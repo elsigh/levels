@@ -88,7 +88,7 @@ fmb.App.prototype.initialize = function(options) {
       _.bind(this.onPhoneResume, this),
       false);
   window.plugins && window.plugins.webintent.onNewIntent(
-      _.bind(this.checkIntent_, this));
+     _.bind(this.checkIntent_, this));
 
   // We reference window.app so we need it to exist first.
   _.defer(_.bind(function() {
@@ -136,16 +136,33 @@ fmb.App.prototype.initHistory_ = function() {
 
 
 /**
+ * @type {RegExp}
+ */
+fmb.App.FOLLOWING_URL_RE = /http:\/\/www\.followmybattery\.com\/(.*)/;
+
+
+/**
  * @private
  */
 fmb.App.prototype.checkIntent_ = function() {
   console.log('checkIntent');
   window.plugins &&
       window.plugins.webintent.getExtra(WebIntent.EXTRA_TEXT, function (url) {
-    alert('GOT INTENT URL' + url);
+    //alert('GOT INTENT URL' + url);
   }, function() {
     //alert('Nada');
   });
+  window.plugins && window.plugins.webintent.getUri(
+      function(url) {
+        console.log('checkIntent_ getUri:' + url);
+        var match = fmb.App.FOLLOWING_URL_RE.exec(url);
+        if (match && match.length) {
+          var username = match[1];
+          _.delay(_.bind(function() {
+            app.model.following.addByUsername(username);
+          }, window['app']), 300);
+        }
+      });
 };
 
 
@@ -258,7 +275,5 @@ fmb.App.prototype.onPhoneResume_ = function() {
   app.view.currentView &&
       app.view.currentView.setIsActive &&
       app.view.currentView.setIsActive(true);
-
-  this.checkIntent_();
 };
 

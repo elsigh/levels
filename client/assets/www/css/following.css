@@ -9,7 +9,7 @@
   font-weight: bold;
   display: inline-block;
   border: 2px solid #000;
-  border-radius: 10px;
+  border-radius: 5px;
   padding-left: 10px;
 }
 
@@ -19,8 +19,9 @@
   position: relative;
   display: inline-block;
   line-height: 1;
+  top: -2px;
   width: 4px;
-  height: 16px;
+  height: 13px;
   background: #000;
   border-top-right-radius: 10px;
   border-bottom-right-radius: 10px;

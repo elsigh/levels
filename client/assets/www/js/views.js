@@ -411,7 +411,7 @@ fmb.views.Following = Backbone.View.extend({
 fmb.views.Following.prototype.initialize = function(options) {
   this.profile = options.profile;
   this.device = options.device;
-  this.model.on('all', this.render, this);
+  this.model.on('all', this.onAll_, this);
   this.device.on('change', this.render, this);
 };
 
@@ -427,7 +427,7 @@ fmb.views.Following.prototype.followingTimeout_ = null;
  * @param {Boolean} isActive True for active.
  */
 fmb.views.Following.prototype.setIsActive = function(isActive) {
-  if (this.followingTimeout_ != null) {
+  if (this.followingTimeout_ !== null) {
     console.log('Clear following fetch interval.');
     window.clearInterval(this.followingTimeout_);
     this.followingTimeout_ = null;
@@ -441,8 +441,14 @@ fmb.views.Following.prototype.setIsActive = function(isActive) {
 };
 
 
+fmb.views.Following.prototype.onAll_ = function(event) {
+  //console.log('onAll!', arguments)
+  this.render();
+};
+
+
 /** @inheritDoc */
-fmb.views.Following.prototype.render = function() {
+fmb.views.Following.prototype.render = _.debounce(function() {
   console.log('Following render.');
   var thisPhoneTemplateData = {
     'profile': this.profile.getTemplateData(),
@@ -462,7 +468,7 @@ fmb.views.Following.prototype.render = function() {
   };
   this.$el.html(fmb.views.getTemplateHtml('following', templateData));
   return this;
-};
+}, 100);
 
 
 /**
@@ -471,36 +477,7 @@ fmb.views.Following.prototype.render = function() {
  */
 fmb.views.Following.prototype.onClickFollowAdd_ = function(e) {
   var username = window.prompt('Type in the username to follow.');
-
-  // Can't follow yerself or no one.
-  if (username === '' ||
-      username == this.profile.get('username')) {
-    return;
-  }
-
-  var alreadyFollowing = this.model.find(function(model) {
-    return model.get('profile')['username'] == username;
-  })
-  if (alreadyFollowing) {
-    alert('You are already following ' + username);
-    return;
-  }
-
-  var followModel = new fmb.models.AjaxSyncModel();
-  followModel.url = _.bind(function() {
-    return fmb.models.getApiUrl('/following/') +
-        this.profile.get('username');
-  }, this);
-  followModel.save({'username': username}, {
-    //url: url,  // why this no work?
-    success: _.bind(function() {
-      console.log('MONEY TRAIN, refetching goodies from server.');
-      this.model.fetch();
-    }, this),
-    error: function() {
-      alert('La bomba, seems we could not find a user ' + username);
-    }
-  });
+  username && this.model.addByUsername(username);
 };
 
 
@@ -516,24 +493,7 @@ fmb.views.Following.prototype.onClickRemove_ = function(e) {
     return;
   }
   console.log('remove username', username);
-  var followModel = new fmb.models.AjaxSyncModel({
-    'id': 'psuedo-data',
-    'username': username
-  });
-  followModel.url = _.bind(function() {
-    return fmb.models.getApiUrl('/following/') +
-        this.profile.get('username');
-  }, this);
-  followModel.destroy({
-    //url: url,  // why this no work?
-    success: _.bind(function() {
-      console.log('MONEY TRAIN, refetching goodies from server.');
-      this.model.fetch();
-    }, this),
-    error: function() {
-      console.log('FAIL removing ', username);
-    }
-  });
+  this.model.removeByUsername(username);
 };
 
 
