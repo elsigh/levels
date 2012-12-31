@@ -248,6 +248,10 @@ class BatteryStatusRequestHandler(WebRequestHandler):
     """Looks up by username and display battery info."""
     def get(self, username=None):
         logging.info('BatteryStatusRequestHandler %s' % username)
+
+        if username is None or username == '':
+            return self.output_response({}, 'index.html')
+
         q = db.Query(models.Profile).filter('username =', username)
         if q.count() == 0:
             self.abort(404)
