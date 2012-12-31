@@ -62,7 +62,7 @@
         <category android:name="android.intent.category.ALTERNATIVE" />
         <category android:name="android.intent.category.BROWSABLE" />
         <data android:scheme="http" />
-        <data android:host="followmybattery.appspot.com" />
+        <data android:host="www.followmybattery.com" />
       </intent-filter>
 
       <intent-filter>
