@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+     KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+  -->
+  <html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="format-detection" content="telephone=no,email=no,address=no">
+    <meta name="viewport"
+      content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height">
+    <!-- target-densitydpi=device-dpi -->
+    <link rel="stylesheet" href="css/index.css">
+    <link rel="stylesheet" href="css/account.css">
+    <link rel="stylesheet" href="css/following.css">
+    <title>Follow My Battery</title>
+    <!--<script src="http://192.168.1.9:8090/target/target-script-min.js#anonymous"></script>-->
+  </head>
+  <body>
+    <div class="fmb-app">
+      <h1>Follow My Battery</h1>
+      <section class="tabs">
+        <a href="following" class="following">Following</a><a
+          href="notifying" class="notifying">Notifying</a><a
+          href="account" class="account">Account</a><span
+          class="share">Share!</share>
+      </section>
+      <section class="fmb-tab fmb-account"></section>
+      <section class="fmb-tab fmb-notifying"></section>
+      <section class="fmb-tab fmb-following"></section>
+    </div>
+
+    <script src="js/cordova-2.2.0.js"></script>
+    <script src="js/phonediedservice_plugin.js"></script>
+    <script src="js/webintent.js"></script>
+    <script src="js/zepto-1.0rc1.js"></script>
+    <script src="js/touch.js"></script>
+    <script src="js/underscore-1.3.3.js"></script>
+    <script src="js/backbone-min.js"></script>
+    <script src="js/backbone.localStorage.js"></script>
+    <script src="js/hogan-2.0.0.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/models.js"></script>
+    <script src="js/views.js"></script>
+
+    <script id="tpl_account" type="text/html">
+      <h2>Account</h2>
+      {{^profile.username}}
+        <h3>Welcome to the App!</h3>
+        <p>
+          Pick a user name. Maybe one your
+          friends are already familiar with. (It's how they'll find you here)
+        </p>
+        <form method="post"
+          class="profile-create"
+          action="{{api_server}}/api/profile/">
+          <div>
+            <label>
+              name:
+              <input type="text" name="username">
+            </label>
+
+            <div class="username-taken-err">
+              Dang!
+              <code class="username-taken"></code>
+              is already taken. Try another name.
+            </div>
+          </div>
+          <input type="submit">
+        </form>
+      {{/profile.username}}
+      {{#profile.username}}
+        <form method="post"
+          class="device-update"
+          action="{{api_server}}/api/device/{{device.uuid}}">
+          <div>
+            <label class="username">
+              <code>{{profile.username}}</code>
+            </label>
+          </div>
+
+          <h3>
+            {{device.platform}}
+            {{device.name}}
+            {{device.version}}
+          </h3>
+
+          <div>
+            Battery Updates:
+            <label>
+              <code>On:</code>
+              <input type="radio" name="update_enabled" value="1"
+                {{#device.update_enabled}}checked{{/device.update_enabled}}>
+            </label>
+            <label>
+              <code>Off:</code>
+              <input type="radio" name="update_enabled" value="0"
+                {{^device.update_enabled}}checked{{/device.update_enabled}}>
+            </label>
+          </div>
+
+          {{#device.update_enabled}}
+            <div>
+              <label>
+                <div class="range">
+                  <span class="min">5</span>
+                  <input type="range" name="update_frequency"
+                    value="{{device.update_frequency}}"
+                    min="5" max="60">
+                  <span class="max">60</span>
+
+                  <div>
+                    every
+                    <code class="update-frequency">{{device.update_frequency}}</code>
+                    min.
+                  </div>
+                </div>
+              </label>
+            </div>
+          {{/device.update_enabled}}
+          {{^device.update_enabled}}
+            <input type="hidden" name="update_frequency"
+              value="{{device.update_frequency}}">
+          {{/device.update_enabled}}
+
+
+          <!--<input type="submit">-->
+        </form>
+      {{/profile.username}}
+    </script>
+
+    <script id="tpl_following" type="text/html">
+      <h2>Following</h2>
+      <button class="follow-add">+ someone</button>
+      <table>
+        <thead>
+          <tr>
+            <th>name</th>
+            <th>battery</th>
+            <th>device</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#this_phone}}
+            <tr>
+              <td>{{profile.username}}</td>
+              <td class="battery-level-c charging-{{battery.is_charging}}">
+                <div class="battery-level"
+                  style="background-image:-webkit-gradient(linear, left top, right top, color-stop({{battery.level}}%, green), color-stop({{battery.level}}%, white))">
+                  {{battery.level}}%
+                </div>
+                <div class="battery-created">
+                  {{battery.created_pretty}}
+                </div>
+              </td>
+              <td>{{device.name}}</td>
+              <td></td>
+            </tr>
+          {{/this_phone}}
+          {{#following}}
+            {{#profile}}
+              {{#devices}}
+                <tr>
+                  <td>{{profile.username}}</td>
+                  <td class="battery-level-c charging-{{battery.is_charging}}">
+                    <div class="battery-level"
+                      style="background-image:-webkit-gradient(linear, left top, right top, color-stop({{battery.level}}%, green), color-stop({{battery.level}}%, white))">
+                      {{battery.level}}%
+                    </div>
+                    <div class="battery-created">
+                      {{battery.created_pretty}}
+                    </div>
+                  </td>
+                  <td>{{device.name}}</td>
+                  <td class="remove-cell">
+                    <div class="remove" data-username="{{profile.username}}">X</div>
+                  </td>
+                </tr>
+              {{/devices}}
+            {{/profile}}
+          {{/following}}
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="5">
+              More battery you follow, better person you are.
+            </td>
+          </tr>
+        </tfoot>
+      </table>
+    </script>
+
+    <script id="tpl_notifying" type="text/html">
+      <h2>Notifying</h2>
+      <p>Coming soon!</p>
+      <!--<form method="post"
+        class="notifying-update"
+        action="{{api_server}}/api/notifying/{{device.uuid}}">
+        <div>
+          Send notification when battery level reaches:
+          <label>
+            <input type="range" name="notify_level"
+              value="{{device.notify_level}}"
+              min="5" max="25">
+            <div>
+              <span class="notify-level">{{device.notify_level}}%
+            </div>
+          </label>
+        </div>
+      </form>-->
+    </script>
+
+    <script>
+      window.templates = {};
+      _.each(['account', 'following', 'notifying'], function(name) {
+        var html = $('#tpl_' + name).html().trim();
+        window.templates[name] = Hogan.compile(html);
+      });
+
+      document.addEventListener('deviceready', function() {
+        window['app'] = new fmb.App();
+      }, false);
+
+    </script>
+  </body>
+  </html>

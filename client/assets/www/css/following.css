@@ -1,0 +1,42 @@
+
+.battery-level-c {
+  text-align: center;
+  white-space: nowrap;
+}
+
+.fmb-following .battery-level {
+  font-size: 1.5em;
+  font-weight: bold;
+  display: inline-block;
+  border: 2px solid #000;
+  border-radius: 10px;
+  padding-left: 10px;
+}
+
+.fmb-following .battery-level:after {
+  content: "";
+  left: 5px;
+  position: relative;
+  display: inline-block;
+  line-height: 1;
+  width: 4px;
+  height: 16px;
+  background: #000;
+  border-top-right-radius: 10px;
+  border-bottom-right-radius: 10px;
+}
+
+.fmb-following .remove-cell {
+  text-align: center;
+}
+
+.fmb-following .charging-1:before {
+  content: "charging";
+  display: block;
+  font-size: 70%;
+  font-weight: normal;
+}
+
+.fmb-following .battery-created {
+  font-size: 70%;
+}

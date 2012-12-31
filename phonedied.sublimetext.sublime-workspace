@@ -1,0 +1,3468 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"save",
+				"saveToStorage"
+			],
+			[
+				"local",
+				"local_storage_only"
+			],
+			[
+				"to",
+				"to_dict"
+			],
+			[
+				"foll",
+				"followed_profile"
+			],
+			[
+				"bater",
+				"batteryPct"
+			],
+			[
+				"unbi",
+				"unbindTouchEndAndMove_"
+			],
+			[
+				"force",
+				"forceReflow"
+			],
+			[
+				"isN",
+				"isNull"
+			],
+			[
+				"testMod",
+				"testModelInstance"
+			],
+			[
+				"storageO",
+				"storageOptions_"
+			],
+			[
+				"formatCon",
+				"formatContactPhone_"
+			],
+			[
+				"is",
+				"isUpdaterStale"
+			],
+			[
+				"format",
+				"formatContactPhones_"
+			],
+			[
+				"invi",
+				"invitationCollection"
+			],
+			[
+				"invit",
+				"invitationModels"
+			],
+			[
+				"formatC",
+				"formatContactPhone_"
+			],
+			[
+				"inv",
+				"invitationCollection"
+			],
+			[
+				"Invitation",
+				"InvitationCollection"
+			],
+			[
+				"night",
+				"nightly_or_release"
+			],
+			[
+				"nigh",
+				"nightly_or_release"
+			],
+			[
+				"is_de",
+				"is_device_supported_android"
+			],
+			[
+				"ex",
+				"experiment_id"
+			],
+			[
+				"onPh",
+				"onPhonePause_"
+			],
+			[
+				"getCurre",
+				"getCurrentView"
+			],
+			[
+				"getTem",
+				"getTemplateData"
+			],
+			[
+				"getDa",
+				"getDataFromLocalProfile_"
+			],
+			[
+				"getCur",
+				"getCurrentView"
+			],
+			[
+				"getC",
+				"getCurrentRoute"
+			],
+			[
+				"colu",
+				"columnNames"
+			],
+			[
+				"L",
+				"LOG_TAG"
+			],
+			[
+				"col",
+				"columnNames"
+			],
+			[
+				"Profile",
+				"ProfileQuery"
+			],
+			[
+				"sync",
+				"syncShouldNotReschedule"
+			],
+			[
+				"Req",
+				"RequestsInFlight"
+			],
+			[
+				"getD",
+				"getDuplicateFreeRequestsCollection"
+			],
+			[
+				"start",
+				"startStopClientWatchGeo"
+			],
+			[
+				"current",
+				"currentTarget"
+			],
+			[
+				"forma",
+				"formattedEmails"
+			],
+			[
+				"formattedPh",
+				"formattedPhones"
+			],
+			[
+				"setRouteV",
+				"setRouteViewType_"
+			],
+			[
+				"lastRe",
+				"lastRequestObj"
+			],
+			[
+				"assertNot",
+				"assertNotEquals"
+			],
+			[
+				"onChat",
+				"onChangeTravelType_"
+			],
+			[
+				"locationC",
+				"locationCurrentData"
+			],
+			[
+				"getTe",
+				"getTemplateData"
+			],
+			[
+				"paths",
+				"pathsMine"
+			],
+			[
+				"changed",
+				"changedAttributes"
+			],
+			[
+				"startOrS",
+				"startOrStopClientWatchGeolocation_"
+			],
+			[
+				"getP",
+				"getPollInterval"
+			],
+			[
+				"updateEt",
+				"updateEtaMaxCount"
+			],
+			[
+				"resetFromSt",
+				"resetFromStorageData"
+			],
+			[
+				"isAc",
+				"isActiveStateString"
+			],
+			[
+				"PRE",
+				"PREVIOUS_LOCATION"
+			],
+			[
+				"previous",
+				"previousLocations"
+			],
+			[
+				"draw",
+				"drawPreviousLocations_"
+			],
+			[
+				"setFi",
+				"setFixedPositionEl"
+			],
+			[
+				"HI",
+				"HIGH_POWER"
+			],
+			[
+				"togg",
+				"toggleShowCurrentLocationHaloIfStale"
+			],
+			[
+				"OUT",
+				"OUT_OF_TOUCH"
+			],
+			[
+				"OUT_",
+				"OUT_OF_TOUCH_THRESHOLD_"
+			],
+			[
+				"add",
+				"address-2"
+			],
+			[
+				"getT",
+				"getTemplateData"
+			],
+			[
+				"extra",
+				"extraTopPx"
+			],
+			[
+				"doB",
+				"doBeaconRemove_"
+			],
+			[
+				"border-top",
+				"border-top-left-radius"
+			],
+			[
+				"batt",
+				"batteryLevel"
+			],
+			[
+				"contac",
+				"contactTypes"
+			],
+			[
+				"border-radiu",
+				"border-bottom-right-radius"
+			],
+			[
+				"bac",
+				"background"
+			],
+			[
+				"secr",
+				"secretToken"
+			],
+			[
+				"e",
+				"emailOrPhone"
+			],
+			[
+				"MIN",
+				"MINUTES"
+			],
+			[
+				"finishPath",
+				"finishPathOnServer_"
+			],
+			[
+				"or",
+				"originalCid"
+			],
+			[
+				"getRe",
+				"getRealPathModel_"
+			],
+			[
+				"us",
+				"usedLocationData"
+			],
+			[
+				"pol",
+				"pollInterval"
+			],
+			[
+				"syn",
+				"syncUid"
+			],
+			[
+				"timeou",
+				"timeoutId"
+			],
+			[
+				"DU",
+				"ERR_DUPLICATE_OPERATION"
+			],
+			[
+				"min",
+				"minorPointUpdate"
+			],
+			[
+				"get",
+				"getDestinationRoute"
+			],
+			[
+				"sy",
+				"syncOperation"
+			],
+			[
+				"pathCre",
+				"pathCreateModel"
+			],
+			[
+				"data",
+				"dataAttributes"
+			],
+			[
+				"title",
+				"titleDataAttrs"
+			],
+			[
+				"isVali",
+				"isValidEmail"
+			],
+			[
+				"notif",
+				"notifications"
+			],
+			[
+				"not",
+				"notifications"
+			],
+			[
+				"touchSt",
+				"touchStartY_"
+			],
+			[
+				"touchStartX",
+				"touchStartX_"
+			],
+			[
+				"onClick",
+				"onClickDoBust_"
+			],
+			[
+				"previou",
+				"previousView_"
+			],
+			[
+				"hide",
+				"hideKeyboard"
+			],
+			[
+				"check",
+				"checkIsOnlineTimeout_"
+			],
+			[
+				"te",
+				"text-align"
+			],
+			[
+				"MO",
+				"MOBILE_KEYBOARD_HEIGHT"
+			],
+			[
+				"opt",
+				"optionsClone"
+			],
+			[
+				"isO",
+				"isOptionsChange"
+			],
+			[
+				"ws-fixe",
+				"ws-fixed-position-set"
+			],
+			[
+				"prevent",
+				"preventDefault"
+			],
+			[
+				"checkI",
+				"checkIsOnlineSuccess_"
+			],
+			[
+				"pathL",
+				"pathLocationUpdateTimeout_"
+			],
+			[
+				"server",
+				"serverRequestCount"
+			],
+			[
+				"chage",
+				"changedAttributes"
+			],
+			[
+				"assertNo",
+				"assertNotNull"
+			],
+			[
+				"stop",
+				"stopWatchGeolocation"
+			],
+			[
+				"Invi",
+				"InvitationCollection"
+			],
+			[
+				"inco",
+				"incomplete_entry"
+			],
+			[
+				"user_agent",
+				"user_agent_string"
+			],
+			[
+				"last",
+				"lastEtaUpdateGeoPoint"
+			],
+			[
+				"ta",
+				"tabsContainer"
+			],
+			[
+				"ws-f",
+				"ws-fixed-position"
+			],
+			[
+				"ws-",
+				"ws-fixed-position-set"
+			],
+			[
+				"fixedE",
+				"fixedElCount_"
+			],
+			[
+				"Mock",
+				"MockClients"
+			],
+			[
+				"mar",
+				"marginBottom"
+			],
+			[
+				"prot",
+				"prototype"
+			],
+			[
+				"change",
+				"changedAttributes"
+			],
+			[
+				"templ",
+				"templateData"
+			],
+			[
+				"getCurrent",
+				"getCurrentRouteOrDefault"
+			],
+			[
+				"na",
+				"navigateTrigger"
+			],
+			[
+				"PATH_VIEW",
+				"PATH_VIEW_DETAILS"
+			],
+			[
+				"em",
+				"embedScript"
+			],
+			[
+				"bloom",
+				"bloombergImgEl"
+			],
+			[
+				"delegate",
+				"delegateEvents"
+			],
+			[
+				"curr",
+				"currentView_"
+			],
+			[
+				"setR",
+				"setRoute"
+			]
+		]
+	},
+	"buffers":
+	[
+		{
+			"file": "server/tests/test_controllers.py",
+			"settings":
+			{
+				"buffer_size": 8101,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "client/assets/www/js/models.js",
+			"settings":
+			{
+				"buffer_size": 7235,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "server/lib/web_request_handler.py",
+			"settings":
+			{
+				"buffer_size": 5817,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "server/lib/controllers.py",
+			"settings":
+			{
+				"buffer_size": 9052,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "client/assets/www/index.html",
+			"settings":
+			{
+				"buffer_size": 6629,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "server/lib/models.py",
+			"settings":
+			{
+				"buffer_size": 3105,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "client/assets/www/js/views.js",
+			"settings":
+			{
+				"buffer_size": 9466,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "client/assets/www/js/app.js",
+			"settings":
+			{
+				"buffer_size": 4152,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "client/assets/www/js/backbone-min.js",
+			"settings":
+			{
+				"buffer_size": 18303,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "client/assets/www/css/account.css",
+			"settings":
+			{
+				"buffer_size": 154,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "client/assets/www/css/index.css",
+			"settings":
+			{
+				"buffer_size": 2087,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "client/src/com/phonedied/android/PhoneDiedAlarm.java",
+			"settings":
+			{
+				"buffer_size": 5107,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "client/src/com/phonedied/android/PhoneDiedService.java",
+			"settings":
+			{
+				"buffer_size": 1924,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "client/src/com/phonedied/android/PhoneDiedPlugin.java",
+			"settings":
+			{
+				"buffer_size": 2267,
+				"line_ending": "Unix",
+				"name": "package com.phonedied.android;"
+			}
+		},
+		{
+			"file": "client/res/xml/config.xml",
+			"settings":
+			{
+				"buffer_size": 1976,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "client/assets/www/js/phonediedservice_plugin.js",
+			"settings":
+			{
+				"buffer_size": 598,
+				"line_ending": "Unix"
+			}
+		}
+	],
+	"build_system": "",
+	"command_palette":
+	{
+		"height": 47.0,
+		"selected_items":
+		[
+			[
+				"Package",
+				"Package Control: Enable Package"
+			],
+			[
+				"PAcka",
+				"Package Control: Disable Package"
+			],
+			[
+				"Packa",
+				"Package Control: Remove Package"
+			],
+			[
+				"Pack",
+				"Package Control: Install Package"
+			]
+		],
+		"width": 381.0
+	},
+	"console":
+	{
+		"height": 125.0
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"file_history":
+	[
+		"/Users/elsigh/src/phonedied/client/src/com/phonedied/android/PhoneDiedActivity.java",
+		"/Users/elsigh/src/phonedied/server/lib/controllers.py",
+		"/Users/elsigh/src/phonedied/server/lib/web_request_handler.py",
+		"/Users/elsigh/src/phonedied/client/assets/www/js/backbone-min.js",
+		"/Users/elsigh/src/phonedied/server/tests/test_handler.py",
+		"/Users/elsigh/src/phonedied/server/lib/test_controllers.py",
+		"/Users/elsigh/src/phonedied/client/assets/www/js/models.js",
+		"/Users/elsigh/src/phonedied/assets/www/index.html",
+		"/Users/elsigh/src/phonedied/client/assets/www/index.html",
+		"/Users/elsigh/src/phonedied/assets/www/css/index.css",
+		"/Users/elsigh/src/phonedied/src/com/phonedied/android/PhoneDiedActivity.java",
+		"/Users/elsigh/src/phonedied/AndroidManifest.xml",
+		"/Users/elsigh/src/phonedied/src/com/phonedied/android/PhoneDiedService.java",
+		"/Users/elsigh/src/phonedied/src/com/phonedied/android/PhoneDiedAlarm.java",
+		"/Users/elsigh/src/phonedied/assets/www/js/app.js",
+		"/Users/elsigh/src/phonedied/assets/www/js/models.js",
+		"/Users/elsigh/src/phonedied/assets/www/js/views.js",
+		"/Users/elsigh/src/phonedied/server/app.yaml",
+		"/Users/elsigh/src/phonedied/server/templates/index.html",
+		"/Users/elsigh/src/phonedied/server/templates/base.html",
+		"/Users/elsigh/src/phonedied/server/templates/error.html",
+		"/Users/elsigh/src/phonedied/server/warmup.py",
+		"/Users/elsigh/src/phonedied/server/lib/models.py",
+		"/Users/elsigh/src/phonedied/assets/www/js/index.js",
+		"/Users/elsigh/src/phonedied/res/xml/config.xml",
+		"/Users/elsigh/src/phonedied/assets/www/main.js",
+		"/Users/elsigh/src/phonedied/src/com/phonedied/android/PhoneDiedAutoStart.java",
+		"/Users/elsigh/src/phonedied/assets/www/master.css",
+		"/Users/elsigh/src/phonedied/build.xml",
+		"/Users/elsigh/src/phonedied/local.properties",
+		"/Users/elsigh/src/phonedied/res/values/strings.xml",
+		"/Users/elsigh/src/phonedied/src/com/phonedied/android/PowerConnectionReceiver.java",
+		"/Users/elsigh/src/phonedied/src/com/phonedied/android/PhoneDied.java",
+		"/Users/elsigh/src/phonedied/src/org/apache/cordova/example/cordovaExample.java",
+		"/Users/elsigh/src/phonedied/assets/www/spec/helper.js",
+		"/Users/elsigh/src/twist/server/frontend/static/shared/js/ws.js",
+		"/Users/elsigh/src/twist/server/frontend/templates/android_build.html",
+		"/Users/elsigh/src/twist/server/frontend/static/shared/js/ws_click.js",
+		"/Users/elsigh/src/twist/server/frontend/static/twist/app.css",
+		"/Users/elsigh/src/twist/server/frontend/static/shared/css/ws_button.css",
+		"/Users/elsigh/src/twist/server/frontend/static/twist/client_onboarding.css",
+		"/Users/elsigh/src/twist/server/frontend/static/twist/client_settings.css",
+		"/Users/elsigh/src/twist/server/frontend/static/twist/create.css",
+		"/Users/elsigh/src/twist/server/frontend/static/twist/create_confirm.css",
+		"/Users/elsigh/src/twist/server/frontend/static/twist/create_destination.css",
+		"/Users/elsigh/src/twist/server/frontend/static/twist/create_favorites.css",
+		"/Users/elsigh/src/twist/server/frontend/static/twist/path.css",
+		"/Users/elsigh/src/twist/server/frontend/static/twist/path_going_too.css",
+		"/Users/elsigh/src/twist/server/frontend/static/twist/path_map.css",
+		"/Users/elsigh/src/twist/client/Android/Archive/pull/app.css",
+		"/Users/elsigh/src/twist/server/frontend/static/shared/js/ws_models.js",
+		"/Users/elsigh/src/twist/server/frontend/static/phonegap/twist-contacts-accessor.js",
+		"/Users/elsigh/src/twist/server/frontend/static/shared/js/ws_models_path.js",
+		"/Users/elsigh/src/twist/server/frontend/tests/shared/index.html",
+		"/Users/elsigh/src/twist/client/Android/Twist/src/com/twist/android/plugins/contacts/TwistContactsAccessor.java",
+		"/Users/elsigh/src/twist/server/frontend/static/twist/models_path_updater.js",
+		"/Users/elsigh/src/twist/server/frontend/static/twist/ff.html",
+		"/Users/elsigh/src/twist/server/frontend/static/twist/manifest.webapp",
+		"/Users/elsigh/src/twist/client/Android/Twist/buildfiles/AndroidManifest.template.xml",
+		"/Users/elsigh/src/twist/client/Android/Twist/AndroidManifest.xml",
+		"/Users/elsigh/src/twist/server/frontend/tests/twist/path_updater.html",
+		"/Users/elsigh/src/twist/server/frontend/static/external/backbone-0.9.2.js",
+		"/Users/elsigh/src/twist/server/frontend/tests/twist/view_path.html",
+		"/Users/elsigh/src/twist/server/frontend/tests/shared/ws_contact_picker.html",
+		"/Users/elsigh/src/twist/server/frontend/static/shared/js/ws_contact_picker.js",
+		"/Users/elsigh/src/twist/server/frontend/tests/twist/mockdata.js",
+		"/Users/elsigh/src/twist/server/frontend/static/twist/models_path_create.js",
+		"/Users/elsigh/src/twist/server/frontend/static/shared/js/ws_format.js",
+		"/Users/elsigh/src/twist/server/frontend/static/shared/js/ws_autocomplete_contacts.js",
+		"/Users/elsigh/src/twist/server/frontend/static/shared/js/ws_autocomplete.js",
+		"/Users/elsigh/src/twist/server/frontend/static/twist/models.js",
+		"/Users/elsigh/src/twist/server/frontend/static/twist/views_create_confirm.js",
+		"/Users/elsigh/src/twist/server/frontend/tests/twist/edit_path.html",
+		"/Users/elsigh/src/twist/server/frontend/tests/twist/index.html",
+		"/Users/elsigh/src/twist/server/frontend/tests/admin/dashboard.html",
+		"/Users/elsigh/src/twist/server/frontend/static/external/backbone-0.9.9-pre.js",
+		"/Users/elsigh/src/twist/server/frontend/static/twist/views_path.js",
+		"/Users/elsigh/src/twist/server/frontend/static/twist/views_path_map.js",
+		"/Users/elsigh/src/twist/server/frontend/tests/shared/ws_storage.html",
+		"/Users/elsigh/src/twist/server/frontend/static/external/backbone.js",
+		"/Users/elsigh/src/twist/server/frontend/static/shared/js/ws_view.js",
+		"/Users/elsigh/src/twist/server/frontend/tests/shared/ws_format.html",
+		"/Users/elsigh/src/twist/server/frontend/templates/admin/dashboard.html",
+		"/Users/elsigh/src/twist/server/frontend/static/twist/desktop/BUILD_DEPS.yaml",
+		"/Users/elsigh/src/twist/server/frontend/templates/twist/path_header_client_destination.mustache",
+		"/Users/elsigh/src/twist/server/frontend/templates/twist/path_map.mustache",
+		"/Users/elsigh/src/twist/server/frontend/static/shared/js/ws_bing_map.js",
+		"/Users/elsigh/src/twist/server/frontend/static/shared/js/ws_map.js",
+		"/Users/elsigh/src/twist/server/frontend/static/twist/views_create_invite.js",
+		"/Users/elsigh/src/twist/server/frontend/templates/admin/uploads.html",
+		"/Users/elsigh/src/twist/server/frontend/static/twist/BUILD_DEPS.yaml",
+		"/Users/elsigh/src/twist/server/frontend/static/twist/desktop/views_desktop.js",
+		"/Users/elsigh/src/twist/server/frontend/static/twist/desktop/views_desktop_destination.js",
+		"/Users/elsigh/src/twist/server/frontend/static/twist/desktop/views_desktop_path.js",
+		"/Users/elsigh/src/twist/server/frontend/static/twist/desktop/views_desktop_photos_widget.js",
+		"/Users/elsigh/src/twist/server/frontend/static/twist/views_client.js",
+		"/Users/elsigh/src/twist/server/frontend/static/twist/views_client_onboarding.js",
+		"/Users/elsigh/src/twist/server/frontend/static/twist/views_create_destination.js",
+		"/Users/elsigh/src/twist/server/frontend/static/twist/views_destination.js",
+		"/Users/elsigh/src/twist/server/frontend/static/twist/views_favorite_label_picker.js",
+		"/Users/elsigh/src/twist/server/frontend/static/twist/views_mobile.js",
+		"/Users/elsigh/src/twist/server/frontend/static/twist/views_notifications.js",
+		"/Users/elsigh/src/twist/server/frontend/static/twist/views_path_chat.js",
+		"/Users/elsigh/src/twist/server/frontend/static/twist/views_path_people.js",
+		"/Users/elsigh/src/twist/server/frontend/static/twist/views_path_photos.js",
+		"/Users/elsigh/src/twist/server/frontend/static/twist/views_photo.js",
+		"/Users/elsigh/src/twist/server/frontend/common_app.yaml",
+		"/Users/elsigh/src/twist/server/frontend/static/external/zepto.touch.js",
+		"/Users/elsigh/src/twist/server/frontend/static/external/zepto.js",
+		"/Users/elsigh/src/twist/server/frontend/templates/base.html",
+		"/Users/elsigh/src/twist/server/frontend/templates/twist/path.mustache",
+		"/Users/elsigh/src/twist/server/frontend/templates/shared/ws_autocomplete.mustache",
+		"/Users/elsigh/src/twist/server/frontend/static/shared/css/ws.css",
+		"/Users/elsigh/src/twist/server/frontend/static/twist/app.manifest",
+		"/Users/elsigh/src/twist/server/frontend/static/twist/cache.manifest",
+		"/Users/elsigh/src/twist/server/frontend/templates/shared/ws_contact_picker_invitations.mustache",
+		"/Users/elsigh/src/twist/server/frontend/static/shared/js/ws_autocomplete_destination.js",
+		"/Users/elsigh/src/twist/server/frontend/templates/shared/ws_contact_picker.mustache",
+		"/Users/elsigh/src/twist/server/frontend/templates/twist/path_invites_dialog.mustache",
+		"/Users/elsigh/src/twist/server/frontend/templates/twist/path_people_list.mustache",
+		"/Users/elsigh/src/twist/server/frontend/static/external/phonegap-webintent.js",
+		"/Users/elsigh/src/twist/tools/web_build.py",
+		"/Users/elsigh/src/twist/client/Android/Twist/res/xml/config.xml",
+		"/Users/elsigh/src/twist/server/frontend/static/info/views_streetview.js",
+		"/Users/elsigh/src/twist/server/frontend/static/info/app.js",
+		"/Users/elsigh/src/twist/tools/android_build_apk.py",
+		"/Users/elsigh/src/twist/server/frontend/templates/twist/path_people.mustache",
+		"/Users/elsigh/src/twist/server/frontend/static/shared/js/ws_popup_menu.js"
+	],
+	"find":
+	{
+		"height": 35.0
+	},
+	"find_in_files":
+	{
+		"height": 93.0,
+		"where_history":
+		[
+			"/Users/elsigh/src/phonedied/client,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/phonedied/server,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/phonedied/assets/www,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/static/,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/static/twist,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/static/twist/,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/templates,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/templates,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/templates,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/static,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/frontend,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/client/Android,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/tests,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/templates,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/backend,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/client/Android/Twist,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/static,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/static/,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/static/shared,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/static/,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/static/twist,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/templates,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/static,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/static/twist,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/tests,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/static/admin,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/static/twist,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/backend,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/static,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/tests,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/static,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/static/shared,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/static/twist,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/static,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/static/shared,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/static/twist,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/templates/twist,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/static,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/static/twist,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/static/twist,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/static,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/static/twist,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/static,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/tests,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/static,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/static/twist,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/client/Android/Twist,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/tests,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/static,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontent/static,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/backend/templates/default/email,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/static,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/static/twist,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/static/twist,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/templates,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/static/twist,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/templates/twist,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/static/twist,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/static/twist,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/templates/twist,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/static/twist,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/twist,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/templates,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/templates/twist,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/static/twist,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/static/twist,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/static/twist,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/static,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/static/twist,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/static,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/static/twist,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/templates,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/static,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/static/admin/stats,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/static,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/static/twist,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/static/twist,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/static/,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/static/admin/dashboard,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/static/twist,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/static,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/static/twist,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/static/admin,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/templates,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/static/admin/stats,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/static/admin/dashboard,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/templates,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/static/shared/js,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/static/twist,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/static/www,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/templates,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/static,-build*.js,-build*.css,-templates.js",
+			"/Users/elsigh/src/twist/server/frontend/templates/twist,-build*.js,-build*.css,-templates.js"
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": true,
+		"find_history":
+		[
+			"properties",
+			"makeRe",
+			"getApp",
+			"conte",
+			"mMix",
+			"mix",
+			"/batter",
+			"Toas",
+			"mix",
+			"SendBatteryStatus",
+			"On:",
+			"money t",
+			"onChangeUpdateEnabled_",
+			"update_e",
+			"onChangeUpdateFrequency_",
+			"mone",
+			"onSubmitUpdateDevice_",
+			"parse =",
+			"auth_t",
+			"parse =",
+			"Backbone.sync =",
+			"parse =",
+			"saveToSt",
+			"sync =",
+			"save =",
+			"wrappe",
+			"local_stor",
+			"success:",
+			"local_storage_only",
+			"local_storage_only\n",
+			"parse =",
+			"to_d",
+			"updateD",
+			"getTempl",
+			"render =",
+			"device.sa",
+			"assert pr",
+			"toSer",
+			"Profile = f",
+			"sync =",
+			"updateDev",
+			"onChangeUpdateEnabled_",
+			"onSubmitUpdateDevice_",
+			"var $form =",
+			"onSubmitUpdateDevice_",
+			"onChangeUpdateFrequency_",
+			"onCha",
+			"update_f",
+			"range",
+			".fetch",
+			"ajaxS",
+			"ProfileNameChecker",
+			"check",
+			".fetc",
+			"Userna",
+			"FollowingCollection",
+			"Following =",
+			"onClick",
+			"follow-a",
+			"'tap",
+			"'following'",
+			"uuid =",
+			"'GET",
+			"some_device_uuid",
+			"ance",
+			"'1'",
+			"method",
+			"auth_to",
+			"decice",
+			"Device.pr",
+			"getTempl",
+			"getTem",
+			"Followin",
+			"'id'",
+			"uuid",
+			"authT",
+			"Dang",
+			"radio",
+			"<dan",
+			"onSubmitUpdateDevice_",
+			"wait:",
+			"updates",
+			"model.dev",
+			"authTo",
+			"render =",
+			"setA",
+			"status",
+			"200",
+			"_json_r",
+			"onSub",
+			"console.l",
+			"transi",
+			"Prof",
+			"Clie",
+			"Cli",
+			"CLIE",
+			"routeA",
+			"clien",
+			"clie",
+			"Client",
+			".\n",
+			"client",
+			"Client",
+			"client",
+			"db.to_dict",
+			"SERVE",
+			"\"POST",
+			"put",
+			".put",
+			"sync",
+			"Sync",
+			"put",
+			"put\"",
+			"put'",
+			"put",
+			"onSub",
+			"SER",
+			"SERv",
+			"Hel",
+			"testb",
+			"test",
+			"following_",
+			"try:",
+			"_set_json_request_data",
+			"Twis",
+			"get_request_arguments_as_fields",
+			"fmb-ac",
+			"ws.l"
+		],
+		"highlight": false,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+			"json",
+			"test_device_uuid",
+			"device",
+			"Account",
+			"profile",
+			"Account",
+			"profile",
+			"models.to_dict",
+			"console.log",
+			"fmb",
+			"",
+			"isClickCancelled_",
+			"timeLastUpdate_",
+			"timeLastCall_",
+			"NO_CHANGE_RESPONSE",
+			"submodelData",
+			"submodels",
+			"/",
+			"'tap ",
+			"format_national",
+			"startCheckingOnline",
+			"TAG",
+			"onClick_",
+			"onClick__",
+			"onPathEventUpdateRecents_",
+			"locationManager",
+			"_redirect_device_to_appstore",
+			"TAG",
+			"cordova.getActivity()",
+			"",
+			"mapActionTimeout_",
+			"TAG",
+			"",
+			"startOrStopClientWatchGeolocation",
+			"isFetching_",
+			": ",
+			"'",
+			"route =",
+			"getActivity().getContentResolver()",
+			"Photo",
+			"photo",
+			"",
+			"cursor.getColumnIndex",
+			"cordova.getContext()",
+			"this.ctx",
+			"isLastUpdateStale_",
+			"getUpdateFrequency",
+			"update",
+			"",
+			"isCurrentLocationStale_",
+			"updater.lastPathLocationUpdateGpsLocation_",
+			"onPathsMineAddRemoveReset_",
+			"updater.startOrStopPathLocationUpdates_",
+			"updater.startPathLocationUpdate_",
+			"updater.pathLocationUpdateTimeout_",
+			"updater.doPathLocationUpdate_",
+			"updater.pathLocationUpdateFrequency_",
+			"updater",
+			"twist.models.PathUpdater",
+			"UPDATE_ETA_DELTA_MS",
+			"-radius: 10px",
+			"isoCountry",
+			"email",
+			"Email",
+			"Address",
+			"Addresses",
+			"\"addresses\"",
+			"Email",
+			"Emails",
+			"emails",
+			"\"",
+			"twistContactsFormatter",
+			"\"",
+			"phoneNumberUtil",
+			"\"",
+			": 8px 8px",
+			": 8px",
+			"'claim'",
+			"twist.models.App.LOCATION_MAX_HORIZONTAL_ACCURACY",
+			"var pathView = getPathViewForData",
+			"ApiModel",
+			"ws.models.Path.LocationUpdateFrequency.MIN",
+			"limit",
+			"'timestamp_gmt'",
+			"trackAnalyticsEvent",
+			"popupMenuEndTwist_",
+			"\\n",
+			"NETWORK",
+			"GPS",
+			"geoWatchNetworkId_",
+			"geoWatchGpsId_",
+			"CONTACT_BOOK_DELAY_MS",
+			"templateModelLimit",
+			"this.lengthLimit_",
+			"shouldKeepModelInMemory",
+			"//this.reEnableAllFixedPositioning();",
+			"NIGHTLY",
+			"nightly",
+			"route_geo_cache",
+			"routeGeoCache",
+			"DESTINATION_ROUTE_ERRORS_MAX",
+			"destinationRouteErrorCount_",
+			": '",
+			"'",
+			"getServerData",
+			"ws.PopupMenu",
+			"cid",
+			"RequestsRetry",
+			"",
+			"startOrStopClientWatchGeolocation_",
+			"startOrStopPathLocationUpdates_",
+			"startOrStopPathLocationUpdates",
+			"startOrStopClientWatchGeolocation",
+			"3px",
+			"setCurrentRouteView",
+			"getCurrentRoute",
+			"currentRoute_",
+			"app.model.client.paths.mine.at",
+			"isEditing",
+			"assertTrue(app.model.pathLocationUpdateGpsLock_);",
+			"_",
+			"",
+			"getBestPathLocationUpdateGpsLocationData_",
+			"locationsPreviousData",
+			"previousLocationsData",
+			"PATH_UPDATE_LOCATION_GEO_MIN_ACCURACY",
+			"PATH_UPDATE_LOCATION_GEO_MAX_ACCURACY",
+			"ws.sync.Scheduled.resume"
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": false,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"selected": 3,
+			"sheets":
+			[
+				{
+					"buffer": 0,
+					"file": "server/tests/test_controllers.py",
+					"settings":
+					{
+						"buffer_size": 8101,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								8100,
+								8100
+							]
+						],
+						"settings":
+						{
+							"annotations":
+							[
+								"TODO",
+								"README",
+								"FIXME"
+							],
+							"csslint_options":
+							{
+								"adjoining-classes": false,
+								"box-model": false,
+								"box-sizing": false,
+								"compatible-vendor-prefixes": false,
+								"display-property-grouping": true,
+								"duplicate-background-images": "warning",
+								"duplicate-properties": true,
+								"empty-rules": true,
+								"errors": true,
+								"fallback-colors": "warning",
+								"floats": false,
+								"font-faces": "warning",
+								"font-sizes": "warning",
+								"gradients": "warning",
+								"ids": "warning",
+								"import": "warning",
+								"important": "warning",
+								"known-properties": true,
+								"outline-none": false,
+								"overqualified-elements": "warning",
+								"qualified-headings": false,
+								"regex-selectors": "warning",
+								"rules-count": "warning",
+								"shorthand": "warning",
+								"text-indent": "warning",
+								"unique-headings": "warning",
+								"universal-selector": "warning",
+								"vendor-prefix": false,
+								"zero-units": false
+							},
+							"gjslint_ignore":
+							[
+							],
+							"gjslint_options":
+							[
+							],
+							"javascript_linter": "jshint",
+							"jshint_options":
+							{
+								"boss": true,
+								"camelcase": false,
+								"expr": true,
+								"indent": true,
+								"sub": true
+							},
+							"pep8": true,
+							"pep8_ignore":
+							[
+								"E501"
+							],
+							"perl_linter": "perlcritic",
+							"pyflakes_ignore":
+							[
+							],
+							"pyflakes_ignore_import_*": true,
+							"sublimelinter": "load-save",
+							"sublimelinter_delay": 0.0,
+							"sublimelinter_disable":
+							[
+							],
+							"sublimelinter_executable_map":
+							{
+								"gjslint": "python /Users/elsigh/src/twist/tools/closure_linter/gjslint.py"
+							},
+							"sublimelinter_fill_outlines": false,
+							"sublimelinter_gutter_marks": false,
+							"sublimelinter_mark_style": "outline",
+							"sublimelinter_notes": false,
+							"sublimelinter_objj_check_ascii": false,
+							"sublimelinter_popup_errors_on_save": false,
+							"sublimelinter_syntax_map":
+							{
+								"C++": "c",
+								"Python Django": "python",
+								"Ruby on Rails": "ruby"
+							},
+							"sublimelinter_wrap_find": true,
+							"syntax": "Packages/Python/Python.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 1944.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "client/assets/www/js/models.js",
+					"settings":
+					{
+						"buffer_size": 7235,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								4336,
+								4336
+							]
+						],
+						"settings":
+						{
+							"annotations":
+							[
+								"TODO",
+								"README",
+								"FIXME"
+							],
+							"csslint_options":
+							{
+								"adjoining-classes": false,
+								"box-model": false,
+								"box-sizing": false,
+								"compatible-vendor-prefixes": false,
+								"display-property-grouping": true,
+								"duplicate-background-images": "warning",
+								"duplicate-properties": true,
+								"empty-rules": true,
+								"errors": true,
+								"fallback-colors": "warning",
+								"floats": false,
+								"font-faces": "warning",
+								"font-sizes": "warning",
+								"gradients": "warning",
+								"ids": "warning",
+								"import": "warning",
+								"important": "warning",
+								"known-properties": true,
+								"outline-none": false,
+								"overqualified-elements": "warning",
+								"qualified-headings": false,
+								"regex-selectors": "warning",
+								"rules-count": "warning",
+								"shorthand": "warning",
+								"text-indent": "warning",
+								"unique-headings": "warning",
+								"universal-selector": "warning",
+								"vendor-prefix": false,
+								"zero-units": false
+							},
+							"gjslint_ignore":
+							[
+							],
+							"gjslint_options":
+							[
+							],
+							"javascript_linter": "jshint",
+							"jshint_options":
+							{
+								"boss": true,
+								"camelcase": false,
+								"expr": true,
+								"indent": true,
+								"sub": true
+							},
+							"pep8": true,
+							"pep8_ignore":
+							[
+								"E501"
+							],
+							"perl_linter": "perlcritic",
+							"pyflakes_ignore":
+							[
+							],
+							"pyflakes_ignore_import_*": true,
+							"sublimelinter": "load-save",
+							"sublimelinter_delay": 0.0,
+							"sublimelinter_disable":
+							[
+							],
+							"sublimelinter_executable_map":
+							{
+								"gjslint": "python /Users/elsigh/src/twist/tools/closure_linter/gjslint.py"
+							},
+							"sublimelinter_fill_outlines": false,
+							"sublimelinter_gutter_marks": false,
+							"sublimelinter_mark_style": "outline",
+							"sublimelinter_notes": false,
+							"sublimelinter_objj_check_ascii": false,
+							"sublimelinter_popup_errors_on_save": false,
+							"sublimelinter_syntax_map":
+							{
+								"C++": "c",
+								"Python Django": "python",
+								"Ruby on Rails": "ruby"
+							},
+							"sublimelinter_wrap_find": true,
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 2565.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "server/lib/web_request_handler.py",
+					"settings":
+					{
+						"buffer_size": 5817,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								4905,
+								4905
+							]
+						],
+						"settings":
+						{
+							"annotations":
+							[
+								"TODO",
+								"README",
+								"FIXME"
+							],
+							"csslint_options":
+							{
+								"adjoining-classes": false,
+								"box-model": false,
+								"box-sizing": false,
+								"compatible-vendor-prefixes": false,
+								"display-property-grouping": true,
+								"duplicate-background-images": "warning",
+								"duplicate-properties": true,
+								"empty-rules": true,
+								"errors": true,
+								"fallback-colors": "warning",
+								"floats": false,
+								"font-faces": "warning",
+								"font-sizes": "warning",
+								"gradients": "warning",
+								"ids": "warning",
+								"import": "warning",
+								"important": "warning",
+								"known-properties": true,
+								"outline-none": false,
+								"overqualified-elements": "warning",
+								"qualified-headings": false,
+								"regex-selectors": "warning",
+								"rules-count": "warning",
+								"shorthand": "warning",
+								"text-indent": "warning",
+								"unique-headings": "warning",
+								"universal-selector": "warning",
+								"vendor-prefix": false,
+								"zero-units": false
+							},
+							"gjslint_ignore":
+							[
+							],
+							"gjslint_options":
+							[
+							],
+							"javascript_linter": "jshint",
+							"jshint_options":
+							{
+								"boss": true,
+								"camelcase": false,
+								"expr": true,
+								"indent": true,
+								"sub": true
+							},
+							"pep8": true,
+							"pep8_ignore":
+							[
+								"E501"
+							],
+							"perl_linter": "perlcritic",
+							"pyflakes_ignore":
+							[
+							],
+							"pyflakes_ignore_import_*": true,
+							"sublimelinter": "load-save",
+							"sublimelinter_delay": 0.0,
+							"sublimelinter_disable":
+							[
+							],
+							"sublimelinter_executable_map":
+							{
+								"gjslint": "python /Users/elsigh/src/twist/tools/closure_linter/gjslint.py"
+							},
+							"sublimelinter_fill_outlines": false,
+							"sublimelinter_gutter_marks": false,
+							"sublimelinter_mark_style": "outline",
+							"sublimelinter_notes": false,
+							"sublimelinter_objj_check_ascii": false,
+							"sublimelinter_popup_errors_on_save": false,
+							"sublimelinter_syntax_map":
+							{
+								"C++": "c",
+								"Python Django": "python",
+								"Ruby on Rails": "ruby"
+							},
+							"sublimelinter_wrap_find": true,
+							"syntax": "Packages/Python/Python.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 151.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "server/lib/controllers.py",
+					"settings":
+					{
+						"buffer_size": 9052,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								5035,
+								5035
+							]
+						],
+						"settings":
+						{
+							"annotations":
+							[
+								"TODO",
+								"README",
+								"FIXME"
+							],
+							"csslint_options":
+							{
+								"adjoining-classes": false,
+								"box-model": false,
+								"box-sizing": false,
+								"compatible-vendor-prefixes": false,
+								"display-property-grouping": true,
+								"duplicate-background-images": "warning",
+								"duplicate-properties": true,
+								"empty-rules": true,
+								"errors": true,
+								"fallback-colors": "warning",
+								"floats": false,
+								"font-faces": "warning",
+								"font-sizes": "warning",
+								"gradients": "warning",
+								"ids": "warning",
+								"import": "warning",
+								"important": "warning",
+								"known-properties": true,
+								"outline-none": false,
+								"overqualified-elements": "warning",
+								"qualified-headings": false,
+								"regex-selectors": "warning",
+								"rules-count": "warning",
+								"shorthand": "warning",
+								"text-indent": "warning",
+								"unique-headings": "warning",
+								"universal-selector": "warning",
+								"vendor-prefix": false,
+								"zero-units": false
+							},
+							"gjslint_ignore":
+							[
+							],
+							"gjslint_options":
+							[
+							],
+							"javascript_linter": "jshint",
+							"jshint_options":
+							{
+								"boss": true,
+								"camelcase": false,
+								"expr": true,
+								"indent": true,
+								"sub": true
+							},
+							"pep8": true,
+							"pep8_ignore":
+							[
+								"E501"
+							],
+							"perl_linter": "perlcritic",
+							"pyflakes_ignore":
+							[
+							],
+							"pyflakes_ignore_import_*": true,
+							"sublimelinter": "load-save",
+							"sublimelinter_delay": 0.0,
+							"sublimelinter_disable":
+							[
+							],
+							"sublimelinter_executable_map":
+							{
+								"gjslint": "python /Users/elsigh/src/twist/tools/closure_linter/gjslint.py"
+							},
+							"sublimelinter_fill_outlines": false,
+							"sublimelinter_gutter_marks": false,
+							"sublimelinter_mark_style": "outline",
+							"sublimelinter_notes": false,
+							"sublimelinter_objj_check_ascii": false,
+							"sublimelinter_popup_errors_on_save": false,
+							"sublimelinter_syntax_map":
+							{
+								"C++": "c",
+								"Python Django": "python",
+								"Ruby on Rails": "ruby"
+							},
+							"sublimelinter_wrap_find": true,
+							"syntax": "Packages/Python/Python.tmLanguage"
+						},
+						"translation.x": 1.0,
+						"translation.y": 1857.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				}
+			]
+		},
+		{
+			"selected": 0,
+			"sheets":
+			[
+				{
+					"buffer": 4,
+					"file": "client/assets/www/index.html",
+					"settings":
+					{
+						"buffer_size": 6629,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1843,
+								1843
+							]
+						],
+						"settings":
+						{
+							"annotations":
+							[
+								"TODO",
+								"README",
+								"FIXME"
+							],
+							"csslint_options":
+							{
+								"adjoining-classes": false,
+								"box-model": false,
+								"box-sizing": false,
+								"compatible-vendor-prefixes": false,
+								"display-property-grouping": true,
+								"duplicate-background-images": "warning",
+								"duplicate-properties": true,
+								"empty-rules": true,
+								"errors": true,
+								"fallback-colors": "warning",
+								"floats": false,
+								"font-faces": "warning",
+								"font-sizes": "warning",
+								"gradients": "warning",
+								"ids": "warning",
+								"import": "warning",
+								"important": "warning",
+								"known-properties": true,
+								"outline-none": false,
+								"overqualified-elements": "warning",
+								"qualified-headings": false,
+								"regex-selectors": "warning",
+								"rules-count": "warning",
+								"shorthand": "warning",
+								"text-indent": "warning",
+								"unique-headings": "warning",
+								"universal-selector": "warning",
+								"vendor-prefix": false,
+								"zero-units": false
+							},
+							"gjslint_ignore":
+							[
+							],
+							"gjslint_options":
+							[
+							],
+							"javascript_linter": "jshint",
+							"jshint_options":
+							{
+								"boss": true,
+								"camelcase": false,
+								"expr": true,
+								"indent": true,
+								"sub": true
+							},
+							"pep8": true,
+							"pep8_ignore":
+							[
+								"E501"
+							],
+							"perl_linter": "perlcritic",
+							"pyflakes_ignore":
+							[
+							],
+							"pyflakes_ignore_import_*": true,
+							"sublimelinter": "load-save",
+							"sublimelinter_delay": 0.0,
+							"sublimelinter_disable":
+							[
+							],
+							"sublimelinter_executable_map":
+							{
+								"gjslint": "python /Users/elsigh/src/twist/tools/closure_linter/gjslint.py"
+							},
+							"sublimelinter_fill_outlines": false,
+							"sublimelinter_gutter_marks": false,
+							"sublimelinter_mark_style": "outline",
+							"sublimelinter_notes": false,
+							"sublimelinter_objj_check_ascii": false,
+							"sublimelinter_popup_errors_on_save": false,
+							"sublimelinter_syntax_map":
+							{
+								"C++": "c",
+								"Python Django": "python",
+								"Ruby on Rails": "ruby"
+							},
+							"sublimelinter_wrap_find": true,
+							"syntax": "Packages/HTML/HTML.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"file": "server/lib/models.py",
+					"settings":
+					{
+						"buffer_size": 3105,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1135,
+								1143
+							]
+						],
+						"settings":
+						{
+							"annotations":
+							[
+								"TODO",
+								"README",
+								"FIXME"
+							],
+							"csslint_options":
+							{
+								"adjoining-classes": false,
+								"box-model": false,
+								"box-sizing": false,
+								"compatible-vendor-prefixes": false,
+								"display-property-grouping": true,
+								"duplicate-background-images": "warning",
+								"duplicate-properties": true,
+								"empty-rules": true,
+								"errors": true,
+								"fallback-colors": "warning",
+								"floats": false,
+								"font-faces": "warning",
+								"font-sizes": "warning",
+								"gradients": "warning",
+								"ids": "warning",
+								"import": "warning",
+								"important": "warning",
+								"known-properties": true,
+								"outline-none": false,
+								"overqualified-elements": "warning",
+								"qualified-headings": false,
+								"regex-selectors": "warning",
+								"rules-count": "warning",
+								"shorthand": "warning",
+								"text-indent": "warning",
+								"unique-headings": "warning",
+								"universal-selector": "warning",
+								"vendor-prefix": false,
+								"zero-units": false
+							},
+							"gjslint_ignore":
+							[
+							],
+							"gjslint_options":
+							[
+							],
+							"javascript_linter": "jshint",
+							"jshint_options":
+							{
+								"boss": true,
+								"camelcase": false,
+								"expr": true,
+								"indent": true,
+								"sub": true
+							},
+							"pep8": true,
+							"pep8_ignore":
+							[
+								"E501"
+							],
+							"perl_linter": "perlcritic",
+							"pyflakes_ignore":
+							[
+							],
+							"pyflakes_ignore_import_*": true,
+							"sublimelinter": "load-save",
+							"sublimelinter_delay": 0.0,
+							"sublimelinter_disable":
+							[
+							],
+							"sublimelinter_executable_map":
+							{
+								"gjslint": "python /Users/elsigh/src/twist/tools/closure_linter/gjslint.py"
+							},
+							"sublimelinter_fill_outlines": false,
+							"sublimelinter_gutter_marks": false,
+							"sublimelinter_mark_style": "outline",
+							"sublimelinter_notes": false,
+							"sublimelinter_objj_check_ascii": false,
+							"sublimelinter_popup_errors_on_save": false,
+							"sublimelinter_syntax_map":
+							{
+								"C++": "c",
+								"Python Django": "python",
+								"Ruby on Rails": "ruby"
+							},
+							"sublimelinter_wrap_find": true,
+							"syntax": "Packages/Python/Python.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 167.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 6,
+					"file": "client/assets/www/js/views.js",
+					"settings":
+					{
+						"buffer_size": 9466,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								6281,
+								6281
+							]
+						],
+						"settings":
+						{
+							"annotations":
+							[
+								"TODO",
+								"README",
+								"FIXME"
+							],
+							"csslint_options":
+							{
+								"adjoining-classes": false,
+								"box-model": false,
+								"box-sizing": false,
+								"compatible-vendor-prefixes": false,
+								"display-property-grouping": true,
+								"duplicate-background-images": "warning",
+								"duplicate-properties": true,
+								"empty-rules": true,
+								"errors": true,
+								"fallback-colors": "warning",
+								"floats": false,
+								"font-faces": "warning",
+								"font-sizes": "warning",
+								"gradients": "warning",
+								"ids": "warning",
+								"import": "warning",
+								"important": "warning",
+								"known-properties": true,
+								"outline-none": false,
+								"overqualified-elements": "warning",
+								"qualified-headings": false,
+								"regex-selectors": "warning",
+								"rules-count": "warning",
+								"shorthand": "warning",
+								"text-indent": "warning",
+								"unique-headings": "warning",
+								"universal-selector": "warning",
+								"vendor-prefix": false,
+								"zero-units": false
+							},
+							"gjslint_ignore":
+							[
+							],
+							"gjslint_options":
+							[
+							],
+							"javascript_linter": "jshint",
+							"jshint_options":
+							{
+								"boss": true,
+								"camelcase": false,
+								"expr": true,
+								"indent": true,
+								"sub": true
+							},
+							"pep8": true,
+							"pep8_ignore":
+							[
+								"E501"
+							],
+							"perl_linter": "perlcritic",
+							"pyflakes_ignore":
+							[
+							],
+							"pyflakes_ignore_import_*": true,
+							"sublimelinter": "load-save",
+							"sublimelinter_delay": 0.0,
+							"sublimelinter_disable":
+							[
+							],
+							"sublimelinter_executable_map":
+							{
+								"gjslint": "python /Users/elsigh/src/twist/tools/closure_linter/gjslint.py"
+							},
+							"sublimelinter_fill_outlines": false,
+							"sublimelinter_gutter_marks": false,
+							"sublimelinter_mark_style": "outline",
+							"sublimelinter_notes": false,
+							"sublimelinter_objj_check_ascii": false,
+							"sublimelinter_popup_errors_on_save": false,
+							"sublimelinter_syntax_map":
+							{
+								"C++": "c",
+								"Python Django": "python",
+								"Ruby on Rails": "ruby"
+							},
+							"sublimelinter_wrap_find": true,
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 3430.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 7,
+					"file": "client/assets/www/js/app.js",
+					"settings":
+					{
+						"buffer_size": 4152,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								925,
+								925
+							]
+						],
+						"settings":
+						{
+							"annotations":
+							[
+								"TODO",
+								"README",
+								"FIXME"
+							],
+							"csslint_options":
+							{
+								"adjoining-classes": false,
+								"box-model": false,
+								"box-sizing": false,
+								"compatible-vendor-prefixes": false,
+								"display-property-grouping": true,
+								"duplicate-background-images": "warning",
+								"duplicate-properties": true,
+								"empty-rules": true,
+								"errors": true,
+								"fallback-colors": "warning",
+								"floats": false,
+								"font-faces": "warning",
+								"font-sizes": "warning",
+								"gradients": "warning",
+								"ids": "warning",
+								"import": "warning",
+								"important": "warning",
+								"known-properties": true,
+								"outline-none": false,
+								"overqualified-elements": "warning",
+								"qualified-headings": false,
+								"regex-selectors": "warning",
+								"rules-count": "warning",
+								"shorthand": "warning",
+								"text-indent": "warning",
+								"unique-headings": "warning",
+								"universal-selector": "warning",
+								"vendor-prefix": false,
+								"zero-units": false
+							},
+							"gjslint_ignore":
+							[
+							],
+							"gjslint_options":
+							[
+							],
+							"javascript_linter": "jshint",
+							"jshint_options":
+							{
+								"boss": true,
+								"camelcase": false,
+								"expr": true,
+								"indent": true,
+								"sub": true
+							},
+							"pep8": true,
+							"pep8_ignore":
+							[
+								"E501"
+							],
+							"perl_linter": "perlcritic",
+							"pyflakes_ignore":
+							[
+							],
+							"pyflakes_ignore_import_*": true,
+							"sublimelinter": "load-save",
+							"sublimelinter_delay": 0.0,
+							"sublimelinter_disable":
+							[
+							],
+							"sublimelinter_executable_map":
+							{
+								"gjslint": "python /Users/elsigh/src/twist/tools/closure_linter/gjslint.py"
+							},
+							"sublimelinter_fill_outlines": false,
+							"sublimelinter_gutter_marks": false,
+							"sublimelinter_mark_style": "outline",
+							"sublimelinter_notes": false,
+							"sublimelinter_objj_check_ascii": false,
+							"sublimelinter_popup_errors_on_save": false,
+							"sublimelinter_syntax_map":
+							{
+								"C++": "c",
+								"Python Django": "python",
+								"Ruby on Rails": "ruby"
+							},
+							"sublimelinter_wrap_find": true,
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 21.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 8,
+					"file": "client/assets/www/js/backbone-min.js",
+					"settings":
+					{
+						"buffer_size": 18303,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								16883,
+								16883
+							]
+						],
+						"settings":
+						{
+							"annotations":
+							[
+								"TODO",
+								"README",
+								"FIXME"
+							],
+							"csslint_options":
+							{
+								"adjoining-classes": false,
+								"box-model": false,
+								"box-sizing": false,
+								"compatible-vendor-prefixes": false,
+								"display-property-grouping": true,
+								"duplicate-background-images": "warning",
+								"duplicate-properties": true,
+								"empty-rules": true,
+								"errors": true,
+								"fallback-colors": "warning",
+								"floats": false,
+								"font-faces": "warning",
+								"font-sizes": "warning",
+								"gradients": "warning",
+								"ids": "warning",
+								"import": "warning",
+								"important": "warning",
+								"known-properties": true,
+								"outline-none": false,
+								"overqualified-elements": "warning",
+								"qualified-headings": false,
+								"regex-selectors": "warning",
+								"rules-count": "warning",
+								"shorthand": "warning",
+								"text-indent": "warning",
+								"unique-headings": "warning",
+								"universal-selector": "warning",
+								"vendor-prefix": false,
+								"zero-units": false
+							},
+							"gjslint_ignore":
+							[
+							],
+							"gjslint_options":
+							[
+							],
+							"javascript_linter": "jshint",
+							"jshint_options":
+							{
+								"boss": true,
+								"camelcase": false,
+								"expr": true,
+								"indent": true,
+								"sub": true
+							},
+							"pep8": true,
+							"pep8_ignore":
+							[
+								"E501"
+							],
+							"perl_linter": "perlcritic",
+							"pyflakes_ignore":
+							[
+							],
+							"pyflakes_ignore_import_*": true,
+							"sublimelinter": "load-save",
+							"sublimelinter_delay": 0.0,
+							"sublimelinter_disable":
+							[
+							],
+							"sublimelinter_executable_map":
+							{
+								"gjslint": "python /Users/elsigh/src/twist/tools/closure_linter/gjslint.py"
+							},
+							"sublimelinter_fill_outlines": false,
+							"sublimelinter_gutter_marks": false,
+							"sublimelinter_mark_style": "outline",
+							"sublimelinter_notes": false,
+							"sublimelinter_objj_check_ascii": false,
+							"sublimelinter_popup_errors_on_save": false,
+							"sublimelinter_syntax_map":
+							{
+								"C++": "c",
+								"Python Django": "python",
+								"Ruby on Rails": "ruby"
+							},
+							"sublimelinter_wrap_find": true,
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage"
+						},
+						"translation.x": 1153.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 9,
+					"file": "client/assets/www/css/account.css",
+					"settings":
+					{
+						"buffer_size": 154,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2,
+								2
+							]
+						],
+						"settings":
+						{
+							"auto_name": "",
+							"syntax": "Packages/CSS/CSS.tmLanguage",
+							"tab_size": 2
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 10,
+					"file": "client/assets/www/css/index.css",
+					"settings":
+					{
+						"buffer_size": 2087,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1855,
+								1855
+							]
+						],
+						"settings":
+						{
+							"annotations":
+							[
+								"TODO",
+								"README",
+								"FIXME"
+							],
+							"csslint_options":
+							{
+								"adjoining-classes": false,
+								"box-model": false,
+								"box-sizing": false,
+								"compatible-vendor-prefixes": false,
+								"display-property-grouping": true,
+								"duplicate-background-images": "warning",
+								"duplicate-properties": true,
+								"empty-rules": true,
+								"errors": true,
+								"fallback-colors": "warning",
+								"floats": false,
+								"font-faces": "warning",
+								"font-sizes": "warning",
+								"gradients": "warning",
+								"ids": "warning",
+								"import": "warning",
+								"important": "warning",
+								"known-properties": true,
+								"outline-none": false,
+								"overqualified-elements": "warning",
+								"qualified-headings": false,
+								"regex-selectors": "warning",
+								"rules-count": "warning",
+								"shorthand": "warning",
+								"text-indent": "warning",
+								"unique-headings": "warning",
+								"universal-selector": "warning",
+								"vendor-prefix": false,
+								"zero-units": false
+							},
+							"gjslint_ignore":
+							[
+							],
+							"gjslint_options":
+							[
+							],
+							"javascript_linter": "jshint",
+							"jshint_options":
+							{
+								"boss": true,
+								"camelcase": false,
+								"expr": true,
+								"indent": true,
+								"sub": true
+							},
+							"pep8": true,
+							"pep8_ignore":
+							[
+								"E501"
+							],
+							"perl_linter": "perlcritic",
+							"pyflakes_ignore":
+							[
+							],
+							"pyflakes_ignore_import_*": true,
+							"sublimelinter": "load-save",
+							"sublimelinter_delay": 0.0,
+							"sublimelinter_disable":
+							[
+							],
+							"sublimelinter_executable_map":
+							{
+								"gjslint": "python /Users/elsigh/src/twist/tools/closure_linter/gjslint.py"
+							},
+							"sublimelinter_fill_outlines": false,
+							"sublimelinter_gutter_marks": false,
+							"sublimelinter_mark_style": "outline",
+							"sublimelinter_notes": false,
+							"sublimelinter_objj_check_ascii": false,
+							"sublimelinter_popup_errors_on_save": false,
+							"sublimelinter_syntax_map":
+							{
+								"C++": "c",
+								"Python Django": "python",
+								"Ruby on Rails": "ruby"
+							},
+							"sublimelinter_wrap_find": true,
+							"syntax": "Packages/CSS/CSS.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 125.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 11,
+					"file": "client/src/com/phonedied/android/PhoneDiedAlarm.java",
+					"settings":
+					{
+						"buffer_size": 5107,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1638,
+								1638
+							]
+						],
+						"settings":
+						{
+							"annotations":
+							[
+								"TODO",
+								"README",
+								"FIXME"
+							],
+							"csslint_options":
+							{
+								"adjoining-classes": false,
+								"box-model": false,
+								"box-sizing": false,
+								"compatible-vendor-prefixes": false,
+								"display-property-grouping": true,
+								"duplicate-background-images": "warning",
+								"duplicate-properties": true,
+								"empty-rules": true,
+								"errors": true,
+								"fallback-colors": "warning",
+								"floats": false,
+								"font-faces": "warning",
+								"font-sizes": "warning",
+								"gradients": "warning",
+								"ids": "warning",
+								"import": "warning",
+								"important": "warning",
+								"known-properties": true,
+								"outline-none": false,
+								"overqualified-elements": "warning",
+								"qualified-headings": false,
+								"regex-selectors": "warning",
+								"rules-count": "warning",
+								"shorthand": "warning",
+								"text-indent": "warning",
+								"unique-headings": "warning",
+								"universal-selector": "warning",
+								"vendor-prefix": false,
+								"zero-units": false
+							},
+							"gjslint_ignore":
+							[
+							],
+							"gjslint_options":
+							[
+							],
+							"javascript_linter": "jshint",
+							"jshint_options":
+							{
+								"boss": true,
+								"camelcase": false,
+								"expr": true,
+								"indent": true,
+								"sub": true
+							},
+							"pep8": true,
+							"pep8_ignore":
+							[
+								"E501"
+							],
+							"perl_linter": "perlcritic",
+							"pyflakes_ignore":
+							[
+							],
+							"pyflakes_ignore_import_*": true,
+							"sublimelinter": "load-save",
+							"sublimelinter_delay": 0.0,
+							"sublimelinter_disable":
+							[
+							],
+							"sublimelinter_executable_map":
+							{
+								"gjslint": "python /Users/elsigh/src/twist/tools/closure_linter/gjslint.py"
+							},
+							"sublimelinter_fill_outlines": false,
+							"sublimelinter_gutter_marks": false,
+							"sublimelinter_mark_style": "outline",
+							"sublimelinter_notes": false,
+							"sublimelinter_objj_check_ascii": false,
+							"sublimelinter_popup_errors_on_save": false,
+							"sublimelinter_syntax_map":
+							{
+								"C++": "c",
+								"Python Django": "python",
+								"Ruby on Rails": "ruby"
+							},
+							"sublimelinter_wrap_find": true,
+							"syntax": "Packages/Java/Java.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 452.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 12,
+					"file": "client/src/com/phonedied/android/PhoneDiedService.java",
+					"settings":
+					{
+						"buffer_size": 1924,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1858,
+								1858
+							]
+						],
+						"settings":
+						{
+							"annotations":
+							[
+								"TODO",
+								"README",
+								"FIXME"
+							],
+							"csslint_options":
+							{
+								"adjoining-classes": false,
+								"box-model": false,
+								"box-sizing": false,
+								"compatible-vendor-prefixes": false,
+								"display-property-grouping": true,
+								"duplicate-background-images": "warning",
+								"duplicate-properties": true,
+								"empty-rules": true,
+								"errors": true,
+								"fallback-colors": "warning",
+								"floats": false,
+								"font-faces": "warning",
+								"font-sizes": "warning",
+								"gradients": "warning",
+								"ids": "warning",
+								"import": "warning",
+								"important": "warning",
+								"known-properties": true,
+								"outline-none": false,
+								"overqualified-elements": "warning",
+								"qualified-headings": false,
+								"regex-selectors": "warning",
+								"rules-count": "warning",
+								"shorthand": "warning",
+								"text-indent": "warning",
+								"unique-headings": "warning",
+								"universal-selector": "warning",
+								"vendor-prefix": false,
+								"zero-units": false
+							},
+							"gjslint_ignore":
+							[
+							],
+							"gjslint_options":
+							[
+							],
+							"javascript_linter": "jshint",
+							"jshint_options":
+							{
+								"boss": true,
+								"camelcase": false,
+								"expr": true,
+								"indent": true,
+								"sub": true
+							},
+							"pep8": true,
+							"pep8_ignore":
+							[
+								"E501"
+							],
+							"perl_linter": "perlcritic",
+							"pyflakes_ignore":
+							[
+							],
+							"pyflakes_ignore_import_*": true,
+							"sublimelinter": "load-save",
+							"sublimelinter_delay": 0.0,
+							"sublimelinter_disable":
+							[
+							],
+							"sublimelinter_executable_map":
+							{
+								"gjslint": "python /Users/elsigh/src/twist/tools/closure_linter/gjslint.py"
+							},
+							"sublimelinter_fill_outlines": false,
+							"sublimelinter_gutter_marks": false,
+							"sublimelinter_mark_style": "outline",
+							"sublimelinter_notes": false,
+							"sublimelinter_objj_check_ascii": false,
+							"sublimelinter_popup_errors_on_save": false,
+							"sublimelinter_syntax_map":
+							{
+								"C++": "c",
+								"Python Django": "python",
+								"Ruby on Rails": "ruby"
+							},
+							"sublimelinter_wrap_find": true,
+							"syntax": "Packages/Java/Java.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 242.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 13,
+					"file": "client/src/com/phonedied/android/PhoneDiedPlugin.java",
+					"settings":
+					{
+						"buffer_size": 2267,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2158,
+								2158
+							]
+						],
+						"settings":
+						{
+							"auto_name": "package com.phonedied.android;",
+							"syntax": "Packages/Java/Java.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 235.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 14,
+					"file": "client/res/xml/config.xml",
+					"settings":
+					{
+						"buffer_size": 1976,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1944,
+								1944
+							]
+						],
+						"settings":
+						{
+							"annotations":
+							[
+								"TODO",
+								"README",
+								"FIXME"
+							],
+							"csslint_options":
+							{
+								"adjoining-classes": false,
+								"box-model": false,
+								"box-sizing": false,
+								"compatible-vendor-prefixes": false,
+								"display-property-grouping": true,
+								"duplicate-background-images": "warning",
+								"duplicate-properties": true,
+								"empty-rules": true,
+								"errors": true,
+								"fallback-colors": "warning",
+								"floats": false,
+								"font-faces": "warning",
+								"font-sizes": "warning",
+								"gradients": "warning",
+								"ids": "warning",
+								"import": "warning",
+								"important": "warning",
+								"known-properties": true,
+								"outline-none": false,
+								"overqualified-elements": "warning",
+								"qualified-headings": false,
+								"regex-selectors": "warning",
+								"rules-count": "warning",
+								"shorthand": "warning",
+								"text-indent": "warning",
+								"unique-headings": "warning",
+								"universal-selector": "warning",
+								"vendor-prefix": false,
+								"zero-units": false
+							},
+							"gjslint_ignore":
+							[
+							],
+							"gjslint_options":
+							[
+							],
+							"javascript_linter": "jshint",
+							"jshint_options":
+							{
+								"boss": true,
+								"camelcase": false,
+								"expr": true,
+								"indent": true,
+								"sub": true
+							},
+							"pep8": true,
+							"pep8_ignore":
+							[
+								"E501"
+							],
+							"perl_linter": "perlcritic",
+							"pyflakes_ignore":
+							[
+							],
+							"pyflakes_ignore_import_*": true,
+							"sublimelinter": "load-save",
+							"sublimelinter_delay": 0.0,
+							"sublimelinter_disable":
+							[
+							],
+							"sublimelinter_executable_map":
+							{
+								"gjslint": "python /Users/elsigh/src/twist/tools/closure_linter/gjslint.py"
+							},
+							"sublimelinter_fill_outlines": false,
+							"sublimelinter_gutter_marks": false,
+							"sublimelinter_mark_style": "outline",
+							"sublimelinter_notes": false,
+							"sublimelinter_objj_check_ascii": false,
+							"sublimelinter_popup_errors_on_save": false,
+							"sublimelinter_syntax_map":
+							{
+								"C++": "c",
+								"Python Django": "python",
+								"Ruby on Rails": "ruby"
+							},
+							"sublimelinter_wrap_find": true,
+							"syntax": "Packages/XML/XML.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 15,
+					"file": "client/assets/www/js/phonediedservice_plugin.js",
+					"settings":
+					{
+						"buffer_size": 598,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								433,
+								433
+							]
+						],
+						"settings":
+						{
+							"annotations":
+							[
+								"TODO",
+								"README",
+								"FIXME"
+							],
+							"csslint_options":
+							{
+								"adjoining-classes": false,
+								"box-model": false,
+								"box-sizing": false,
+								"compatible-vendor-prefixes": false,
+								"display-property-grouping": true,
+								"duplicate-background-images": "warning",
+								"duplicate-properties": true,
+								"empty-rules": true,
+								"errors": true,
+								"fallback-colors": "warning",
+								"floats": false,
+								"font-faces": "warning",
+								"font-sizes": "warning",
+								"gradients": "warning",
+								"ids": "warning",
+								"import": "warning",
+								"important": "warning",
+								"known-properties": true,
+								"outline-none": false,
+								"overqualified-elements": "warning",
+								"qualified-headings": false,
+								"regex-selectors": "warning",
+								"rules-count": "warning",
+								"shorthand": "warning",
+								"text-indent": "warning",
+								"unique-headings": "warning",
+								"universal-selector": "warning",
+								"vendor-prefix": false,
+								"zero-units": false
+							},
+							"gjslint_ignore":
+							[
+							],
+							"gjslint_options":
+							[
+							],
+							"javascript_linter": "jshint",
+							"jshint_options":
+							{
+								"boss": true,
+								"camelcase": false,
+								"expr": true,
+								"indent": true,
+								"sub": true
+							},
+							"pep8": true,
+							"pep8_ignore":
+							[
+								"E501"
+							],
+							"perl_linter": "perlcritic",
+							"pyflakes_ignore":
+							[
+							],
+							"pyflakes_ignore_import_*": true,
+							"sublimelinter": "load-save",
+							"sublimelinter_delay": 0.0,
+							"sublimelinter_disable":
+							[
+							],
+							"sublimelinter_executable_map":
+							{
+								"gjslint": "python /Users/elsigh/src/twist/tools/closure_linter/gjslint.py"
+							},
+							"sublimelinter_fill_outlines": false,
+							"sublimelinter_gutter_marks": false,
+							"sublimelinter_mark_style": "outline",
+							"sublimelinter_notes": false,
+							"sublimelinter_objj_check_ascii": false,
+							"sublimelinter_popup_errors_on_save": false,
+							"sublimelinter_syntax_map":
+							{
+								"C++": "c",
+								"Python Django": "python",
+								"Ruby on Rails": "ruby"
+							},
+							"sublimelinter_wrap_find": true,
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				}
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 0.0
+	},
+	"input":
+	{
+		"height": 0.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			],
+			[
+				1,
+				0,
+				2,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			0.404645468617,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.exec":
+	{
+		"height": 100.0
+	},
+	"output.find_results":
+	{
+		"height": 176.0
+	},
+	"replace":
+	{
+		"height": 64.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+			[
+				"contr",
+				"server/lib/controllers.py"
+			],
+			[
+				"web_",
+				"server/lib/web_request_handler.py"
+			],
+			[
+				"app.js",
+				"assets/www/spec/helper.js"
+			],
+			[
+				"ws_view",
+				"server/frontend/static/shared/js/ws_view.js"
+			],
+			[
+				"app.css",
+				"server/frontend/static/twist/app.css"
+			],
+			[
+				"ws.js",
+				"server/frontend/static/shared/js/ws.js"
+			],
+			[
+				"ws_cli",
+				"server/frontend/static/shared/js/ws_click.js"
+			],
+			[
+				"ws_ac",
+				"server/frontend/static/shared/css/ws_action_bar.css"
+			],
+			[
+				"ws_b",
+				"server/frontend/static/shared/css/ws_button.css"
+			],
+			[
+				"android_b",
+				"server/frontend/templates/android_build.html"
+			],
+			[
+				"ws_mode",
+				"server/frontend/static/shared/js/ws_models.js"
+			],
+			[
+				"ws_mod",
+				"server/frontend/static/shared/js/ws_models_path.js"
+			],
+			[
+				"androidman",
+				"client/Android/Twist/AndroidManifest.xml"
+			],
+			[
+				"ws_models_p",
+				"server/frontend/static/shared/js/ws_models_path.js"
+			],
+			[
+				"back",
+				"server/frontend/static/external/backbone-0.9.2.js"
+			],
+			[
+				"ws_format",
+				"server/frontend/static/shared/js/ws_format.js"
+			],
+			[
+				"ws_au",
+				"server/frontend/static/shared/js/ws_autocomplete.js"
+			],
+			[
+				"path_upda",
+				"server/frontend/tests/twist/path_updater.html"
+			],
+			[
+				"models_pa",
+				"server/frontend/static/twist/models_path_updater.js"
+			],
+			[
+				"models_path_c",
+				"server/frontend/static/twist/models_path_create.js"
+			],
+			[
+				"view_pa",
+				"server/frontend/tests/twist/view_path.html"
+			],
+			[
+				"mock",
+				"server/frontend/tests/twist/mockdata.js"
+			],
+			[
+				"ws_con",
+				"server/frontend/tests/shared/ws_contact_picker.html"
+			],
+			[
+				"views_create_con",
+				"server/frontend/static/twist/views_create_confirm.js"
+			],
+			[
+				"models_path",
+				"server/frontend/static/twist/models_path_create.js"
+			],
+			[
+				"edit_path",
+				"server/frontend/tests/twist/edit_path.html"
+			],
+			[
+				"admin/dash",
+				"server/frontend/tests/admin/dashboard.html"
+			],
+			[
+				"twist/index",
+				"server/frontend/tests/twist/index.html"
+			],
+			[
+				"shared/index",
+				"server/frontend/tests/shared/index.html"
+			],
+			[
+				"ws_models_pa",
+				"server/frontend/static/shared/js/ws_models_path.js"
+			],
+			[
+				"ws_mo",
+				"server/frontend/static/shared/js/ws_models.js"
+			],
+			[
+				"backbone",
+				"server/frontend/static/external/backbone-0.9.2.js"
+			],
+			[
+				"ws_model",
+				"server/frontend/static/shared/js/ws_models.js"
+			],
+			[
+				"views_path_ma",
+				"server/frontend/static/twist/views_path_map.js"
+			],
+			[
+				"views_pa",
+				"server/frontend/static/twist/views_path.js"
+			],
+			[
+				"twist/index.ht",
+				"server/frontend/tests/twist/index.html"
+			],
+			[
+				"ws_s",
+				"server/frontend/tests/shared/ws_storage.html"
+			],
+			[
+				"tests/ad",
+				"server/frontend/tests/admin/dashboard.html"
+			],
+			[
+				"shared/index.html",
+				"server/frontend/tests/shared/index.html"
+			],
+			[
+				"models_path_",
+				"server/frontend/static/twist/models_path_create.js"
+			],
+			[
+				"backbon",
+				"server/frontend/static/external/backbone.js"
+			],
+			[
+				"ws_models_path",
+				"server/frontend/static/shared/js/ws_models_path.js"
+			],
+			[
+				"path_ma",
+				"server/frontend/static/twist/path_map.css"
+			],
+			[
+				"path_header_cli",
+				"server/frontend/templates/twist/path_header_client_destination.mustache"
+			],
+			[
+				"path_map",
+				"server/frontend/templates/twist/path_map.mustache"
+			],
+			[
+				"ws_bin",
+				"server/frontend/static/shared/js/ws_bing_map.js"
+			],
+			[
+				"ws_map",
+				"server/frontend/static/shared/js/ws_map.js"
+			],
+			[
+				"path_up",
+				"server/frontend/static/twist/models_path_updater.js"
+			],
+			[
+				"models.js",
+				"server/frontend/static/twist/models.js"
+			],
+			[
+				"ws_models.",
+				"server/frontend/static/shared/js/ws_models.js"
+			],
+			[
+				"views_create_in",
+				"server/frontend/static/twist/views_create_invite.js"
+			],
+			[
+				"shared/inde",
+				"server/frontend/tests/shared/index.html"
+			],
+			[
+				"external/zep",
+				"server/frontend/static/external/zepto.touch.js"
+			],
+			[
+				"zepto.tu",
+				"server/frontend/static/external/zepto.touch.js"
+			],
+			[
+				"ws_click",
+				"server/frontend/static/shared/js/ws_click.js"
+			],
+			[
+				"zep",
+				"server/frontend/static/external/zepto.js"
+			],
+			[
+				"views_client_o",
+				"server/frontend/static/twist/views_client_onboarding.js"
+			],
+			[
+				"ws_autom",
+				"server/frontend/static/shared/js/ws_autocomplete_contacts.js"
+			],
+			[
+				"ff.h",
+				"server/frontend/static/twist/ff.html"
+			],
+			[
+				"ff.",
+				"server/frontend/static/twist/ff.html"
+			],
+			[
+				"app.yal",
+				"server/frontend/common_app.yaml"
+			],
+			[
+				"cach",
+				"server/frontend/static/twist/cache.manifest"
+			],
+			[
+				"app.ma",
+				"server/frontend/static/twist/app.manifest"
+			],
+			[
+				"ws.css",
+				"server/frontend/static/shared/css/ws.css"
+			],
+			[
+				"path.css",
+				"server/frontend/static/twist/path.css"
+			],
+			[
+				"base.h",
+				"server/frontend/templates/base.html"
+			],
+			[
+				"path.mu",
+				"server/frontend/templates/twist/path.mustache"
+			],
+			[
+				"path.cs",
+				"server/frontend/static/twist/path.css"
+			],
+			[
+				"contact_pick",
+				"server/frontend/templates/shared/ws_contact_picker_invitations.mustache"
+			],
+			[
+				"ws_cont",
+				"server/frontend/static/shared/js/ws_contact_picker.js"
+			],
+			[
+				"models_path_cre",
+				"server/frontend/static/twist/models_path_create.js"
+			],
+			[
+				"contact_pic",
+				"server/frontend/templates/shared/ws_contact_picker_invitations.mustache"
+			],
+			[
+				"contact_p",
+				"server/frontend/templates/shared/ws_contact_picker.mustache"
+			],
+			[
+				"path_peo",
+				"server/frontend/templates/twist/path_people_list.mustache"
+			],
+			[
+				"ws_fo",
+				"server/frontend/static/shared/js/ws_format.js"
+			],
+			[
+				"shared/ind",
+				"server/frontend/tests/shared/index.html"
+			],
+			[
+				"webint",
+				"server/frontend/static/external/phonegap-webintent.js"
+			],
+			[
+				"views_path_peo",
+				"server/frontend/static/twist/views_path_people.js"
+			],
+			[
+				"andr",
+				"client/Android/Twist/AndroidManifest.xml"
+			],
+			[
+				"confi",
+				"client/Android/Twist/res/xml/config.xml"
+			],
+			[
+				"path_inv",
+				"server/frontend/templates/twist/path_invites_dialog.mustache"
+			],
+			[
+				"ws_for",
+				"server/frontend/static/shared/js/ws_format.js"
+			],
+			[
+				"views_cre",
+				"server/frontend/static/twist/views_create_destination.js"
+			],
+			[
+				"web_bui",
+				"tools/web_build.py"
+			],
+			[
+				"ws_vi",
+				"server/frontend/static/shared/js/ws_view.js"
+			],
+			[
+				"ws_moe",
+				"server/frontend/static/shared/js/ws_models.js"
+			],
+			[
+				"path_invi",
+				"server/frontend/templates/twist/path_invites_dialog.mustache"
+			],
+			[
+				"path_peopl",
+				"server/frontend/templates/twist/path_people_list.mustache"
+			],
+			[
+				"views_path_p",
+				"server/frontend/static/twist/views_path_people.js"
+			],
+			[
+				"ws_pop",
+				"server/frontend/static/shared/js/ws_popup_menu.js"
+			],
+			[
+				"path_m",
+				"server/frontend/static/twist/path_map.css"
+			],
+			[
+				"androi",
+				"tools/android_build_apk.py"
+			],
+			[
+				"views_path_de",
+				"server/frontend/static/twist/views_path_detail.js"
+			],
+			[
+				"path_he",
+				"server/frontend/templates/twist/path_header_eta.mustache"
+			],
+			[
+				"onboa",
+				"server/frontend/static/twist/models_onboarding.js"
+			],
+			[
+				"android_",
+				"tools/android_build_apk.py"
+			],
+			[
+				"ws_bi",
+				"server/frontend/static/shared/js/ws_bing_map.js"
+			],
+			[
+				"views_path_m",
+				"server/frontend/static/twist/views_path_map.js"
+			],
+			[
+				"model",
+				"server/frontend/static/twist/models.js"
+			],
+			[
+				"ws_sy",
+				"server/frontend/static/shared/js/ws_sync.js"
+			],
+			[
+				"views_cli",
+				"server/frontend/static/twist/views_client_onboarding.js"
+			],
+			[
+				"getapp_re",
+				"server/frontend/templates/getapp_redirect.html"
+			],
+			[
+				"views_clie",
+				"server/frontend/static/twist/views_client_onboarding.js"
+			],
+			[
+				"auto",
+				"server/frontend/static/shared/js/ws_autocomplete_contacts.js"
+			],
+			[
+				"create_inv",
+				"server/frontend/templates/twist/create_invite.mustache"
+			],
+			[
+				"ws_te",
+				"server/frontend/static/shared/js/ws_text.js"
+			],
+			[
+				"views_de",
+				"server/frontend/static/twist/views_destinations_map.js"
+			],
+			[
+				"ws_vie",
+				"server/frontend/static/shared/js/ws_view.js"
+			],
+			[
+				"ws_click_de",
+				"server/frontend/tests/shared/ws_click_demo.html"
+			],
+			[
+				"views_mo",
+				"server/frontend/static/twist/views_mobile.js"
+			],
+			[
+				"views.",
+				"server/frontend/static/twist/views.js"
+			],
+			[
+				"ws_syn",
+				"server/frontend/tests/shared/ws_sync.html"
+			],
+			[
+				"ws_form",
+				"server/frontend/static/shared/js/ws_format.js"
+			],
+			[
+				"ws_clic",
+				"server/frontend/static/shared/js/ws_click.js"
+			],
+			[
+				"views.js",
+				"server/frontend/static/twist/views.js"
+			],
+			[
+				"models.",
+				"server/frontend/static/twist/models.js"
+			],
+			[
+				"ws_action_b",
+				"server/frontend/tests/shared/ws_action_bar.html"
+			],
+			[
+				"ws_click_dem",
+				"server/frontend/tests/shared/ws_click_demo.html"
+			],
+			[
+				"ws_lis",
+				"server/frontend/static/shared/js/ws_list.js"
+			],
+			[
+				"views_no",
+				"server/frontend/static/twist/views_notifications.js"
+			],
+			[
+				"models_onb",
+				"server/frontend/static/twist/models_onboarding.js"
+			],
+			[
+				"create_d",
+				"server/frontend/templates/twist/create_destination.mustache"
+			],
+			[
+				"views_cr",
+				"server/frontend/static/twist/views_create_destination.js"
+			],
+			[
+				"views_c",
+				"server/frontend/static/twist/views_create_destination.js"
+			],
+			[
+				"views_path",
+				"server/frontend/static/twist/views_path.js"
+			],
+			[
+				"twist/ind",
+				"server/frontend/tests/twist/index.html"
+			],
+			[
+				"create_in",
+				"server/frontend/templates/twist/create_invite.mustache"
+			],
+			[
+				"iphone_",
+				"server/frontend/templates/twist/iphone_invitation_redirect.html"
+			]
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"show_minimap": false,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 239.0,
+	"status_bar_visible": true
+}

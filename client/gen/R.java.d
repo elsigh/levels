@@ -1,0 +1,25 @@
+/Users/elsigh/src/phonedied/client/gen/com/phonedied/android/R.java \
+ : /Users/elsigh/src/phonedied/client/res/drawable/icon.png \
+/Users/elsigh/src/phonedied/client/res/drawable/splash.png \
+/Users/elsigh/src/phonedied/client/res/drawable-hdpi/ic_launcher.png \
+/Users/elsigh/src/phonedied/client/res/drawable-hdpi/icon.png \
+/Users/elsigh/src/phonedied/client/res/drawable-ldpi/ic_launcher.png \
+/Users/elsigh/src/phonedied/client/res/drawable-ldpi/icon.png \
+/Users/elsigh/src/phonedied/client/res/drawable-mdpi/ic_launcher.png \
+/Users/elsigh/src/phonedied/client/res/drawable-mdpi/icon.png \
+/Users/elsigh/src/phonedied/client/res/drawable-xhdpi/ic_launcher.png \
+/Users/elsigh/src/phonedied/client/res/drawable-xhdpi/icon.png \
+/Users/elsigh/src/phonedied/client/res/layout/main.xml \
+/Users/elsigh/src/phonedied/client/res/values/strings.xml \
+/Users/elsigh/src/phonedied/client/res/xml/config.xml \
+/Users/elsigh/src/phonedied/client/bin/res/drawable/icon.png \
+/Users/elsigh/src/phonedied/client/bin/res/drawable/splash.png \
+/Users/elsigh/src/phonedied/client/bin/res/drawable-hdpi/ic_launcher.png \
+/Users/elsigh/src/phonedied/client/bin/res/drawable-hdpi/icon.png \
+/Users/elsigh/src/phonedied/client/bin/res/drawable-ldpi/ic_launcher.png \
+/Users/elsigh/src/phonedied/client/bin/res/drawable-ldpi/icon.png \
+/Users/elsigh/src/phonedied/client/bin/res/drawable-mdpi/ic_launcher.png \
+/Users/elsigh/src/phonedied/client/bin/res/drawable-mdpi/icon.png \
+/Users/elsigh/src/phonedied/client/bin/res/drawable-xhdpi/ic_launcher.png \
+/Users/elsigh/src/phonedied/client/bin/res/drawable-xhdpi/icon.png \
+/Users/elsigh/src/phonedied/client/bin/AndroidManifest.xml \

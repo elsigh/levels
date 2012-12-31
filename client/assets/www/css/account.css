@@ -1,0 +1,15 @@
+
+
+.fmb-account .username-taken-err {
+  display: none;
+  font-size: 90%;
+  color: red;
+}
+
+.fmb-account .username-taken-err.fmb-active {
+  display: block;
+}
+
+.fmb-account .username code{
+  font-size: 3em;
+}

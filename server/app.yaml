@@ -1,0 +1,71 @@
+application: followmybattery
+version: 1
+runtime: python27
+threadsafe: true
+api_version: 1
+default_expiration: "0d 0h"
+
+
+libraries:
+- name: django
+  version: latest
+
+
+builtins:
+#uncomment to turn on page performance
+#- appstats: on
+
+
+inbound_services:
+#- warmup
+
+
+# Magic skip configuration, do not edit.
+skip_files: |
+  ^(.*/)?(
+  (#.*#)|
+  (.*~)|
+  (.*\.py[co])|
+  (.*\.php)|
+  (.*closure_compiler.*)|
+  (\..*)|
+  (.*DEPLOY.py)|
+  (.*BUILD.py)|
+  (tests.*)|
+  )$
+
+handlers:
+# cron jobs
+#- url: /cronjobs/logreporter.*
+#  script: cronjobs.logreporter.app
+#  login: admin
+
+# google app engine only stuff
+- url: /_ah/warmup
+  script: warmup.app
+  login: admin
+
+# Static files
+- url: /favicon.ico
+  static_files: static/img/favicon.ico
+  upload: static/img/favicon.ico
+  expiration: "0d 1h"
+
+- url: /robots.txt
+  static_files: static/robots.txt
+  upload: static/robots.txt
+  expiration: "0d 1h"
+
+# General static content directory.
+- url: /static
+  static_dir: static
+  expiration: "3650d"
+
+# Serve the tests for automation.
+- url: /tests
+  static_dir: tests
+  expiration: "1s"
+
+# Catch to route to www
+- url: .*
+  script: lib.controllers.app

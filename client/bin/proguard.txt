@@ -1,0 +1,12 @@
+# view AndroidManifest.xml #generated:52
+-keep class com.phonedied.android.PhoneDiedActivity { <init>(...); }
+
+# view AndroidManifest.xml #generated:83
+-keep class com.phonedied.android.PhoneDiedAlarm { <init>(...); }
+
+# view AndroidManifest.xml #generated:77
+-keep class com.phonedied.android.PhoneDiedAutoStart { <init>(...); }
+
+# view AndroidManifest.xml #generated:75
+-keep class com.phonedied.android.PhoneDiedService { <init>(...); }
+
