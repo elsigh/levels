@@ -15,7 +15,7 @@ fmb.models.SERVER_LOCAL = 'http://192.168.1.9:9091';
 /**
  * @type {string}
  */
-fmb.models.SERVER_PROD = 'http://followmybattery.appspot.com';
+fmb.models.SERVER_PROD = 'http://www.followmybattery.com';
 
 
 /**
