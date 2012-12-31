@@ -1,0 +1,55 @@
+{% extends "base.html"%}
+
+{% block head %}
+  <link rel="stylesheet" href="/static/css/index.css">
+  <style>
+    footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      color: #fff;
+      padding: 15px;
+      background: #aaa;
+      text-align: center;
+    }
+    .content {
+      padding: 10px;
+    }
+  </style>
+{% endblock %}
+
+{% block body %}
+  <section>
+    <header>
+      <h1>Follow My Battery</h1>
+    </header>
+    <div class="content">
+      <p>
+        <a href="http://play.google.com/store/apps/details?id=com.phonedied.android">
+          <img alt="Android app on Google Play"
+            src="http://developer.android.com/images/brand/en_generic_rgb_wo_60.png" />
+        </a>
+      </p>
+      <ul>
+        <li>
+          Automatically lets your friends or family know when you're battery's dying.
+        </li>
+        <li>
+          Instant view of loved ones battery status if they don't answer the phone.
+        </li>
+        <li>
+          More device support coming soon (maybe you need new batteries =)
+        </li>
+      </ul>
+
+      <p>
+        <a href="mailto:elsigh@gmail.com?Subject=FollowMyBattery">Talk to Us!</a>
+      </p>
+    </div>
+
+    <footer>
+      @Copyright 2012 - FollowMyBattery
+    </footer>
+  </section>
+{% endblock %}
