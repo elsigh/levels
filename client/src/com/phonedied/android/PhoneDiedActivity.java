@@ -21,7 +21,7 @@ public class PhoneDiedActivity extends DroidGap {
         Log.d(TAG, "BUILD:: " + android.os.Build.DEVICE + ", " +
               android.os.Build.MODEL + ", " + android.os.Build.PRODUCT);
         super.setIntegerProperty("splashscreen", R.drawable.splash);
-        super.setBooleanProperty("keepRunning", false);
+        //super.setBooleanProperty("keepRunning", false);
         super.loadUrl("file:///android_asset/www/index.html", 10000);
     }
 
