@@ -196,9 +196,13 @@ class ApiFollowingRequestHandler(ApiRequestHandler):
                 q_bat.ancestor(device.key())
                 q_bat.order('-created')
                 battery = q_bat.get()
+                if battery is None:
+                    battery_tpl_data = {}
+                else:
+                    battery_tpl_data = models.to_dict(battery)
                 followed_device = {
                   'device': models.to_dict(device),
-                  'battery': models.to_dict(battery)
+                  'battery': battery_tpl_data
                 }
                 followed_obj['devices'].append(followed_device)
 
@@ -213,6 +217,14 @@ class ApiFollowingRequestHandler(ApiRequestHandler):
         if q.count() == 0:
             return self.output_json_error()
         follow_profile = q.get()
+
+        # Now make sure they're not already following that user.
+        q = db.Query(models.Following).ancestor(self._profile.key())
+        q.filter('following =', follow_profile.key())
+        if q.count() > 0:
+            logging.info('ALREADY following!')
+            return self.output_json_error({}, 409)
+
         following = models.Following(
             parent=self._profile,
             following=follow_profile
@@ -220,7 +232,9 @@ class ApiFollowingRequestHandler(ApiRequestHandler):
         following.put()
         return self.output_json_success(models.to_dict(follow_profile))
 
-    def delete(self, username=None):
+
+class ApiFollowingDeleteRequestHandler(ApiRequestHandler):
+    def post(self, username=None):
         self.set_and_assert_profile()
         username = self._json_request_data['username']
         q = db.Query(models.Profile).filter('username =', username)
@@ -287,6 +301,7 @@ app = webapp2.WSGIApplication([
     (r'/api/profile/(.*)', ApiProfileRequestHandler),
     (r'/api/device/(.*)', ApiDeviceRequestHandler),
     (r'/api/battery/(.*)', ApiBatteryRequestHandler),
+    (r'/api/following/delete(.*)', ApiFollowingDeleteRequestHandler),
     (r'/api/following/(.*)', ApiFollowingRequestHandler),
     (r'/api/notifying/(.*)', ApiNotifyingRequestHandler),
     (r'/(.*)', BatteryStatusRequestHandler),

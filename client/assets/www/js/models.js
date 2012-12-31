@@ -444,6 +444,77 @@ fmb.models.FollowingCollection.prototype.parse = function(response) {
 
 
 /**
+ * @param {string} username A username to follow.
+ */
+fmb.models.FollowingCollection.prototype.addByUsername = function(username) {
+  console.log('addByUsername:', username);
+
+  // Can't follow yerself or no one.
+  if (username === '' ||
+      username == this.profile.get('username')) {
+    return;
+  }
+
+  var alreadyFollowing = this.find(function(model) {
+    return model.get('profile')['username'] == username;
+  });
+  if (alreadyFollowing) {
+    console.log('.. bail, already following', username);
+    alert('You are already following ' + username);
+    return;
+  }
+
+  var followModel = new fmb.models.AjaxSyncModel();
+  followModel.url = _.bind(function() {
+    return fmb.models.getApiUrl('/following/') +
+        this.profile.get('username');
+  }, this);
+  followModel.save({'username': username}, {
+    //url: url,  // why this no work?
+    success: _.bind(function() {
+      console.log('MONEY TRAIN, refetching goodies from server.');
+      this.fetch();
+    }, this),
+    error: function(model, xhr, options) {
+      if (xhr.status === 404) {
+        alert('La bomba, seems we could not find a user ' + username);
+      } else if (xhr.status === 409) {
+        //alert('already following');
+      }
+    }
+  });
+};
+
+
+/**
+ * @param {string} username A username to follow.
+ */
+fmb.models.FollowingCollection.prototype.removeByUsername = function(username) {
+  var followModel = new fmb.models.AjaxSyncModel();
+
+  followModel.url = _.bind(function() {
+    return fmb.models.getApiUrl('/following/delete/') +
+        this.profile.get('username');
+  }, this);
+
+  followModel.save({
+    'username': username
+  }, {
+    // Why does url not work here?
+    //url: fmb.models.getApiUrl('/following/delete/') +
+    //     this.profile.get('username'),
+    success: _.bind(function() {
+      console.log('MONEY TRAIN, refetching goodies from server.');
+      this.fetch();
+    }, this),
+    error: function(model, xhr, options) {
+      console.log('FAIL removing ' +  username + ', ' + xhr.status);
+    }
+  });
+};
+
+
+/**
  * @return {string}
  */
 fmb.models.FollowingCollection.prototype.url = function() {
