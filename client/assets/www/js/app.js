@@ -219,6 +219,10 @@ fmb.App.prototype.onPhonePause_ = function() {
   window.removeEventListener('batterystatus',
                              fmb.App.onBatteryStatus_,
                              false);
+
+  app.view.currentView &&
+      app.view.currentView.setIsActive &&
+      app.view.currentView.setIsActive(false);
 };
 
 
@@ -250,6 +254,10 @@ fmb.App.prototype.onPhoneResume_ = function() {
   window.addEventListener('batterystatus',
                           fmb.App.onBatteryStatus_,
                           false);
+
+  app.view.currentView &&
+      app.view.currentView.setIsActive &&
+      app.view.currentView.setIsActive(true);
 
   this.checkIntent_();
 };

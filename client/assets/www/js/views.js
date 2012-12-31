@@ -149,10 +149,14 @@ fmb.views.App.prototype.onClickTab_ = function(e) {
 fmb.views.App.prototype.setCurrentView = function(view) {
   if (this.currentView) {
     this.currentView.$el.removeClass('fmb-active');
+    this.currentView.setIsActive &&
+        this.currentView.setIsActive(false);
   }
   this.currentView = view;
   this.currentView.render();
   this.currentView.$el.addClass('fmb-active');
+  this.currentView.setIsActive &&
+      this.currentView.setIsActive(true);
 };
 
 
@@ -214,6 +218,7 @@ fmb.views.App.prototype.transitionPage = function(route) {
 fmb.views.Account = Backbone.View.extend({
   el: '.fmb-account',
   events: {
+    'tap form.profile-create input[type="submit"]': 'onSubmitCreateProfile_',
     'submit form.profile-create': 'onSubmitCreateProfile_',
     'submit form.device-update': 'onSubmitUpdateDevice_',
     'tap input[type="radio"]': 'onChangeUpdateEnabled_',
@@ -248,8 +253,9 @@ fmb.views.Account.prototype.render = function() {
  * @private
  */
 fmb.views.Account.prototype.onSubmitCreateProfile_ = function(e) {
+  console.log('onSubmitCreateProfile_');
   e.preventDefault();
-  var $form = $(e.currentTarget);
+  var $form = this.$('form.profile-create');
   var data = fmb.views.serializeFormToObject($form);
 
   // First we need to check if this username is available.
@@ -407,6 +413,31 @@ fmb.views.Following.prototype.initialize = function(options) {
   this.device = options.device;
   this.model.on('all', this.render, this);
   this.device.on('change', this.render, this);
+};
+
+
+/**
+ * @type {number}
+ * @private
+ */
+fmb.views.Following.prototype.followingTimeout_ = null;
+
+
+/**
+ * @param {Boolean} isActive True for active.
+ */
+fmb.views.Following.prototype.setIsActive = function(isActive) {
+  if (this.followingTimeout_ != null) {
+    console.log('Clear following fetch interval.');
+    window.clearInterval(this.followingTimeout_);
+    this.followingTimeout_ = null;
+  }
+  if (isActive) {
+    console.log('Set following fetch interval.');
+    this.followingTimeout_ = window.setInterval(
+        _.bind(this.model.fetch, this.model),
+        30000);
+  }
 };
 
 
