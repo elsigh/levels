@@ -21,7 +21,7 @@
   xmlns:android="http://schemas.android.com/apk/res/android"
   android:windowSoftInputMode="adjustResize"
   package="com.phonedied.android"
-  android:versionName="0.1"
+  android:versionName="0.2"
   android:versionCode="1"
   android:hardwareAccelerated="true">
 

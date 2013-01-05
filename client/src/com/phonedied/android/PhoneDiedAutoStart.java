@@ -12,7 +12,7 @@ public class PhoneDiedAutoStart extends BroadcastReceiver
     {
         if (intent.getAction().equals("android.intent.action.BOOT_COMPLETED"))
         {
-            //alarm.SetAlarm(context);
+            alarm.SetAlarm(context);
         }
     }
 }
