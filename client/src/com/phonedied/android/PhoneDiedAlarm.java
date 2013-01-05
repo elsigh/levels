@@ -8,6 +8,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.BatteryManager;
 import android.os.PowerManager;
@@ -36,11 +37,12 @@ public class PhoneDiedAlarm extends BroadcastReceiver {
 
     private static final String TAG = PhoneDiedAlarm.class.getSimpleName();
 
-    public static final String mixpanelToken = "05816db61e038417de78b3ebc0859168";
+    public static final String PREFS_NAME = "PhoneDiedPrefs";
 
     private String updatePath = "";
     private String uuid = "";
     private String authToken = "";
+    private String updateFrequency = "";
 
     public static HttpResponse makeRequest(String updatePath, JSONObject json) throws Exception {
         Log.d(TAG, "makeRequest: " + updatePath + ", " + json.toString());
@@ -66,8 +68,7 @@ public class PhoneDiedAlarm extends BroadcastReceiver {
 
     public void SendBatteryStatus(Context context, String updatePath,
                                   String uuid, String authToken) {
-        Log.d(TAG, "SendBatteryStatus: " + updatePath + ", " + uuid + ", " +
-              authToken);
+        Log.d(TAG, "SendBatteryStatus: " + updatePath + ", " + uuid + ", " + authToken);
         PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         PowerManager.WakeLock wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "");
         wl.acquire();
@@ -116,60 +117,57 @@ public class PhoneDiedAlarm extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        String authToken = intent.getStringExtra(PhoneDiedService.EXTRAS_AUTH_TOKEN);
-        String uuid = intent.getStringExtra(PhoneDiedService.EXTRAS_UUID);
-        String updatePath = intent.getStringExtra(PhoneDiedService.EXTRAS_UPDATE_PATH);
-        Log.d(TAG, "onReceive w/ intent " + updatePath + ", " + uuid + ", " +
-              authToken);
-        SendBatteryStatus(context, updatePath, uuid, authToken);
+        SharedPreferences settings = context.getApplicationContext().
+                getSharedPreferences(PREFS_NAME, 0);
+        String updatePath = settings.getString(PhoneDiedService.EXTRAS_UPDATE_PATH, null);
+        String uuid = settings.getString(PhoneDiedService.EXTRAS_UUID, null);
+        String authToken = settings.getString(PhoneDiedService.EXTRAS_AUTH_TOKEN, null);
+        Log.d(TAG, "onReceive w/ prefs: " + updatePath + ", " + uuid + ", " + authToken);
+
+        if (updatePath != null && uuid != null && authToken != null) {
+            SendBatteryStatus(context, updatePath, uuid, authToken);
+        } else {
+            Log.d(TAG, "Unable to SendBatteryStatus - too damn much null!");
+        }
     }
 
-    public void SetAlarm(Context context, String updatePath, String uuid,
+    public void SetPrefs(Context context, String updatePath, String uuid,
                          String authToken, String updateFrequency) {
-        Log.d(TAG, "SetAlarm! " + updatePath + ", " + uuid + ", " +
-              authToken + ", " + updateFrequency);
+        Log.d(TAG, "SetPrefs: " + updatePath + ", " + uuid + ", " + authToken +
+              ", " + updateFrequency);
 
-        // Store references to how the alarm was set so we can use in CancelAlarm.
-        this.updatePath = updatePath;
-        this.uuid = uuid;
-        this.authToken = authToken;
+        SharedPreferences settings = context.getApplicationContext().
+                getSharedPreferences(PREFS_NAME, 0);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putString(PhoneDiedService.EXTRAS_AUTH_TOKEN, authToken);
+        editor.putString(PhoneDiedService.EXTRAS_UUID, uuid);
+        editor.putString(PhoneDiedService.EXTRAS_UPDATE_PATH, updatePath);
+        editor.putString(PhoneDiedService.EXTRAS_UPDATE_FREQUENCY, updateFrequency);
+        editor.commit();
+    }
 
+    public void SetAlarm(Context context) {
         AlarmManager am = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
-
         Intent intent = new Intent(context, PhoneDiedAlarm.class);
-        intent.putExtra(PhoneDiedService.EXTRAS_AUTH_TOKEN, authToken);
-        intent.putExtra(PhoneDiedService.EXTRAS_UUID, uuid);
-        intent.putExtra(PhoneDiedService.EXTRAS_UPDATE_PATH, updatePath);
-
         PendingIntent pi = PendingIntent.getBroadcast(context, 0, intent, 0);
 
+        SharedPreferences settings = context.getApplicationContext().
+                getSharedPreferences(PREFS_NAME, 0);
+        String updateFrequency = settings.getString(PhoneDiedService.EXTRAS_UPDATE_FREQUENCY, "");
+
+        Log.d(TAG, "SetAlarm! w/ updateFrequency:" + updateFrequency);
         int alarmIntervalMs = 1000 * 60 * Integer.parseInt(updateFrequency);  // Millisec * Second * Minute
 
         am.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(),
                         alarmIntervalMs, pi);
     }
 
-    public void UpdateAlarm(Context context, String updatePath, String uuid,
-                         String authToken, String updateFrequency) {
-        Log.d(TAG, "UpdateAlarm! " + updatePath + ", " + uuid + ", " +
-              authToken + ", " + updateFrequency);
-        CancelAlarm(context);
-        SetAlarm(context, updatePath, uuid, authToken, updateFrequency);
-    }
-
     public void CancelAlarm(Context context) {
-        Log.d(TAG, "CancelAlarm! w/ " + this.updatePath + ", " +
-              this.uuid + ", " + this.authToken);
+        Log.d(TAG, "CancelAlarm!");
         Intent intent = new Intent(context, PhoneDiedAlarm.class);
-        intent.putExtra(PhoneDiedService.EXTRAS_AUTH_TOKEN, this.authToken);
-        intent.putExtra(PhoneDiedService.EXTRAS_UUID, this.uuid);
-        intent.putExtra(PhoneDiedService.EXTRAS_UPDATE_PATH, this.updatePath);
         PendingIntent sender = PendingIntent.getBroadcast(context, 0, intent, 0);
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         alarmManager.cancel(sender);
-        this.updatePath = "";
-        this.uuid = "";
-        this.authToken = "";
     }
  }
 
