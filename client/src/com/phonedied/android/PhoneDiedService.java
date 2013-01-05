@@ -45,17 +45,21 @@ public class PhoneDiedService extends Service {
     @Override
     public void onStart(Intent intent, int startId) {
         super.onStart(intent, startId);
-        String authToken = intent.getStringExtra(EXTRAS_AUTH_TOKEN);
-        String uuid = intent.getStringExtra(EXTRAS_UUID);
-        String updatePath = intent.getStringExtra(EXTRAS_UPDATE_PATH);
-        String updateFrequency = intent.getStringExtra(EXTRAS_UPDATE_FREQUENCY);
-        Log.d(TAG, "onStart, w/" + isRunning + ", " +
-              authToken + ", " + uuid + ", " +
-              updatePath + ", " + updateFrequency);
+        Log.d(TAG, "onStart");
+
+        if (intent != null) {
+            String authToken = intent.getStringExtra(EXTRAS_AUTH_TOKEN);
+            String uuid = intent.getStringExtra(EXTRAS_UUID);
+            String updatePath = intent.getStringExtra(EXTRAS_UPDATE_PATH);
+            String updateFrequency = intent.getStringExtra(EXTRAS_UPDATE_FREQUENCY);
+            Log.d(TAG, "onStart, w/ intent" +
+                  authToken + ", " + uuid + ", " +
+                  updatePath + ", " + updateFrequency);
+            alarm.SetPrefs(this, updatePath, uuid, authToken, updateFrequency);
+        }
 
         if (!isRunning) {
-            //alarm.SendBatteryStatus(this, updatePath, uuid, authToken, updateFrequency);
-            alarm.SetAlarm(this, updatePath, uuid, authToken, updateFrequency);
+            alarm.SetAlarm(this);
             isRunning = true;
             Toast.makeText(this.getApplicationContext(),
                            "Battery updates ENABLED.",
@@ -63,7 +67,8 @@ public class PhoneDiedService extends Service {
 
         // Update the alarm timing.
         } else {
-            alarm.UpdateAlarm(this, updatePath, uuid, authToken, updateFrequency);
+            alarm.CancelAlarm(this);
+            alarm.SetAlarm(this);
             Toast.makeText(this.getApplicationContext(),
                            "Battery updates ENABLED (updated).",
                            Toast.LENGTH_LONG).show();

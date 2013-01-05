@@ -402,6 +402,7 @@ fmb.views.Following = Backbone.View.extend({
   el: '.fmb-following',
   events: {
     'tap .follow-add': 'onClickFollowAdd_',
+    'tap .following-username': 'onClickFollowingUsername_',
     'tap .remove': 'onClickRemove_'
   }
 });
@@ -458,7 +459,7 @@ fmb.views.Following.prototype.render = _.debounce(function() {
       'level': window.navigator.battery && window.navigator.battery.level ||
           50,
       'is_charging': window.navigator.battery &&
-          window.navigator.battery.isPlugged || 1
+          window.navigator.battery.isPlugged ? 1 : 0
     }
   };
   var templateData = {
@@ -470,6 +471,26 @@ fmb.views.Following.prototype.render = _.debounce(function() {
   return this;
 }, 100);
 
+
+/**
+ * @param {Event} e A click event.
+ * @private
+ */
+fmb.views.Following.prototype.onClickFollowingUsername_ = function(e) {
+  var extras = {};
+  extras[WebIntent.EXTRA_TEXT] = fmb.models.SERVER + '/' +
+      this.model.profile.get('username');
+  extras[WebIntent.EXTRA_SUBJECT] = 'Dude, you need to charge your phone!';
+  window.plugins.webintent.startActivity({
+      action: WebIntent.ACTION_SEND,
+      type: 'text/plain',
+      extras: extras
+  }, function() {
+      console.log('Share sent!');
+  }, function () {
+      console.log('Share fail!');
+  });
+};
 
 /**
  * @param {Event} e A click event.
