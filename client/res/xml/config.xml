@@ -41,6 +41,7 @@
 
         <plugin name="PhoneDiedPlugin" value="com.phonedied.android.PhoneDiedPlugin" />
         <plugin name="WebIntent" value="com.borismus.webintent.WebIntent" />
+        <plugin name="ContactView" value="com.rearden.ContactView" />
     </plugins>
 </cordova>
 

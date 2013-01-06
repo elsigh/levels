@@ -47,6 +47,7 @@
     <script src="js/cordova-2.2.0.js"></script>
     <script src="js/phonediedservice_plugin.js"></script>
     <script src="js/webintent.js"></script>
+    <script src="js/ContactView.js"></script>
     <script src="js/zepto-1.0rc1.js"></script>
     <script src="js/touch.js"></script>
     <script src="js/underscore-1.3.3.js"></script>
@@ -116,19 +117,15 @@
           {{#device.update_enabled}}
             <div>
               <label>
-                <div class="range">
-                  <span class="min">5</span>
-                  <input type="range" name="update_frequency"
-                    value="{{device.update_frequency}}"
-                    min="5" max="60">
-                  <span class="max">60</span>
-
-                  <div>
-                    every
-                    <code class="update-frequency">{{device.update_frequency}}</code>
-                    min.
-                  </div>
-                </div>
+                every
+                <select name="update_frequency">
+                  <option>1</option>
+                  <option>5</option>
+                  <option>10</option>
+                  <option>20</option>
+                  <option>30</option>
+                </select>
+                min.
               </label>
             </div>
           {{/device.update_enabled}}
@@ -209,22 +206,56 @@
 
     <script id="tpl_notifying" type="text/html">
       <h2>Notifying</h2>
-      <p>Coming soon!</p>
-      <!--<form method="post"
-        class="notifying-update"
-        action="{{api_server}}/api/notifying/{{device.uuid}}">
-        <div>
-          Send notification when battery level reaches:
-          <label>
-            <input type="range" name="notify_level"
-              value="{{device.notify_level}}"
-              min="5" max="25">
-            <div>
-              <span class="notify-level">{{device.notify_level}}%
-            </div>
-          </label>
-        </div>
-      </form>-->
+      <button class="notifying-add">+ someone</button>
+      <table>
+        <thead>
+          <tr>
+            <th>name</th>
+            <th>contact</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#notifying}}
+            <tr>
+              <td>
+                <span class="notifying-name">{{name}}</span>
+              </td>
+              <td>
+                {{means}}
+              </td>
+              <td class="remove-cell">
+                <div class="remove" data-means="{{means}}">X</div>
+              </td>
+            </tr>
+          {{/notifying}}
+          {{^notifying}}
+            <tr>
+              <td colspan="3">Let someone know - what a nice thing to do!</td>
+            </tr>
+          {{/notifying}}
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="3">
+              At
+              <form method="post"
+                class="device-update"
+                action="{{api_server}}/api/device/{{device.uuid}}">
+                <select name="notify_level">
+                  <option>5</option>
+                  <option>10</option>
+                  <option>20</option>
+                  <option>30</option>
+                  <option>100</option>
+                </select>
+              </form>%
+              sends automatic notifications.
+
+            </td>
+          </tr>
+        </tfoot>
+      </table>
     </script>
 
     <script>
