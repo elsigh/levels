@@ -21,3 +21,9 @@ indexes:
   properties:
   - name: created
     direction: desc
+
+- kind: NotificationSent
+  ancestor: yes
+  properties:
+  - name: means
+  - name: created
