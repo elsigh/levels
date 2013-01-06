@@ -85,10 +85,12 @@ fmb.models.sync = function(method, model, options) {
     if ((method == 'update') || (method == 'create') || (method == 'delete')) {
       var data = model.toJSON();  // Typical Backbone.
       data['auth_token'] = fmb.models.sync.authToken;
+      data['uuid'] = fmb.models.sync.uuid;
       options.data = JSON.stringify(data);
     } else {
       options.data = {
-        'auth_token': fmb.models.sync.authToken
+        'auth_token': fmb.models.sync.authToken,
+        'uuid': fmb.models.sync.uuid
       };
     }
   }
@@ -143,6 +145,7 @@ fmb.models.App.prototype.initialize = function() {
     deviceUid = window.device && window.device.uuid || fmb.models.getUid();
     localStorage.setItem('device_uid', deviceUid);
   }
+
   this.device = new fmb.models.Device({
     'id': deviceUid,
     'uuid': deviceUid,
@@ -164,10 +167,32 @@ fmb.models.App.prototype.initialize = function() {
     _.defer(_.bind(function() {
       this.profile.fetch();
       this.device.fetch();
-      //this.notifying.fetch();
       this.following.fetch();
+      this.notifying.fetch();
     }, this));
   }
+};
+
+
+/******************************************************************************/
+
+
+
+/**
+ * @extends {Backbone.Model}
+ * @constructor
+ */
+fmb.Collection = Backbone.Collection.extend();
+
+
+/** @inheritDoc */
+fmb.Collection.prototype.initialize = function(opt_options) {
+  this.on('reset', function() {
+    this.each(function(model) {
+      console.log('SAVING MODEL TO STORAGE:', model.toJSON())
+      model.saveToStorage();
+    });
+  }, this);
 };
 
 
@@ -311,13 +336,15 @@ fmb.models.Device = fmb.Model.extend({
   defaults: {
     'user_agent_string': window.navigator.userAgent,
     'update_enabled': 1,
-    'update_frequency': 10
+    'update_frequency': 10,
+    'notify_level': 10
   }
 });
 
 
 /** @inheritDoc */
 fmb.models.Device.prototype.initialize = function(options) {
+  fmb.models.sync.uuid = options.uuid;
   this.fetchFromStorage({silent: true});
   this.on('change', this.onChange_, this);
 };
@@ -385,25 +412,95 @@ fmb.models.Device.prototype.getTemplateData = function() {
  * @extends {Backbone.Collection}
  * @constructor
  */
-fmb.models.NotifyingCollection = Backbone.Collection.extend({
-  localStorage: new Backbone.LocalStorage("NotifyingCollection")
+fmb.models.NotifyingCollection = fmb.Collection.extend({
+  localStorage: new Backbone.LocalStorage('NotifyingCollection'),
+  model: fmb.Model
 });
 
 
-/**
- * @return {string}
- */
+/** @inheritDoc */
 fmb.models.NotifyingCollection.prototype.initialize =
     function(models, options) {
+  fmb.Collection.prototype.initialize.call(this);
   this.profile = options.profile;
 };
 
 
-/**
- * @return {string}
- */
+/** @inheritDoc */
 fmb.models.NotifyingCollection.prototype.url = function() {
   return fmb.models.getApiUrl('/notifying/') + this.profile.get('username');
+};
+
+
+/** @inheritDoc */
+fmb.models.NotifyingCollection.prototype.parse = function(response) {
+  return response['notifying'];
+};
+
+
+/**
+ * @param {Object} obj A contact object.
+ */
+fmb.models.NotifyingCollection.prototype.addContact = function(obj) {
+  console.log('addContact:', obj);
+
+  var means = obj['means'];
+  if (means === '') {
+    return;
+  }
+
+  var alreadyNotifying = this.find(function(model) {
+    return model.get('means') == means;
+  });
+  if (alreadyNotifying) {
+    console.log('.. bail, already notifying', means);
+    alert('You are already notifying ' + means);
+    return;
+  }
+
+  var addModel = new fmb.models.AjaxSyncModel();
+  addModel.url = _.bind(function() {
+    return fmb.models.getApiUrl('/notifying/') +
+        this.profile.get('username');
+  }, this);
+  addModel.save(obj, {
+    success: _.bind(function() {
+      console.log('MONEY TRAIN, refetching goodies from server.');
+      this.fetch();
+    }, this),
+    error: function(model, xhr, options) {
+      if (xhr.status === 404) {
+        alert('La bomba, seems we could not find delete ' + means);
+      } else if (xhr.status === 409) {
+        //alert('already notifying');
+      }
+    }
+  });
+};
+
+
+/**
+ * @param {string} means A means of contact.
+ */
+fmb.models.NotifyingCollection.prototype.removeByMeans = function(means) {
+  var notifyModel = new fmb.models.AjaxSyncModel();
+
+  notifyModel.url = _.bind(function() {
+    return fmb.models.getApiUrl('/notifying/delete/') +
+        this.profile.get('username');
+  }, this);
+
+  notifyModel.save({
+    'means': means
+  }, {
+    success: _.bind(function() {
+      console.log('MONEY TRAIN, refetching goodies from server.');
+      this.fetch();
+    }, this),
+    error: function(model, xhr, options) {
+      console.log('FAIL removing ' +  means + ', ' + xhr.status);
+    }
+  });
 };
 
 
@@ -415,8 +512,9 @@ fmb.models.NotifyingCollection.prototype.url = function() {
  * @extends {Backbone.Collection}
  * @constructor
  */
-fmb.models.FollowingCollection = Backbone.Collection.extend({
-  localStorage: new Backbone.LocalStorage("FollowingCollection")
+fmb.models.FollowingCollection = fmb.Collection.extend({
+  localStorage: new Backbone.LocalStorage('FollowingCollection'),
+  model: fmb.Model
 });
 
 
@@ -425,6 +523,7 @@ fmb.models.FollowingCollection = Backbone.Collection.extend({
  */
 fmb.models.FollowingCollection.prototype.initialize =
     function(models, options) {
+  fmb.Collection.prototype.initialize.call(this);
   this.profile = options.profile;
 };
 

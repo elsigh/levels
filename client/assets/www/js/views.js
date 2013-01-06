@@ -222,7 +222,7 @@ fmb.views.Account = Backbone.View.extend({
     'submit form.profile-create': 'onSubmitCreateProfile_',
     'submit form.device-update': 'onSubmitUpdateDevice_',
     'tap input[type="radio"]': 'onChangeUpdateEnabled_',
-    'change input[name="update_frequency"]': 'onChangeUpdateFrequency_'
+    'change [name="update_frequency"]': 'onChangeUpdateFrequency_'
   }
 });
 
@@ -244,6 +244,9 @@ fmb.views.Account.prototype.render = function() {
     'device': this.device.getTemplateData()
   };
   this.$el.html(fmb.views.getTemplateHtml('account', templateData));
+
+  this.$('select').val(this.device.get('update_frequency'));
+
   return this;
 };
 
@@ -318,7 +321,6 @@ fmb.views.Account.prototype.onChangeUpdateEnabled_ = function(e) {
  * @private
  */
 fmb.views.Account.prototype.onChangeUpdateFrequency_ = function(e) {
-  this.$('.update-frequency').text($(e.currentTarget).val());
   this.updateDevice_();
 };
 
@@ -328,7 +330,6 @@ fmb.views.Account.prototype.onChangeUpdateFrequency_ = function(e) {
  * @private
  */
 fmb.views.Account.prototype.onSubmitUpdateDevice_ = function(e) {
-  console.log('onSubmitUpdateDevice_')
   e.preventDefault();
   this.updateDevice_();
 };
@@ -338,11 +339,15 @@ fmb.views.Account.prototype.onSubmitUpdateDevice_ = function(e) {
  * @private
  */
 fmb.views.Account.prototype.updateDevice_ = function() {
-  console.log('updateDevice_')
-  var $form = $('form.device-update');
+  var $form = this.$('form.device-update');
   var data = fmb.views.serializeFormToObject($form);
-  data['update_enabled'] = parseInt(data['update_enabled'], 10);
-  data['update_frequency'] = parseInt(data['update_frequency'], 10);
+  if (_.has(data, 'update_enabled')) {
+    data['update_enabled'] = parseInt(data['update_enabled'], 10);
+  }
+  if (_.has(data, 'update_frequency')) {
+    data['update_frequency'] = parseInt(data['update_frequency'], 10);
+  }
+  console.log('updateDevice_ w/', data);
   this.device.save(data);
 };
 
@@ -365,7 +370,11 @@ fmb.views.Account.prototype.debouncedUpdateDevice_ = _.debounce(function() {
  */
 fmb.views.Notifying = Backbone.View.extend({
   el: '.fmb-notifying',
-  events: {}
+  events: {
+    'tap .notifying-add': 'onClickNotifyingAdd_',
+    'tap .remove': 'onClickRemove_',
+    'change [name="notify_level"]': 'onChangeUpdateFrequency_'
+  }
 });
 
 
@@ -378,7 +387,7 @@ fmb.views.Notifying.prototype.initialize = function(options) {
 
 
 /** @inheritDoc */
-fmb.views.Notifying.prototype.render = function() {
+fmb.views.Notifying.prototype.render = _.debounce(function() {
   console.log('Notifying render.');
   var templateData = {
     'notifying': this.model.toJSON(),
@@ -386,7 +395,78 @@ fmb.views.Notifying.prototype.render = function() {
     'device': this.device.getTemplateData()
   };
   this.$el.html(fmb.views.getTemplateHtml('notifying', templateData));
+
+  this.$('select').val(this.device.get('notify_level'));
+
   return this;
+}, 100);
+
+
+/**
+ * @param {Event} e A change event.
+ * @private
+ */
+fmb.views.Notifying.prototype.onChangeUpdateFrequency_ = function(e) {
+  fmb.views.Account.prototype.updateDevice_.call(this);
+};
+
+
+/**
+ * @param {Event} e A click event.
+ * @private
+ */
+fmb.views.Notifying.prototype.onClickNotifyingAdd_ = function() {
+  if (fmb.models.SERVER == fmb.models.SERVER_PROD) {
+    cordova.require('cordova/plugin/contactview').show(
+        _.bind(function(contact) {
+          console.log('GOT CONTACT!' + JSON.stringify(contact));
+          //{"email":"elsigh@gmail.com","phone":"512-698-9983","name":"Lindsey Simon"}
+          if (contact['phone']) {
+            this.model.addContact({
+              'name': contact['name'],
+              'means': contact['phone'],
+              'type': 'phone'
+            });
+          } else if (contact['email']) {
+            this.model.addContact({
+              'name': contact['name'],
+              'means': contact['email'],
+              'type': 'email'
+            });
+          } else {
+            alert('Unable to get a means of contact for that record. =(');
+          }
+        }, this),
+        function(fail) {
+          console.log('FAIL CONTACT', fail);
+          alert('We were unable to get the contact you selected. =(');
+        });
+  } else {
+    var means = window.prompt('Means of contact:');
+    if (!means) {
+      return;
+    }
+    this.model.addContact({
+      'means': means,
+      'name': 'Somebody',
+      'type': 'phone'
+    });
+  }
+};
+
+
+/**
+ * @param {Event} e A click event.
+ * @private
+ */
+fmb.views.Notifying.prototype.onClickRemove_ = function(e) {
+  var means = $(e.currentTarget).data('means');
+  var isSure = window.confirm('Really remove ' + means + ' from the list?');
+  if (!isSure) {
+    return;
+  }
+  console.log('remove means', means);
+  this.model.removeByMeans(means);
 };
 
 

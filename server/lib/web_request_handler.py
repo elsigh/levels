@@ -1,7 +1,7 @@
 #!/usr/bin/python2.7
 # -*- coding: utf_8 -*-
 #
-# 
+#
 
 import httplib
 import json
@@ -9,7 +9,7 @@ import logging
 import os
 import webapp2
 
-from lib.ua_parser.py import user_agent_parser
+from lib.external.ua_parser.py import user_agent_parser
 
 import custom_filters
 from django import template
