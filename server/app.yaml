@@ -12,6 +12,7 @@ libraries:
 
 
 builtins:
+- deferred: on
 #uncomment to turn on page performance
 #- appstats: on
 

@@ -24,7 +24,7 @@ class Profile(db.Model):
     created = db.DateTimeProperty(auto_now_add=True)
     modified = db.DateTimeProperty(auto_now=True)
     id = db.StringProperty()
-    username = db.StringProperty()
+    username = db.StringProperty(required=True)
     auth_token = db.StringProperty()
     email = db.StringProperty()
 
@@ -32,39 +32,52 @@ class Profile(db.Model):
 class Device(db.Model):
     created = db.DateTimeProperty(auto_now_add=True)
     modified = db.DateTimeProperty(auto_now=True)
-    uuid = db.StringProperty()
+    uuid = db.StringProperty(required=True)
     user_agent_string = db.StringProperty()
     update_enabled = db.IntegerProperty()
     update_frequency = db.IntegerProperty()
-    notify_level = db.IntegerProperty()
+    notify_level = db.IntegerProperty(default=10, required=True)
+    is_last_update_over_notify_level = db.BooleanProperty(default=True)
     name = db.StringProperty()
     platform = db.StringProperty()
     version = db.StringProperty()
+    # Username fields make the db a little more sane to look at.
+    parent_username = db.StringProperty()
 
 
 class Battery(db.Model):
     created = db.DateTimeProperty(auto_now_add=True)
-    level = db.IntegerProperty()
+    level = db.IntegerProperty(required=True)
     is_charging = db.IntegerProperty()
 
 
 class Following(db.Model):
     created = db.DateTimeProperty(auto_now_add=True)
-    modified = db.DateTimeProperty(auto_now=True)
     following = db.ReferenceProperty(Profile)
+    # Username fields make the db a little more sane to look at.
+    parent_username = db.StringProperty()
+    following_username = db.StringProperty()
 
 
 class Notifying(db.Model):
     created = db.DateTimeProperty(auto_now_add=True)
-    modified = db.DateTimeProperty(auto_now=True)
-    notify_name = db.StringProperty()
-    notify_type = db.StringProperty()
-    notify_means = db.StringProperty()
+    # Username fields make the db a little more sane to look at.
+    parent_username = db.StringProperty()
+    means = db.StringProperty(required=True)
+    name = db.StringProperty()
+    type = db.StringProperty()
 
+
+class NotificationSent(db.Model):
+    created = db.DateTimeProperty(auto_now_add=True)
+    # Username fields make the db a little more sane to look at.
+    parent_username = db.StringProperty()
+    means = db.StringProperty(required=True)
+
+# Because db.to_dict can't do datetime.datetime, apparently.
 SIMPLE_TYPES = (int, long, float, bool, dict, basestring, list)
 
 
-# Because db.to_dict can't do datetime.datetime, apparently.
 def to_dict(model, include_auth_token=False, include_email=False):
     output = {}
 
@@ -91,5 +104,10 @@ def to_dict(model, include_auth_token=False, include_email=False):
             output[key] = to_dict(value)
         else:
             raise ValueError('cannot encode ' + repr(prop))
+
+    # Ensure we have a model id in our output.
+    if len(model.properties()):
+        if 'id' not in output:
+            output['id'] = str(model.key())
 
     return output

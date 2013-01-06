@@ -147,4 +147,8 @@ input[type="range"] {
   border-bottom-color: #77c5e1;
 }
 
+.fmb-notifying form {
+  display: inline-block;
+}
+
 

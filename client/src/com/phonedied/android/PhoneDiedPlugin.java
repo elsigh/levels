@@ -29,7 +29,7 @@ public class PhoneDiedPlugin extends Plugin {
 
         if (action.equals("startService")) {
             Intent intent = new Intent(this.cordova.getActivity(),
-                PhoneDiedService.class);
+                                       PhoneDiedService.class);
 
             String authToken = "";
             String uuid = "";
