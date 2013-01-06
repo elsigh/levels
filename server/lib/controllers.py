@@ -180,6 +180,9 @@ class ApiDeviceRequestHandler(ApiRequestHandler):
 
 
 def _send_notification_templater(profile_id, device_id, notifying_id, tpl_name):
+    # Why oh why should I need to sprinkle this shit in here.
+    os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
+
     logging.info('_send_notification_templater %s, %s, %s' %
                  (profile_id, device_id, tpl_name))
     profile = models.Profile.get_by_id(profile_id)
@@ -220,7 +223,7 @@ def send_battery_notification_email(profile_id, device_id, notifying_id, send=Tr
         logging.info('BAIL CITY BABY, DONE EMAIL NOTIFIED ENUFF')
         return
 
-    mail.send_mail(sender='FollowMyBattery Alert <support@followmybattery.com>',
+    mail.send_mail(sender='FollowMyBattery Alert <elsigh@followmybattery.com>',
                    to='%s <%s>' % (notifying.name, notifying.means),
                    subject='%s has a very sad phone =(' % notifying.name,
                    body=rendered)
@@ -293,7 +296,8 @@ class ApiBatteryRequestHandler(ApiRequestHandler):
         level = self._json_request_data['level']
         is_this_update_over_notify_level = int(level) > int(self._device.notify_level)
 
-        logging.info('YOOYO %s, %s' %
+        logging.info('_device.is_last_update_over_notify_level %s, '
+                     'is_this_update_over_notify_level %s' %
                      (self._device.is_last_update_over_notify_level,
                       is_this_update_over_notify_level))
         if (self._device.is_last_update_over_notify_level and
