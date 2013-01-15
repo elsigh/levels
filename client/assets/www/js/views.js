@@ -290,11 +290,11 @@ fmb.views.Account.prototype.onSubmitCreateProfile_ = function(e) {
       if (xhr.status === 404) {
         this.model.save(data, {
           success: _.bind(function(model, response) {
-            console.log('response::', response);
-            // And save the device record once the profile's done, aka
-            // after auth_token comes back from the server.
+            console.log('profile response::', response);
+            // And save the device record to the server once the profile's
+            // done, aka after auth_token comes back from the server.
             if (response && response['auth_token']) {
-              _.delay(_.bind(this.device.save, this.device), 500);
+              _.delay(_.bind(this.device.saveToServer, this.device), 500);
             }
           }, this)
         });
@@ -493,6 +493,7 @@ fmb.views.Following.prototype.initialize = function(options) {
   this.profile = options.profile;
   this.device = options.device;
   this.model.on('all', this.onAll_, this);
+  this.device.on('battery_status', this.render, this);
   this.device.on('change', this.render, this);
 };
 

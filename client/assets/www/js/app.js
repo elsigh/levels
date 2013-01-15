@@ -67,8 +67,7 @@ fmb.App.isPhonePaused_ = false;
 fmb.App.onBatteryStatus_ = function(batteryInfo) {
   window.navigator.battery.level = batteryInfo['level'];
   window.navigator.battery.isPlugged = batteryInfo['isPlugged'];
-  window['app'].model.device.trigger('change',
-                                     window['app'].model.device);
+  window['app'].model.device.trigger('battery_status');
 };
 
 
