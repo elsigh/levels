@@ -9,9 +9,11 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.ContactsContract;
+import android.widget.Toast;
 
 import org.apache.cordova.api.Plugin;
 import org.apache.cordova.api.PluginResult;
+
 
 public class ContactView extends Plugin {
 	private static final int PICK_CONTACT = 1;
@@ -27,7 +29,7 @@ public class ContactView extends Plugin {
 	}
 
 	public void startContactActivity() {
-		Intent intent = new Intent(Intent.ACTION_PICK);
+		Intent intent = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
 		intent.setType(ContactsContract.Contacts.CONTENT_TYPE);
 		this.cordova.startActivityForResult((Plugin) this, intent, PICK_CONTACT);
 	}
@@ -38,7 +40,7 @@ public class ContactView extends Plugin {
 		String number = null;
 		String email = null;
 		switch (reqCode) {
-		case (PICK_CONTACT):
+        case (PICK_CONTACT):
 			if (resultCode == Activity.RESULT_OK) {
 				Uri contactData = data.getData();
 				Cursor c = this.cordova.getActivity().managedQuery(contactData, null, null, null, null);

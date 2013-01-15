@@ -9,7 +9,7 @@ fmb.models = {};
 /**
  * @type {string}
  */
-fmb.models.SERVER_LOCAL = 'http://192.168.1.9:9091';
+fmb.models.SERVER_LOCAL = 'http://192.168.1.4:9091';
 
 
 /**
@@ -95,7 +95,7 @@ fmb.models.sync = function(method, model, options) {
     }
   }
   console.log('AJAX SYNC', method, model.url());
-  Backbone.ajaxSync.call(this, method, this, options);
+  Backbone.ajaxSync.call(this, method, model, options);
 };
 
 
@@ -107,7 +107,7 @@ fmb.models.sync.authToken = null;
 
 // All sync calls do double duty.
 Backbone.sync = function() {
-  Backbone.localSync.apply(this, arguments);
+  Backbone.LocalStorage.sync.apply(this, arguments);
   return fmb.models.sync.apply(this, arguments);
 };
 
@@ -147,18 +147,17 @@ fmb.models.App.prototype.initialize = function() {
   }
 
   this.device = new fmb.models.Device({
-    'id': deviceUid,
     'uuid': deviceUid,
     'name': window.device && window.device.name || navigator.appName,
     'platform': window.device && window.device.platform || navigator.platform,
     'version': window.device && window.device.version || navigator.appVersion
   });
 
-  this.notifying = new fmb.models.NotifyingCollection([], {
+  this.notifying = new fmb.models.NotifyingCollection(null, {
     profile: this.profile
   });
 
-  this.following = new fmb.models.FollowingCollection([], {
+  this.following = new fmb.models.FollowingCollection(null, {
     profile: this.profile
   });
 
@@ -187,12 +186,20 @@ fmb.Collection = Backbone.Collection.extend();
 
 /** @inheritDoc */
 fmb.Collection.prototype.initialize = function(opt_options) {
+  console.log('initialize collection')
+  this.fetchFromStorage({silent: true});
   this.on('reset', function() {
     this.each(function(model) {
-      console.log('SAVING MODEL TO STORAGE:', model.toJSON())
       model.saveToStorage();
     });
   }, this);
+};
+
+
+fmb.Collection.prototype.fetchFromStorage = function(opt_options) {
+  var results = this.localStorage.findAll();
+  console.log('fetchFromStorage:' + JSON.stringify(results));
+  this.reset(results, opt_options);
 };
 
 
@@ -223,7 +230,7 @@ fmb.Model.prototype.getTemplateData = function() {
 
 /** @inheritDoc */
 fmb.Model.prototype.parse = function(response, xhr) {
-  //console.log('..parse')
+  //console.log('fmb.Model parse: ' + this.id + ', ' + JSON.stringify(response));
 
   if (response['auth_token'] && !fmb.models.sync.authToken) {
     //console.log('SETTING AUTH TOKEN')
@@ -243,20 +250,48 @@ fmb.Model.prototype.parse = function(response, xhr) {
 };
 
 
+fmb.Model.prototype.saveToServer = function() {
+  console.log('saveToServer called for id:' + this.id);
+
+  // ghetto!
+  Backbone.sync = function() {
+    return fmb.models.sync.apply(this, arguments);
+  };
+
+  this.save();
+
+  // ghetto!
+  Backbone.sync = function() {
+    Backbone.LocalStorage.sync.apply(this, arguments);
+    return fmb.models.sync.apply(this, arguments);
+  };
+};
+
+
 fmb.Model.prototype.saveToStorage = function() {
-  Backbone.localSync('update', this);
+  console.log('saveToStorage called for id:' + this.id);
+  // ghetto!
+  Backbone.sync = function() {
+    return Backbone.LocalStorage.sync.apply(this, arguments);
+  };
+
+  this.save();
+
+  // ghetto!
+  Backbone.sync = function() {
+    Backbone.LocalStorage.sync.apply(this, arguments);
+    return fmb.models.sync.apply(this, arguments);
+  };
 };
 
 
 fmb.Model.prototype.fetchFromStorage = function(opt_options) {
-  var options =_.clone(opt_options) || {};
-  options = _.extend(options, {
-    success: _.bind(function(resp) {
-      this.set(resp, opt_options);
-    }, this)
-  });
-  Backbone.localSync('read', this, options);
+  var results = this.localStorage.findAll();
+  if (results.length) {
+    this.set(results[0], opt_options);
+  }
 };
+
 
 
 /******************************************************************************/
@@ -332,7 +367,7 @@ fmb.models.ProfileNameChecker.prototype.url = function() {
  * @constructor
  */
 fmb.models.Device = fmb.Model.extend({
-  localStorage: new Backbone.LocalStorage("Device"),
+  localStorage: new Backbone.LocalStorage('Device'),
   defaults: {
     'user_agent_string': window.navigator.userAgent,
     'update_enabled': 1,
@@ -345,7 +380,13 @@ fmb.models.Device = fmb.Model.extend({
 /** @inheritDoc */
 fmb.models.Device.prototype.initialize = function(options) {
   fmb.models.sync.uuid = options.uuid;
-  this.fetchFromStorage({silent: true});
+  this.fetchFromStorage();
+  this.change();  // reset internal change hash
+  if (this.id) {
+    _.defer(function() {
+      cordova.require('cordova/plugin/phonediedservice').startService();
+    });
+  }
   this.on('change', this.onChange_, this);
 };
 
@@ -356,7 +397,8 @@ fmb.models.Device.prototype.initialize = function(options) {
 fmb.models.Device.prototype.onChange_ = function() {
   var plugin = cordova.require('cordova/plugin/phonediedservice');
   var changedAttributes = this.changedAttributes();
-  console.log('Device onChange_', changedAttributes);
+  console.log('Device onChange_' +  JSON.stringify(changedAttributes));
+
   if (plugin && changedAttributes) {
 
     if ((_.has(changedAttributes, 'update_enabled') ||
@@ -373,10 +415,9 @@ fmb.models.Device.prototype.onChange_ = function() {
       }
 
     // First time device install, start the service.
-    } else if (_.has(changedAttributes, 'created')) {
+    } else if (_.has(changedAttributes, 'id')) {
       console.log('Device onChange FIRST TIME - start service.');
-      plugin.startService(function() {console.log('win'); },
-                          function(err) { console.log('lose', err); });
+      plugin.startService();
     }
 
   }
