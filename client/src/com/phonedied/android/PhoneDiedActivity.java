@@ -8,6 +8,9 @@ import android.util.Log;
 
 import org.apache.cordova.*;
 
+import com.google.android.gms.auth.GoogleAuthUtil;
+import com.google.android.gms.common.GooglePlayServicesUtil;
+
 import com.phonedied.android.PhoneDiedService;
 
 

@@ -21,6 +21,34 @@ var fmb = {};
 
 
 /**
+ * Good times, wrap fmb.log
+ */
+fmb.log = function() {
+  var argumentsArray = _.toArray(arguments);
+  var consoleStrings = [];
+  _.each(argumentsArray, function(logLine) {
+    if (_.isElement(logLine)) {
+      consoleStrings.push('isElement-className: ' + logLine.className);
+    } else if (_.isObject(logLine)) {
+      // Some of our objects have circular references..
+      try {
+        // Wrapped in quotation marks for later parseability.
+        var stringified = '"' + JSON.stringify(logLine) + '"';
+        consoleStrings.push(stringified);
+      } catch (err) {
+        consoleStrings.push(logLine);
+      }
+    } else {
+      consoleStrings.push(logLine);
+    }
+  });
+
+  var consoleString = consoleStrings.join(', ');
+  console.log(consoleString);
+};
+
+
+/**
  * @constructor
  * @param {Object} options Config options.
  */
@@ -73,7 +101,7 @@ fmb.App.onBatteryStatus_ = function(batteryInfo) {
 
 /** @inheritDoc */
 fmb.App.prototype.initialize = function(options) {
-  console.log('fmb.App initialize');
+  fmb.log('fmb.App initialize');
 
   _.each(fmb.App.Routes, _.bind(function(route) {
     this.route(route.url, route.handler);
@@ -110,22 +138,21 @@ fmb.App.prototype.initialize = function(options) {
  * @private
  */
 fmb.App.prototype.initHistory_ = function() {
-  console.log('fmb.App.initHistory_' + window.location.hash);
+  fmb.log('fmb.App.initHistory_' + window.location.hash);
 
   var usePushState = true;
   var root = '/app/';
   var silent = false;
 
-  console.log('Backbone.history.start', usePushState, silent);
+  fmb.log('Backbone.history.start', usePushState, silent);
   var matchedRoute = Backbone.history.start({
     pushState: usePushState,
     root: root,
     silent: silent
   });
   if (!matchedRoute) {
-    console.warn('No matchedRoute in initHistory',
-                 this.model.profile.get('username'));
-    if (this.model.profile.get('username')) {
+    console.warn('No matchedRoute in initHistory');
+    if (this.model.profile && this.model.profile.get('username')) {
       this.navigate(fmb.App.Routes.FOLLOWING.url, {trigger: true});
     } else {
       this.navigate(fmb.App.Routes.ACCOUNT.url, {trigger: true});
@@ -144,7 +171,7 @@ fmb.App.FOLLOWING_URL_RE = /http:\/\/www\.followmybattery\.com\/(.*)/;
  * @private
  */
 fmb.App.prototype.checkIntent_ = function() {
-  console.log('checkIntent');
+  fmb.log('checkIntent');
   window.plugins &&
       window.plugins.webintent.getExtra(WebIntent.EXTRA_TEXT, function (url) {
     //alert('GOT INTENT URL' + url);
@@ -153,7 +180,7 @@ fmb.App.prototype.checkIntent_ = function() {
   });
   window.plugins && window.plugins.webintent.getUri(
       function(url) {
-        console.log('checkIntent_ getUri:' + url);
+        fmb.log('checkIntent_ getUri:' + url);
         var match = fmb.App.FOLLOWING_URL_RE.exec(url);
         if (match && match.length) {
           var username = match[1];
@@ -169,7 +196,7 @@ fmb.App.prototype.checkIntent_ = function() {
  * @private
  */
 fmb.App.prototype.routeAccount_ = function() {
-  console.log('routeAccount_');
+  fmb.log('routeAccount_');
   this.view.transitionPage(fmb.App.Routes.ACCOUNT);
 };
 
@@ -202,7 +229,7 @@ fmb.App.prototype.pauseResumeTimeout_ = null;
  */
 fmb.App.prototype.clearPauseResumeTimeout_ = function() {
   if (this.pauseResumeTimeout_ !== null) {
-    console.log('fmb.App clearPauseResumeTimeout_ clearing a timer!');
+    fmb.log('fmb.App clearPauseResumeTimeout_ clearing a timer!');
     window.clearTimeout(this.pauseResumeTimeout_);
     this.pauseResumeTimeout_ = null;
   }
@@ -213,12 +240,12 @@ fmb.App.prototype.clearPauseResumeTimeout_ = function() {
  * Delayed w/ state for PhoneGap.
  */
 fmb.App.prototype.onPhonePause = function() {
-  console.log('fmb.App.onPhonePause');
+  fmb.log('fmb.App.onPhonePause');
   if (fmb.App.isPhonePaused_) {
-    console.log('.. already paused, bail.');
+    fmb.log('.. already paused, bail.');
     return;
   }
-  console.log('^^^^ PAUSE PAUSE PAUSE PAUSE PAUSE ^^^^');
+  fmb.log('^^^^ PAUSE PAUSE PAUSE PAUSE PAUSE ^^^^');
 
   fmb.App.isPhonePaused_ = true;
   this.clearPauseResumeTimeout_();
@@ -231,7 +258,7 @@ fmb.App.prototype.onPhonePause = function() {
  * @private
  */
 fmb.App.prototype.onPhonePause_ = function() {
-  console.log('onPhonePause_');
+  fmb.log('onPhonePause_');
   window.removeEventListener('batterystatus',
                              fmb.App.onBatteryStatus_,
                              false);
@@ -246,12 +273,12 @@ fmb.App.prototype.onPhonePause_ = function() {
  * Delayed w/ state for PhoneGap.
  */
 fmb.App.prototype.onPhoneResume = function() {
-  console.log('fmb.App onPhoneResume');
+  fmb.log('fmb.App onPhoneResume');
   if (!fmb.App.isPhonePaused_) {
-    console.log('.. not paused, bail.');
+    fmb.log('.. not paused, bail.');
     return;
   }
-  console.log('^^^^ RESUME RESUME RESUME RESUME RESUME ^^^^');
+  fmb.log('^^^^ RESUME RESUME RESUME RESUME RESUME ^^^^');
 
   fmb.App.isPhonePaused_ = false;
 
@@ -265,7 +292,7 @@ fmb.App.prototype.onPhoneResume = function() {
  * @private
  */
 fmb.App.prototype.onPhoneResume_ = function() {
-  console.log('onPhoneResume_');
+  fmb.log('onPhoneResume_');
 
   window.addEventListener('batterystatus',
                           fmb.App.onBatteryStatus_,
