@@ -89,7 +89,7 @@ fmb.views.App = Backbone.View.extend({
 
 /** @inheritDoc */
 fmb.views.App.prototype.initialize = function(options) {
-  console.log('fmb.views.App.initialize', this.model);
+  fmb.log('fmb.views.App.initialize', this.model);
 
 };
 
@@ -99,10 +99,10 @@ fmb.views.App.prototype.initialize = function(options) {
  * @private
  */
 fmb.views.App.prototype.onClickShare_ = function(e) {
-  console.log('fmb.views.App.onClickShare_', e);
+  fmb.log('fmb.views.App.onClickShare_', e);
   e.preventDefault();
   if (!this.model.profile.get('username')) {
-    console.log('Gotta get a username before sharing.');
+    fmb.log('Gotta get a username before sharing.');
     return;
   }
   this.$('.tabs .share').addClass('selected');
@@ -119,9 +119,9 @@ fmb.views.App.prototype.onClickShare_ = function(e) {
       type: 'text/plain',
       extras: extras
   }, function() {
-      console.log('Share sent!');
+      fmb.log('Share sent!');
   }, function () {
-      console.log('Share fail!');
+      fmb.log('Share fail!');
   });
 
 };
@@ -132,10 +132,10 @@ fmb.views.App.prototype.onClickShare_ = function(e) {
  * @private
  */
 fmb.views.App.prototype.onClickTab_ = function(e) {
-  console.log('fmb.views.App.onClickTab_', e);
+  fmb.log('fmb.views.App.onClickTab_', e);
   e.preventDefault();
   if (!this.model.profile.get('username')) {
-    console.log('Gotta get a username before navigating.');
+    fmb.log('Gotta get a username before navigating.');
     return;
   }
   window['app'].navigate($(e.currentTarget).attr('href'),
@@ -164,7 +164,7 @@ fmb.views.App.prototype.setCurrentView = function(view) {
  * @param {Object} route A route.
  */
 fmb.views.App.prototype.transitionPage = function(route) {
-  console.log('transitionPage', route);
+  fmb.log('fmb.views.App --> transitionPage', route);
 
   var newView;
 
@@ -219,6 +219,7 @@ fmb.views.Account = Backbone.View.extend({
   el: '.fmb-account',
   events: {
     'tap form.profile-create input[type="submit"]': 'onSubmitCreateProfile_',
+    'tap .gplus-login': '',
     'submit form.profile-create': 'onSubmitCreateProfile_',
     'submit form.device-update': 'onSubmitUpdateDevice_',
     'tap input[type="radio"]': 'onChangeUpdateEnabled_',
@@ -229,7 +230,7 @@ fmb.views.Account = Backbone.View.extend({
 
 /** @inheritDoc */
 fmb.views.Account.prototype.initialize = function(options) {
-  console.log('views.Account initialize');
+  fmb.log('views.Account initialize');
   this.device = options.device;
   this.model.on('change', this.render, this);
   this.device.on('change', this.render, this);
@@ -238,7 +239,7 @@ fmb.views.Account.prototype.initialize = function(options) {
 
 /** @inheritDoc */
 fmb.views.Account.prototype.render = function() {
-  console.log('views.Account render');
+  fmb.log('views.Account render');
   var templateData = {
     'profile': this.model.getTemplateData(),
     'device': this.device.getTemplateData()
@@ -256,7 +257,7 @@ fmb.views.Account.prototype.render = function() {
  * @private
  */
 fmb.views.Account.prototype.onSubmitCreateProfile_ = function(e) {
-  console.log('onSubmitCreateProfile_');
+  fmb.log('onSubmitCreateProfile_');
   e.preventDefault();
   var $form = this.$('form.profile-create');
   var data = fmb.views.serializeFormToObject($form);
@@ -272,7 +273,8 @@ fmb.views.Account.prototype.onSubmitCreateProfile_ = function(e) {
   }
 
   var usernameChecker = new fmb.models.ProfileNameChecker({
-    username: username
+    username: username,
+    uuid: this.device.get('uuid')
   });
 
   this.$('.username-taken-err').removeClass('fmb-active');
@@ -290,7 +292,7 @@ fmb.views.Account.prototype.onSubmitCreateProfile_ = function(e) {
       if (xhr.status === 404) {
         this.model.save(data, {
           success: _.bind(function(model, response) {
-            console.log('profile response::', response);
+            fmb.log('profile response::', response);
             // And save the device record to the server once the profile's
             // done, aka after auth_token comes back from the server.
             if (response && response['auth_token']) {
@@ -347,7 +349,7 @@ fmb.views.Account.prototype.updateDevice_ = function() {
   if (_.has(data, 'update_frequency')) {
     data['update_frequency'] = parseInt(data['update_frequency'], 10);
   }
-  console.log('updateDevice_ w/', data);
+  fmb.log('updateDevice_ w/', data);
   this.device.save(data);
 };
 
@@ -388,7 +390,7 @@ fmb.views.Notifying.prototype.initialize = function(options) {
 
 /** @inheritDoc */
 fmb.views.Notifying.prototype.render = _.debounce(function() {
-  console.log('Notifying render.');
+  fmb.log('Notifying render.');
   var templateData = {
     'notifying': this.model.toJSON(),
     'profile': this.profile.getTemplateData(),
@@ -419,7 +421,7 @@ fmb.views.Notifying.prototype.onClickNotifyingAdd_ = function() {
   if (fmb.models.SERVER == fmb.models.SERVER_PROD) {
     cordova.require('cordova/plugin/contactview').show(
         _.bind(function(contact) {
-          console.log('GOT CONTACT!' + JSON.stringify(contact));
+          fmb.log('GOT CONTACT!' + JSON.stringify(contact));
           //{"email":"elsigh@gmail.com","phone":"512-698-9983","name":"Lindsey Simon"}
           if (contact['phone']) {
             this.model.addContact({
@@ -438,7 +440,7 @@ fmb.views.Notifying.prototype.onClickNotifyingAdd_ = function() {
           }
         }, this),
         function(fail) {
-          console.log('FAIL CONTACT', fail);
+          fmb.log('FAIL CONTACT', fail);
           alert('We were unable to get the contact you selected. =(');
         });
   } else {
@@ -465,7 +467,7 @@ fmb.views.Notifying.prototype.onClickRemove_ = function(e) {
   if (!isSure) {
     return;
   }
-  console.log('remove means', means);
+  fmb.log('remove means', means);
   this.model.removeByMeans(means);
 };
 
@@ -510,12 +512,12 @@ fmb.views.Following.prototype.followingTimeout_ = null;
  */
 fmb.views.Following.prototype.setIsActive = function(isActive) {
   if (this.followingTimeout_ !== null) {
-    console.log('Clear following fetch interval.');
+    fmb.log('Clear following fetch interval.');
     window.clearInterval(this.followingTimeout_);
     this.followingTimeout_ = null;
   }
   if (isActive) {
-    console.log('Set following fetch interval.');
+    fmb.log('Set following fetch interval.');
     this.followingTimeout_ = window.setInterval(
         _.bind(this.model.fetch, this.model),
         30000);
@@ -524,14 +526,14 @@ fmb.views.Following.prototype.setIsActive = function(isActive) {
 
 
 fmb.views.Following.prototype.onAll_ = function(event) {
-  //console.log('onAll!', arguments)
+  //fmb.log('onAll!', arguments)
   this.render();
 };
 
 
 /** @inheritDoc */
 fmb.views.Following.prototype.render = _.debounce(function() {
-  console.log('Following render.');
+  fmb.log('Following render.');
   var thisPhoneTemplateData = {
     'profile': this.profile.getTemplateData(),
     'device': this.device.getTemplateData(),
@@ -567,9 +569,9 @@ fmb.views.Following.prototype.onClickFollowingUsername_ = function(e) {
       type: 'text/plain',
       extras: extras
   }, function() {
-      console.log('Share sent!');
+      fmb.log('Share sent!');
   }, function () {
-      console.log('Share fail!');
+      fmb.log('Share fail!');
   });
 };
 
@@ -594,7 +596,7 @@ fmb.views.Following.prototype.onClickRemove_ = function(e) {
   if (!isSure) {
     return;
   }
-  console.log('remove username', username);
+  fmb.log('remove username', username);
   this.model.removeByUsername(username);
 };
 

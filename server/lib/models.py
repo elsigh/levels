@@ -77,11 +77,12 @@ class NotificationSent(db.Model):
 # Because db.to_dict can't do datetime.datetime, apparently.
 SIMPLE_TYPES = (int, long, float, bool, dict, basestring, list)
 
-
+import logging
 def to_dict(model, include_auth_token=False, include_email=False):
     output = {}
-
+    logging.info('include_auth_token: %s' % include_auth_token)
     for key, prop in model.properties().iteritems():
+        #logging.info('KEY: %s' % key)
 
         # Ignore some sensitive fields.
         if key == 'auth_token' and not include_auth_token:
@@ -90,6 +91,7 @@ def to_dict(model, include_auth_token=False, include_email=False):
             continue
 
         value = getattr(model, key)
+        #logging.info('VALUE: %s' % value)
 
         if value is None or isinstance(value, SIMPLE_TYPES):
             output[key] = value

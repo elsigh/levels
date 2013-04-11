@@ -118,6 +118,8 @@ class ApiProfileRequestHandler(ApiRequestHandler):
         assert len(username) >= 3
 
         q = db.Query(models.Profile).filter('username =', username)
+        #existing_profile = q.get()
+
         if q.count() == 0:
             return self.output_json_error()
         else:
@@ -145,6 +147,17 @@ class ApiProfileRequestHandler(ApiRequestHandler):
             # Include auth_token, which is otherwise never sent down the wire.
             obj = models.to_dict(profile, include_auth_token=True)
             return self.output_json_success(obj)
+
+
+class ApiProfileDeviceRequestHandler(ApiRequestHandler):
+    def get(self, uuid=None):
+        q = db.Query(models.Device).filter('uuid =', uuid)
+        device = q.get()
+        if not device:
+             return self.output_json_error({}, 400)
+
+        profile = device.parent()
+        return self.output_json_success(models.to_dict(profile, include_auth_token=True))
 
 
 class ApiDeviceRequestHandler(ApiRequestHandler):
@@ -502,6 +515,7 @@ class BatteryStatusRequestHandler(WebRequestHandler):
 
 
 app = webapp2.WSGIApplication([
+    (r'/api/profile/device/(.*)', ApiProfileDeviceRequestHandler),
     (r'/api/profile/(.*)', ApiProfileRequestHandler),
     (r'/api/device/(.*)', ApiDeviceRequestHandler),
     (r'/api/battery/(.*)', ApiBatteryRequestHandler),
