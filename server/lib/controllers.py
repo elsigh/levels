@@ -157,7 +157,11 @@ class ApiProfileDeviceRequestHandler(ApiRequestHandler):
              return self.output_json_error({}, 400)
 
         profile = device.parent()
-        return self.output_json_success(models.to_dict(profile, include_auth_token=True))
+        result = {
+            'profile': models.to_dict(profile, include_auth_token=True),
+            'device': models.to_dict(device)
+        }
+        return self.output_json_success(result)
 
 
 class ApiDeviceRequestHandler(ApiRequestHandler):

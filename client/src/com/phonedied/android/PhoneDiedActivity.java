@@ -21,7 +21,8 @@ public class PhoneDiedActivity extends DroidGap {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.d(TAG, "BUILD:: " + android.os.Build.DEVICE + ", " +
+        Log.d(TAG, "PhoneDiedActivity onCreate w/ " +
+              "BUILD:: " + android.os.Build.DEVICE + ", " +
               android.os.Build.MODEL + ", " + android.os.Build.PRODUCT);
         super.setIntegerProperty("splashscreen", R.drawable.splash);
         super.setBooleanProperty("keepRunning", false);
