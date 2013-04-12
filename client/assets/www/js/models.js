@@ -134,6 +134,7 @@ fmb.models.App.prototype.initialize = function() {
 
   // id is necessary for localStorage plugin with a model.
   var profileUid = localStorage.getItem('profile_uid');
+  fmb.log('profileUid from localStorage', profileUid);
   var doFetch = true;
   if (!profileUid) {
     doFetch = false;
@@ -167,11 +168,15 @@ fmb.models.App.prototype.initialize = function() {
         fmb.log('SUCCESSFULLY FOUND OLD PROFILE: ', response);
 
         this.profile.clear({silent: true});
-        this.profile.set(response);
-
+        this.profile.set(response['profile']);
+        this.profile.saveToStorage();
         localStorage.setItem('profile_uid', this.profile.id);
 
-        alert('We found an existing account for you =)');
+        this.device.clear({silent: true});
+        this.device.set(response['device']);
+        this.device.saveToStorage();
+
+        fmb.log('We found an existing account for you =)');
       }, this)
     });
   }
