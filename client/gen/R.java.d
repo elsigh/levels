@@ -12,4 +12,14 @@
 /Users/elsigh/src/followmybatterry/client/res/layout/main.xml \
 /Users/elsigh/src/followmybatterry/client/res/values/strings.xml \
 /Users/elsigh/src/followmybatterry/client/res/xml/config.xml \
+/Users/elsigh/src/followmybatterry/client/bin/res/drawable/icon.png \
+/Users/elsigh/src/followmybatterry/client/bin/res/drawable/splash.png \
+/Users/elsigh/src/followmybatterry/client/bin/res/drawable-hdpi/ic_launcher.png \
+/Users/elsigh/src/followmybatterry/client/bin/res/drawable-hdpi/icon.png \
+/Users/elsigh/src/followmybatterry/client/bin/res/drawable-ldpi/ic_launcher.png \
+/Users/elsigh/src/followmybatterry/client/bin/res/drawable-ldpi/icon.png \
+/Users/elsigh/src/followmybatterry/client/bin/res/drawable-mdpi/ic_launcher.png \
+/Users/elsigh/src/followmybatterry/client/bin/res/drawable-mdpi/icon.png \
+/Users/elsigh/src/followmybatterry/client/bin/res/drawable-xhdpi/ic_launcher.png \
+/Users/elsigh/src/followmybatterry/client/bin/res/drawable-xhdpi/icon.png \
 /Users/elsigh/src/followmybatterry/client/bin/AndroidManifest.xml \
