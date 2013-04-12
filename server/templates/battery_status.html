@@ -85,14 +85,14 @@
             <td>
               {{item.device.name}}
             </td>
-            <td class="battery-level-c charging-{{battery.is_charging}}">
+            <td class="battery-level-c charging-{{item.settings.is_charging}}">
               <div class="battery-level"
-                data-level="{{item.battery.level}}">
-                {{item.battery.level}}%
+                data-level="{{item.settings.battery_level}}">
+                {{item.settings.battery_level}}%
               </div>
 
               <div class="battery-created">
-                {{item.battery.created}}
+                {{item.settings.created}}
               </div>
             </td>
           </tr>

@@ -9,7 +9,7 @@ cordova.define('cordova/plugin/phonediedservice', function(require, exports, mod
         [fmb.models.sync.authToken,
          app.model.device.get('uuid'),
          app.model.device.get('update_frequency'),
-         fmb.models.getApiUrl('/battery/' +
+         fmb.models.getApiUrl('/settings/' +
                               app.model.device.get('uuid'))
         ]);
   };
