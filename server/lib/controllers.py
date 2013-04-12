@@ -13,6 +13,9 @@ import uuid
 
 os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
 
+sys.path.append(os.path.join(os.path.dirname(__file__), 'external'))
+logging.info("CONTROLLER PATH MTUFASHASD %s" % sys.path)
+
 from django.template.loader import get_template
 from django.template import Context
 
@@ -23,7 +26,6 @@ from google.appengine.ext import deferred
 from lib.web_request_handler import WebRequestHandler
 from lib import models
 
-sys.path.append(os.path.join(os.path.dirname(__file__), 'external'))
 from lib.external.twilio.rest import TwilioRestClient
 
 # last import.

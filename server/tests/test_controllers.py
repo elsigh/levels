@@ -10,6 +10,9 @@ import sys
 # Need the server root dir on the path.
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/..')
 
+import logging
+logging.info("SYS PATH MOTHERFUCKLER: %s" % sys.path)
+
 from google.appengine.ext import db
 from google.appengine.ext import testbed
 
