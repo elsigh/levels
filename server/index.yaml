@@ -27,3 +27,9 @@ indexes:
   properties:
   - name: means
   - name: created
+
+- kind: Settings
+  ancestor: yes
+  properties:
+  - name: created
+    direction: desc

@@ -537,9 +537,9 @@ fmb.views.Following.prototype.render = _.debounce(function() {
   var thisPhoneTemplateData = {
     'profile': this.profile.getTemplateData(),
     'device': this.device.getTemplateData(),
-    'battery': {
+    'settings': {
       'created_pretty': 'live!',
-      'level': window.navigator.battery && window.navigator.battery.level ||
+      'battery_level': window.navigator.battery && window.navigator.battery.level ||
           50,
       'is_charging': window.navigator.battery &&
           window.navigator.battery.isPlugged ? 1 : 0

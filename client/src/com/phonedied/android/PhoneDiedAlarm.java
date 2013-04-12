@@ -5,13 +5,18 @@ package com.phonedied.android;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.media.AudioManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.BatteryManager;
 import android.os.PowerManager;
+import android.provider.Settings;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -66,9 +71,48 @@ public class PhoneDiedAlarm extends BroadcastReceiver {
         return httpClient.execute(httpPost);
     }
 
+    private boolean isAirplaneModeOn(ContentResolver contentResolver) {
+        return Settings.System.getInt(contentResolver, Settings.System.AIRPLANE_MODE_ON, 0) == 1;
+        /*
+        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.JELLY_BEAN) {
+           return Settings.System.getInt(contentResolver, Settings.System.AIRPLANE_MODE_ON, 0) == 1;
+        } else {
+           return Settings.Global.getInt(contentResolver, Settings.Global.AIRPLANE_MODE_ON, 0) == 1;
+        }
+        */
+    }
+
+    private boolean isBluetoothOn(ContentResolver contentResolver) {
+        return Settings.System.getInt(contentResolver, Settings.System.BLUETOOTH_ON, 0) == 1;
+        /*
+        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.JELLY_BEAN) {
+           return Settings.System.getInt(contentResolver, Settings.System.BLUETOOTH_ON, 0) == 1;
+        } else {
+           return Settings.Global.getInt(contentResolver, Settings.Global.BLUETOOTH_ON, 0) == 1;
+        }
+        */
+    }
+
+    private int getRingerModeInt(ContentResolver contentResolver) {
+        return Settings.System.getInt(contentResolver, Settings.System.MODE_RINGER, 0);
+        /*
+        Log.d(TAG, android.os.Build.VERSION.SDK_INT + " vs:: " +
+              android.os.Build.VERSION_CODES.JELLY_BEAN);
+        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.JELLY_BEAN) {
+            Log.d(TAG, "SYSTEM STYLEZZZZZZ");
+           return Settings.System.getInt(contentResolver, Settings.System.MODE_RINGER, 0);
+        } else {
+           return Settings.Global.getInt(contentResolver, Settings.Global.MODE_RINGER, 0);
+        }
+        */
+    }
+
     public void SendBatteryStatus(Context context, String updatePath,
                                   String uuid, String authToken) {
         Log.d(TAG, "SendBatteryStatus: " + updatePath + ", " + uuid + ", " + authToken);
+
+        AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+        ConnectivityManager connManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         PowerManager.WakeLock wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "");
         wl.acquire();
@@ -86,19 +130,53 @@ public class PhoneDiedAlarm extends BroadcastReceiver {
         //boolean usbCharge = chargePlug == BatteryManager.BATTERY_PLUGGED_USB;
         //boolean acCharge = chargePlug == BatteryManager.BATTERY_PLUGGED_AC;
 
-        int level = batteryIntent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0);
-        int scale = batteryIntent.getIntExtra(BatteryManager.EXTRA_SCALE, 100);
+        int batteryLevel = batteryIntent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0);
+        int batteryScale = batteryIntent.getIntExtra(BatteryManager.EXTRA_SCALE, 100);
+        int batteryPercent = (batteryLevel * 100) / batteryScale;
 
-        int percent = (level*100)/scale;
+        final ContentResolver contentResolver = context.getContentResolver();
+
+        boolean airplaneModeOnBool = isAirplaneModeOn(contentResolver);
+
+        boolean bluetoothOnBool = isBluetoothOn(contentResolver);
+
+        int ringerModeInt = getRingerModeInt(contentResolver);
+        String ringerMode = "";
+        if (ringerModeInt == AudioManager.RINGER_MODE_SILENT) {
+            ringerMode = "silent";
+        } else if (ringerModeInt == AudioManager.RINGER_MODE_NORMAL) {
+            ringerMode = "normal";
+        } else if (ringerModeInt == AudioManager.RINGER_MODE_VIBRATE) {
+            ringerMode = "vibrate";
+        } else {
+            ringerMode = "normal";
+        }
+
+        int volumeAlarm = audioManager.getStreamVolume(AudioManager.STREAM_ALARM);
+        int volumeCall = audioManager.getStreamVolume(AudioManager.STREAM_VOICE_CALL);
+        int volumeMusic = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+        int volumeRing = audioManager.getStreamVolume(AudioManager.STREAM_RING);
+        int volumeSystem = audioManager.getStreamVolume(AudioManager.STREAM_SYSTEM);
+
+        NetworkInfo wifi = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+        boolean wifiOnBool = wifi.isAvailable();
 
         JSONObject json = new JSONObject();
         try {
             json.put("auth_token", authToken);
             json.put("uuid", uuid);
             json.put("is_charging", isChargingInt);
-            json.put("level", percent);
-            Toast.makeText(context, "Battery: " + percent + "%",
-                           Toast.LENGTH_LONG).show();
+            json.put("battery_level", batteryPercent);
+            json.put("airplane_mode_on", airplaneModeOnBool);
+            json.put("bluetooth_on", bluetoothOnBool);
+            json.put("wifi_on", wifiOnBool);
+            json.put("ringer_mode", ringerMode);
+            json.put("ringer_mode_int", ringerModeInt);
+            json.put("volume_alarm", volumeAlarm);
+            json.put("volume_call", volumeCall);
+            json.put("volume_music", volumeMusic);
+            json.put("volume_ring", volumeRing);
+            json.put("volume_system", volumeSystem);
 
         } catch (JSONException e) {
             throw new RuntimeException(e);
@@ -106,11 +184,15 @@ public class PhoneDiedAlarm extends BroadcastReceiver {
 
         // Send the battery update to our server.
         try {
-            //makeRequest(updatePath, json);
-            new PhoneDiedBatteryUpdateTask().execute(updatePath, json.toString());
+            String jsonString = json.toString();
+            new PhoneDiedUpdateTask().execute(updatePath, jsonString);
         } catch (Exception e) {
             Log.d(TAG, "makeRequest Exception::" + Log.getStackTraceString(e));
         }
+
+        Toast.makeText(context,
+                       "Battery: " + batteryPercent + "%",
+                       Toast.LENGTH_SHORT).show();
 
         wl.release();
     }
@@ -173,8 +255,8 @@ public class PhoneDiedAlarm extends BroadcastReceiver {
 
 
 
-class PhoneDiedBatteryUpdateTask extends AsyncTask<String, Void, Void> {
-    private static final String TAG = PhoneDiedBatteryUpdateTask.class.getSimpleName();
+class PhoneDiedUpdateTask extends AsyncTask<String, Void, Void> {
+    private static final String TAG = PhoneDiedUpdateTask.class.getSimpleName();
 
     private Exception exception;
 

@@ -116,7 +116,7 @@ class RequestHandlerTest(unittest.TestCase):
         obj = json.loads(body)
         self.assertEquals(0, obj['update_enabled'])
 
-    def test_ApiBatteryRequestHandler(self):
+    def test_ApiSettingsRequestHandler(self):
         elsigh_profile = models.Profile(
             id='someid',
             username='elsighmon',
@@ -131,41 +131,41 @@ class RequestHandlerTest(unittest.TestCase):
         )
         elsigh_device.put()
 
-        response = self.testapp.post_json('/api/battery/test_device_uuid',
+        response = self.testapp.post_json('/api/settings/test_device_uuid',
                                           params=dict(auth_token='test_auth_token',
                                                       uuid='test_device_uuid',
-                                                      level=82,
+                                                      battery_level=82,
                                                       is_charging=0))
 
         body = response.normal_body
         obj = json.loads(body)
-        self.assertEquals(82, obj['level'])
+        self.assertEquals(82, obj['battery_level'])
         self.assertTrue(obj['is_last_update_over_notify_level'])
 
         tasks = self.taskqueue_stub.GetTasks('default')
         self.assertEqual(0, len(tasks))
 
-        response = self.testapp.post_json('/api/battery/test_device_uuid',
+        response = self.testapp.post_json('/api/settings/test_device_uuid',
                                           params=dict(auth_token='test_auth_token',
                                                       uuid='test_device_uuid',
-                                                      level=9,
+                                                      battery_level=9,
                                                       is_charging=0))
         body = response.normal_body
         obj = json.loads(body)
-        self.assertEquals(9, obj['level'])
+        self.assertEquals(9, obj['battery_level'])
         self.assertFalse(obj['is_last_update_over_notify_level'])
 
         tasks = self.taskqueue_stub.GetTasks('default')
         self.assertEqual(1, len(tasks))
 
-        response = self.testapp.post_json('/api/battery/test_device_uuid',
+        response = self.testapp.post_json('/api/settings/test_device_uuid',
                                           params=dict(auth_token='test_auth_token',
                                                       uuid='test_device_uuid',
-                                                      level=11,
+                                                      battery_level=11,
                                                       is_charging=0))
         body = response.normal_body
         obj = json.loads(body)
-        self.assertEquals(11, obj['level'])
+        self.assertEquals(11, obj['battery_level'])
         self.assertTrue(obj['is_last_update_over_notify_level'])
 
     def test_ApiFollowingRequestHandler(self):
@@ -189,12 +189,12 @@ class RequestHandlerTest(unittest.TestCase):
         )
         jr_device.put()
 
-        jr_battery = models.Battery(
+        jr_settings = models.Settings(
            parent=jr_device,
-           level=75,
+           battery_level=75,
            is_charging=1
         )
-        jr_battery.put()
+        jr_settings.put()
 
         jr_following = models.Following(
             following=jr_profile,
@@ -215,12 +215,12 @@ class RequestHandlerTest(unittest.TestCase):
         )
         ded_device.put()
 
-        ded_battery = models.Battery(
+        ded_settings = models.Settings(
            parent=ded_device,
-           level=35,
+           battery_level=35,
            is_charging=0
         )
-        ded_battery.put()
+        ded_settings.put()
 
         ded_following = models.Following(
             following=ded_profile,

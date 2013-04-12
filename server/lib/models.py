@@ -51,6 +51,12 @@ class Battery(db.Model):
     is_charging = db.IntegerProperty()
 
 
+class Settings(db.Model):
+    created = db.DateTimeProperty(auto_now_add=True)
+    battery_level = db.IntegerProperty(required=True)
+    battery_is_charging = db.IntegerProperty()
+
+
 class Following(db.Model):
     created = db.DateTimeProperty(auto_now_add=True)
     following = db.ReferenceProperty(Profile)
