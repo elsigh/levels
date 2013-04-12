@@ -344,6 +344,45 @@ class ApiBatteryRequestHandler(ApiRequestHandler):
         return self.output_json_success(json_output)
 
 
+class ApiSettingsRequestHandler(ApiRequestHandler):
+    def post(self, uuid=None):
+        self.set_and_assert_profile()
+        self.set_and_assert_device()
+
+        battery_level = self._json_request_data['battery_level']
+        is_this_update_over_notify_level = int(battery_level) > int(self._device.notify_level)
+
+        logging.info('_device.is_last_update_over_notify_level %s, '
+                     'is_this_update_over_notify_level %s' %
+                     (self._device.is_last_update_over_notify_level,
+                      is_this_update_over_notify_level))
+        if (self._device.is_last_update_over_notify_level and
+            not is_this_update_over_notify_level):
+            logging.info('^^^^ DO NOTIFICATIONS! ^^^^')
+            deferred.defer(send_battery_notifications,
+                           self._profile.key().id(),
+                           self._device.key().id())
+
+        settings = models.Settings(
+            parent=self._device,
+            battery_level=battery_level,
+            is_charging=self._json_request_data['is_charging']
+        )
+        settings.put()
+
+        if is_this_update_over_notify_level != self._device.is_last_update_over_notify_level:
+            self._device.is_last_update_over_notify_level = is_this_update_over_notify_level
+            self._device.put()
+
+        # Hack in is_last_update_over_notify_level
+        json_output = models.to_dict(settings)
+        json_output.update({
+            'is_last_update_over_notify_level': is_this_update_over_notify_level
+        })
+
+        return self.output_json_success(json_output)
+
+
 class ApiFollowingRequestHandler(ApiRequestHandler):
     def get(self, username=None):
         self.set_and_assert_profile()
@@ -479,10 +518,10 @@ class ApiNotifyingDeleteRequestHandler(ApiRequestHandler):
         return self.output_json_success(models.to_dict(notifying))
 
 
-class BatteryStatusRequestHandler(WebRequestHandler):
+class UsernameRequestHandler(WebRequestHandler):
     """Looks up by username and display battery info."""
     def get(self, username=None):
-        logging.info('BatteryStatusRequestHandler %s' % username)
+        logging.info('UsernameRequestHandler %s' % username)
 
         if username is None or username == '':
             return self.output_response({}, 'index.html')
@@ -500,18 +539,18 @@ class BatteryStatusRequestHandler(WebRequestHandler):
         q_device.order('-created')
 
         for device in q_device:
-            q_bat = db.Query(models.Battery)
-            q_bat.ancestor(device.key())
-            q_bat.order('-created')
-            battery = q_bat.get()
-            device_data = {
+            q_settings = db.Query(models.Settings)
+            q_settings.ancestor(device.key())
+            q_settings.order('-created')
+            last_settings = q_settings.get()
+            settings_data = {
               'device': models.to_dict(device),
-              'battery': models.to_dict(battery)
+              'settings': models.to_dict(last_settings)
             }
             template_data['devices'].append(device_data)
 
         template_data['title'] = template_data['profile']['username'] + \
-            ' ' + str(template_data['devices'][0]['battery']['level']) + \
+            ' ' + str(template_data['devices'][0]['last_settings']['battery_level']) + \
             '% - FollowMyBattery'
 
         logging.info('TPL_DATA %s' % template_data)
@@ -522,10 +561,11 @@ app = webapp2.WSGIApplication([
     (r'/api/profile/device/(.*)', ApiProfileDeviceRequestHandler),
     (r'/api/profile/(.*)', ApiProfileRequestHandler),
     (r'/api/device/(.*)', ApiDeviceRequestHandler),
-    (r'/api/battery/(.*)', ApiBatteryRequestHandler),
+    (r'/api/battery/(.*)', ApiBatteryRequestHandler), # deprecated
+    (r'/api/settings/(.*)', ApiSettingsRequestHandler),
     (r'/api/following/delete(.*)', ApiFollowingDeleteRequestHandler),
     (r'/api/following/(.*)', ApiFollowingRequestHandler),
     (r'/api/notifying/delete/(.*)', ApiNotifyingDeleteRequestHandler),
     (r'/api/notifying/(.*)', ApiNotifyingRequestHandler),
-    (r'/(.*)', BatteryStatusRequestHandler),
+    (r'/(.*)', UsernameRequestHandler),
     ], debug=True)
