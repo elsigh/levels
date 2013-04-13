@@ -2,6 +2,8 @@
 # Compiled source #
 ###################
 *.pyc
+client/build/.*
+client/gen/.*
 
 # OS generated files #
 ######################
