@@ -81,7 +81,7 @@ fmb.views.App = Backbone.View.extend({
   el: '.fmb-app',
   events: {
     'tap .tabs a': 'onClickTab_',
-    'tap .tabs .share': 'onClickShare_'
+    'tap .share': 'onClickShare_'
     //'tap .tabs a': 'onClickTab_'
   }
 });
@@ -373,7 +373,8 @@ fmb.views.Account.prototype.debouncedUpdateDevice_ = _.debounce(function() {
 fmb.views.Notifying = Backbone.View.extend({
   el: '.fmb-notifying',
   events: {
-    'tap .notifying-add': 'onClickNotifyingAdd_',
+    'tap .notifying-add-phone': 'onClickNotifyingAdd_',
+    'tap .notifying-add-email': 'onClickNotifyingAdd_',
     'tap .remove': 'onClickRemove_',
     'change [name="notify_level"]': 'onChangeUpdateFrequency_'
   }
@@ -417,8 +418,12 @@ fmb.views.Notifying.prototype.onChangeUpdateFrequency_ = function(e) {
  * @param {Event} e A click event.
  * @private
  */
-fmb.views.Notifying.prototype.onClickNotifyingAdd_ = function() {
+fmb.views.Notifying.prototype.onClickNotifyingAdd_ = function(e) {
   if (fmb.models.SERVER == fmb.models.SERVER_PROD) {
+    var emailOrPhone = $(e.currentTarget).hasClass('notifying-add-phone') ?
+        'phone' : 'email';
+    fmb.log('onClickNotifyingAdd_ emailOrPhone', emailOrPhone);
+
     cordova.require('cordova/plugin/contactview').show(
         _.bind(function(contact) {
           fmb.log('GOT CONTACT!' + JSON.stringify(contact));
@@ -442,7 +447,9 @@ fmb.views.Notifying.prototype.onClickNotifyingAdd_ = function() {
         function(fail) {
           fmb.log('FAIL CONTACT', fail);
           alert('We were unable to get the contact you selected. =(');
-        });
+        },
+        emailOrPhone);
+
   } else {
     var means = window.prompt('Means of contact:');
     if (!means) {
@@ -483,7 +490,7 @@ fmb.views.Notifying.prototype.onClickRemove_ = function(e) {
 fmb.views.Following = Backbone.View.extend({
   el: '.fmb-following',
   events: {
-    'tap .follow-add': 'onClickFollowAdd_',
+    'tap .follow-add-phone': 'onClickFollowAdd_',
     'tap .following-username': 'onClickFollowingUsername_',
     'tap .remove': 'onClickRemove_'
   }
@@ -533,7 +540,6 @@ fmb.views.Following.prototype.onAll_ = function(event) {
 
 /** @inheritDoc */
 fmb.views.Following.prototype.render = _.debounce(function() {
-  fmb.log('Following render.');
   var thisPhoneTemplateData = {
     'profile': this.profile.getTemplateData(),
     'device': this.device.getTemplateData(),
@@ -545,6 +551,7 @@ fmb.views.Following.prototype.render = _.debounce(function() {
           window.navigator.battery.isPlugged ? 1 : 0
     }
   };
+  fmb.log('Following render.', thisPhoneTemplateData);
   var templateData = {
     'following': this.model.toJSON(),
     'this_phone': thisPhoneTemplateData,
@@ -552,7 +559,7 @@ fmb.views.Following.prototype.render = _.debounce(function() {
   };
   this.$el.html(fmb.views.getTemplateHtml('following', templateData));
   return this;
-}, 100);
+}, 500);
 
 
 /**

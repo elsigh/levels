@@ -93,6 +93,8 @@ fmb.App.isPhonePaused_ = false;
  * @type {Object} batteryInfo Phonegap battery info.
  */
 fmb.App.onBatteryStatus_ = function(batteryInfo) {
+  fmb.log('fmb.App.onBatteryStatus_', batteryInfo);
+  window.navigator.battery = window.navigator.battery || {};
   window.navigator.battery.level = batteryInfo['level'];
   window.navigator.battery.isPlugged = batteryInfo['isPlugged'];
   window['app'].model.device.trigger('battery_status');
