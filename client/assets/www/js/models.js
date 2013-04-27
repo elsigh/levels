@@ -9,7 +9,7 @@ fmb.models = {};
 /**
  * @type {string}
  */
-fmb.models.SERVER_LOCAL = 'http://localhost:9091';
+fmb.models.SERVER_LOCAL = 'http://localhost:8080';
 
 
 /**
