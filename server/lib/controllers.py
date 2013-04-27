@@ -326,19 +326,19 @@ class ApiBatteryRequestHandler(ApiRequestHandler):
                            self._profile.key().id(),
                            self._device.key().id())
 
-        battery = models.Battery(
+        settings = models.Settings(
             parent=self._device,
-            level=level,
+            battery_level=level,
             is_charging=self._json_request_data['is_charging']
         )
-        battery.put()
+        settings.put()
 
         if is_this_update_over_notify_level != self._device.is_last_update_over_notify_level:
             self._device.is_last_update_over_notify_level = is_this_update_over_notify_level
             self._device.put()
 
         # Hack in is_last_update_over_notify_level
-        json_output = models.to_dict(battery)
+        json_output = models.to_dict(settings)
         json_output.update({
             'is_last_update_over_notify_level': is_this_update_over_notify_level
         })
@@ -404,17 +404,17 @@ class ApiFollowingRequestHandler(ApiRequestHandler):
             q_device.order('-created')
 
             for device in q_device:
-                q_bat = db.Query(models.Battery)
-                q_bat.ancestor(device.key())
-                q_bat.order('-created')
-                battery = q_bat.get()
-                if battery is None:
-                    battery_tpl_data = {}
+                q_settings = db.Query(models.Settings)
+                q_settings.ancestor(device.key())
+                q_settings.order('-created')
+                settings = q_settings.get()
+                if settings is None:
+                    settings_tpl_data = {}
                 else:
-                    battery_tpl_data = models.to_dict(battery)
+                    settings_tpl_data = models.to_dict(settings)
                 followed_device = {
                   'device': models.to_dict(device),
-                  'battery': battery_tpl_data
+                  'settings': settings_tpl_data
                 }
                 followed_obj['devices'].append(followed_device)
 

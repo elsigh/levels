@@ -45,16 +45,10 @@ class Device(db.Model):
     parent_username = db.StringProperty()
 
 
-class Battery(db.Model):
-    created = db.DateTimeProperty(auto_now_add=True)
-    level = db.IntegerProperty(required=True)
-    is_charging = db.IntegerProperty()
-
-
 class Settings(db.Model):
     created = db.DateTimeProperty(auto_now_add=True)
     battery_level = db.IntegerProperty(required=True)
-    battery_is_charging = db.IntegerProperty()
+    is_charging = db.IntegerProperty()
 
 
 class Following(db.Model):
@@ -86,6 +80,10 @@ SIMPLE_TYPES = (int, long, float, bool, dict, basestring, list)
 import logging
 def to_dict(model, include_auth_token=False, include_email=False):
     output = {}
+
+    if model is None:
+        return output
+
     logging.info('include_auth_token: %s' % include_auth_token)
     for key, prop in model.properties().iteritems():
         #logging.info('KEY: %s' % key)

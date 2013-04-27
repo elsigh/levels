@@ -104,6 +104,7 @@
             {{device.version}}
           </h3>
 
+          <!--
           <div>
             Battery Updates:
             <label>
@@ -117,8 +118,10 @@
                 {{^device.update_enabled}}checked{{/device.update_enabled}}>
             </label>
           </div>
+          -->
 
           {{#device.update_enabled}}
+            <!--
             <div>
               <label>
                 every
@@ -132,6 +135,7 @@
                 min.
               </label>
             </div>
+            -->
           {{/device.update_enabled}}
           {{^device.update_enabled}}
             <input type="hidden" name="update_frequency"
@@ -146,7 +150,7 @@
 
     <script id="tpl_following" type="text/html">
       <h2>Following</h2>
-      <button class="follow-add">+ someone</button>
+      <button class="share">+ someone</button>
       <table>
         <thead>
           <tr>
@@ -157,22 +161,24 @@
           </tr>
         </thead>
         <tbody>
+
           {{#this_phone}}
             <tr>
               <td>{{profile.username}}</td>
-              <td class="battery-level-c charging-{{battery.is_charging}}">
+              <td class="battery-level-c charging-{{settings.is_charging}}">
                 <div class="battery-level"
-                  style="background-image:-webkit-gradient(linear, left top, right top, color-stop({{battery.level}}%, green), color-stop({{battery.level}}%, white))">
-                  {{battery.level}}%
+                  style="background-image:-webkit-gradient(linear, left top, right top, color-stop({{settings.battery_level}}%, green), color-stop({{settings.battery_level}}%, white))">
+                  {{settings.battery_level}}%
                 </div>
                 <div class="battery-created">
-                  {{battery.created_pretty}}
+                  {{settings.created_pretty}}
                 </div>
               </td>
               <td>{{device.name}}</td>
               <td></td>
             </tr>
           {{/this_phone}}
+
           {{#following}}
             {{#profile}}
               {{#devices}}
@@ -180,13 +186,13 @@
                   <td>
                     <span class="following-username">{{profile.username}}</span>
                   </td>
-                  <td class="battery-level-c charging-{{battery.is_charging}}">
+                  <td class="battery-level-c charging-{{settings.is_charging}}">
                     <div class="battery-level"
-                      style="background-image:-webkit-gradient(linear, left top, right top, color-stop({{battery.level}}%, green), color-stop({{battery.level}}%, white))">
-                      {{battery.level}}%
+                      style="background-image:-webkit-gradient(linear, left top, right top, color-stop({{settings.battery_level}}%, green), color-stop({{settings.battery_level}}%, white))">
+                      {{settings.battery_level}}%
                     </div>
                     <div class="battery-created">
-                      {{battery.created_pretty}}
+                      {{settings.created_pretty}}
                     </div>
                   </td>
                   <td>{{device.name}}</td>
@@ -201,7 +207,7 @@
         <tfoot>
           <tr>
             <td colspan="5">
-              More battery you follow, better person you are.
+              Follow more batteries!
             </td>
           </tr>
         </tfoot>
@@ -210,7 +216,11 @@
 
     <script id="tpl_notifying" type="text/html">
       <h2>Notifying</h2>
-      <button class="notifying-add">+ someone</button>
+      <p>
+        Sends a notification out when your battery is at 10%
+      </p>
+      <button class="notifying-add-phone">+ phone</button>
+      <button class="notifying-add-email">+ email</button>
       <table>
         <thead>
           <tr>
@@ -235,10 +245,11 @@
           {{/notifying}}
           {{^notifying}}
             <tr>
-              <td colspan="3">Let someone know - what a nice thing to do!</td>
+              <td colspan="3">Notify them before your battery dies.</td>
             </tr>
           {{/notifying}}
         </tbody>
+        <!--
         <tfoot>
           <tr>
             <td colspan="3">
@@ -259,6 +270,7 @@
             </td>
           </tr>
         </tfoot>
+        -->
       </table>
     </script>
 
