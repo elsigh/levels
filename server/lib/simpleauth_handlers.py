@@ -192,7 +192,7 @@ class AuthHandler(BaseRequestHandler, SimpleAuthHandler):
 
   def logout(self):
     self.auth.unset_session()
-    self.redirect('/')
+    self.redirect('/login')
 
   def handle_exception(self, exception, debug):
     logging.error(exception)

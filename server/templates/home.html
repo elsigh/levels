@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 
 {% block main %}
-  <p>This is a test app to demonstrate SimpleAuth.</p>
+  <p>This is a test to demonstrate SimpleAuth.</p>
   {% if logged_in %}
     <p>Hey there. Looks like you're logged in already.</p>
     <a href="{{ url_for('profile') }}" class="btn">my profile</a>
