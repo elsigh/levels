@@ -9,6 +9,14 @@ default_expiration: "0d 0h"
 libraries:
 - name: django
   version: latest
+- name: markupsafe
+  version: latest
+- name: setuptools
+  version: latest
+- name: jinja2
+  version: latest
+- name: lxml
+  version: latest
 
 
 builtins:
