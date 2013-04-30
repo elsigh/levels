@@ -8,31 +8,30 @@ import logging
 import os
 import sys
 import webapp2
+from webapp2 import Route
 import urllib2
 import uuid
 
 os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
 
 sys.path.append(os.path.join(os.path.dirname(__file__), 'external'))
-logging.info("CONTROLLER PATH MTUFASHASD %s" % sys.path)
 
 from django.template.loader import get_template
 from django.template import Context
 
 from google.appengine.api import mail
 from google.appengine.ext import db
+from google.appengine.ext import ndb
 from google.appengine.ext import deferred
 
 from lib.web_request_handler import WebRequestHandler
 from lib import models
+from lib import simpleauth_handlers
 
 from lib.external.twilio.rest import TwilioRestClient
 
 # last import.
 import settings
-
-TWILIO_ACCOUNT_SID = "AC13e0edad6a784369a6500a5159be461a"
-TWILIO_AUTH_TOKEN = "39e9b2ee9eab31146cac977c1640321c"
 
 
 def requires_auth_token(func):
@@ -267,7 +266,8 @@ def send_battery_notification_phone(profile_id, device_id, notifying_id, send=Tr
     logging.info('rendered: %s' % rendered)
     twilio_message = None
     if send:
-        client = TwilioRestClient(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
+        client = TwilioRestClient(settings.TWILIO_ACCOUNT_SID,
+                                  settings.TWILIO_AUTH_TOKEN)
         twilio_message = client.sms.messages.create(to=notifying.means,
                                                     from_="+15084525193",
                                                     body=rendered)
@@ -558,8 +558,18 @@ class UsernameRequestHandler(WebRequestHandler):
         logging.info('TPL_DATA %s' % template_data)
         self.output_response(template_data, 'battery_status.html')
 
+# webapp2 config
+app_config = {
+  'webapp2_extras.sessions': {
+    'cookie_name': '_simpleauth_sess',
+    'secret_key': settings.SESSION_KEY
+  },
+  'webapp2_extras.auth': {
+    'user_attributes': []
+  }
+}
 
-app = webapp2.WSGIApplication([
+routes = [
     (r'/api/profile/device/(.*)', ApiProfileDeviceRequestHandler),
     (r'/api/profile/(.*)', ApiProfileRequestHandler),
     (r'/api/device/(.*)', ApiDeviceRequestHandler),
@@ -569,5 +579,25 @@ app = webapp2.WSGIApplication([
     (r'/api/following/(.*)', ApiFollowingRequestHandler),
     (r'/api/notifying/delete/(.*)', ApiNotifyingDeleteRequestHandler),
     (r'/api/notifying/(.*)', ApiNotifyingRequestHandler),
+
+    Route('/login',
+          handler='lib.simpleauth_handlers.RootHandler'),
+    Route('/profile',
+          handler='lib.simpleauth_handlers.ProfileHandler',
+          name='profile'),
+    Route('/logout',
+          handler='lib.simpleauth_handlers.AuthHandler:logout',
+          name='logout'),
+    Route('/auth/<provider>',
+          handler='lib.simpleauth_handlers.AuthHandler:_simple_auth',
+          name='auth_login'),
+    Route('/auth/<provider>/callback',
+          handler='lib.simpleauth_handlers.AuthHandler:_auth_callback',
+          name='auth_callback'),
+
     (r'/(.*)', UsernameRequestHandler),
-    ], debug=True)
+]
+
+
+
+app = webapp2.WSGIApplication(routes, config=app_config, debug=True)
