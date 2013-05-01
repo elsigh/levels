@@ -34,12 +34,12 @@ public class PhoneDiedPlugin extends Plugin {
             Intent intent = new Intent(this.cordova.getActivity(),
                                        PhoneDiedService.class);
 
-            String authToken = "";
+            String apiToken = "";
             String uuid = "";
             String updateFrequency = "";
             String updatePath = "";
             try {
-                authToken = args.getString(0);
+                apiToken = args.getString(0);
                 uuid = args.getString(1);
                 updateFrequency = args.getString(2);
                 updatePath = args.getString(3);
@@ -48,7 +48,7 @@ public class PhoneDiedPlugin extends Plugin {
               return new PluginResult(PluginResult.Status.JSON_EXCEPTION);
             }
 
-            intent.putExtra(PhoneDiedService.EXTRAS_AUTH_TOKEN, authToken);
+            intent.putExtra(PhoneDiedService.EXTRAS_API_TOKEN, apiToken);
             intent.putExtra(PhoneDiedService.EXTRAS_UUID, uuid);
             intent.putExtra(PhoneDiedService.EXTRAS_UPDATE_FREQUENCY, updateFrequency);
             intent.putExtra(PhoneDiedService.EXTRAS_UPDATE_PATH, updatePath);

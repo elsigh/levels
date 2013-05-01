@@ -294,8 +294,8 @@ fmb.views.Account.prototype.onSubmitCreateProfile_ = function(e) {
           success: _.bind(function(model, response) {
             fmb.log('profile response::', response);
             // And save the device record to the server once the profile's
-            // done, aka after auth_token comes back from the server.
-            if (response && response['auth_token']) {
+            // done, aka after api_token comes back from the server.
+            if (response && response['api_token']) {
               _.delay(_.bind(this.device.saveToServer, this.device), 500);
             }
           }, this)
