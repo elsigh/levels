@@ -7,17 +7,17 @@ import httplib
 import json
 import logging
 import os
+import sys
+import time
 import webapp2
+from webapp2_extras import auth, sessions, jinja2
+from jinja2.runtime import TemplateNotFound
 
 from lib.external.ua_parser.py import user_agent_parser
 
-import custom_filters
-from django import template
-template.add_to_builtins('lib.custom_filters')
-template.add_to_builtins('lib.verbatim_templatetag')
-
-from django.template.loader import get_template
-from django.template import Context
+# Hack to get ndb into the modules list.
+from google.appengine.ext import ndb
+sys.modules['ndb'] = ndb
 
 import settings
 
@@ -27,42 +27,63 @@ class WebRequestHandler(webapp2.RequestHandler):
     WebRequestHandler
     """
 
-    def get_js_templates(self):
-        # check if the property exists, if not then add it
-        # In production we'll cache templates, in dev refresh every time.
-        yaml_file_name = self._get_yaml_file_name
-        if (not yaml_file_name in WebRequestHandler._global_js or
-                not WebRequestHandler.is_production()):
-            templates = {}
-            yaml_config = self.build_deps_yaml()
-            for src in yaml_config['templates']:
-                path = os.path.join(settings.TEMPLATE_DIRS, src)
-                f = open(path, 'r')
+    def dispatch(self):
+        # Get a session store for this request.
+        self.session_store = sessions.get_store(request=self.request)
 
-                bits = path.split('/')
-                filename = bits[len(bits) - 1]
-                key_name = filename.replace('.mustache', '')
+        try:
+            # Dispatch the request.
+            webapp2.RequestHandler.dispatch(self)
+        finally:
+            # Save all sessions.
+            self.session_store.save_sessions(self.response)
 
-                templates[key_name] = f.read()
-                f.close()
-            WebRequestHandler._global_js[yaml_file_name] = templates
+    @webapp2.cached_property
+    def jinja2(self):
+        """Returns a Jinja2 renderer cached in the app registry"""
+        return jinja2.get_jinja2(app=self.app)
 
-        return WebRequestHandler._global_js[yaml_file_name]
+    @webapp2.cached_property
+    def session(self):
+        """Returns a session using the default cookie key"""
+        return self.session_store.get_session()
 
-    @staticmethod
-    def is_production():
-        return custom_filters.is_production()
+    @webapp2.cached_property
+    def auth(self):
+        return auth.get_auth()
 
-    @staticmethod
-    def get_version():
-        return custom_filters.get_version()
+    @webapp2.cached_property
+    def current_user(self):
+        """Returns currently logged in user"""
+        user_dict = self.auth.get_user_by_session()
+        return self.auth.store.user_model.get_by_id(user_dict['user_id'])
+
+    @webapp2.cached_property
+    def logged_in(self):
+        """Returns true if a user is currently logged in, false otherwise"""
+        return self.auth.get_user_by_session() is not None
+
+    @webapp2.cached_property
+    def is_production(self):
+        return 'Development' not in os.environ['SERVER_SOFTWARE']
+
+    @webapp2.cached_property
+    def version(self):
+        if self.is_production:
+            version = os.environ['CURRENT_VERSION_ID']
+        else:
+            version = time.strftime('%H_%M_%S', time.gmtime())
+        return version
 
     def initialize(self, request, response):
         logging.info('WebRequestHandler initialize.')
         super(WebRequestHandler, self).initialize(request, response)
         if request.method != 'OPTIONS':
             self.browser_detect()
-        os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
+
+    def head(self, *args):
+        """Head is used by Twitter. If not there the tweet button shows 0"""
+        pass
 
     def apply_cors_headers(self):
         self.response.headers['Access-Control-Allow-Origin'] = '*'
@@ -102,21 +123,22 @@ class WebRequestHandler(webapp2.RequestHandler):
             An HTTP response with the rendered template.
         """
         logging.info('output_response: start')
-        is_production = WebRequestHandler.is_production()
         tpl_data.update({
             'title_app': 'Follow My Battery',
-            'is_production': is_production,
+            'is_production': self.is_production,
             'user_agent': self._user_agent,
             'user_agent_json': json.dumps(self._user_agent),
-            'build_version': WebRequestHandler.get_version(),
+            'build_version': self.version,
+            'url_for': self.uri_for,
+            'logged_in': self.logged_in,
+            'flashes': self.session.get_flashes(),
         })
 
-        logging.info('output_response: template render start- %s' % tpl_name)
-        tpl = get_template(tpl_name)
-        rendered = tpl.render(Context(tpl_data))
-        logging.info('output_response: template render done - %s' % tpl_name)
-        self.response.write(rendered)
-        logging.info('WebRequestHandler DONE.')
+        try:
+            self.response.write(self.jinja2.render_template(
+                tpl_name, **tpl_data))
+        except TemplateNotFound:
+            self.abort(404)
 
 
 class TemplatesRequestHandler(webapp2.RequestHandler):
@@ -131,27 +153,27 @@ class TemplatesRequestHandler(webapp2.RequestHandler):
 
 def ErrorHandler(request, response, exception, code):
     """A webapp2 implementation of error_handler."""
-    os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
     logging.info('ErrorHandler code %s' % code)
     logging.info('Exception: %s' % exception)
-    is_production = WebRequestHandler.is_production()
+
     user_agent_string = request.headers.get('USER_AGENT')
     ua_dict = user_agent_parser.Parse(user_agent_string)
     logging.info('UA: %s' % ua_dict)
-    tpl_data = {
-        'is_production': is_production,
-        'error_code': code,
-        'error_code_text': httplib.responses[code],
-        'error_message': exception,
-        'user_agent_json': json.dumps(ua_dict),
-    }
-    tpl = get_template('error.html')
-    rendered = tpl.render(Context(tpl_data))
+
     response.set_status(code)
     response.headers['Access-Control-Allow-Origin'] = '*'
     response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS, PUT'
     response.headers['Access-Control-Allow-Credentials'] = 'true'
     response.headers['Access-Control-Allow-Headers'] = 'Content-Type,X-Requested-With'
+
+    tpl_data = {
+        'is_production': self.is_production,
+        'error_code': code,
+        'error_code_text': httplib.responses[code],
+        'error_message': exception,
+        'user_agent_json': json.dumps(ua_dict),
+    }
+    rendered = self.jinja2.render_template('error.html', **tpl_data)
     response.write(rendered)
 
 
