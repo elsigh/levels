@@ -107,7 +107,6 @@ class AuthHandler(WebRequestHandler, SimpleAuthHandler):
         _attrs.update({
           'api_token': str(uuid.uuid4())
         })
-        logging.info('ARRTS:: %s', _attrs)
 
         ok, user = self.auth.store.user_model.create_user(auth_id, **_attrs)
         if ok:

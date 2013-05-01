@@ -86,16 +86,16 @@ fmb.models.sync = function(method, model, options) {
   options.contentType = 'application/json; charset=utf8';
 
   // Includes our auth token in requests.
-  if (fmb.models.sync.authToken) {
+  if (fmb.models.sync.apiToken) {
     if ((method == 'update') || (method == 'create') || (method == 'delete')) {
       var data = model.toJSON();  // Typical Backbone.
-      data['auth_token'] = fmb.models.sync.authToken;
-      data['uuid'] = fmb.models.sync.uuid;
+      data['api_token'] = fmb.models.sync.apiToken;
+      data['device_uuid'] = fmb.models.sync.deviceUuid;
       options.data = JSON.stringify(data);
     } else {
       options.data = {
-        'auth_token': fmb.models.sync.authToken,
-        'uuid': fmb.models.sync.uuid
+        'api_token': fmb.models.sync.apiToken,
+        'device_uuid': fmb.models.sync.deviceUuid
       };
     }
   }
@@ -107,7 +107,7 @@ fmb.models.sync = function(method, model, options) {
 /**
  * @type {string}
  */
-fmb.models.sync.authToken = null;
+fmb.models.sync.apiToken = null;
 
 
 // All sync calls do double duty.
@@ -133,17 +133,17 @@ fmb.models.App.prototype.initialize = function() {
   fmb.log('fmb.models.App.initialize');
 
   // id is necessary for localStorage plugin with a model.
-  var profileUid = localStorage.getItem('profile_uid');
-  fmb.log('profileUid from localStorage', profileUid);
+  var userUid = localStorage.getItem('user_uid');
+  fmb.log('userUid from localStorage', userUid);
   var doFetch = true;
-  if (!profileUid) {
+  if (!userUid) {
     doFetch = false;
-    profileUid = fmb.models.getUid();
-    localStorage.setItem('profile_uid', profileUid);
+    userUid = fmb.models.getUid();
+    localStorage.setItem('user_uid', userUid);
   }
 
-  this.profile = new fmb.models.Profile({
-    id: profileUid
+  this.user = new fmb.models.User({
+    id: userUid
   });
 
 
@@ -151,36 +151,10 @@ fmb.models.App.prototype.initialize = function() {
   fmb.log('deviceUid from localStorage', deviceUid);
   if (!deviceUid) {
     deviceUid = window.device && window.device.uuid || fmb.models.getUid();
-
-    // Hardcode a stable uuid for testing.
-    if (window.location.protocol == 'http:') {
-      deviceUid = '6009c94b-5b58-fc7a-391a-491f35afe2dc';
-    }
-
     localStorage.setItem('device_uid', deviceUid);
-
-    // This might work.
-    fmb.log('Checking out ProfileDeviceChecker w/uuid', deviceUid);
-    var tmp = new fmb.models.ProfileDeviceChecker({
-      'uuid': deviceUid
-    }).fetch({
-      success: _.bind(function(model, response) {
-        fmb.log('SUCCESSFULLY FOUND OLD PROFILE: ', response);
-
-        this.profile.clear({silent: true});
-        this.profile.set(response['profile']);
-        this.profile.saveToStorage();
-        localStorage.setItem('profile_uid', this.profile.id);
-
-        this.device.clear({silent: true});
-        this.device.set(response['device']);
-        this.device.saveToStorage();
-
-        fmb.log('We found an existing account for you =)');
-      }, this)
-    });
   }
 
+  // Initialize device, real data will come from server.
   this.device = new fmb.models.Device({
     'uuid': deviceUid,
     'name': window.device && window.device.name || navigator.appName,
@@ -189,17 +163,17 @@ fmb.models.App.prototype.initialize = function() {
   });
 
   this.notifying = new fmb.models.NotifyingCollection(null, {
-    profile: this.profile
+    user: this.user
   });
 
   this.following = new fmb.models.FollowingCollection(null, {
-    profile: this.profile
+    user: this.user
   });
 
   if (doFetch) {
     // Deferred so model references are set on window.app.
     _.defer(_.bind(function() {
-      this.profile.fetch();
+      this.user.fetch();
       this.device.fetch();
       this.following.fetch();
       this.notifying.fetch();
@@ -267,9 +241,9 @@ fmb.Model.prototype.getTemplateData = function() {
 fmb.Model.prototype.parse = function(response, xhr) {
   //fmb.log('fmb.Model parse: ' + this.id + ', ' + JSON.stringify(response));
 
-  if (response['auth_token'] && !fmb.models.sync.authToken) {
+  if (response['api_token'] && !fmb.models.sync.apiToken) {
     //fmb.log('SETTING AUTH TOKEN')
-    fmb.models.sync.authToken = response['auth_token'];
+    fmb.models.sync.apiToken = response['api_token'];
   }
 
   // Always store server data to localStorage.
@@ -337,15 +311,15 @@ fmb.Model.prototype.fetchFromStorage = function(opt_options) {
  * @extends {fmb.Model}
  * @constructor
  */
-fmb.models.Profile = fmb.Model.extend({
-  localStorage: new Backbone.LocalStorage("Profile")
+fmb.models.User = fmb.Model.extend({
+  localStorage: new Backbone.LocalStorage('User')
 });
 
 
 /** @inheritDoc */
-fmb.models.Profile.prototype.initialize = function(options) {
-  this.once('change:auth_token', function() {
-    fmb.models.sync.authToken = this.get('auth_token');
+fmb.models.User.prototype.initialize = function(options) {
+  this.once('change:api_token', function() {
+    fmb.models.sync.apiToken = this.get('api_token');
   }, this);
 };
 
@@ -353,13 +327,8 @@ fmb.models.Profile.prototype.initialize = function(options) {
 /**
  * @return {string}
  */
-fmb.models.Profile.prototype.url = function() {
-  var username = this.has('username') ? this.get('username') : '';
-  if (!username) {
-    fmb.log('No username, no Profile url.');
-    return false;
-  }
-  return fmb.models.getApiUrl('/profile/' + username);
+fmb.models.User.prototype.url = function() {
+  return fmb.models.getApiUrl('/user');
 };
 
 
@@ -384,49 +353,6 @@ fmb.models.AjaxSyncModel= Backbone.Model.extend({
  * @extends {fmb.Model}
  * @constructor
  */
-fmb.models.ProfileNameChecker = Backbone.Model.extend({
-  sync: Backbone.ajaxSync
-});
-
-
-/**
- * @return {string}
- */
-fmb.models.ProfileNameChecker.prototype.url = function() {
-  return fmb.models.Profile.prototype.url.call(this);
-};
-
-
-/******************************************************************************/
-
-
-
-/**
- * @extends {fmb.Model}
- * @constructor
- */
-fmb.models.ProfileDeviceChecker = Backbone.Model.extend({
-  sync: Backbone.ajaxSync
-});
-
-
-/**
- * @return {string}
- */
-fmb.models.ProfileDeviceChecker.prototype.url = function() {
-  var uuid = this.has('uuid') ? this.get('uuid') : '';
-  return fmb.models.getApiUrl('/profile/device/' + uuid);
-};
-
-
-/******************************************************************************/
-
-
-
-/**
- * @extends {fmb.Model}
- * @constructor
- */
 fmb.models.Device = fmb.Model.extend({
   localStorage: new Backbone.LocalStorage('Device'),
   defaults: {
@@ -440,7 +366,7 @@ fmb.models.Device = fmb.Model.extend({
 
 /** @inheritDoc */
 fmb.models.Device.prototype.initialize = function(options) {
-  fmb.models.sync.uuid = options.uuid;
+  fmb.models.sync.deviceUuid = options.uuid;
   this.fetchFromStorage();
 
   if (this.id) {
@@ -489,7 +415,7 @@ fmb.models.Device.prototype.onChange_ = function() {
  * @return {string} An url.
  */
 fmb.models.Device.prototype.url = function() {
-  return fmb.models.getApiUrl('/device/' + this.get('uuid'));
+  return fmb.models.getApiUrl('/device');
 };
 
 
@@ -524,18 +450,13 @@ fmb.models.NotifyingCollection = fmb.Collection.extend({
 fmb.models.NotifyingCollection.prototype.initialize =
     function(models, options) {
   fmb.Collection.prototype.initialize.call(this);
-  this.profile = options.profile;
+  this.user = options.user;
 };
 
 
 /** @inheritDoc */
 fmb.models.NotifyingCollection.prototype.url = function() {
-  var username = this.profile.get('username');
-  if (!username) {
-    fmb.log('No username, no NotifyingCollection url.');
-    return false;
-  }
-  return fmb.models.getApiUrl('/notifying/' + username);
+  return fmb.models.getApiUrl('/notifying');
 };
 
 
@@ -567,8 +488,7 @@ fmb.models.NotifyingCollection.prototype.addContact = function(obj) {
 
   var addModel = new fmb.models.AjaxSyncModel();
   addModel.url = _.bind(function() {
-    return fmb.models.getApiUrl('/notifying/') +
-        this.profile.get('username');
+    return fmb.models.getApiUrl('/notifying');
   }, this);
   addModel.save(obj, {
     success: _.bind(function() {
@@ -593,8 +513,7 @@ fmb.models.NotifyingCollection.prototype.removeByMeans = function(means) {
   var notifyModel = new fmb.models.AjaxSyncModel();
 
   notifyModel.url = _.bind(function() {
-    return fmb.models.getApiUrl('/notifying/delete/') +
-        this.profile.get('username');
+    return fmb.models.getApiUrl('/notifying/delete/');
   }, this);
 
   notifyModel.save({
@@ -631,7 +550,7 @@ fmb.models.FollowingCollection = fmb.Collection.extend({
 fmb.models.FollowingCollection.prototype.initialize =
     function(models, options) {
   fmb.Collection.prototype.initialize.call(this);
-  this.profile = options.profile;
+  this.user = options.user;
 };
 
 
@@ -642,7 +561,6 @@ fmb.models.FollowingCollection.prototype.parse = function(response) {
       var createdTs = device['battery']['created'] * 1000;
       device['battery']['created_pretty'] =
           fmb.models.prettyDate(createdTs);
-
     });
   });
   return response['following'];
@@ -650,32 +568,31 @@ fmb.models.FollowingCollection.prototype.parse = function(response) {
 
 
 /**
- * @param {string} username A username to follow.
+ * @param {string} userKey A userKey to follow.
  */
-fmb.models.FollowingCollection.prototype.addByUsername = function(username) {
-  fmb.log('addByUsername:', username);
+fmb.models.FollowingCollection.prototype.addByUserKey = function(userKey) {
+  fmb.log('addByUsername:', userKey);
 
   // Can't follow yerself or no one.
-  if (username === '' ||
-      username == this.profile.get('username')) {
+  if (userKey === '' ||
+      userKey == this.user.get('key')) {
     return;
   }
 
   var alreadyFollowing = this.find(function(model) {
-    return model.get('profile')['username'] == username;
+    return model.get('user')['key'] == userKey;
   });
   if (alreadyFollowing) {
-    fmb.log('.. bail, already following', username);
-    alert('You are already following ' + username);
+    fmb.log('.. bail, already following', userKey);
+    alert('You are already following ' + userKey);
     return;
   }
 
   var followModel = new fmb.models.AjaxSyncModel();
   followModel.url = _.bind(function() {
-    return fmb.models.getApiUrl('/following/') +
-        this.profile.get('username');
+    return fmb.models.getApiUrl('/following');
   }, this);
-  followModel.save({'username': username}, {
+  followModel.save({'user_key': userKey}, {
     //url: url,  // why this no work?
     success: _.bind(function() {
       fmb.log('MONEY TRAIN, refetching goodies from server.');
@@ -683,7 +600,7 @@ fmb.models.FollowingCollection.prototype.addByUsername = function(username) {
     }, this),
     error: function(model, xhr, options) {
       if (xhr.status === 404) {
-        alert('La bomba, seems we could not find a user ' + username);
+        alert('La bomba, seems we could not find a user ' + userKey);
       } else if (xhr.status === 409) {
         //alert('already following');
       }
@@ -693,28 +610,27 @@ fmb.models.FollowingCollection.prototype.addByUsername = function(username) {
 
 
 /**
- * @param {string} username A username to follow.
+ * @param {string} userKey A userKey to follow.
  */
-fmb.models.FollowingCollection.prototype.removeByUsername = function(username) {
+fmb.models.FollowingCollection.prototype.removeByUsername = function(userKey) {
   var followModel = new fmb.models.AjaxSyncModel();
 
   followModel.url = _.bind(function() {
-    return fmb.models.getApiUrl('/following/delete/') +
-        this.profile.get('username');
+    return fmb.models.getApiUrl('/following/delete');
   }, this);
 
   followModel.save({
-    'username': username
+    'user_key': userKey
   }, {
     // Why does url not work here?
     //url: fmb.models.getApiUrl('/following/delete/') +
-    //     this.profile.get('username'),
+    //     this.user.get('userKey'),
     success: _.bind(function() {
       fmb.log('MONEY TRAIN, refetching goodies from server.');
       this.fetch();
     }, this),
     error: function(model, xhr, options) {
-      fmb.log('FAIL removing ' +  username + ', ' + xhr.status);
+      fmb.log('FAIL removing ', userKey, xhr.status);
     }
   });
 };
@@ -724,11 +640,6 @@ fmb.models.FollowingCollection.prototype.removeByUsername = function(username) {
  * @return {string}
  */
 fmb.models.FollowingCollection.prototype.url = function() {
-  var username = this.profile.get('username');
-  if (!username) {
-    fmb.log('No username, no FollowingCollection url.');
-    return false;
-  }
-  return fmb.models.getApiUrl('/following/' + username);
+  return fmb.models.getApiUrl('/following');
 };
 

@@ -28,15 +28,14 @@ app_config = {
 
 routes = [
     # API
-    Route('/api/profile/device/(.*)', handler='lib.api.ApiProfileDeviceRequestHandler'),
-    Route('/api/profile/(.*)', handler='lib.api.ApiProfileRequestHandler'),
-    #Route('/api/user/(.*)', handler='lib.api.ApiUserRequestHandler'),
-    Route('/api/device/(.*)', handler='lib.api.ApiDeviceRequestHandler'),
-    Route('/api/settings/(.*)', handler='lib.api.ApiSettingsRequestHandler'),
-    Route('/api/following/delete(.*)', handler='lib.api.ApiFollowingDeleteRequestHandler'),
-    Route('/api/following/(.*)', handler='lib.api.ApiFollowingRequestHandler'),
-    Route('/api/notifying/delete/(.*)', handler='lib.api.ApiNotifyingDeleteRequestHandler'),
-    Route('/api/notifying/(.*)', handler='lib.api.ApiNotifyingRequestHandler'),
+    Route('/api/user/device', handler='lib.api.ApiUserDeviceRequestHandler'),
+    Route('/api/user', handler='lib.api.ApiUserRequestHandler'),
+    Route('/api/device', handler='lib.api.ApiDeviceRequestHandler'),
+    Route('/api/settings', handler='lib.api.ApiSettingsRequestHandler'),
+    Route('/api/following/delete', handler='lib.api.ApiFollowingDeleteRequestHandler'),
+    Route('/api/following', handler='lib.api.ApiFollowingRequestHandler'),
+    Route('/api/notifying/delete', handler='lib.api.ApiNotifyingDeleteRequestHandler'),
+    Route('/api/notifying', handler='lib.api.ApiNotifyingRequestHandler'),
 
     # AUTH
     Route('/login', handler='lib.auth.RootHandler'),
@@ -48,8 +47,8 @@ routes = [
           name='auth_callback'),
 
     # WWW
-    Route('/profile/<user_id>', handler='lib.www.OtherProfileHandler'),
-    Route('/profile', handler='lib.www.ProfileHandler', name='profile'),
+    Route('/profile/<user_key>', handler='lib.www.ProfileHandler'),
+    Route('/profile', handler='lib.www.ProfileHandler'),
 ]
 
 app = webapp2.WSGIApplication(routes, config=app_config, debug=True)

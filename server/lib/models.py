@@ -17,103 +17,113 @@
 import datetime
 import time
 
-from google.appengine.ext import db
+from google.appengine.ext import ndb
+from ndb import model
 
 
-class Profile(db.Model):
-    created = db.DateTimeProperty(auto_now_add=True)
-    modified = db.DateTimeProperty(auto_now=True)
-    id = db.StringProperty()
-    username = db.StringProperty(required=True)
-    auth_token = db.StringProperty()
-    email = db.StringProperty()
+# Note we get user from webapp2_extras.
+from webapp2_extras.appengine.auth.models import User
 
 
-class Device(db.Model):
-    created = db.DateTimeProperty(auto_now_add=True)
-    modified = db.DateTimeProperty(auto_now=True)
-    uuid = db.StringProperty(required=True)
-    user_agent_string = db.StringProperty()
-    update_enabled = db.IntegerProperty()
-    update_frequency = db.IntegerProperty()
-    notify_level = db.IntegerProperty(default=10, required=True)
-    is_last_update_over_notify_level = db.BooleanProperty(default=True)
-    name = db.StringProperty()
-    platform = db.StringProperty()
-    version = db.StringProperty()
-    # Username fields make the db a little more sane to look at.
-    parent_username = db.StringProperty()
+# Hack with setattr to add a class method to User.
+def get_user_template_data(user):
+    template_data = {
+      'user': user.to_dict(),
+      'devices': []
+    }
+    q_device = Device.query(ancestor=user.key)
+    q_device.order(-Device.created)
+    for device in q_device:
+        q_settings = Settings.query(ancestor=device.key)
+        q_settings.order(-Settings.created)
+        last_settings = q_settings.get()
+        settings_data = {
+          'device': device.to_dict(),
+          'settings': last_settings.to_dict()
+        }
+        template_data['devices'].append(device_data)
+
+    return template_data
+setattr(User, 'get_template_data', get_user_template_data)
 
 
-class Settings(db.Model):
-    created = db.DateTimeProperty(auto_now_add=True)
-    battery_level = db.IntegerProperty(required=True)
-    is_charging = db.IntegerProperty()
+class Device(ndb.Model):
+    created = ndb.DateTimeProperty(auto_now_add=True)
+    modified = ndb.DateTimeProperty(auto_now=True)
+    uuid = ndb.StringProperty(required=True)
+    user_agent_string = ndb.StringProperty()
+    update_enabled = ndb.IntegerProperty()
+    update_frequency = ndb.IntegerProperty()
+    notify_level = ndb.IntegerProperty(default=10)
+    is_last_update_over_notify_level = ndb.BooleanProperty(default=True)
+    name = ndb.StringProperty()
+    platform = ndb.StringProperty()
+    version = ndb.StringProperty()
 
 
-class Following(db.Model):
-    created = db.DateTimeProperty(auto_now_add=True)
-    following = db.ReferenceProperty(Profile)
-    # Username fields make the db a little more sane to look at.
-    parent_username = db.StringProperty()
-    following_username = db.StringProperty()
+class Settings(ndb.Model):
+    created = ndb.DateTimeProperty(auto_now_add=True)
+    battery_level = ndb.IntegerProperty(required=True)
+    is_charging = ndb.IntegerProperty()
 
 
-class Notifying(db.Model):
-    created = db.DateTimeProperty(auto_now_add=True)
-    # Username fields make the db a little more sane to look at.
-    parent_username = db.StringProperty()
-    means = db.StringProperty(required=True)
-    name = db.StringProperty()
-    type = db.StringProperty()
+class Following(ndb.Model):
+    created = ndb.DateTimeProperty(auto_now_add=True)
+    following = ndb.KeyProperty(kind=User)
 
 
-class NotificationSent(db.Model):
-    created = db.DateTimeProperty(auto_now_add=True)
-    # Username fields make the db a little more sane to look at.
-    parent_username = db.StringProperty()
-    means = db.StringProperty(required=True)
+class Notifying(ndb.Model):
+    created = ndb.DateTimeProperty(auto_now_add=True)
+    means = ndb.StringProperty(required=True)
+    name = ndb.StringProperty()
+    type = ndb.StringProperty()
 
-# Because db.to_dict can't do datetime.datetime, apparently.
-SIMPLE_TYPES = (int, long, float, bool, dict, basestring, list)
 
-import logging
-def to_dict(model, include_auth_token=False, include_email=False):
-    output = {}
+class NotificationSent(ndb.Model):
+    created = ndb.DateTimeProperty(auto_now_add=True)
+    means = ndb.StringProperty(required=True)
 
-    if model is None:
-        return output
 
-    logging.info('include_auth_token: %s' % include_auth_token)
-    for key, prop in model.properties().iteritems():
-        #logging.info('KEY: %s' % key)
+# # Because db.to_dict can't do datetime.datetime, apparently.
+# SIMPLE_TYPES = (int, long, float, bool, dict, basestring, list)
 
-        # Ignore some sensitive fields.
-        if key == 'auth_token' and not include_auth_token:
-            continue
-        if key == 'email' and not include_email:
-            continue
+# import logging
+# def to_dict(model, include_auth_token=False, include_email=False):
+#     output = {}
 
-        value = getattr(model, key)
-        #logging.info('VALUE: %s' % value)
+#     if model is None:
+#         return output
 
-        if value is None or isinstance(value, SIMPLE_TYPES):
-            output[key] = value
-        elif isinstance(value, datetime.date):
-            # Convert date/datetime to ms-since-epoch ("new Date()").
-            ms = time.mktime(value.utctimetuple())
-            ms += getattr(value, 'microseconds', 0) / 1000
-            output[key] = int(ms)
-        elif isinstance(value, db.GeoPt):
-            output[key] = {'lat': value.lat, 'lon': value.lon}
-        elif isinstance(value, db.Model):
-            output[key] = to_dict(value)
-        else:
-            raise ValueError('cannot encode ' + repr(prop))
+#     logging.info('include_auth_token: %s' % include_auth_token)
+#     for key, prop in model.properties().iteritems():
+#         #logging.info('KEY: %s' % key)
 
-    # Ensure we have a model id in our output.
-    if len(model.properties()):
-        if 'id' not in output:
-            output['id'] = str(model.key())
+#         # Ignore some sensitive fields.
+#         if key == 'auth_token' and not include_auth_token:
+#             continue
+#         if key == 'email' and not include_email:
+#             continue
 
-    return output
+#         value = getattr(model, key)
+#         #logging.info('VALUE: %s' % value)
+
+#         if value is None or isinstance(value, SIMPLE_TYPES):
+#             output[key] = value
+#         elif isinstance(value, datetime.date):
+#             # Convert date/datetime to ms-since-epoch ("new Date()").
+#             ms = time.mktime(value.utctimetuple())
+#             ms += getattr(value, 'microseconds', 0) / 1000
+#             output[key] = int(ms)
+#         elif isinstance(value, db.GeoPt):
+#             output[key] = {'lat': value.lat, 'lon': value.lon}
+#         elif isinstance(value, ndb.Model):
+#             output[key] = to_dict(value)
+#         else:
+#             raise ValueError('cannot encode ' + repr(prop))
+
+#     # Ensure we have a model id in our output.
+#     if len(model.properties()):
+#         if 'id' not in output:
+#             output['id'] = str(model.key())
+
+#     return output
