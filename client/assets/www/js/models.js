@@ -86,15 +86,15 @@ fmb.models.sync = function(method, model, options) {
   options.contentType = 'application/json; charset=utf8';
 
   // Includes our auth token in requests.
-  if (fmb.models.sync.authToken) {
+  if (fmb.models.sync.apiToken) {
     if ((method == 'update') || (method == 'create') || (method == 'delete')) {
       var data = model.toJSON();  // Typical Backbone.
-      data['auth_token'] = fmb.models.sync.authToken;
+      data['api_token'] = fmb.models.sync.apiToken;
       data['uuid'] = fmb.models.sync.uuid;
       options.data = JSON.stringify(data);
     } else {
       options.data = {
-        'auth_token': fmb.models.sync.authToken,
+        'api_token': fmb.models.sync.apiToken,
         'uuid': fmb.models.sync.uuid
       };
     }
@@ -107,7 +107,7 @@ fmb.models.sync = function(method, model, options) {
 /**
  * @type {string}
  */
-fmb.models.sync.authToken = null;
+fmb.models.sync.apiToken = null;
 
 
 // All sync calls do double duty.
@@ -267,9 +267,9 @@ fmb.Model.prototype.getTemplateData = function() {
 fmb.Model.prototype.parse = function(response, xhr) {
   //fmb.log('fmb.Model parse: ' + this.id + ', ' + JSON.stringify(response));
 
-  if (response['auth_token'] && !fmb.models.sync.authToken) {
+  if (response['api_token'] && !fmb.models.sync.apiToken) {
     //fmb.log('SETTING AUTH TOKEN')
-    fmb.models.sync.authToken = response['auth_token'];
+    fmb.models.sync.apiToken = response['api_token'];
   }
 
   // Always store server data to localStorage.
@@ -344,8 +344,8 @@ fmb.models.Profile = fmb.Model.extend({
 
 /** @inheritDoc */
 fmb.models.Profile.prototype.initialize = function(options) {
-  this.once('change:auth_token', function() {
-    fmb.models.sync.authToken = this.get('auth_token');
+  this.once('change:api_token', function() {
+    fmb.models.sync.apiToken = this.get('api_token');
   }, this);
 };
 

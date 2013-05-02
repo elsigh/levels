@@ -46,7 +46,7 @@ public class PhoneDiedAlarm extends BroadcastReceiver {
 
     private String updatePath = "";
     private String uuid = "";
-    private String authToken = "";
+    private String apiToken = "";
     private String updateFrequency = "";
 
     public static HttpResponse makeRequest(String updatePath, JSONObject json) throws Exception {
@@ -108,8 +108,8 @@ public class PhoneDiedAlarm extends BroadcastReceiver {
     }
 
     public void SendBatteryStatus(Context context, String updatePath,
-                                  String uuid, String authToken) {
-        Log.d(TAG, "SendBatteryStatus: " + updatePath + ", " + uuid + ", " + authToken);
+                                  String uuid, String apiToken) {
+        Log.d(TAG, "SendBatteryStatus: " + updatePath + ", " + uuid + ", " + apiToken);
 
         AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         ConnectivityManager connManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -163,7 +163,7 @@ public class PhoneDiedAlarm extends BroadcastReceiver {
 
         JSONObject json = new JSONObject();
         try {
-            json.put("auth_token", authToken);
+            json.put("api_token", apiToken);
             json.put("uuid", uuid);
             json.put("is_charging", isChargingInt);
             json.put("battery_level", batteryPercent);
@@ -203,25 +203,25 @@ public class PhoneDiedAlarm extends BroadcastReceiver {
                 getSharedPreferences(PREFS_NAME, 0);
         String updatePath = settings.getString(PhoneDiedService.EXTRAS_UPDATE_PATH, null);
         String uuid = settings.getString(PhoneDiedService.EXTRAS_UUID, null);
-        String authToken = settings.getString(PhoneDiedService.EXTRAS_AUTH_TOKEN, null);
-        Log.d(TAG, "onReceive w/ prefs: " + updatePath + ", " + uuid + ", " + authToken);
+        String apiToken = settings.getString(PhoneDiedService.EXTRAS_API_TOKEN, null);
+        Log.d(TAG, "onReceive w/ prefs: " + updatePath + ", " + uuid + ", " + apiToken);
 
-        if (updatePath != null && uuid != null && authToken != null) {
-            SendBatteryStatus(context, updatePath, uuid, authToken);
+        if (updatePath != null && uuid != null && apiToken != null) {
+            SendBatteryStatus(context, updatePath, uuid, apiToken);
         } else {
             Log.d(TAG, "Unable to SendBatteryStatus - too damn much null!");
         }
     }
 
     public void SetPrefs(Context context, String updatePath, String uuid,
-                         String authToken, String updateFrequency) {
-        Log.d(TAG, "SetPrefs: " + updatePath + ", " + uuid + ", " + authToken +
+                         String apiToken, String updateFrequency) {
+        Log.d(TAG, "SetPrefs: " + updatePath + ", " + uuid + ", " + apiToken +
               ", " + updateFrequency);
 
         SharedPreferences settings = context.getApplicationContext().
                 getSharedPreferences(PREFS_NAME, 0);
         SharedPreferences.Editor editor = settings.edit();
-        editor.putString(PhoneDiedService.EXTRAS_AUTH_TOKEN, authToken);
+        editor.putString(PhoneDiedService.EXTRAS_API_TOKEN, apiToken);
         editor.putString(PhoneDiedService.EXTRAS_UUID, uuid);
         editor.putString(PhoneDiedService.EXTRAS_UPDATE_PATH, updatePath);
         editor.putString(PhoneDiedService.EXTRAS_UPDATE_FREQUENCY, updateFrequency);
