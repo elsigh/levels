@@ -60,41 +60,20 @@
 
     <script id="tpl_account" type="text/html">
       <h2>Account</h2>
-      {{^profile.username}}
+      {{^user.api_token}}
         <h3>Welcome to the App!</h3>
         <p>
-          Pick a user name. Maybe one your
-          friends are already familiar with. (It's how they'll find you here)
+          <button class="gplus-login">G+ Login</button>
         </p>
-        <form method="post"
-          class="profile-create"
-          action="{{api_server}}/api/profile/">
-          <div>
-            <label>
-              name:
-              <input type="text" name="username">
-            </label>
+      {{/user.api_token}}
 
-            <div class="username-taken-err">
-              Dang!
-              <code class="username-taken"></code>
-              is already taken. Try another name.
-            </div>
-          </div>
-          <input type="submit">
-        </form>
-
-        <p>
-        <button class="gplus-login">G+ Login</button>
-      {{/profile.username}}
-
-      {{#profile.username}}
+      {{#user.api_token}}
         <form method="post"
           class="device-update"
-          action="{{api_server}}/api/device/{{device.uuid}}">
+          action="{{api_server}}/api/device">
           <div>
             <label class="username">
-              <code>{{profile.username}}</code>
+              <code>{{user.name}}</code>
             </label>
           </div>
 
@@ -145,7 +124,7 @@
 
           <!--<input type="submit">-->
         </form>
-      {{/profile.username}}
+      {{/user.api_token}}
     </script>
 
     <script id="tpl_following" type="text/html">
@@ -164,7 +143,7 @@
 
           {{#this_phone}}
             <tr>
-              <td>{{profile.username}}</td>
+              <td>{{user.name}}</td>
               <td class="battery-level-c charging-{{settings.is_charging}}">
                 <div class="battery-level"
                   style="background-image:-webkit-gradient(linear, left top, right top, color-stop({{settings.battery_level}}%, green), color-stop({{settings.battery_level}}%, white))">
@@ -180,11 +159,11 @@
           {{/this_phone}}
 
           {{#following}}
-            {{#profile}}
+            {{#user}}
               {{#devices}}
                 <tr>
                   <td>
-                    <span class="following-username">{{profile.username}}</span>
+                    <span class="following-username">{{user.name}}</span>
                   </td>
                   <td class="battery-level-c charging-{{settings.is_charging}}">
                     <div class="battery-level"
@@ -197,11 +176,11 @@
                   </td>
                   <td>{{device.name}}</td>
                   <td class="remove-cell">
-                    <div class="remove" data-username="{{profile.username}}">X</div>
+                    <div class="remove" data-username="{{user.name}}">X</div>
                   </td>
                 </tr>
               {{/devices}}
-            {{/profile}}
+            {{/user}}
           {{/following}}
         </tbody>
         <tfoot>

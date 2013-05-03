@@ -22,18 +22,17 @@ import settings
 
 
 class ProfileHandler(WebRequestHandler):
-  def get(self, key=None):
+  def get(self, user_key=None):
     """Handles GET /profile"""
 
-    if self.logged_in and key is None:
+    if self.logged_in and user_key is None:
       self.output_response({
         'user': self.current_user,
         'session': self.auth.get_user_by_session()
       }, 'profile.html')
 
-    elif key is not None:
-        user_key = ndb.Key(urlsafe=key)
-        user = user_key.get()
+    elif user_key is not None:
+        user = ndb.Key(urlsafe=user_key).get()
         logging.info('user: %s', user.to_dict())
 
         template_data = user.get_template_data()
