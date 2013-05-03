@@ -1,5 +1,5 @@
 
-{% extends 'base.html' %}
+{% extends "base.html" %}
 
 {% block head %}
   <link rel="stylesheet" href="/static/css/index.css">
@@ -75,8 +75,12 @@
       <img src="{{ user.avatar_url }}">
     </div>
     <div class="body">
-      <h1 style="margin-top: 0; padding-top: 0">{{ user.name }}</h1>
-      <p><a href="{{ user.link }}" target="_blank" rel="nofollow">{{ user.link }}</a></p>
+      <h1 style="margin-top: 0; padding-top: 0">
+        {{ user.name }}
+      </h1>
+      <p>
+        <a href="{{ user.link }}" target="_blank" rel="nofollow">{{ user.link }}</a>
+      </p>
     </div>
   </div>
 

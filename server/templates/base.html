@@ -20,6 +20,8 @@
          smoothing fonts for easy reading -->
     <meta http-equiv="cleartype" content="on">
 
+    <link rel="stylesheet" href="/static/css/base.css">
+
     {% block head %}{% endblock %}
 
   </head>
@@ -32,8 +34,18 @@
       {% if user_agent.os.family %} {{user_agent.os.family}} {{user_agent.os.family}}-{{user_agent.os.major}} {{user_agent.os.family}}-{{user_agent.os.major}}-{{user_agent.os.minor}}{% endif %}
       ">
 
-      {% block body %}
-      {% endblock %}
+      <div class="nav">
+        {% if logged_in %}
+          <a href="/logout?continue={{url_path}}">sign out</a>
+        {% else %}
+          <a href="/login">sign in</a>
+        {% endif %}
+      </div>
+
+      <div class="content">
+        {% block body %}
+        {% endblock %}
+      </div>
 
   </body>
 </html>

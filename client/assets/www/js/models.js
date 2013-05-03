@@ -17,7 +17,6 @@ fmb.models.SERVER_LOCAL = 'http://localhost:8080';
  */
 fmb.models.SERVER_PROD = 'http://www.followmybattery.com';
 
-
 /**
  * @type {string}
  */

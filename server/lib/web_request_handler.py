@@ -137,6 +137,7 @@ class WebRequestHandler(webapp2.RequestHandler):
             'user_agent_json': json.dumps(self._user_agent),
             'build_version': self.version,
             'url_for': self.uri_for,
+            'url_path': self.request.path,
             'logged_in': self.logged_in,
             'flashes': self.session.get_flashes(),
         })

@@ -38,7 +38,7 @@ routes = [
     Route('/api/notifying', handler='lib.api.ApiNotifyingRequestHandler'),
 
     # AUTH
-    Route('/login', handler='lib.auth.RootHandler'),
+    Route('/login', handler='lib.auth.LoginHandler'),
     Route('/logout', handler='lib.auth.AuthHandler:logout', name='logout'),
     Route('/auth/<provider>', handler='lib.auth.AuthHandler:_simple_auth',
           name='auth_login'),
