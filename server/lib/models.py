@@ -18,6 +18,7 @@ import datetime
 import time
 
 from google.appengine.ext import ndb
+from ndb import model
 
 
 # Note we get user from webapp2_extras.

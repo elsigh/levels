@@ -154,7 +154,7 @@ fmb.App.prototype.initHistory_ = function() {
   });
   if (!matchedRoute) {
     console.warn('No matchedRoute in initHistory');
-    if (this.model.profile && this.model.profile.get('username')) {
+    if (this.model.user && this.model.user.get('api_token')) {
       this.navigate(fmb.App.Routes.FOLLOWING.url, {trigger: true});
     } else {
       this.navigate(fmb.App.Routes.ACCOUNT.url, {trigger: true});
@@ -185,9 +185,9 @@ fmb.App.prototype.checkIntent_ = function() {
         fmb.log('checkIntent_ getUri:' + url);
         var match = fmb.App.FOLLOWING_URL_RE.exec(url);
         if (match && match.length) {
-          var username = match[1];
+          var userKey = match[1];
           _.delay(_.bind(function() {
-            app.model.following.addByUsername(username);
+            app.model.following.addByUserKey(userKey);
           }, window['app']), 300);
         }
       });

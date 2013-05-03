@@ -28,15 +28,14 @@ app_config = {
 
 routes = [
     # API
-    Route('/api/user/device/<uuid>', handler='lib.api.ApiUserDeviceRequestHandler'),
-    Route('/api/user/<key>', handler='lib.api.ApiUserRequestHandler'),
-    #Route('/api/user/(.*)', handler='lib.api.ApiUserRequestHandler'),
-    Route('/api/device/<uuid>', handler='lib.api.ApiDeviceRequestHandler'),
-    Route('/api/settings/<uuid>', handler='lib.api.ApiSettingsRequestHandler'),
-    Route('/api/following/delete/<key>', handler='lib.api.ApiFollowingDeleteRequestHandler'),
-    Route('/api/following/<key>', handler='lib.api.ApiFollowingRequestHandler'),
-    Route('/api/notifying/delete/<device_key>', handler='lib.api.ApiNotifyingDeleteRequestHandler'),
-    Route('/api/notifying/<device_key>', handler='lib.api.ApiNotifyingRequestHandler'),
+    Route('/api/user/device', handler='lib.api.ApiUserDeviceRequestHandler'),
+    Route('/api/user', handler='lib.api.ApiUserRequestHandler'),
+    Route('/api/device', handler='lib.api.ApiDeviceRequestHandler'),
+    Route('/api/settings', handler='lib.api.ApiSettingsRequestHandler'),
+    Route('/api/following/delete', handler='lib.api.ApiFollowingDeleteRequestHandler'),
+    Route('/api/following', handler='lib.api.ApiFollowingRequestHandler'),
+    Route('/api/notifying/delete', handler='lib.api.ApiNotifyingDeleteRequestHandler'),
+    Route('/api/notifying', handler='lib.api.ApiNotifyingRequestHandler'),
 
     # AUTH
     Route('/login', handler='lib.auth.RootHandler'),
@@ -48,7 +47,7 @@ routes = [
           name='auth_callback'),
 
     # WWW
-    Route('/profile/<key>', handler='lib.www.ProfileHandler'),
+    Route('/profile/<user_key>', handler='lib.www.ProfileHandler'),
     Route('/profile', handler='lib.www.ProfileHandler'),
 ]
 

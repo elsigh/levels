@@ -20,6 +20,8 @@ from webapp2_extras.appengine.auth.models import User
 import unittest
 import webtest
 
+from lib.web_request_handler import WebRequestHandler
+from lib import api
 from lib import controllers
 from lib import models
 
@@ -36,6 +38,7 @@ class RequestHandlerTest(unittest.TestCase):
 
     def tearDown(self):
         self.testbed.deactivate()
+        WebRequestHandler.unit_test_current_user = None
 
     # def test_ApiUserRequestHandler(self):
     #     self.testapp.get('/api/user/foo', status=404)
@@ -72,24 +75,25 @@ class RequestHandlerTest(unittest.TestCase):
             api_token='test_api_token'
         )
         user.put()
+        WebRequestHandler.unit_test_current_user = user
 
         # Without an api_token, we should bomb.
-        response = self.testapp.post_json('/api/device/some_uuid',
-                                          params=dict(uuid='test_device_uuid',
+        response = self.testapp.post_json('/api/device',
+                                          params=dict(device_uuid='test_device_uuid',
                                                       user_agent_string='ua'),
                                           status=500)
 
         # Without a *matching* api_token, we should bomb.
-        response = self.testapp.post_json('/api/device/some_uuid',
+        response = self.testapp.post_json('/api/device',
                                           params=dict(api_token='NOMATCH',
-                                                      uuid='test_device_uuid',
+                                                      device_uuid='test_device_uuid',
                                                       user_agent_string='ua'),
                                           status=500)
 
         # Create a device associated with that user.
-        response = self.testapp.post_json('/api/device/some_uuid',
+        response = self.testapp.post_json('/api/device',
                                           params=dict(api_token='test_api_token',
-                                                      uuid='test_device_uuid',
+                                                      device_uuid='test_device_uuid',
                                                       user_agent_string='ua',
                                                       update_enabled='1',
                                                       update_frequency='20',
@@ -101,15 +105,15 @@ class RequestHandlerTest(unittest.TestCase):
         self.assertEquals(1, obj['update_enabled'])
 
         # Test an ancestor query
-        q = models.Device.query().ancestor(user.key)
+        q = models.Device.query(ancestor=user.key)
         self.assertEquals(1, q.count())
         query_device = q.get()
         self.assertEquals('test_device_uuid', query_device.uuid)
 
         # Tests an update to that device.
-        response = self.testapp.post_json('/api/device/some_uuid',
+        response = self.testapp.post_json('/api/device',
                                           params=dict(api_token='test_api_token',
-                                                      uuid='test_device_uuid',
+                                                      device_uuid='test_device_uuid',
                                                       user_agent_string='ua',
                                                       update_enabled='0',
                                                       update_frequency='20',
@@ -127,19 +131,21 @@ class RequestHandlerTest(unittest.TestCase):
             api_token='test_api_token'
         )
         elsigh_user.put()
+        WebRequestHandler.unit_test_current_user = elsigh_user
 
         elsigh_device = models.Device(
             uuid='test_device_uuid',
-            parent=elsigh_user,
+            parent=elsigh_user.key,
             notify_level=10
         )
         elsigh_device.put()
 
-        response = self.testapp.post_json('/api/settings/test_device_uuid',
+        response = self.testapp.post_json('/api/settings',
                                           params=dict(api_token='test_api_token',
-                                                      uuid='test_device_uuid',
+                                                      device_uuid='test_device_uuid',
                                                       battery_level=82,
                                                       is_charging=0))
+
 
         body = response.normal_body
         obj = json.loads(body)
@@ -149,9 +155,9 @@ class RequestHandlerTest(unittest.TestCase):
         tasks = self.taskqueue_stub.GetTasks('default')
         self.assertEqual(0, len(tasks))
 
-        response = self.testapp.post_json('/api/settings/test_device_uuid',
+        response = self.testapp.post_json('/api/settings',
                                           params=dict(api_token='test_api_token',
-                                                      uuid='test_device_uuid',
+                                                      device_uuid='test_device_uuid',
                                                       battery_level=9,
                                                       is_charging=0))
         body = response.normal_body
@@ -162,9 +168,9 @@ class RequestHandlerTest(unittest.TestCase):
         tasks = self.taskqueue_stub.GetTasks('default')
         self.assertEqual(1, len(tasks))
 
-        response = self.testapp.post_json('/api/settings/test_device_uuid',
+        response = self.testapp.post_json('/api/settings',
                                           params=dict(api_token='test_api_token',
-                                                      uuid='test_device_uuid',
+                                                      device_uuid='test_device_uuid',
                                                       battery_level=11,
                                                       is_charging=0))
         body = response.normal_body
@@ -179,6 +185,7 @@ class RequestHandlerTest(unittest.TestCase):
             api_token='elsigh_api_token'
         )
         user.put()
+        WebRequestHandler.unit_test_current_user = user
 
         jr_user = User(
             id='jr_id',
@@ -189,20 +196,20 @@ class RequestHandlerTest(unittest.TestCase):
 
         jr_device = models.Device(
             uuid='jr_uuid',
-            parent=jr_user
+            parent=jr_user.key
         )
         jr_device.put()
 
         jr_settings = models.Settings(
-           parent=jr_device,
+           parent=jr_device.key,
            battery_level=75,
            is_charging=1
         )
         jr_settings.put()
 
         jr_following = models.Following(
-            following=jr_user,
-            parent=user
+            following=jr_user.key,
+            parent=user.key
         )
         jr_following.put()
 
@@ -215,29 +222,30 @@ class RequestHandlerTest(unittest.TestCase):
 
         ded_device = models.Device(
             uuid='ded_uuid',
-            parent=ded_user
+            parent=ded_user.key
         )
         ded_device.put()
 
         ded_settings = models.Settings(
-           parent=ded_device,
+           parent=ded_device.key,
            battery_level=35,
            is_charging=0
         )
         ded_settings.put()
 
         ded_following = models.Following(
-            following=ded_user,
-            parent=user
+            following=ded_user.key,
+            parent=user.key
         )
         ded_following.put()
 
         # Gut check on the ancestor query thing.
-        q = models.Following.query().ancestor(user.key)
+        q = models.Following.query(ancestor=user.key)
         self.assertEquals(2, q.count())
 
-        response = self.testapp.get('/api/following/elsigh',
-                                    params=dict(api_token='elsigh_api_token'))
+        response = self.testapp.get('/api/following',
+                                    params=dict(api_token='elsigh_api_token',
+                                                user_key='elsigh'))
         body = response.normal_body
         obj = json.loads(body)
         self.assertEquals(2, len(obj['following']))
@@ -249,6 +257,7 @@ class RequestHandlerTest(unittest.TestCase):
             api_token='elsigh_api_token'
         )
         user.put()
+        WebRequestHandler.unit_test_current_user = user
 
         ded_user = User(
             id='ded_id',
@@ -256,19 +265,20 @@ class RequestHandlerTest(unittest.TestCase):
             api_token='ded_api_token'
         )
         ded_user.put()
-
-        response = self.testapp.post_json('/api/following/elsighmon',
+        logging.info('DED KEY:: %s', ded_user.key.urlsafe())
+        response = self.testapp.post_json('/api/following',
                                           params=dict(api_token='elsigh_api_token',
-                                                      name='ded'))
+                                                      user_key=ded_user.key.urlsafe()))
+        return
 
         body = response.normal_body
         obj = json.loads(body)
         self.assertEquals('ded', obj['name'])
 
         # Trying to follow ded again should error.
-        response = self.testapp.post_json('/api/following/elsighmon',
+        response = self.testapp.post_json('/api/following',
                                           params=dict(api_token='elsigh_api_token',
-                                                      name='ded'),
+                                                      user_key=ded_user.key.urlsafe()),
                                           status=409)
         body = response.normal_body
         obj = json.loads(body)
@@ -281,6 +291,7 @@ class RequestHandlerTest(unittest.TestCase):
             api_token='elsigh_api_token'
         )
         elsigh_user.put()
+        WebRequestHandler.unit_test_current_user = elsigh_user
 
         ded_user = User(
             id='ded_id',
@@ -290,29 +301,29 @@ class RequestHandlerTest(unittest.TestCase):
         ded_user.put()
 
         following = models.Following(
-            parent=elsigh_user,
-            following=ded_user
+            parent=elsigh_user.key,
+            following=ded_user.key
         )
         following.put()
 
-        q = models.Following.query().ancestor(elsigh_user.key)
+        q = models.Following.query(ancestor=elsigh_user.key)
         self.assertEquals(1, q.count())
 
-        response = self.testapp.post_json('/api/following/delete/elsighmon',
+        response = self.testapp.post_json('/api/following/delete',
                                           params=dict(api_token='elsigh_api_token',
-                                                      name='ded'))
+                                                      user_key=ded_user.key.urlsafe()))
 
         body = response.normal_body
         obj = json.loads(body)
         self.assertEquals('ded', obj['name'])
 
-        q = models.Following.query().ancestor(elsigh_user.key)
+        q = models.Following.query(ancestor=elsigh_user.key)
         self.assertEquals(0, q.count())
 
         # Trying to delete ded again should error.
-        self.testapp.post_json('/api/following/delete/elsighmon',
+        self.testapp.post_json('/api/following/delete',
                                params=dict(api_token='elsigh_api_token',
-                                           name='ded'),
+                                           user_key=ded_user.key.urlsafe()),
                                status=404)
 
     def test_ApiNotifyingRequestHandler_get(self):
@@ -322,15 +333,16 @@ class RequestHandlerTest(unittest.TestCase):
             api_token='elsigh_api_token'
         )
         elsigh_user.put()
+        WebRequestHandler.unit_test_current_user = elsigh_user
 
         elsigh_device = models.Device(
             uuid='elsigh_uuid',
-            parent=elsigh_user
+            parent=elsigh_user.key
         )
         elsigh_device.put()
 
         ded_notifying = models.Notifying(
-            parent=elsigh_device,
+            parent=elsigh_device.key,
             means='4152223333',
             name='Dustin Diaz',
             type='phone'
@@ -338,7 +350,7 @@ class RequestHandlerTest(unittest.TestCase):
         ded_notifying.put()
 
         jr_notifying = models.Notifying(
-            parent=elsigh_device,
+            parent=elsigh_device.key,
             means='4158889999',
             name='John Forsythe',
             type='phone'
@@ -346,12 +358,12 @@ class RequestHandlerTest(unittest.TestCase):
         jr_notifying.put()
 
         # Gut check on the ancestor query thing.
-        q = models.Notifying.query().ancestor(elsigh_device.key)
+        q = models.Notifying.query(ancestor=elsigh_device.key)
         self.assertEquals(2, q.count())
 
-        response = self.testapp.get('/api/notifying/elsigh',
+        response = self.testapp.get('/api/notifying',
                                     params=dict(api_token='elsigh_api_token',
-                                                uuid='elsigh_uuid'))
+                                                device_uuid='elsigh_uuid'))
         body = response.normal_body
         obj = json.loads(body)
         self.assertEquals(2, len(obj['notifying']))
@@ -363,27 +375,28 @@ class RequestHandlerTest(unittest.TestCase):
             api_token='elsigh_api_token'
         )
         elsigh_user.put()
+        WebRequestHandler.unit_test_current_user = elsigh_user
 
         elsigh_device = models.Device(
             uuid='elsigh_uuid',
-            parent=elsigh_user
+            parent=elsigh_user.key
         )
         elsigh_device.put()
 
-        response = self.testapp.post_json('/api/notifying/elsighmon',
+        response = self.testapp.post_json('/api/notifying',
                                           params=dict(api_token='elsigh_api_token',
-                                                      uuid=elsigh_device.uuid,
+                                                      device_uuid=elsigh_device.uuid,
                                                       means='4152223333',
                                                       name='Dustin Diaz',
                                                       type='phone'))
         self.assertNotEquals(None, response)
-        q = models.Notifying.query().ancestor(elsigh_device.key)
+        q = models.Notifying.query(ancestor=elsigh_device.key)
         self.assertEquals(1, q.count())
 
         # Trying to notify them again should error.
-        response = self.testapp.post_json('/api/notifying/elsighmon',
+        response = self.testapp.post_json('/api/notifying',
                                           params=dict(api_token='elsigh_api_token',
-                                                      uuid=elsigh_device.uuid,
+                                                      device_uuid=elsigh_device.uuid,
                                                       means='4152223333'),
                                           status=409)
         body = response.normal_body
@@ -397,36 +410,37 @@ class RequestHandlerTest(unittest.TestCase):
             api_token='elsigh_api_token'
         )
         elsigh_user.put()
+        WebRequestHandler.unit_test_current_user = elsigh_user
 
         elsigh_device = models.Device(
             uuid='elsigh_uuid',
-            parent=elsigh_user
+            parent=elsigh_user.key
         )
         elsigh_device.put()
 
         ded_notifying = models.Notifying(
-            parent=elsigh_device,
+            parent=elsigh_device.key,
             means='4152223333',
             name='Dustin Diaz',
             type='phone'
         )
         ded_notifying.put()
 
-        q = models.Notifying.query().ancestor(elsigh_device.key)
+        q = models.Notifying.query(ancestor=elsigh_device.key)
         self.assertEquals(1, q.count())
 
-        response = self.testapp.post_json('/api/notifying/delete/elsighmon',
+        response = self.testapp.post_json('/api/notifying/delete',
                                           params=dict(api_token='elsigh_api_token',
-                                                      uuid=elsigh_device.uuid,
+                                                      device_uuid=elsigh_device.uuid,
                                                       means='4152223333'))
         self.assertNotEquals(None, response)
-        q = models.Notifying.query().ancestor(elsigh_device.key)
+        q = models.Notifying.query(ancestor=elsigh_device.key)
         self.assertEquals(0, q.count())
 
         # Trying to delete ded again should error.
-        self.testapp.post_json('/api/notifying/delete/elsighmon',
+        self.testapp.post_json('/api/notifying/delete',
                                params=dict(api_token='elsigh_api_token',
-                                           uuid=elsigh_device.uuid,
+                                           device_uuid=elsigh_device.uuid,
                                            means='4152223333'),
                                status=404)
 
@@ -440,12 +454,12 @@ class RequestHandlerTest(unittest.TestCase):
 
         elsigh_device = models.Device(
             uuid='elsigh_uuid',
-            parent=elsigh_user
+            parent=elsigh_user.key
         )
         elsigh_device.put()
 
         ded_notifying = models.Notifying(
-            parent=elsigh_device,
+            parent=elsigh_device.key,
             means='4152223333',
             name='Dustin Diaz',
             type='phone'
@@ -455,8 +469,8 @@ class RequestHandlerTest(unittest.TestCase):
         tasks = self.taskqueue_stub.GetTasks('default')
         self.assertEqual(0, len(tasks))
 
-        controllers.send_battery_notifications(elsigh_user.key.id(),
-                                               elsigh_device.key.id())
+        api.send_battery_notifications(elsigh_user.key.id(),
+                                       elsigh_device.key.id())
 
         tasks = self.taskqueue_stub.GetTasks('default')
         self.assertEqual(1, len(tasks))
@@ -471,32 +485,32 @@ class RequestHandlerTest(unittest.TestCase):
 
         elsigh_device = models.Device(
             uuid='elsigh_uuid',
-            parent=elsigh_user
+            parent=elsigh_user.key
         )
         elsigh_device.put()
 
         ded_notifying = models.Notifying(
-            parent=elsigh_device,
+            parent=elsigh_device.key,
             means='+15126989983',
             name='Dustin Diaz',
             type='phone'
         )
         ded_notifying.put()
 
-        controllers.send_battery_notification_phone(elsigh_user.key.id(),
-                                                    elsigh_device.key.id(),
-                                                    ded_notifying.key.id(),
-                                                    send=False)
+        api.send_battery_notification_phone(elsigh_user.key.id(),
+                                            elsigh_device.key.id(),
+                                            ded_notifying.key.id(),
+                                            send=False)
 
-        q = models.NotificationSent.query().ancestor(ded_notifying.key)
+        q = models.NotificationSent.query(ancestor=ded_notifying.key)
         self.assertEquals(1, q.count())
 
         # Try again, which should not send b/c time.
-        controllers.send_battery_notification_phone(elsigh_user.key.id(),
-                                                    elsigh_device.key.id(),
-                                                    ded_notifying.key.id(),
-                                                    send=False)
-        q = models.NotificationSent.query().ancestor(ded_notifying.key)
+        api.send_battery_notification_phone(elsigh_user.key.id(),
+                                            elsigh_device.key.id(),
+                                            ded_notifying.key.id(),
+                                            send=False)
+        q = models.NotificationSent.query(ancestor=ded_notifying.key)
         self.assertEquals(1, q.count())
 
     def test_send_battery_notification_email(self):
@@ -509,31 +523,31 @@ class RequestHandlerTest(unittest.TestCase):
 
         elsigh_device = models.Device(
             uuid='elsigh_uuid',
-            parent=elsigh_user
+            parent=elsigh_user.key
         )
         elsigh_device.put()
 
         ded_notifying = models.Notifying(
-            parent=elsigh_device,
+            parent=elsigh_device.key,
             means='elsigh@gmail.com',
             name='Dustin Diaz',
             type='phone'
         )
         ded_notifying.put()
 
-        controllers.send_battery_notification_email(elsigh_user.key.id(),
-                                                    elsigh_device.key.id(),
-                                                    ded_notifying.key.id(),
-                                                    send=False)
+        api.send_battery_notification_email(elsigh_user.key.id(),
+                                            elsigh_device.key.id(),
+                                            ded_notifying.key.id(),
+                                            send=False)
 
-        q = models.NotificationSent.query().ancestor(ded_notifying.key)
+        q = models.NotificationSent.query(ancestor=ded_notifying.key)
         self.assertEquals(1, q.count())
 
         # Try again, which should not send b/c time.
-        controllers.send_battery_notification_email(elsigh_user.key.id(),
-                                                    elsigh_device.key.id(),
-                                                    ded_notifying.key.id(),
-                                                    send=False)
-        q = models.NotificationSent.query().ancestor(ded_notifying.key)
+        api.send_battery_notification_email(elsigh_user.key.id(),
+                                            elsigh_device.key.id(),
+                                            ded_notifying.key.id(),
+                                            send=False)
+        q = models.NotificationSent.query(ancestor=ded_notifying.key)
         self.assertEquals(1, q.count())
 

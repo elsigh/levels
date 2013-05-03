@@ -101,8 +101,8 @@ fmb.views.App.prototype.initialize = function(options) {
 fmb.views.App.prototype.onClickShare_ = function(e) {
   fmb.log('fmb.views.App.onClickShare_', e);
   e.preventDefault();
-  if (!this.model.profile.get('username')) {
-    fmb.log('Gotta get a username before sharing.');
+  if (!this.model.user.get('api_token')) {
+    fmb.log('Gotta get a api_token before sharing.');
     return;
   }
   this.$('.tabs .share').addClass('selected');
@@ -111,8 +111,8 @@ fmb.views.App.prototype.onClickShare_ = function(e) {
   }, this), 500);
 
   var extras = {};
-  extras[WebIntent.EXTRA_TEXT] = fmb.models.SERVER + '/' +
-      this.model.profile.get('username');
+  extras[WebIntent.EXTRA_TEXT] = fmb.models.SERVER + '/profile/' +
+      this.model.user.get('key');
   extras[WebIntent.EXTRA_SUBJECT] = 'Follow my battery!';
   window.plugins.webintent.startActivity({
       action: WebIntent.ACTION_SEND,
@@ -134,8 +134,8 @@ fmb.views.App.prototype.onClickShare_ = function(e) {
 fmb.views.App.prototype.onClickTab_ = function(e) {
   fmb.log('fmb.views.App.onClickTab_', e);
   e.preventDefault();
-  if (!this.model.profile.get('username')) {
-    fmb.log('Gotta get a username before navigating.');
+  if (!this.model.user.get('api_token')) {
+    fmb.log('Gotta get a api_token before navigating.');
     return;
   }
   window['app'].navigate($(e.currentTarget).attr('href'),
@@ -173,7 +173,7 @@ fmb.views.App.prototype.transitionPage = function(route) {
   if (_.isEqual(fmb.App.Routes.ACCOUNT, route)) {
     if (!this.viewAccount) {
       this.viewAccount = new fmb.views.Account({
-        model: this.model.profile,
+        model: this.model.user,
         device: this.model.device
       });
     }
@@ -183,7 +183,7 @@ fmb.views.App.prototype.transitionPage = function(route) {
   } else if (_.isEqual(fmb.App.Routes.FOLLOWING, route)) {
     if (!this.viewFollowing) {
       this.viewFollowing = new fmb.views.Following({
-        profile: this.model.profile,
+        user: this.model.user,
         device: this.model.device,
         model: this.model.following
       });
@@ -194,7 +194,7 @@ fmb.views.App.prototype.transitionPage = function(route) {
   } else if (_.isEqual(fmb.App.Routes.NOTIFYING, route)) {
     if (!this.viewNotifying) {
       this.viewNotifying = new fmb.views.Notifying({
-        profile: this.model.profile,
+        user: this.model.user,
         device: this.model.device,
         model: this.model.notifying
       });
@@ -218,9 +218,7 @@ fmb.views.App.prototype.transitionPage = function(route) {
 fmb.views.Account = Backbone.View.extend({
   el: '.fmb-account',
   events: {
-    'tap form.profile-create input[type="submit"]': 'onSubmitCreateProfile_',
-    'tap .gplus-login': '',
-    'submit form.profile-create': 'onSubmitCreateProfile_',
+    'tap .gplus-login': 'onClickLogin_',
     'submit form.device-update': 'onSubmitUpdateDevice_',
     'tap input[type="radio"]': 'onChangeUpdateEnabled_',
     'change [name="update_frequency"]': 'onChangeUpdateFrequency_'
@@ -241,7 +239,7 @@ fmb.views.Account.prototype.initialize = function(options) {
 fmb.views.Account.prototype.render = function() {
   fmb.log('views.Account render');
   var templateData = {
-    'profile': this.model.getTemplateData(),
+    'user': this.model.getTemplateData(),
     'device': this.device.getTemplateData()
   };
   this.$el.html(fmb.views.getTemplateHtml('account', templateData));
@@ -253,59 +251,11 @@ fmb.views.Account.prototype.render = function() {
 
 
 /**
- * @param {Event} e A submit event.
+ * @param {Event} e A change event.
  * @private
  */
-fmb.views.Account.prototype.onSubmitCreateProfile_ = function(e) {
-  fmb.log('onSubmitCreateProfile_');
-  e.preventDefault();
-  var $form = this.$('form.profile-create');
-  var data = fmb.views.serializeFormToObject($form);
-
-  // First we need to check if this username is available.
-  var username = data['username'];
-
-  if (username.length < 3) {
-    this.$('.username-taken').text(username);
-    this.$('.username-taken-err').addClass('fmb-active');
-    this.$('input[name="username"]').val('').focus();
-    return;
-  }
-
-  var usernameChecker = new fmb.models.ProfileNameChecker({
-    username: username,
-    uuid: this.device.get('uuid')
-  });
-
-  this.$('.username-taken-err').removeClass('fmb-active');
-  usernameChecker.fetch({
-    success: _.bind(function(model, response, options) {
-      // If we got a success callback, then this username is already
-      // taken and found on our server.
-      this.$('.username-taken').text(username);
-      this.$('.username-taken-err').addClass('fmb-active');
-      this.$('input[name="username"]').val('').focus();
-    }, this),
-
-    error: _.bind(function(model, xhr, options) {
-      // All bueno, we can proceed to create the profile.
-      if (xhr.status === 404) {
-        this.model.save(data, {
-          success: _.bind(function(model, response) {
-            fmb.log('profile response::', response);
-            // And save the device record to the server once the profile's
-            // done, aka after api_token comes back from the server.
-            if (response && response['api_token']) {
-              _.delay(_.bind(this.device.saveToServer, this.device), 500);
-            }
-          }, this)
-        });
-      } else {
-        alert('Yikes, you might be offline. Or else our server is ;/');
-      }
-    }, this)
-
-  });
+fmb.views.Account.prototype.onClickLogin_ = function() {
+  document.location = fmb.models.SERVER + '/auth/google';
 };
 
 
@@ -383,7 +333,7 @@ fmb.views.Notifying = Backbone.View.extend({
 
 /** @inheritDoc */
 fmb.views.Notifying.prototype.initialize = function(options) {
-  this.profile = options.profile;
+  this.user = options.user;
   this.device = options.device;
   this.model.on('all', this.render, this);
 };
@@ -394,7 +344,7 @@ fmb.views.Notifying.prototype.render = _.debounce(function() {
   fmb.log('Notifying render.');
   var templateData = {
     'notifying': this.model.toJSON(),
-    'profile': this.profile.getTemplateData(),
+    'user': this.user.getTemplateData(),
     'device': this.device.getTemplateData()
   };
   this.$el.html(fmb.views.getTemplateHtml('notifying', templateData));
@@ -490,8 +440,7 @@ fmb.views.Notifying.prototype.onClickRemove_ = function(e) {
 fmb.views.Following = Backbone.View.extend({
   el: '.fmb-following',
   events: {
-    'tap .follow-add-phone': 'onClickFollowAdd_',
-    'tap .following-username': 'onClickFollowingUsername_',
+    'tap .following-user': 'onClickFollowingUser_',
     'tap .remove': 'onClickRemove_'
   }
 });
@@ -499,7 +448,7 @@ fmb.views.Following = Backbone.View.extend({
 
 /** @inheritDoc */
 fmb.views.Following.prototype.initialize = function(options) {
-  this.profile = options.profile;
+  this.user = options.user;
   this.device = options.device;
   this.model.on('all', this.onAll_, this);
   this.device.on('battery_status', this.render, this);
@@ -541,7 +490,7 @@ fmb.views.Following.prototype.onAll_ = function(event) {
 /** @inheritDoc */
 fmb.views.Following.prototype.render = _.debounce(function() {
   var thisPhoneTemplateData = {
-    'profile': this.profile.getTemplateData(),
+    'user': this.user.getTemplateData(),
     'device': this.device.getTemplateData(),
     'settings': {
       'created_pretty': 'live!',
@@ -566,15 +515,16 @@ fmb.views.Following.prototype.render = _.debounce(function() {
  * @param {Event} e A click event.
  * @private
  */
-fmb.views.Following.prototype.onClickFollowingUsername_ = function(e) {
+fmb.views.Following.prototype.onClickFollowingUser_ = function(e) {
+  return; // TODO(elsigh): Something fun like this.
   var extras = {};
-  extras[WebIntent.EXTRA_TEXT] = fmb.models.SERVER + '/' +
-      this.model.profile.get('username');
+  extras[WebIntent.EXTRA_TEXT] = fmb.models.SERVER + '/profile/' +
+      this.model.user.get('key');
   extras[WebIntent.EXTRA_SUBJECT] = 'Dude, you need to charge your phone!';
   window.plugins.webintent.startActivity({
-      action: WebIntent.ACTION_SEND,
-      type: 'text/plain',
-      extras: extras
+    action: WebIntent.ACTION_SEND,
+    type: 'text/plain',
+    extras: extras
   }, function() {
       fmb.log('Share sent!');
   }, function () {
@@ -582,29 +532,19 @@ fmb.views.Following.prototype.onClickFollowingUsername_ = function(e) {
   });
 };
 
-/**
- * @param {Event} e A click event.
- * @private
- */
-fmb.views.Following.prototype.onClickFollowAdd_ = function(e) {
-  var username = window.prompt('Type in the username to follow.');
-  username && this.model.addByUsername(username);
-};
-
-
 
 /**
  * @param {Event} e A click event.
  * @private
  */
 fmb.views.Following.prototype.onClickRemove_ = function(e) {
-  var username = $(e.currentTarget).data('username');
-  var isSure = window.confirm('Really remove ' + username + ' from your list?');
+  var userKey = $(e.currentTarget).data('key');
+  var isSure = window.confirm('Really remove them from your list?');
   if (!isSure) {
     return;
   }
-  fmb.log('remove username', username);
-  this.model.removeByUsername(username);
+  fmb.log('fmb.views.Following onClickRemove_ userKey', userKey);
+  this.model.removeByUserKey(userKey);
 };
 
 
