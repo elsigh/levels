@@ -7,10 +7,15 @@ from lib.web_request_handler import WebRequestHandler
 from lib.external.simpleauth import SimpleAuthHandler
 
 
-class RootHandler(WebRequestHandler):
+class LoginHandler(WebRequestHandler):
   def get(self):
-    """Handles default langing page"""
-    self.output_response({}, 'home.html')
+    """Handles default landing page"""
+    if self.logged_in:
+      self.redirect('/profile/%s' % self.current_user.key.urlsafe())
+    elif self.request.get('r') == '0':
+      self.output_response({}, 'login.html')
+    else:
+      self.redirect('/auth/google')
 
 
 class AuthHandler(WebRequestHandler, SimpleAuthHandler):
@@ -118,11 +123,11 @@ class AuthHandler(WebRequestHandler, SimpleAuthHandler):
     self.session.add_flash(auth_info, 'auth_info - from _on_signin(...)')
 
     # Go to the profile page
-    self.redirect('/profile')
+    self.redirect('/profile/%s' % user.key.urlsafe())
 
   def logout(self):
     self.auth.unset_session()
-    self.redirect('/login')
+    self.redirect(self.request.get('continue', '/login?r=0'))
 
   def handle_exception(self, exception, debug):
     logging.error(exception)
