@@ -15,6 +15,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), 'external'))
 
 from google.appengine.api import mail
 from google.appengine.ext import ndb
+sys.modules['ndb'] = ndb
 from google.appengine.ext import deferred
 
 from webapp2_extras import jinja2
