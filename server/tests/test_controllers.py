@@ -40,7 +40,7 @@ class RequestHandlerTest(unittest.TestCase):
         self.testbed.deactivate()
         WebRequestHandler.unit_test_current_user = None
 
-    # def test_ApiUserRequestHandler(self):
+    # def test_ApiUserHandler(self):
     #     self.testapp.get('/api/user/foo', status=404)
 
     #     response = self.testapp.post_json('/api/user/',
@@ -68,7 +68,7 @@ class RequestHandlerTest(unittest.TestCase):
     #     self.assertEquals('elsigh', obj['name'])
     #     self.assertTrue('api_token' not in obj)
 
-    def test_ApiDeviceRequestHandler(self):
+    def test_ApiDeviceHandler(self):
         user = User(
             id='someid',
             name='elsighmon',
@@ -124,7 +124,7 @@ class RequestHandlerTest(unittest.TestCase):
         obj = json.loads(body)
         self.assertEquals(0, obj['update_enabled'])
 
-    def test_ApiSettingsRequestHandler(self):
+    def test_ApiSettingsHandler(self):
         elsigh_user = User(
             id='someid',
             name='elsighmon',
@@ -178,7 +178,7 @@ class RequestHandlerTest(unittest.TestCase):
         self.assertEquals(11, obj['battery_level'])
         self.assertTrue(obj['is_last_update_over_notify_level'])
 
-    def test_ApiFollowingRequestHandler(self):
+    def test_ApiFollowingHandler(self):
         user = User(
             id='someid',
             name='elsighmon',

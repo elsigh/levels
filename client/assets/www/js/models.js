@@ -16,6 +16,7 @@ fmb.models.SERVER_LOCAL = 'http://localhost:8080';
  * @type {string}
  */
 fmb.models.SERVER_PROD = 'http://www.followmybattery.com';
+fmb.models.SERVER_PROD = fmb.models.SERVER_LOCAL;
 
 /**
  * @type {string}
@@ -328,6 +329,30 @@ fmb.models.User.prototype.initialize = function(options) {
  */
 fmb.models.User.prototype.url = function() {
   return fmb.models.getApiUrl('/user');
+};
+
+
+/**
+ * @param {string} token A login request token.
+ */
+fmb.models.User.prototype.syncByToken = function(token) {
+  /*var tmpModel = new fmb.models.AjaxSyncModel();
+  tmpModel.url = function() {
+    return fmb.models.getApiUrl('/user/token');
+  };
+  */
+  this.save({
+    'user_token': token
+  }, {
+    url: fmb.models.getApiUrl('/user/token'),
+    success: _.bind(function(model, response) {
+      fmb.log('MONEY TRAIN!!', response);
+
+    }, this),
+    error: function(model, xhr, options) {
+      alert('LA BOMBA');
+    }
+  });
 };
 
 

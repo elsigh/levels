@@ -14,6 +14,7 @@ import uuid
 sys.path.append(os.path.join(os.path.dirname(__file__), 'external'))
 
 from google.appengine.api import mail
+from google.appengine.api import memcache
 from google.appengine.ext import ndb
 sys.modules['ndb'] = ndb
 from google.appengine.ext import deferred
@@ -23,7 +24,6 @@ from webapp2_extras.appengine.auth.models import User
 
 from lib.web_request_handler import WebRequestHandler
 from lib import models
-from lib import simpleauth_handlers
 
 from lib.external.twilio.rest import TwilioRestClient
 
@@ -113,7 +113,7 @@ class ApiRequestHandler(WebRequestHandler):
         self._device = device
 
 
-class ApiUserRequestHandler(ApiRequestHandler):
+class ApiUserHandler(ApiRequestHandler):
     def get(self):
         user = ndb.Key(urlsafe=self._json_request_data['user_key']).get()
         if not user:
@@ -125,18 +125,17 @@ class ApiUserRequestHandler(ApiRequestHandler):
 
 
 
-class ApiUserDeviceRequestHandler(ApiRequestHandler):
-    def get(self):
-        self.set_and_assert_device()
-        user = self._device.parent()
-        result = {
-            'user': user.to_dict(),
-            'device': self._device.to_dict()
-        }
-        return self.output_json_success(result)
+class ApiUserTokenHandler(ApiRequestHandler):
+    def post(self):
+        user_id = memcache.get('user_token-%s' %
+                               self._json_request_data['user_token'])
+        logging.info('user_id :: %s' % user_id)
+        assert user_id
+        user = ndb.Key('User', int(user_id)).get()
+        return self.output_json_success(user.to_dict())
 
 
-class ApiDeviceRequestHandler(ApiRequestHandler):
+class ApiDeviceHandler(ApiRequestHandler):
     def get(self, device_uuid=None):
         self.set_and_assert_device()
         return self.output_json_success(self._device.to_dict())
@@ -278,7 +277,7 @@ def send_battery_notifications(user_id, device_id):
                        notifying.key.id())
 
 
-class ApiSettingsRequestHandler(ApiRequestHandler):
+class ApiSettingsHandler(ApiRequestHandler):
     def post(self):
         self.assert_current_user_with_api_token()
         self.set_and_assert_device()
@@ -317,7 +316,7 @@ class ApiSettingsRequestHandler(ApiRequestHandler):
         return self.output_json_success(json_output)
 
 
-class ApiFollowingRequestHandler(ApiRequestHandler):
+class ApiFollowingHandler(ApiRequestHandler):
     def get(self):
         self.assert_current_user_with_api_token()
 
@@ -372,7 +371,7 @@ class ApiFollowingRequestHandler(ApiRequestHandler):
         return self.output_json_success(follow_user.to_dict())
 
 
-class ApiFollowingDeleteRequestHandler(ApiRequestHandler):
+class ApiFollowingDeleteHandler(ApiRequestHandler):
     def post(self):
         self.assert_current_user_with_api_token()
 
@@ -393,7 +392,7 @@ class ApiFollowingDeleteRequestHandler(ApiRequestHandler):
         return self.output_json_success(follow_user.to_dict())
 
 
-class ApiNotifyingRequestHandler(ApiRequestHandler):
+class ApiNotifyingHandler(ApiRequestHandler):
     def get(self):
         self.assert_current_user_with_api_token()
         self.set_and_assert_device()
@@ -428,7 +427,7 @@ class ApiNotifyingRequestHandler(ApiRequestHandler):
         return self.output_json_success(notifying.to_dict())
 
 
-class ApiNotifyingDeleteRequestHandler(ApiRequestHandler):
+class ApiNotifyingDeleteHandler(ApiRequestHandler):
     def post(self, device_key=None):
         self.assert_current_user_with_api_token()
         self.set_and_assert_device()

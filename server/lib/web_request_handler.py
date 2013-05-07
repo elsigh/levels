@@ -68,7 +68,9 @@ class WebRequestHandler(webapp2.RequestHandler):
     @webapp2.cached_property
     def logged_in(self):
         """Returns true if a user is currently logged in, false otherwise"""
-        return self.auth.get_user_by_session() is not None
+        user_by_session = self.auth.get_user_by_session()
+        logging.info('user_by_session: %s' % user_by_session)
+        return user_by_session is not None
 
     @webapp2.cached_property
     def is_production(self):
