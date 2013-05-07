@@ -250,12 +250,29 @@ fmb.views.Account.prototype.render = function() {
 };
 
 
+fmb.postMessage = function(msg) {
+  fmb.log('fmb.postMessage', msg, window.app);
+};
+
+
 /**
  * @param {Event} e A change event.
  * @private
  */
 fmb.views.Account.prototype.onClickLogin_ = function() {
-  document.location = fmb.models.SERVER + '/auth/google';
+  //document.location = fmb.models.SERVER + '/auth/google';
+  var userToken = fmb.models.getUid();
+  var ref = window.open(fmb.models.SERVER +
+                        '/login?user_token=' + window.escape(userToken),
+      '_blank',
+      'location=0');
+
+  var oauthInterval = window.setInterval(_.bind(function() {
+    if (ref.closed) {
+      window.clearInterval(oauthInterval);
+      this.model.syncByToken(userToken);
+    }
+  }, this), 500);
 };
 
 

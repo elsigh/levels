@@ -28,14 +28,14 @@ app_config = {
 
 routes = [
     # API
-    Route('/api/user/device', handler='lib.api.ApiUserDeviceRequestHandler'),
-    Route('/api/user', handler='lib.api.ApiUserRequestHandler'),
-    Route('/api/device', handler='lib.api.ApiDeviceRequestHandler'),
-    Route('/api/settings', handler='lib.api.ApiSettingsRequestHandler'),
-    Route('/api/following/delete', handler='lib.api.ApiFollowingDeleteRequestHandler'),
-    Route('/api/following', handler='lib.api.ApiFollowingRequestHandler'),
-    Route('/api/notifying/delete', handler='lib.api.ApiNotifyingDeleteRequestHandler'),
-    Route('/api/notifying', handler='lib.api.ApiNotifyingRequestHandler'),
+    Route('/api/user/token', handler='lib.api.ApiUserTokenHandler'),
+    Route('/api/user', handler='lib.api.ApiUserHandler'),
+    Route('/api/device', handler='lib.api.ApiDeviceHandler'),
+    Route('/api/settings', handler='lib.api.ApiSettingsHandler'),
+    Route('/api/following/delete', handler='lib.api.ApiFollowingDeleteHandler'),
+    Route('/api/following', handler='lib.api.ApiFollowingHandler'),
+    Route('/api/notifying/delete', handler='lib.api.ApiNotifyingDeleteHandler'),
+    Route('/api/notifying', handler='lib.api.ApiNotifyingHandler'),
 
     # AUTH
     Route('/login', handler='lib.auth.LoginHandler'),

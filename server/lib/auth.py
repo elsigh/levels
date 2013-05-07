@@ -3,6 +3,8 @@ import logging
 import settings
 import uuid
 
+from google.appengine.api import memcache
+
 from lib.web_request_handler import WebRequestHandler
 from lib.external.simpleauth import SimpleAuthHandler
 
@@ -10,10 +12,18 @@ from lib.external.simpleauth import SimpleAuthHandler
 class LoginHandler(WebRequestHandler):
   def get(self):
     """Handles default landing page"""
-    if self.logged_in:
-      self.redirect('/profile/%s' % self.current_user.key.urlsafe())
+    user_token = self.request.get('user_token')
+    self.session['user_token'] = user_token
+    logging.info('SET USER TOKEN %s' % user_token)
+    tpl_data = {}
+    if self.logged_in and self.current_user:
+      memcache.set('user_token-%s' % user_token, self.current_user.key.id(), 60)
+      uri = '/profile/%s' % self.current_user.key.urlsafe()
+      if user_token:
+        uri = uri + '?close=1'
+      self.redirect(uri)
     elif self.request.get('r') == '0':
-      self.output_response({}, 'login.html')
+      self.output_response(tpl_data, 'login.html')
     else:
       self.redirect('/auth/google')
 
@@ -117,13 +127,15 @@ class AuthHandler(WebRequestHandler, SimpleAuthHandler):
         if ok:
           self.auth.set_session(self.auth.store.user_to_dict(user))
 
-    # Remember auth data during redirect, just for this demo. You wouldn't
-    # normally do this.
-    self.session.add_flash(data, 'data - from _on_signin(...)')
-    self.session.add_flash(auth_info, 'auth_info - from _on_signin(...)')
+    # Stores a key / val pair in memcache for the client to query on
+    # to match up the user id to the user_token.
+    user_token = self.session.get('user_token')
+    if user_token:
+      memcache.add('user_token-%s' % user_token, user.key.id(), 60)
+      logging.info('Added user_token<->id match - %s, %s' % (user_token, user.id))
 
     # Go to the profile page
-    self.redirect('/profile/%s' % user.key.urlsafe())
+    self.redirect('/profile/%s?close=1' % user.key.urlsafe())
 
   def logout(self):
     self.auth.unset_session()
