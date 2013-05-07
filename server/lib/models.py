@@ -20,34 +20,38 @@ import time
 from google.appengine.ext import ndb
 from ndb import model
 
-
-# Note we get user from webapp2_extras.
 from webapp2_extras.appengine.auth.models import User
 
 
-# Hack with setattr to add a class method to User.
-def get_user_template_data(user):
-    template_data = {
-      'user': user.to_dict(),
-      'devices': []
-    }
-    q_device = Device.query(ancestor=user.key)
-    q_device.order(-Device.created)
-    for device in q_device:
-        q_settings = Settings.query(ancestor=device.key)
-        q_settings.order(-Settings.created)
-        last_settings = q_settings.get()
-        settings_data = {
-          'device': device.to_dict(),
-          'settings': last_settings.to_dict()
+class FMBModel(ndb.Model):
+    def to_dict(self):
+        obj = super(FMBModel, self).to_dict()
+        urlsafe_key = self.key.urlsafe()
+        obj['key'] = urlsafe_key
+        return obj
+
+
+class FMBUser(User, FMBModel):
+    def get_template_data(self):
+        template_data = {
+          'user': self.to_dict(),
+          'devices': []
         }
-        template_data['devices'].append(device_data)
+        q_device = Device.query(ancestor=self.key)
+        q_device.order(-Device.created)
+        for device in q_device:
+            q_settings = Settings.query(ancestor=device.key)
+            q_settings.order(-Settings.created)
+            last_settings = q_settings.get()
+            settings_data = {
+              'device': device.to_dict(),
+              'settings': last_settings.to_dict()
+            }
+            template_data['devices'].append(device_data)
+        return template_data
 
-    return template_data
-setattr(User, 'get_template_data', get_user_template_data)
 
-
-class Device(ndb.Model):
+class Device(FMBModel):
     created = ndb.DateTimeProperty(auto_now_add=True)
     modified = ndb.DateTimeProperty(auto_now=True)
     uuid = ndb.StringProperty(required=True)
@@ -61,25 +65,25 @@ class Device(ndb.Model):
     version = ndb.StringProperty()
 
 
-class Settings(ndb.Model):
+class Settings(FMBModel):
     created = ndb.DateTimeProperty(auto_now_add=True)
     battery_level = ndb.IntegerProperty(required=True)
     is_charging = ndb.IntegerProperty()
 
 
-class Following(ndb.Model):
+class Following(FMBModel):
     created = ndb.DateTimeProperty(auto_now_add=True)
     following = ndb.KeyProperty(kind=User)
 
 
-class Notifying(ndb.Model):
+class Notifying(FMBModel):
     created = ndb.DateTimeProperty(auto_now_add=True)
     means = ndb.StringProperty(required=True)
     name = ndb.StringProperty()
     type = ndb.StringProperty()
 
 
-class NotificationSent(ndb.Model):
+class NotificationSent(FMBModel):
     created = ndb.DateTimeProperty(auto_now_add=True)
     means = ndb.StringProperty(required=True)
 
@@ -116,7 +120,7 @@ class NotificationSent(ndb.Model):
 #             output[key] = int(ms)
 #         elif isinstance(value, db.GeoPt):
 #             output[key] = {'lat': value.lat, 'lon': value.lon}
-#         elif isinstance(value, ndb.Model):
+#         elif isinstance(value, FMBModel):
 #             output[key] = to_dict(value)
 #         else:
 #             raise ValueError('cannot encode ' + repr(prop))

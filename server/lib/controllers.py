@@ -11,6 +11,8 @@ from webapp2 import Route
 
 sys.path.append(os.path.join(os.path.dirname(__file__), 'external'))
 
+from lib.models import FMBUser
+
 # last import.
 import settings
 
@@ -22,7 +24,8 @@ app_config = {
     'secret_key': settings.SESSION_KEY
   },
   'webapp2_extras.auth': {
-    'user_attributes': []
+    'user_attributes': [],
+    'user_model': FMBUser
   }
 }
 
