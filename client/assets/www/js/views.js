@@ -250,11 +250,6 @@ fmb.views.Account.prototype.render = function() {
 };
 
 
-fmb.postMessage = function(msg) {
-  fmb.log('fmb.postMessage', msg, window.app);
-};
-
-
 /**
  * @param {Event} e A change event.
  * @private
@@ -270,6 +265,7 @@ fmb.views.Account.prototype.onClickLogin_ = function() {
   var oauthInterval = window.setInterval(_.bind(function() {
     if (ref.closed) {
       window.clearInterval(oauthInterval);
+      fmb.log('calling syncByToken')
       this.model.syncByToken(userToken);
     }
   }, this), 500);

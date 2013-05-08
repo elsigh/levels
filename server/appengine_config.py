@@ -1,5 +1,8 @@
 #!/usr/bin/python2.7
 
+
+from google.appengine.ext import deferred
+
 """
 def webapp_add_wsgi_middleware(app):
     #to turn off appstats, comment this

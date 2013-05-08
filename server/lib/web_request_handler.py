@@ -16,6 +16,7 @@ from jinja2.runtime import TemplateNotFound
 from lib.external.ua_parser.py import user_agent_parser
 
 # Hack to get ndb into the modules list.
+from google.appengine.ext import deferred
 from google.appengine.ext import ndb
 sys.modules['ndb'] = ndb
 
@@ -27,6 +28,7 @@ class WebRequestHandler(webapp2.RequestHandler):
     WebRequestHandler
     """
 
+    # This is for unit testing where we don't have cookie sessions.
     unit_test_current_user = None
 
     def dispatch(self):
@@ -41,20 +43,24 @@ class WebRequestHandler(webapp2.RequestHandler):
             self.session_store.save_sessions(self.response)
 
     @webapp2.cached_property
+    #@property
     def jinja2(self):
         """Returns a Jinja2 renderer cached in the app registry"""
         return jinja2.get_jinja2(app=self.app)
 
     @webapp2.cached_property
+    #@property
     def session(self):
         """Returns a session using the default cookie key"""
         return self.session_store.get_session()
 
     @webapp2.cached_property
+    #@property
     def auth(self):
         return auth.get_auth()
 
     @webapp2.cached_property
+    #@property
     def current_user(self):
         """Returns currently logged in user"""
         user_dict = self.auth.get_user_by_session()
@@ -63,9 +69,11 @@ class WebRequestHandler(webapp2.RequestHandler):
                 return WebRequestHandler.unit_test_current_user
             return None
         else:
-            return self.auth.store.user_model.get_by_id(user_dict['user_id'])
+            user = self.auth.store.user_model.get_by_id(user_dict['user_id'])
+            return user
 
     @webapp2.cached_property
+    #@property
     def logged_in(self):
         """Returns true if a user is currently logged in, false otherwise"""
         user_by_session = self.auth.get_user_by_session()
@@ -73,10 +81,12 @@ class WebRequestHandler(webapp2.RequestHandler):
         return user_by_session is not None
 
     @webapp2.cached_property
+    #@property
     def is_production(self):
         return 'Development' not in os.environ['SERVER_SOFTWARE']
 
     @webapp2.cached_property
+    #@property
     def version(self):
         if self.is_production:
             version = os.environ['CURRENT_VERSION_ID']
