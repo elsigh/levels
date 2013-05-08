@@ -28,6 +28,7 @@ class WebRequestHandler(webapp2.RequestHandler):
     WebRequestHandler
     """
 
+    # This is for unit testing where we don't have cookie sessions.
     unit_test_current_user = None
 
     def dispatch(self):
@@ -63,14 +64,12 @@ class WebRequestHandler(webapp2.RequestHandler):
     def current_user(self):
         """Returns currently logged in user"""
         user_dict = self.auth.get_user_by_session()
-        logging.info('GET CURRENT USER user_dict: %s' % user_dict)
         if user_dict is None:
             if WebRequestHandler.unit_test_current_user:
                 return WebRequestHandler.unit_test_current_user
             return None
         else:
             user = self.auth.store.user_model.get_by_id(user_dict['user_id'])
-            logging.info('USER:: %s' % user)
             return user
 
     @webapp2.cached_property

@@ -25,19 +25,11 @@ from webapp2_extras.appengine.auth.models import User
 
 
 class FMBModel(ndb.Model):
-    def to_dict(self, include_api_token=False):
+    def to_dict(self):
         obj = super(FMBModel, self).to_dict()
         obj['id'] = self.key.id()
         urlsafe_key = self.key.urlsafe()
         obj['key'] = urlsafe_key
-
-        # Remove some sensitive data unless its requested.
-        output = {}
-        for key, val in obj.iteritems():
-            if key == 'api_token' and not include_api_token:
-                continue
-            output[key] = val
-
         return obj
 
 
