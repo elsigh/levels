@@ -1,5 +1,10 @@
 
 
+// Oh good times.
+$.ajaxSettings['beforeSend'] = function(xhr, settings) {
+  xhr.withCredentials = true;
+};
+
 /**
  * @type {Object} Models namespace.
  */
@@ -77,7 +82,7 @@ fmb.models.sync = function(method, model, options) {
     return;
   }
 
-  var url = model.url();
+  var url = options.url || model.url();
   if (!url) {
     return;
   }
@@ -87,7 +92,7 @@ fmb.models.sync = function(method, model, options) {
 
   // Includes our auth token in requests.
   if (fmb.models.sync.apiToken) {
-    if ((method == 'update') || (method == 'create') || (method == 'delete')) {
+    if (method == 'update' || method == 'create' || method == 'delete') {
       var data = model.toJSON();  // Typical Backbone.
       data['api_token'] = fmb.models.sync.apiToken;
       data['device_uuid'] = fmb.models.sync.deviceUuid;
@@ -99,7 +104,7 @@ fmb.models.sync = function(method, model, options) {
       };
     }
   }
-  fmb.log('AJAX SYNC', method, url);
+  fmb.log('---------------> AJAX SYNC', method, url);
   Backbone.ajaxSync.call(this, method, model, options);
 };
 
@@ -133,18 +138,17 @@ fmb.models.App.prototype.initialize = function() {
   fmb.log('fmb.models.App.initialize');
 
   // id is necessary for localStorage plugin with a model.
-  var userUid = localStorage.getItem('user_uid');
-  fmb.log('userUid from localStorage', userUid);
-  var doFetch = true;
-  if (!userUid) {
-    doFetch = false;
-    userUid = fmb.models.getUid();
-    localStorage.setItem('user_uid', userUid);
-  }
+  var userId = localStorage.getItem('user_id');
+  fmb.log('userId from localStorage', userId);
 
-  this.user = new fmb.models.User({
-    id: userUid
-  });
+  if (userId) {
+    this.user = new fmb.models.User({
+      id: userId
+    });
+    this.user.fetchFromStorage();
+  } else {
+    this.user = new fmb.models.User();
+  }
 
 
   var deviceUid = localStorage.getItem('device_uid');
@@ -170,13 +174,16 @@ fmb.models.App.prototype.initialize = function() {
     user: this.user
   });
 
-  if (doFetch) {
+  // Fetch all from the server if the user model has an id
+  // which is only true when the user has previously authenticated
+  // and been fully set up.
+  if (this.user.id) {
     // Deferred so model references are set on window.app.
     _.defer(_.bind(function() {
       this.user.fetch();
-      this.device.fetch();
-      this.following.fetch();
-      this.notifying.fetch();
+      //this.device.fetch();
+      //this.following.fetch();
+      //this.notifying.fetch();
     }, this));
   }
 };
@@ -259,7 +266,7 @@ fmb.Model.prototype.parse = function(response, xhr) {
 };
 
 
-fmb.Model.prototype.saveToServer = function() {
+fmb.Model.prototype.saveToServer = function(opt_data, opt_options) {
   fmb.log('saveToServer called for id:' + this.id);
 
   // ghetto!
@@ -267,7 +274,7 @@ fmb.Model.prototype.saveToServer = function() {
     return fmb.models.sync.apply(this, arguments);
   };
 
-  this.save();
+  this.save(opt_data, opt_options);
 
   // ghetto!
   Backbone.sync = function() {
@@ -296,6 +303,7 @@ fmb.Model.prototype.saveToStorage = function() {
 
 fmb.Model.prototype.fetchFromStorage = function(opt_options) {
   var results = this.localStorage.findAll();
+  fmb.log('fetchFromStorage RESULTS:', results);
   if (results.length) {
     this.set(results[results.length - 1], opt_options);
   }
@@ -319,7 +327,13 @@ fmb.models.User = fmb.Model.extend({
 /** @inheritDoc */
 fmb.models.User.prototype.initialize = function(options) {
   this.once('change:api_token', function() {
+    fmb.log('Saved apiToken fmb.models.sync:', this.get('api_token'));
     fmb.models.sync.apiToken = this.get('api_token');
+  }, this);
+
+  this.once('change:id', function() {
+    fmb.log('Saved user_id to localStorage:', this.id);
+    localStorage.setItem('user_id', this.id);
   }, this);
 };
 
@@ -336,17 +350,14 @@ fmb.models.User.prototype.url = function() {
  * @param {string} token A login request token.
  */
 fmb.models.User.prototype.syncByToken = function(token) {
-  /*var tmpModel = new fmb.models.AjaxSyncModel();
-  tmpModel.url = function() {
-    return fmb.models.getApiUrl('/user/token');
-  };
-  */
-  this.save({
+  fmb.log('fmb.models.User syncByToken', token);
+
+  this.saveToServer({
     'user_token': token
   }, {
     url: fmb.models.getApiUrl('/user/token'),
-    success: _.bind(function(model, response) {
-      fmb.log('MONEY TRAIN!!', response);
+    success: _.bind(function(model, response, options) {
+      fmb.log('fmb.models.User syncByToken MONEY TRAIN!!', response);
 
     }, this),
     error: function(model, xhr, options) {

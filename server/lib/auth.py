@@ -4,9 +4,12 @@ import settings
 import uuid
 
 from google.appengine.api import memcache
+from google.appengine.ext import deferred
 
 from lib.web_request_handler import WebRequestHandler
 from lib.external.simpleauth import SimpleAuthHandler
+
+from lib import models
 
 
 class LoginHandler(WebRequestHandler):
@@ -86,9 +89,9 @@ class AuthHandler(WebRequestHandler, SimpleAuthHandler):
     user = self.auth.store.user_model.get_by_auth_id(auth_id)
     _attrs = self._to_user_model_attrs(data, self.USER_ATTRS[provider])
 
-    if user:
+    if user is not None:
       logging.info('Found existing user to log in')
-      # Existing users might've changed their profile data so we update our
+      # Existing users might'veuser_ changed their profile data so we update our
       # local model anyway. This might result in quite inefficient usage
       # of the Datastore, but we do this anyway for demo purposes.
       #
@@ -104,7 +107,7 @@ class AuthHandler(WebRequestHandler, SimpleAuthHandler):
       # then, create a new user if nobody's signed in,
       # otherwise add this auth_id to currently logged in user.
 
-      if self.logged_in:
+      if self.logged_in and self.current_user:
         logging.info('Updating currently logged in user')
 
         u = self.current_user
@@ -118,7 +121,7 @@ class AuthHandler(WebRequestHandler, SimpleAuthHandler):
       else:
         logging.info('Creating a brand new user')
 
-        # Create an api_token for this user.
+        # Creates a FMB api_token for this user.
         _attrs.update({
           'api_token': str(uuid.uuid4())
         })
@@ -130,9 +133,11 @@ class AuthHandler(WebRequestHandler, SimpleAuthHandler):
     # Stores a key / val pair in memcache for the client to query on
     # to match up the user id to the user_token.
     user_token = self.session.get('user_token')
+    logging.info('_on_signin session user_token: %s' % user_token)
     if user_token:
       memcache.add('user_token-%s' % user_token, user.key.id(), 60)
-      logging.info('Added user_token<->id match - %s, %s' % (user_token, user.id))
+      logging.info('Added user_token<->id match - %s, %s' %
+                   (user_token, user.key.id()))
 
     # Go to the profile page
     self.redirect('/profile/%s?close=1' % user.key.urlsafe())

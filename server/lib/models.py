@@ -15,19 +15,29 @@
 # limitations under the License.
 
 import datetime
+import sys
 import time
 
 from google.appengine.ext import ndb
-from ndb import model
+sys.modules['ndb'] = ndb
 
 from webapp2_extras.appengine.auth.models import User
 
 
 class FMBModel(ndb.Model):
-    def to_dict(self):
+    def to_dict(self, include_api_token=False):
         obj = super(FMBModel, self).to_dict()
+        obj['id'] = self.key.id()
         urlsafe_key = self.key.urlsafe()
         obj['key'] = urlsafe_key
+
+        # Remove some sensitive data unless its requested.
+        output = {}
+        for key, val in obj.iteritems():
+            if key == 'api_token' and not include_api_token:
+                continue
+            output[key] = val
+
         return obj
 
 
@@ -87,47 +97,3 @@ class NotificationSent(FMBModel):
     created = ndb.DateTimeProperty(auto_now_add=True)
     means = ndb.StringProperty(required=True)
 
-
-# # Because db.to_dict can't do datetime.datetime, apparently.
-# SIMPLE_TYPES = (int, long, float, bool, dict, basestring, list)
-
-# import logging
-# def to_dict(model, include_auth_token=False, include_email=False):
-#     output = {}
-
-#     if model is None:
-#         return output
-
-#     logging.info('include_auth_token: %s' % include_auth_token)
-#     for key, prop in model.properties().iteritems():
-#         #logging.info('KEY: %s' % key)
-
-#         # Ignore some sensitive fields.
-#         if key == 'auth_token' and not include_auth_token:
-#             continue
-#         if key == 'email' and not include_email:
-#             continue
-
-#         value = getattr(model, key)
-#         #logging.info('VALUE: %s' % value)
-
-#         if value is None or isinstance(value, SIMPLE_TYPES):
-#             output[key] = value
-#         elif isinstance(value, datetime.date):
-#             # Convert date/datetime to ms-since-epoch ("new Date()").
-#             ms = time.mktime(value.utctimetuple())
-#             ms += getattr(value, 'microseconds', 0) / 1000
-#             output[key] = int(ms)
-#         elif isinstance(value, db.GeoPt):
-#             output[key] = {'lat': value.lat, 'lon': value.lon}
-#         elif isinstance(value, FMBModel):
-#             output[key] = to_dict(value)
-#         else:
-#             raise ValueError('cannot encode ' + repr(prop))
-
-#     # Ensure we have a model id in our output.
-#     if len(model.properties()):
-#         if 'id' not in output:
-#             output['id'] = str(model.key())
-
-#     return output

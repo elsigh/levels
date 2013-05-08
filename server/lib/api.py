@@ -15,6 +15,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), 'external'))
 
 from google.appengine.api import mail
 from google.appengine.api import memcache
+from google.appengine.ext import deferred
 from google.appengine.ext import ndb
 sys.modules['ndb'] = ndb
 from google.appengine.ext import deferred
@@ -100,6 +101,8 @@ class ApiRequestHandler(WebRequestHandler):
     def assert_current_user_with_api_token(self):
         api_token = self._json_request_data['api_token']
         assert api_token
+        logging.info('api_token: %s, current_user: %s' %
+                     (api_token, self.current_user))
         assert self.current_user.api_token == api_token
 
     def set_and_assert_device(self):
@@ -115,7 +118,9 @@ class ApiRequestHandler(WebRequestHandler):
 
 class ApiUserHandler(ApiRequestHandler):
     def get(self):
-        user = ndb.Key(urlsafe=self._json_request_data['user_key']).get()
+        self.assert_current_user_with_api_token()
+        user = self.current_user
+        #user = ndb.Key(urlsafe=self._json_request_data['user_key']).get()
         if not user:
              return self.output_json_error({}, 404)
         return self.output_json_success(user.to_dict())
@@ -131,8 +136,8 @@ class ApiUserTokenHandler(ApiRequestHandler):
                                self._json_request_data['user_token'])
         logging.info('user_id :: %s' % user_id)
         assert user_id
-        user = ndb.Key('User', int(user_id)).get()
-        return self.output_json_success(user.to_dict())
+        user = ndb.Key('FMBUser', int(user_id)).get()
+        return self.output_json_success(user.to_dict(include_api_token=True))
 
 
 class ApiDeviceHandler(ApiRequestHandler):

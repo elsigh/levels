@@ -17,6 +17,8 @@ libraries:
   version: latest
 - name: lxml
   version: latest
+- name: webapp2
+  version: latest
 
 
 builtins:

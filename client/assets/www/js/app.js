@@ -44,7 +44,7 @@ fmb.log = function() {
   });
 
   var consoleString = consoleStrings.join(', ');
-  console.log(consoleString);
+  console.log.call(console, consoleString);
 };
 
 
@@ -173,7 +173,7 @@ fmb.App.FOLLOWING_URL_RE = /http:\/\/www\.followmybattery\.com\/(.*)/;
  * @private
  */
 fmb.App.prototype.checkIntent_ = function() {
-  fmb.log('checkIntent');
+  fmb.log('fmb.App checkIntent');
   window.plugins &&
       window.plugins.webintent.getExtra(WebIntent.EXTRA_TEXT, function (url) {
     //alert('GOT INTENT URL' + url);
@@ -182,7 +182,7 @@ fmb.App.prototype.checkIntent_ = function() {
   });
   window.plugins && window.plugins.webintent.getUri(
       function(url) {
-        fmb.log('checkIntent_ getUri:' + url);
+        fmb.log('fmb.App checkIntent_ getUri:' + url);
         var match = fmb.App.FOLLOWING_URL_RE.exec(url);
         if (match && match.length) {
           var userKey = match[1];
