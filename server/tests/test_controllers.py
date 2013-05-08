@@ -12,10 +12,9 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/..')
 
 import logging
 
+from google.appengine.api import memcache
 from google.appengine.ext import ndb
 from google.appengine.ext import testbed
-
-from webapp2_extras.appengine.auth.models import User
 
 import unittest
 import webtest
@@ -68,8 +67,26 @@ class RequestHandlerTest(unittest.TestCase):
     #     self.assertEquals('elsigh', obj['name'])
     #     self.assertTrue('user_id' not in obj)
 
+    def test_ApiUserTokenHandler(self):
+        user = models.FMBUser(
+            name='elsighmon'
+        )
+        user.put()
+        WebRequestHandler.unit_test_current_user = user
+
+        user_token = 'foobar'
+        memcache.add('user_token-%s' % user_token, user.key.id())
+        response = self.testapp.post_json('/api/user/token',
+                                          params=dict(user_token=user_token))
+        body = response.normal_body
+        obj = json.loads(body)
+        self.assertEquals(user.name, obj['name'])
+
+        should_be_none = memcache.get('user_token-%s' % user_token)
+        assert should_be_none is None
+
     def test_ApiDeviceHandler(self):
-        user = User(
+        user = models.FMBUser(
             name='elsighmon'
         )
         user.put()
@@ -124,7 +141,7 @@ class RequestHandlerTest(unittest.TestCase):
         # self.assertEquals(0, obj['update_enabled'])
 
     def test_ApiSettingsHandler(self):
-        elsigh_user = User(
+        elsigh_user = models.FMBUser(
             name='elsighmon'
         )
         elsigh_user.put()
@@ -176,13 +193,13 @@ class RequestHandlerTest(unittest.TestCase):
         self.assertTrue(obj['is_last_update_over_notify_level'])
 
     def test_ApiFollowingHandler(self):
-        elsigh_user = User(
+        elsigh_user = models.FMBUser(
             name='elsighmon'
         )
         elsigh_user.put()
         WebRequestHandler.unit_test_current_user = elsigh_user
 
-        jr_user = User(
+        jr_user = models.FMBUser(
             id='jr_user_id',
             name='jr'
         )
@@ -207,7 +224,7 @@ class RequestHandlerTest(unittest.TestCase):
         )
         jr_following.put()
 
-        ded_user = User(
+        ded_user = models.FMBUser(
             id='ded_user_id',
             name='ded'
         )
@@ -243,13 +260,13 @@ class RequestHandlerTest(unittest.TestCase):
         self.assertEquals(2, len(obj['following']))
 
     def test_ApiFollowingRequestHandler_add(self):
-        elsigh_user = User(
+        elsigh_user = models.FMBUser(
             name='elsighmon'
         )
         elsigh_user.put()
         WebRequestHandler.unit_test_current_user = elsigh_user
 
-        ded_user = User(
+        ded_user = models.FMBUser(
             name='ded'
         )
         ded_user.put()
@@ -276,13 +293,13 @@ class RequestHandlerTest(unittest.TestCase):
         self.assertEquals('exists', obj['error'])
 
     def test_ApiFollowingRequestHandler_delete(self):
-        elsigh_user = User(
+        elsigh_user = models.FMBUser(
             name='elsighmon'
         )
         elsigh_user.put()
         WebRequestHandler.unit_test_current_user = elsigh_user
 
-        ded_user = User(
+        ded_user = models.FMBUser(
             name='ded'
         )
         ded_user.put()
@@ -314,7 +331,7 @@ class RequestHandlerTest(unittest.TestCase):
                                status=404)
 
     def test_ApiNotifyingRequestHandler_get(self):
-        elsigh_user = User(
+        elsigh_user = models.FMBUser(
             name='elsighmon'
         )
         elsigh_user.put()
@@ -354,7 +371,7 @@ class RequestHandlerTest(unittest.TestCase):
         self.assertEquals(2, len(obj['notifying']))
 
     def test_ApiNotifyingRequestHandler_add(self):
-        elsigh_user = User(
+        elsigh_user = models.FMBUser(
             name='elsighmon'
         )
         elsigh_user.put()
@@ -387,7 +404,7 @@ class RequestHandlerTest(unittest.TestCase):
         self.assertEquals('exists', obj['error'])
 
     def test_ApiNotifyingRequestHandler_delete(self):
-        elsigh_user = User(
+        elsigh_user = models.FMBUser(
             name='elsighmon'
         )
         elsigh_user.put()
@@ -426,7 +443,7 @@ class RequestHandlerTest(unittest.TestCase):
                                status=404)
 
     def test_send_battery_notifications(self):
-        elsigh_user = User(
+        elsigh_user = models.FMBUser(
             name='elsighmon'
         )
         elsigh_user.put()
@@ -455,7 +472,7 @@ class RequestHandlerTest(unittest.TestCase):
         self.assertEqual(1, len(tasks))
 
     def test_send_battery_notification_phone(self):
-        elsigh_user = User(
+        elsigh_user = models.FMBUser(
             name='elsighmon'
         )
         elsigh_user.put()
@@ -491,7 +508,7 @@ class RequestHandlerTest(unittest.TestCase):
         self.assertEquals(1, q.count())
 
     def test_send_battery_notification_email(self):
-        elsigh_user = User(
+        elsigh_user = models.FMBUser(
             name='elsighmon'
         )
         elsigh_user.put()

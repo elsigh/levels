@@ -45,11 +45,12 @@ class FMBUser(User, FMBModel):
             q_settings = Settings.query(ancestor=device.key)
             q_settings.order(-Settings.created)
             last_settings = q_settings.get()
-            settings_data = {
-              'device': device.to_dict(),
-              'settings': last_settings.to_dict()
-            }
-            template_data['devices'].append(device_data)
+            if last_settings is not None:
+                device_data = {
+                  'device': device.to_dict(),
+                  'settings': last_settings.to_dict()
+                }
+                template_data['devices'].append(device_data)
         return template_data
 
 
@@ -75,7 +76,7 @@ class Settings(FMBModel):
 
 class Following(FMBModel):
     created = ndb.DateTimeProperty(auto_now_add=True)
-    following = ndb.KeyProperty(kind=User)
+    following = ndb.KeyProperty(kind=FMBUser)
 
 
 class Notifying(FMBModel):

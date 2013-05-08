@@ -21,7 +21,6 @@ sys.modules['ndb'] = ndb
 from google.appengine.ext import deferred
 
 from webapp2_extras import jinja2
-from webapp2_extras.appengine.auth.models import User
 
 from lib.web_request_handler import WebRequestHandler
 from lib import models
@@ -128,12 +127,19 @@ class ApiUserHandler(ApiRequestHandler):
 
 class ApiUserTokenHandler(ApiRequestHandler):
     def post(self):
-        user_id = memcache.get('user_token-%s' %
-                               self._json_request_data['user_token'])
-        logging.info('user_id :: %s' % user_id)
+        memcache_key = 'user_token-%s' % self._json_request_data['user_token']
+        user_id = memcache.get(memcache_key)
         assert user_id
-        user = ndb.Key('FMBUser', int(user_id)).get()
-        return self.output_json_success(user.to_dict(include_user_id=True))
+
+        user = ndb.Key(models.FMBUser, int(user_id)).get()
+        logging.info('ApiUserTokenHandler user_id: %s, user: %s' %
+                     (user_id, user))
+        assert user
+
+        # Ok, now clear the memcache token - it's only good once.
+        memcache.delete(memcache_key)
+
+        return self.output_json_success(user.to_dict())
 
 
 class ApiDeviceHandler(ApiRequestHandler):
@@ -167,12 +173,18 @@ class ApiDeviceHandler(ApiRequestHandler):
 app_for_taskqueue = webapp2.WSGIApplication()
 
 def _send_notification_templater(user_id, device_id, notifying_id, tpl_name):
-
     logging.info('_send_notification_templater %s, %s, %s' %
                  (user_id, device_id, tpl_name))
-    user = models.User.get_by_id(user_id)
+
+    user = models.FMBUser.get_by_id(user_id)
+    assert user
+
     device = models.Device.get_by_id(device_id, parent=user.key)
+    assert device
+
     notifying = models.Notifying.get_by_id(notifying_id, parent=device.key)
+    assert notifying
+
     logging.info('send_battery_notification_phone %s, %s, %s' %
                  (user.name, device.uuid, notifying.means))
 
@@ -253,7 +265,7 @@ def send_battery_notifications(user_id, device_id):
     """The deferred way to send battery notifications."""
     logging.info('send_battery_notifications %s, %s' %
                  (user_id, device_id))
-    user = models.User.get_by_id(user_id)
+    user = models.FMBUser.get_by_id(user_id)
     device = models.Device.get_by_id(device_id, parent=user.key)
     logging.info('send_battery_notifications %s, %s' %
                  (user.name, device.uuid))

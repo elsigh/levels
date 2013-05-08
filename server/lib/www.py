@@ -15,7 +15,6 @@ from lib.web_request_handler import WebRequestHandler
 from google.appengine.ext import ndb
 
 import webapp2
-from webapp2_extras.appengine.auth.models import User
 
 from lib import models
 
@@ -40,7 +39,7 @@ class ProfileHandler(WebRequestHandler):
         try:
             user = ndb.Key(urlsafe=user_key).get()
         except:
-            user = User()
+            user = models.FMBUser()
         logging.info('user: %s', user.to_dict())
 
         template_data = user.get_template_data()
