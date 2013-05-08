@@ -1,5 +1,10 @@
 
 
+// Yep, we need zepto to work with CORS and cookies.
+$.ajaxSettings['beforeSend'] = function(xhr, settings) {
+  xhr.withCredentials = true;
+};
+
 /**
  * @type {Object} Models namespace.
  */
@@ -16,7 +21,10 @@ fmb.models.SERVER_LOCAL = 'http://localhost:8080';
  * @type {string}
  */
 fmb.models.SERVER_PROD = 'http://www.followmybattery.com';
+
+// Useful for testing from the filesystem locally.
 fmb.models.SERVER_PROD = fmb.models.SERVER_LOCAL;
+
 
 /**
  * @type {string}
@@ -77,7 +85,7 @@ fmb.models.sync = function(method, model, options) {
     return;
   }
 
-  var url = model.url();
+  var url = options.url || model.url();
   if (!url) {
     return;
   }
@@ -86,20 +94,20 @@ fmb.models.sync = function(method, model, options) {
   options.contentType = 'application/json; charset=utf8';
 
   // Includes our auth token in requests.
-  if (fmb.models.sync.apiToken) {
-    if ((method == 'update') || (method == 'create') || (method == 'delete')) {
+  if (fmb.models.sync.userId) {
+    if (method == 'update' || method == 'create' || method == 'delete') {
       var data = model.toJSON();  // Typical Backbone.
-      data['api_token'] = fmb.models.sync.apiToken;
-      data['device_uuid'] = fmb.models.sync.deviceUuid;
+      data['user_id'] = fmb.models.sync.userId;
+      data['device_id'] = fmb.models.sync.deviceId;
       options.data = JSON.stringify(data);
     } else {
       options.data = {
-        'api_token': fmb.models.sync.apiToken,
-        'device_uuid': fmb.models.sync.deviceUuid
+        'user_id': fmb.models.sync.userId,
+        'device_id': fmb.models.sync.deviceId
       };
     }
   }
-  fmb.log('AJAX SYNC', method, url);
+  fmb.log('---------------> AJAX SYNC', method, url);
   Backbone.ajaxSync.call(this, method, model, options);
 };
 
@@ -107,7 +115,7 @@ fmb.models.sync = function(method, model, options) {
 /**
  * @type {string}
  */
-fmb.models.sync.apiToken = null;
+fmb.models.sync.userId = null;
 
 
 // All sync calls do double duty.
@@ -133,34 +141,32 @@ fmb.models.App.prototype.initialize = function() {
   fmb.log('fmb.models.App.initialize');
 
   // id is necessary for localStorage plugin with a model.
-  var userUid = localStorage.getItem('user_uid');
-  fmb.log('userUid from localStorage', userUid);
-  var doFetch = true;
-  if (!userUid) {
-    doFetch = false;
-    userUid = fmb.models.getUid();
-    localStorage.setItem('user_uid', userUid);
+  var userId = localStorage.getItem('user_id');
+  fmb.log('userId from localStorage', userId);
+  if (userId) {
+    this.user = new fmb.models.User({
+      id: userId
+    });
+    this.user.fetchFromStorage();
+  } else {
+    this.user = new fmb.models.User();
   }
 
-  this.user = new fmb.models.User({
-    id: userUid
-  });
-
-
-  var deviceUid = localStorage.getItem('device_uid');
-  fmb.log('deviceUid from localStorage', deviceUid);
-  if (!deviceUid) {
-    deviceUid = window.device && window.device.uuid || fmb.models.getUid();
-    localStorage.setItem('device_uid', deviceUid);
+  var deviceId = localStorage.getItem('device_id');
+  fmb.log('deviceId from localStorage', deviceId);
+  if (deviceId) {
+    this.device = new fmb.models.Device({
+      id: deviceId
+    });
+    this.device.fetchFromStorage();
+  } else {
+    this.device = new fmb.models.Device({
+      'uuid': window.device && window.device.uuid || fmb.models.getUid(),
+      'name': window.device && window.device.name || navigator.appName,
+      'platform': window.device && window.device.platform || navigator.platform,
+      'version': window.device && window.device.version || navigator.appVersion
+    });
   }
-
-  // Initialize device, real data will come from server.
-  this.device = new fmb.models.Device({
-    'uuid': deviceUid,
-    'name': window.device && window.device.name || navigator.appName,
-    'platform': window.device && window.device.platform || navigator.platform,
-    'version': window.device && window.device.version || navigator.appVersion
-  });
 
   this.notifying = new fmb.models.NotifyingCollection(null, {
     user: this.user
@@ -170,13 +176,22 @@ fmb.models.App.prototype.initialize = function() {
     user: this.user
   });
 
-  if (doFetch) {
+  // Fetch all from the server if the user model has an id
+  // which is only true when the user has previously authenticated
+  // and been fully set up.
+  if (this.user.id) {
     // Deferred so model references are set on window.app.
     _.defer(_.bind(function() {
       this.user.fetch();
-      this.device.fetch();
-      this.following.fetch();
-      this.notifying.fetch();
+      //this.device.fetch();
+      //this.following.fetch();
+      //this.notifying.fetch();
+    }, this));
+
+  } else {
+    this.user.once('change:id', _.bind(function() {
+      fmb.log('** SAVE DEVICE for the first time');
+      this.device.saveToServer();
     }, this));
   }
 };
@@ -241,11 +256,6 @@ fmb.Model.prototype.getTemplateData = function() {
 fmb.Model.prototype.parse = function(response, xhr) {
   //fmb.log('fmb.Model parse: ' + this.id + ', ' + JSON.stringify(response));
 
-  if (response['api_token'] && !fmb.models.sync.apiToken) {
-    //fmb.log('SETTING AUTH TOKEN')
-    fmb.models.sync.apiToken = response['api_token'];
-  }
-
   // Always store server data to localStorage.
   if (response['status'] === 0) {
     _.defer(_.bind(function() {
@@ -253,13 +263,14 @@ fmb.Model.prototype.parse = function(response, xhr) {
       this.saveToStorage();
     }, this));
   }
+
   delete response['status'];  // Not for model data.
 
   return response;
 };
 
 
-fmb.Model.prototype.saveToServer = function() {
+fmb.Model.prototype.saveToServer = function(opt_data, opt_options) {
   fmb.log('saveToServer called for id:' + this.id);
 
   // ghetto!
@@ -267,7 +278,7 @@ fmb.Model.prototype.saveToServer = function() {
     return fmb.models.sync.apply(this, arguments);
   };
 
-  this.save();
+  this.save(opt_data, opt_options);
 
   // ghetto!
   Backbone.sync = function() {
@@ -296,6 +307,7 @@ fmb.Model.prototype.saveToStorage = function() {
 
 fmb.Model.prototype.fetchFromStorage = function(opt_options) {
   var results = this.localStorage.findAll();
+  fmb.log('fetchFromStorage RESULTS:', results);
   if (results.length) {
     this.set(results[results.length - 1], opt_options);
   }
@@ -318,8 +330,10 @@ fmb.models.User = fmb.Model.extend({
 
 /** @inheritDoc */
 fmb.models.User.prototype.initialize = function(options) {
-  this.once('change:api_token', function() {
-    fmb.models.sync.apiToken = this.get('api_token');
+  this.once('change:id', function() {
+    fmb.log('Saved user_id to localStorage:', this.id);
+    localStorage.setItem('user_id', this.id);
+    fmb.models.sync.userId = this.id;
   }, this);
 };
 
@@ -333,21 +347,20 @@ fmb.models.User.prototype.url = function() {
 
 
 /**
+ * The login flow has us using a string token that gets saved into
+ * memcache on the server so we can map the user who opens the popup
+ * to this user.
  * @param {string} token A login request token.
  */
 fmb.models.User.prototype.syncByToken = function(token) {
-  /*var tmpModel = new fmb.models.AjaxSyncModel();
-  tmpModel.url = function() {
-    return fmb.models.getApiUrl('/user/token');
-  };
-  */
-  this.save({
+  fmb.log('fmb.models.User syncByToken', token);
+
+  this.saveToServer({
     'user_token': token
   }, {
     url: fmb.models.getApiUrl('/user/token'),
-    success: _.bind(function(model, response) {
-      fmb.log('MONEY TRAIN!!', response);
-
+    success: _.bind(function(model, response, options) {
+      fmb.log('fmb.models.User syncByToken MONEY TRAIN!!', response);
     }, this),
     error: function(model, xhr, options) {
       alert('LA BOMBA');
@@ -390,9 +403,6 @@ fmb.models.Device = fmb.Model.extend({
 
 /** @inheritDoc */
 fmb.models.Device.prototype.initialize = function(options) {
-  fmb.models.sync.deviceUuid = options.uuid;
-  this.fetchFromStorage();
-
   if (this.id) {
     _.defer(function() {
       cordova.require('cordova/plugin/phonediedservice').startService();
@@ -427,7 +437,8 @@ fmb.models.Device.prototype.onChange_ = function() {
 
     // First time device install, start the service.
     } else if (_.has(changedAttributes, 'id')) {
-      fmb.log('Device onChange FIRST TIME - start service.');
+      fmb.log('Device change:id FIRST TIME.', this.id);
+      localStorage.setItem('device_id', this.id);
       plugin.startService();
     }
 

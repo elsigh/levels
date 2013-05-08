@@ -99,7 +99,8 @@ Backbone.LocalStorage.sync = window.Store.sync = Backbone.localSync = function(m
     case "delete":  resp = store.destroy(model);                           break;
   }
   if (resp) {
-    if (options && options.success) options.success(resp);
+    // Edited by elsigh - we don't want localStorage to trigger success callbacks.
+    if (options && options.localStorageSuccess) options.localStorageSuccess(resp);
     if (syncDfd) syncDfd.resolve();
   } else {
     if (options && options.error) options.error("Record not found");

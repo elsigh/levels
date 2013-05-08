@@ -73,11 +73,12 @@
         <form method="post"
           class="device-update"
           action="{{api_server}}/api/device">
-          <div>
-            <label class="username">
-              <code>{{user.name}}</code>
-            </label>
-          </div>
+          <img
+            src="{{user.avatar_url}}" width="100"
+            align="left">
+          <h2>
+            {{user.name}}
+          </h2>
 
           <h3>
             {{device.platform}}

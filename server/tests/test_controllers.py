@@ -12,10 +12,9 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/..')
 
 import logging
 
+from google.appengine.api import memcache
 from google.appengine.ext import ndb
 from google.appengine.ext import testbed
-
-from webapp2_extras.appengine.auth.models import User
 
 import unittest
 import webtest
@@ -49,8 +48,8 @@ class RequestHandlerTest(unittest.TestCase):
     #     body = response.normal_body
     #     obj = json.loads(body)
     #     self.assertEquals('elsigh', obj['name'])
-    #     self.assertTrue('api_token' in obj)
-    #     self.assertNotEquals('', obj['api_token'])
+    #     self.assertTrue('user_id' in obj)
+    #     self.assertNotEquals('', obj['user_id'])
 
     #     # Trying to create again with this name should fail.
     #     response = self.testapp.post_json('/api/user/',
@@ -61,38 +60,54 @@ class RequestHandlerTest(unittest.TestCase):
     #     obj = json.loads(body)
     #     self.assertEquals('exists', obj['error'])
 
-    #     # But we should be able to retrieve it, sans api_token.
+    #     # But we should be able to retrieve it, sans user_id.
     #     response = self.testapp.get('/api/user/elsigh')
     #     body = response.normal_body
     #     obj = json.loads(body)
     #     self.assertEquals('elsigh', obj['name'])
-    #     self.assertTrue('api_token' not in obj)
+    #     self.assertTrue('user_id' not in obj)
 
-    def test_ApiDeviceHandler(self):
-        user = User(
-            id='someid',
-            name='elsighmon',
-            api_token='test_api_token'
+    def test_ApiUserTokenHandler(self):
+        user = models.FMBUser(
+            name='elsighmon'
         )
         user.put()
         WebRequestHandler.unit_test_current_user = user
 
-        # Without an api_token, we should bomb.
+        user_token = 'foobar'
+        memcache.add('user_token-%s' % user_token, user.key.id())
+        response = self.testapp.post_json('/api/user/token',
+                                          params=dict(user_token=user_token))
+        body = response.normal_body
+        obj = json.loads(body)
+        self.assertEquals(user.name, obj['name'])
+
+        should_be_none = memcache.get('user_token-%s' % user_token)
+        assert should_be_none is None
+
+    def test_ApiDeviceHandler(self):
+        user = models.FMBUser(
+            name='elsighmon'
+        )
+        user.put()
+        WebRequestHandler.unit_test_current_user = user
+
+        # Without a user_id, we should bomb.
         response = self.testapp.post_json('/api/device',
                                           params=dict(device_uuid='test_device_uuid',
                                                       user_agent_string='ua'),
                                           status=500)
 
-        # Without a *matching* api_token, we should bomb.
+        # Without a *matching* user_id, we should bomb.
         response = self.testapp.post_json('/api/device',
-                                          params=dict(api_token='NOMATCH',
+                                          params=dict(user_id='NOMATCH',
                                                       device_uuid='test_device_uuid',
                                                       user_agent_string='ua'),
                                           status=500)
 
         # Create a device associated with that user.
         response = self.testapp.post_json('/api/device',
-                                          params=dict(api_token='test_api_token',
+                                          params=dict(user_id=user.key.id(),
                                                       device_uuid='test_device_uuid',
                                                       user_agent_string='ua',
                                                       update_enabled='1',
@@ -110,25 +125,24 @@ class RequestHandlerTest(unittest.TestCase):
         query_device = q.get()
         self.assertEquals('test_device_uuid', query_device.uuid)
 
-        # Tests an update to that device.
-        response = self.testapp.post_json('/api/device',
-                                          params=dict(api_token='test_api_token',
-                                                      device_uuid='test_device_uuid',
-                                                      user_agent_string='ua',
-                                                      update_enabled='0',
-                                                      update_frequency='20',
-                                                      name='Samsung',
-                                                      platform='Android',
-                                                      version='S3'))
-        body = response.normal_body
-        obj = json.loads(body)
-        self.assertEquals(0, obj['update_enabled'])
+
+        # # Tests an update to that device.
+        # response = self.testapp.post_json('/api/device',
+        #                                   params=dict(user_id='test_user_id',
+        #                                               device_uuid='test_device_uuid',
+        #                                               user_agent_string='ua',
+        #                                               update_enabled='0',
+        #                                               update_frequency='20',
+        #                                               name='Samsung',
+        #                                               platform='Android',
+        #                                               version='S3'))
+        # body = response.normal_body
+        # obj = json.loads(body)
+        # self.assertEquals(0, obj['update_enabled'])
 
     def test_ApiSettingsHandler(self):
-        elsigh_user = User(
-            id='someid',
-            name='elsighmon',
-            api_token='test_api_token'
+        elsigh_user = models.FMBUser(
+            name='elsighmon'
         )
         elsigh_user.put()
         WebRequestHandler.unit_test_current_user = elsigh_user
@@ -141,8 +155,8 @@ class RequestHandlerTest(unittest.TestCase):
         elsigh_device.put()
 
         response = self.testapp.post_json('/api/settings',
-                                          params=dict(api_token='test_api_token',
-                                                      device_uuid='test_device_uuid',
+                                          params=dict(user_id=elsigh_user.key.id(),
+                                                      device_id=elsigh_device.key.id(),
                                                       battery_level=82,
                                                       is_charging=0))
 
@@ -156,8 +170,8 @@ class RequestHandlerTest(unittest.TestCase):
         self.assertEqual(0, len(tasks))
 
         response = self.testapp.post_json('/api/settings',
-                                          params=dict(api_token='test_api_token',
-                                                      device_uuid='test_device_uuid',
+                                          params=dict(user_id=elsigh_user.key.id(),
+                                                      device_id=elsigh_device.key.id(),
                                                       battery_level=9,
                                                       is_charging=0))
         body = response.normal_body
@@ -169,8 +183,8 @@ class RequestHandlerTest(unittest.TestCase):
         self.assertEqual(1, len(tasks))
 
         response = self.testapp.post_json('/api/settings',
-                                          params=dict(api_token='test_api_token',
-                                                      device_uuid='test_device_uuid',
+                                          params=dict(user_id=elsigh_user.key.id(),
+                                                      device_id=elsigh_device.key.id(),
                                                       battery_level=11,
                                                       is_charging=0))
         body = response.normal_body
@@ -179,18 +193,15 @@ class RequestHandlerTest(unittest.TestCase):
         self.assertTrue(obj['is_last_update_over_notify_level'])
 
     def test_ApiFollowingHandler(self):
-        user = User(
-            id='someid',
-            name='elsighmon',
-            api_token='elsigh_api_token'
+        elsigh_user = models.FMBUser(
+            name='elsighmon'
         )
-        user.put()
-        WebRequestHandler.unit_test_current_user = user
+        elsigh_user.put()
+        WebRequestHandler.unit_test_current_user = elsigh_user
 
-        jr_user = User(
-            id='jr_id',
-            name='jr',
-            api_token='jr_api_token'
+        jr_user = models.FMBUser(
+            id='jr_user_id',
+            name='jr'
         )
         jr_user.put()
 
@@ -209,14 +220,13 @@ class RequestHandlerTest(unittest.TestCase):
 
         jr_following = models.Following(
             following=jr_user.key,
-            parent=user.key
+            parent=elsigh_user.key
         )
         jr_following.put()
 
-        ded_user = User(
-            id='ded_id',
-            name='ded',
-            api_token='ded_api_token'
+        ded_user = models.FMBUser(
+            id='ded_user_id',
+            name='ded'
         )
         ded_user.put()
 
@@ -235,40 +245,38 @@ class RequestHandlerTest(unittest.TestCase):
 
         ded_following = models.Following(
             following=ded_user.key,
-            parent=user.key
+            parent=elsigh_user.key
         )
         ded_following.put()
 
         # Gut check on the ancestor query thing.
-        q = models.Following.query(ancestor=user.key)
+        q = models.Following.query(ancestor=elsigh_user.key)
         self.assertEquals(2, q.count())
 
         response = self.testapp.get('/api/following',
-                                    params=dict(api_token='elsigh_api_token',
-                                                user_key='elsigh'))
+                                    params=dict(user_id=elsigh_user.key.id()))
         body = response.normal_body
         obj = json.loads(body)
         self.assertEquals(2, len(obj['following']))
 
     def test_ApiFollowingRequestHandler_add(self):
-        user = User(
-            id='someid',
-            name='elsighmon',
-            api_token='elsigh_api_token'
+        elsigh_user = models.FMBUser(
+            name='elsighmon'
         )
-        user.put()
-        WebRequestHandler.unit_test_current_user = user
+        elsigh_user.put()
+        WebRequestHandler.unit_test_current_user = elsigh_user
 
-        ded_user = User(
-            id='ded_id',
-            name='ded',
-            api_token='ded_api_token'
+        ded_user = models.FMBUser(
+            name='ded'
         )
         ded_user.put()
         logging.info('DED KEY:: %s', ded_user.key.urlsafe())
         response = self.testapp.post_json('/api/following',
-                                          params=dict(api_token='elsigh_api_token',
+                                          params=dict(user_id=elsigh_user.key.id(),
                                                       user_key=ded_user.key.urlsafe()))
+
+
+        # TODOTODOTODO
         return
 
         body = response.normal_body
@@ -277,7 +285,7 @@ class RequestHandlerTest(unittest.TestCase):
 
         # Trying to follow ded again should error.
         response = self.testapp.post_json('/api/following',
-                                          params=dict(api_token='elsigh_api_token',
+                                          params=dict(user_id=elsigh_user.key.id(),
                                                       user_key=ded_user.key.urlsafe()),
                                           status=409)
         body = response.normal_body
@@ -285,18 +293,14 @@ class RequestHandlerTest(unittest.TestCase):
         self.assertEquals('exists', obj['error'])
 
     def test_ApiFollowingRequestHandler_delete(self):
-        elsigh_user = User(
-            id='someid',
-            name='elsighmon',
-            api_token='elsigh_api_token'
+        elsigh_user = models.FMBUser(
+            name='elsighmon'
         )
         elsigh_user.put()
         WebRequestHandler.unit_test_current_user = elsigh_user
 
-        ded_user = User(
-            id='ded_id',
-            name='ded',
-            api_token='ded_api_token'
+        ded_user = models.FMBUser(
+            name='ded'
         )
         ded_user.put()
 
@@ -310,7 +314,7 @@ class RequestHandlerTest(unittest.TestCase):
         self.assertEquals(1, q.count())
 
         response = self.testapp.post_json('/api/following/delete',
-                                          params=dict(api_token='elsigh_api_token',
+                                          params=dict(user_id=elsigh_user.key.id(),
                                                       user_key=ded_user.key.urlsafe()))
 
         body = response.normal_body
@@ -322,15 +326,13 @@ class RequestHandlerTest(unittest.TestCase):
 
         # Trying to delete ded again should error.
         self.testapp.post_json('/api/following/delete',
-                               params=dict(api_token='elsigh_api_token',
+                               params=dict(user_id=elsigh_user.key.id(),
                                            user_key=ded_user.key.urlsafe()),
                                status=404)
 
     def test_ApiNotifyingRequestHandler_get(self):
-        elsigh_user = User(
-            id='someid',
-            name='elsighmon',
-            api_token='elsigh_api_token'
+        elsigh_user = models.FMBUser(
+            name='elsighmon'
         )
         elsigh_user.put()
         WebRequestHandler.unit_test_current_user = elsigh_user
@@ -362,17 +364,15 @@ class RequestHandlerTest(unittest.TestCase):
         self.assertEquals(2, q.count())
 
         response = self.testapp.get('/api/notifying',
-                                    params=dict(api_token='elsigh_api_token',
-                                                device_uuid='elsigh_uuid'))
+                                    params=dict(user_id=elsigh_user.key.id(),
+                                                device_id=elsigh_device.key.id()))
         body = response.normal_body
         obj = json.loads(body)
         self.assertEquals(2, len(obj['notifying']))
 
     def test_ApiNotifyingRequestHandler_add(self):
-        elsigh_user = User(
-            id='someid',
-            name='elsighmon',
-            api_token='elsigh_api_token'
+        elsigh_user = models.FMBUser(
+            name='elsighmon'
         )
         elsigh_user.put()
         WebRequestHandler.unit_test_current_user = elsigh_user
@@ -384,8 +384,8 @@ class RequestHandlerTest(unittest.TestCase):
         elsigh_device.put()
 
         response = self.testapp.post_json('/api/notifying',
-                                          params=dict(api_token='elsigh_api_token',
-                                                      device_uuid=elsigh_device.uuid,
+                                          params=dict(user_id=elsigh_user.key.id(),
+                                                      device_id=elsigh_device.key.id(),
                                                       means='4152223333',
                                                       name='Dustin Diaz',
                                                       type='phone'))
@@ -395,8 +395,8 @@ class RequestHandlerTest(unittest.TestCase):
 
         # Trying to notify them again should error.
         response = self.testapp.post_json('/api/notifying',
-                                          params=dict(api_token='elsigh_api_token',
-                                                      device_uuid=elsigh_device.uuid,
+                                          params=dict(user_id=elsigh_user.key.id(),
+                                                      device_id=elsigh_device.key.id(),
                                                       means='4152223333'),
                                           status=409)
         body = response.normal_body
@@ -404,10 +404,8 @@ class RequestHandlerTest(unittest.TestCase):
         self.assertEquals('exists', obj['error'])
 
     def test_ApiNotifyingRequestHandler_delete(self):
-        elsigh_user = User(
-            id='someid',
-            name='elsighmon',
-            api_token='elsigh_api_token'
+        elsigh_user = models.FMBUser(
+            name='elsighmon'
         )
         elsigh_user.put()
         WebRequestHandler.unit_test_current_user = elsigh_user
@@ -430,8 +428,8 @@ class RequestHandlerTest(unittest.TestCase):
         self.assertEquals(1, q.count())
 
         response = self.testapp.post_json('/api/notifying/delete',
-                                          params=dict(api_token='elsigh_api_token',
-                                                      device_uuid=elsigh_device.uuid,
+                                          params=dict(user_id=elsigh_user.key.id(),
+                                                      device_id=elsigh_device.key.id(),
                                                       means='4152223333'))
         self.assertNotEquals(None, response)
         q = models.Notifying.query(ancestor=elsigh_device.key)
@@ -439,16 +437,14 @@ class RequestHandlerTest(unittest.TestCase):
 
         # Trying to delete ded again should error.
         self.testapp.post_json('/api/notifying/delete',
-                               params=dict(api_token='elsigh_api_token',
-                                           device_uuid=elsigh_device.uuid,
+                               params=dict(user_id=elsigh_user.key.id(),
+                                           device_id=elsigh_device.key.id(),
                                            means='4152223333'),
                                status=404)
 
     def test_send_battery_notifications(self):
-        elsigh_user = User(
-            id='someid',
-            name='elsighmon',
-            api_token='elsigh_api_token'
+        elsigh_user = models.FMBUser(
+            name='elsighmon'
         )
         elsigh_user.put()
 
@@ -476,10 +472,8 @@ class RequestHandlerTest(unittest.TestCase):
         self.assertEqual(1, len(tasks))
 
     def test_send_battery_notification_phone(self):
-        elsigh_user = User(
-            id='someid',
-            name='elsighmon',
-            api_token='elsigh_api_token'
+        elsigh_user = models.FMBUser(
+            name='elsighmon'
         )
         elsigh_user.put()
 
@@ -514,10 +508,8 @@ class RequestHandlerTest(unittest.TestCase):
         self.assertEquals(1, q.count())
 
     def test_send_battery_notification_email(self):
-        elsigh_user = User(
-            id='someid',
-            name='elsighmon',
-            api_token='elsigh_api_token'
+        elsigh_user = models.FMBUser(
+            name='elsighmon'
         )
         elsigh_user.put()
 
