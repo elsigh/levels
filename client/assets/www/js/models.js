@@ -4,6 +4,17 @@
 $.ajaxSettings['beforeSend'] = function(xhr, settings) {
   xhr.withCredentials = true;
 };
+/*
+$.ajaxSettings['complete'] = function(xhr, status) {
+  // noop
+};
+$.ajaxSettings['success'] = function(xhr, status) {
+  // noop
+};
+$.ajaxSettings['error'] = function(xhr, status) {
+  // noop
+};
+*/
 
 /**
  * @type {Object} Models namespace.
@@ -20,7 +31,7 @@ fmb.models.SERVER_LOCAL = 'http://localhost:8080';
 /**
  * @type {string}
  */
-fmb.models.SERVER_PROD = 'http://www.followmybattery.com';
+fmb.models.SERVER_PROD = 'https://followmybattery.appspot.com';
 
 // Useful for testing from the filesystem locally.
 fmb.models.SERVER_PROD = fmb.models.SERVER_LOCAL;
@@ -97,14 +108,21 @@ fmb.models.sync = function(method, model, options) {
   if (fmb.models.sync.userId) {
     if (method == 'update' || method == 'create' || method == 'delete') {
       var data = model.toJSON();  // Typical Backbone.
+      data['api_token'] = fmb.models.sync.apiToken;
       data['user_id'] = fmb.models.sync.userId;
-      data['device_id'] = fmb.models.sync.deviceId;
+
+      if (fmb.models.sync.deviceId) {
+        data['device_id'] = fmb.models.sync.deviceId;
+      }
       options.data = JSON.stringify(data);
     } else {
       options.data = {
-        'user_id': fmb.models.sync.userId,
-        'device_id': fmb.models.sync.deviceId
+        'api_token': fmb.models.sync.apiToken,
+        'user_id': fmb.models.sync.userId
       };
+      if (fmb.models.sync.deviceId) {
+        options.data['device_id'] = fmb.models.sync.deviceId;
+      }
     }
   }
   fmb.log('---------------> AJAX SYNC', method, url);
@@ -115,7 +133,19 @@ fmb.models.sync = function(method, model, options) {
 /**
  * @type {string}
  */
+fmb.models.sync.apiToken = null;
+
+
+/**
+ * @type {string}
+ */
 fmb.models.sync.userId = null;
+
+
+/**
+ * @type {string}
+ */
+fmb.models.sync.deviceId = null;
 
 
 // All sync calls do double duty.
@@ -221,9 +251,12 @@ fmb.Collection.prototype.initialize = function(opt_options) {
 
 
 fmb.Collection.prototype.fetchFromStorage = function(opt_options) {
-  var results = this.localStorage.findAll();
-  //fmb.log('fetchFromStorage:' + JSON.stringify(results));
-  this.reset(results, opt_options);
+  // Pretend to be async.
+  _.defer(_.bind(function() {
+    var results = this.localStorage.findAll();
+    //fmb.log('fetchFromStorage:' + JSON.stringify(results));
+    this.reset(results, opt_options);
+  }, this));
 };
 
 
@@ -270,6 +303,10 @@ fmb.Model.prototype.parse = function(response, xhr) {
 };
 
 
+/**
+ * @param {Object=} opt_data Data to save.
+ * @param {Object=} opt_options Options config.
+ */
 fmb.Model.prototype.saveToServer = function(opt_data, opt_options) {
   fmb.log('saveToServer called for id:' + this.id);
 
@@ -288,6 +325,9 @@ fmb.Model.prototype.saveToServer = function(opt_data, opt_options) {
 };
 
 
+/**
+ * Save me.
+ */
 fmb.Model.prototype.saveToStorage = function() {
   fmb.log('saveToStorage called for id:' + this.id);
   // ghetto!
@@ -305,12 +345,18 @@ fmb.Model.prototype.saveToStorage = function() {
 };
 
 
+/**
+ * @param {Object=} opt_options Options config.
+ */
 fmb.Model.prototype.fetchFromStorage = function(opt_options) {
-  var results = this.localStorage.findAll();
-  fmb.log('fetchFromStorage RESULTS:', results);
-  if (results.length) {
-    this.set(results[results.length - 1], opt_options);
-  }
+  // Pretend to be async.
+  _.defer(_.bind(function() {
+    var results = this.localStorage.findAll();
+    fmb.log('fetchFromStorage RESULTS:', results);
+    if (results.length) {
+      this.set(results[results.length - 1], opt_options);
+    }
+  }, this));
 };
 
 
@@ -331,10 +377,16 @@ fmb.models.User = fmb.Model.extend({
 /** @inheritDoc */
 fmb.models.User.prototype.initialize = function(options) {
   this.once('change:id', function() {
-    fmb.log('Saved user_id to localStorage:', this.id);
+    fmb.log('Saved user_id to localStorage:', this.id,
+            'and set for fmb.models.sync');
     localStorage.setItem('user_id', this.id);
     fmb.models.sync.userId = this.id;
   }, this);
+
+  this.once('change:api_token', function() {
+    fmb.log('Set API token for fmb.models.sync', this.get('api_token'));
+    fmb.models.sync.apiToken = this.get('api_token');
+  }
 };
 
 

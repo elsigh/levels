@@ -28,9 +28,6 @@ class WebRequestHandler(webapp2.RequestHandler):
     WebRequestHandler
     """
 
-    # This is for unit testing where we don't have cookie sessions.
-    unit_test_current_user = None
-
     def dispatch(self):
         # Get a session store for this request.
         self.session_store = sessions.get_store(request=self.request)
@@ -43,50 +40,35 @@ class WebRequestHandler(webapp2.RequestHandler):
             self.session_store.save_sessions(self.response)
 
     @webapp2.cached_property
-    #@property
     def jinja2(self):
         """Returns a Jinja2 renderer cached in the app registry"""
         return jinja2.get_jinja2(app=self.app)
 
     @webapp2.cached_property
-    #@property
     def session(self):
         """Returns a session using the default cookie key"""
         return self.session_store.get_session()
 
     @webapp2.cached_property
-    #@property
     def auth(self):
         return auth.get_auth()
 
     @webapp2.cached_property
-    #@property
     def current_user(self):
         """Returns currently logged in user"""
+        # For the website, which can just use straight up sessions.
         user_dict = self.auth.get_user_by_session()
-        if user_dict is None:
-            if WebRequestHandler.unit_test_current_user:
-                return WebRequestHandler.unit_test_current_user
-            return None
-        else:
+        if user_dict is not None:
             user = self.auth.store.user_model.get_by_id(user_dict['user_id'])
             return user
 
-    @webapp2.cached_property
-    #@property
-    def logged_in(self):
-        """Returns true if a user is currently logged in, false otherwise"""
-        user_by_session = self.auth.get_user_by_session()
-        logging.info('user_by_session: %s' % user_by_session)
-        return user_by_session is not None
+        return None
 
     @webapp2.cached_property
-    #@property
     def is_production(self):
         return 'Development' not in os.environ['SERVER_SOFTWARE']
 
     @webapp2.cached_property
-    #@property
     def version(self):
         if self.is_production:
             version = os.environ['CURRENT_VERSION_ID']

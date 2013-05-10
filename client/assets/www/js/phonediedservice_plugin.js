@@ -6,11 +6,11 @@ cordova.define('cordova/plugin/phonediedservice', function(require, exports, mod
 
   plugin.startService = function(win, fail) {
     return exec(win, fail, 'PhoneDiedPlugin', 'startService',
-        [fmb.models.sync.apiToken,
-         app.model.device.get('uuid'),
+        [app.model.user.get('api_token'),
+         app.model.user.get('id'),
+         app.model.device.get('id'),
          app.model.device.get('update_frequency'),
-         fmb.models.getApiUrl('/settings/' +
-                              app.model.device.get('uuid'))
+         fmb.models.getApiUrl('/settings')
         ]);
   };
 

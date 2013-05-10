@@ -17,6 +17,7 @@
 import datetime
 import sys
 import time
+import uuid
 
 from google.appengine.ext import ndb
 sys.modules['ndb'] = ndb
@@ -25,15 +26,23 @@ from webapp2_extras.appengine.auth.models import User
 
 
 class FMBModel(ndb.Model):
-    def to_dict(self):
+    def to_dict(self, include_api_token=False):
         obj = super(FMBModel, self).to_dict()
         obj['id'] = self.key.id()
         urlsafe_key = self.key.urlsafe()
         obj['key'] = urlsafe_key
+
+        if 'api_token' in obj and not include_api_token:
+            obj.pop('api_token')
+
         return obj
 
 
 class FMBUser(User, FMBModel):
+    def _pre_put_hook(self):
+        if not hasattr(self, 'api_token'):
+            self.api_token = str(uuid.uuid4())
+
     def get_template_data(self):
         template_data = {
           'user': self.to_dict(),
