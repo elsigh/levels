@@ -177,6 +177,7 @@ class RequestHandlerTest(unittest.TestCase):
         obj = json.loads(body)
         self.assertEquals(82, obj['battery_level'])
         self.assertEquals(1, obj['expando_test'])
+        assert not 'api_token' in obj
         self.assertTrue(obj['is_last_update_over_notify_level'])
 
         # tests that it made it to the datastore

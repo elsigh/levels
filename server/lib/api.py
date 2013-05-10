@@ -68,7 +68,16 @@ class ApiRequestHandler(WebRequestHandler):
 
         logging.info('JSON REQ DATA: %s' % self._json_request_data)
 
-
+    @property
+    def pruned_json_request_data(self):
+        obj = self._json_request_data.copy()
+        try:
+            obj.pop('api_token')
+            obj.pop('user_id')
+            obj.pop('device_id')
+        except KeyError:
+            pass
+        return obj
 
     def _assert_user_id(self):
         """Ensures that the passed in user_id data matches the logged in user."""
@@ -340,7 +349,8 @@ class ApiSettingsHandler(ApiRequestHandler):
         settings = models.Settings(
             parent=self._device.key
         )
-        settings.populate(**self._json_request_data)
+        settings_data = self.pruned_json_request_data
+        settings.populate(**settings_data)
         settings.put()
 
         if is_this_update_over_notify_level != self._device.is_last_update_over_notify_level:
