@@ -77,7 +77,7 @@ class Device(FMBModel):
     version = ndb.StringProperty()
 
 
-class Settings(FMBModel):
+class Settings(FMBModel, ndb.Expando):
     created = ndb.DateTimeProperty(auto_now_add=True)
     battery_level = ndb.IntegerProperty(required=True)
     is_charging = ndb.IntegerProperty()

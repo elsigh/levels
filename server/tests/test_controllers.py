@@ -169,13 +169,18 @@ class RequestHandlerTest(unittest.TestCase):
                                                       user_id=elsigh_user.key.id(),
                                                       device_id=elsigh_device.key.id(),
                                                       battery_level=82,
-                                                      is_charging=0))
+                                                      is_charging=0,
+                                                      expando_test=1))
 
 
         body = response.normal_body
         obj = json.loads(body)
         self.assertEquals(82, obj['battery_level'])
+        self.assertEquals(1, obj['expando_test'])
+        assert not 'api_token' in obj
         self.assertTrue(obj['is_last_update_over_notify_level'])
+
+        # tests that it made it to the datastore
 
         tasks = self.taskqueue_stub.GetTasks('default')
         self.assertEqual(0, len(tasks))

@@ -28,7 +28,7 @@ class ProfileHandler(WebRequestHandler):
 
     close = self.request.get('close')
 
-    if self.logged_in and user_key is None:
+    if self.current_user and user_key is None:
       self.output_response({
           'user': self.current_user,
           'session': self.auth.get_user_by_session(),
