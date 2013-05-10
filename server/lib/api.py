@@ -77,7 +77,7 @@ class ApiRequestHandler(WebRequestHandler):
         assert self.current_user is not None
         #logging.info('_assert_user_id %s vs %s' %
         #    (self.current_user.key.id(), self._json_request_data['user_id']))
-        assert self.current_user.key.id() == self._json_request_data['user_id']
+        assert self.current_user.key.id() == int(self._json_request_data['user_id'])
 
     def _assert_device(self):
         """Ensures that the passed in device_id is owned by current_user."""
@@ -101,7 +101,7 @@ class ApiRequestHandler(WebRequestHandler):
             'api_token' in self._json_request_data):
             user_id = self._json_request_data['user_id']
             api_token = self._json_request_data['api_token']
-            user = self.auth.store.user_model.get_by_id(user_id)
+            user = self.auth.store.user_model.get_by_id(int(user_id))
             logging.info('coolio %s, %s, %s' %
                 (user_id, api_token, user))
             if user.api_token == api_token:
@@ -338,10 +338,9 @@ class ApiSettingsHandler(ApiRequestHandler):
                            self._device.key.id())
 
         settings = models.Settings(
-            parent=self._device.key,
-            battery_level=battery_level,
-            is_charging=self._json_request_data['is_charging']
+            parent=self._device.key
         )
+        settings.populate(**self._json_request_data)
         settings.put()
 
         if is_this_update_over_notify_level != self._device.is_last_update_over_notify_level:
