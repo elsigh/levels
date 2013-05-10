@@ -59,12 +59,16 @@ class ApiRequestHandler(WebRequestHandler):
         # Did this b/c the syntax to check _json_request_data for key
         # existence is also pretty ugly and these two fields are pretty key.
         elif self.request.method == 'GET':
+            if self.request.get('api_token'):
+                self._json_request_data['api_token'] = self.request.get('api_token')
             if self.request.get('user_id'):
                 self._json_request_data['user_id'] = int(self.request.get('user_id'))
             if self.request.get('device_id'):
                 self._json_request_data['device_id'] = int(self.request.get('device_id'))
 
         logging.info('JSON REQ DATA: %s' % self._json_request_data)
+
+
 
     def _assert_user_id(self):
         """Ensures that the passed in user_id data matches the logged in user."""
@@ -84,6 +88,26 @@ class ApiRequestHandler(WebRequestHandler):
                          parent=self.current_user.key).get()
         assert device
         self._device = device
+
+    @webapp2.cached_property
+    def current_user(self):
+        user = super(ApiRequestHandler, self).current_user
+        if user is not None:
+            return user
+
+        # For our api_token situation, which is special because we can't go
+        # setting a cookie for our domain in both our JS client and Java client.
+        if ('user_id' in self._json_request_data and
+            'api_token' in self._json_request_data):
+            user_id = self._json_request_data['user_id']
+            api_token = self._json_request_data['api_token']
+            user = self.auth.store.user_model.get_by_id(user_id)
+            logging.info('coolio %s, %s, %s' %
+                (user_id, api_token, user))
+            if user.api_token == api_token:
+                return user
+
+        return None
 
     # Backbone.js likes to use put for update, we call it POST.
     def put(self, *args):
@@ -126,6 +150,7 @@ class ApiUserHandler(ApiRequestHandler):
 
 
 class ApiUserTokenHandler(ApiRequestHandler):
+    """Returns some pretty important data back to the user."""
     def post(self):
         memcache_key = 'user_token-%s' % self._json_request_data['user_token']
         user_id = memcache.get(memcache_key)
@@ -139,23 +164,32 @@ class ApiUserTokenHandler(ApiRequestHandler):
         # Ok, now clear the memcache token - it's only good once.
         memcache.delete(memcache_key)
 
-        return self.output_json_success(user.to_dict())
+        return self.output_json_success(user.to_dict(include_api_token=True))
 
 
 class ApiDeviceHandler(ApiRequestHandler):
-    def get(self, device_uuid=None):
+    def get(self):
         return self.output_json_success(self._device.to_dict())
 
     def post(self):
-        q = models.Device.query().filter(
-            models.Device.uuid == self._json_request_data['device_uuid'])
-        if q.count() == 0:
-            device = models.Device(
-                uuid=self._json_request_data['device_uuid'],
-                parent=self.current_user.key
-            )
+        # update
+        if 'id' in self._json_request_data:
+            device = ndb.Key(models.Device, int(self._json_request_data['id'])).get()
+            assert device
         else:
-            device = q.get()
+            q = models.Device.query().filter(
+                models.Device.uuid == self._json_request_data['uuid']
+            )
+            if q.count() == 0:
+                device = models.Device(
+                    uuid=self._json_request_data['uuid'],
+                    parent=self.current_user.key
+                )
+            else:
+                # TODO(elsigh): This means you can take over an existing
+                # device record which may or may not be desirable.
+                device = q.get()
+                device.parent = self.current_user.key
 
         device.user_agent_string = self._json_request_data['user_agent_string']
         device.update_enabled = int(self._json_request_data['update_enabled'])

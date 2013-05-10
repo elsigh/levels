@@ -19,7 +19,7 @@ class LoginHandler(WebRequestHandler):
     self.session['user_token'] = user_token
     logging.info('SET USER TOKEN %s' % user_token)
     tpl_data = {}
-    if self.logged_in and self.current_user:
+    if self.current_user:
       memcache.set('user_token-%s' % user_token, self.current_user.key.id(), 60)
       uri = '/profile/%s' % self.current_user.key.urlsafe()
       if user_token:
@@ -91,12 +91,6 @@ class AuthHandler(WebRequestHandler, SimpleAuthHandler):
 
     if user is not None:
       logging.info('Found existing user to log in')
-      # Existing users might'veuser_ changed their profile data so we update our
-      # local model anyway. This might result in quite inefficient usage
-      # of the Datastore, but we do this anyway for demo purposes.
-      #
-      # In a real app you could compare _attrs with user's properties fetched
-      # from the datastore and update local user in case something's changed.
       user.populate(**_attrs)
       user.put()
       self.auth.set_session(
@@ -107,7 +101,7 @@ class AuthHandler(WebRequestHandler, SimpleAuthHandler):
       # then, create a new user if nobody's signed in,
       # otherwise add this auth_id to currently logged in user.
 
-      if self.logged_in and self.current_user:
+      if self.current_user:
         logging.info('Updating currently logged in user')
 
         u = self.current_user

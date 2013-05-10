@@ -26,7 +26,7 @@
   android:hardwareAccelerated="true">
 
   <uses-sdk
-    android:minSdkVersion="15"
+    android:minSdkVersion="12"
     android:targetSdkVersion="21" />
 
   <supports-screens
@@ -56,7 +56,8 @@
       android:theme="@android:style/Theme.Black.NoTitleBar"
       android:configChanges="orientation|keyboardHidden"
       android:windowSoftInputMode="adjustResize"
-      android:launchMode="singleTask">
+      android:launchMode="singleTask"
+      android:screenOrientation="portrait">
 
       <intent-filter>
         <action android:name="android.intent.action.VIEW" />

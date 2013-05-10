@@ -45,8 +45,9 @@ public class PhoneDiedAlarm extends BroadcastReceiver {
     public static final String PREFS_NAME = "PhoneDiedPrefs";
 
     private String updatePath = "";
-    private String uuid = "";
     private String apiToken = "";
+    private String userId = "";
+    private String deviceId = "";
     private String updateFrequency = "";
 
     public static HttpResponse makeRequest(String updatePath, JSONObject json) throws Exception {
@@ -107,9 +108,11 @@ public class PhoneDiedAlarm extends BroadcastReceiver {
         */
     }
 
-    public void SendBatteryStatus(Context context, String updatePath,
-                                  String uuid, String apiToken) {
-        Log.d(TAG, "SendBatteryStatus: " + updatePath + ", " + uuid + ", " + apiToken);
+    public void SendBatteryStatus(Context context,
+                                  String apiToken, String userId, String deviceId,
+                                  String updatePath) {
+        Log.d(TAG, "SendBatteryStatus: " + apiToken + ", " + userId + ", " +
+              deviceId + ", " + updatePath);
 
         AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         ConnectivityManager connManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -164,7 +167,8 @@ public class PhoneDiedAlarm extends BroadcastReceiver {
         JSONObject json = new JSONObject();
         try {
             json.put("api_token", apiToken);
-            json.put("uuid", uuid);
+            json.put("user_id", userId);
+            json.put("device_id", deviceId);
             json.put("is_charging", isChargingInt);
             json.put("battery_level", batteryPercent);
             json.put("airplane_mode_on", airplaneModeOnBool);
@@ -201,28 +205,30 @@ public class PhoneDiedAlarm extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         SharedPreferences settings = context.getApplicationContext().
                 getSharedPreferences(PREFS_NAME, 0);
-        String updatePath = settings.getString(PhoneDiedService.EXTRAS_UPDATE_PATH, null);
-        String uuid = settings.getString(PhoneDiedService.EXTRAS_UUID, null);
         String apiToken = settings.getString(PhoneDiedService.EXTRAS_API_TOKEN, null);
-        Log.d(TAG, "onReceive w/ prefs: " + updatePath + ", " + uuid + ", " + apiToken);
+        String userId = settings.getString(PhoneDiedService.EXTRAS_USER_ID, null);
+        String deviceId = settings.getString(PhoneDiedService.EXTRAS_DEVICE_ID, null);
+        String updatePath = settings.getString(PhoneDiedService.EXTRAS_UPDATE_PATH, null);
+        Log.d(TAG, "onReceive w/ prefs: " + updatePath + ", " + deviceId + ", " + userId);
 
-        if (updatePath != null && uuid != null && apiToken != null) {
-            SendBatteryStatus(context, updatePath, uuid, apiToken);
+        if (updatePath != null && deviceId != null && userId != null) {
+            SendBatteryStatus(context, apiToken, userId, deviceId, updatePath);
         } else {
             Log.d(TAG, "Unable to SendBatteryStatus - too damn much null!");
         }
     }
 
-    public void SetPrefs(Context context, String updatePath, String uuid,
-                         String apiToken, String updateFrequency) {
-        Log.d(TAG, "SetPrefs: " + updatePath + ", " + uuid + ", " + apiToken +
+    public void SetPrefs(Context context, String apiToken, String userId,
+                         String deviceId, String updatePath, String updateFrequency) {
+        Log.d(TAG, "SetPrefs: " + updatePath + ", " + deviceId + ", " + userId +
               ", " + updateFrequency);
 
         SharedPreferences settings = context.getApplicationContext().
                 getSharedPreferences(PREFS_NAME, 0);
         SharedPreferences.Editor editor = settings.edit();
         editor.putString(PhoneDiedService.EXTRAS_API_TOKEN, apiToken);
-        editor.putString(PhoneDiedService.EXTRAS_UUID, uuid);
+        editor.putString(PhoneDiedService.EXTRAS_USER_ID, userId);
+        editor.putString(PhoneDiedService.EXTRAS_DEVICE_ID, deviceId);
         editor.putString(PhoneDiedService.EXTRAS_UPDATE_PATH, updatePath);
         editor.putString(PhoneDiedService.EXTRAS_UPDATE_FREQUENCY, updateFrequency);
         editor.commit();
