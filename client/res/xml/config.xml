@@ -34,9 +34,10 @@
     <preference name="exit-on-suspend" value="false" />
     <plugins>
         <plugin name="App" value="org.apache.cordova.App" />
-        <plugin name="Device" value="org.apache.cordova.Device" />
-        <plugin name="NetworkStatus" value="org.apache.cordova.NetworkManager" />
         <plugin name="Battery" value="org.apache.cordova.BatteryListener" />
+        <plugin name="Device" value="org.apache.cordova.Device" />
+        <plugin name="InAppBrowser" value="org.apache.cordova.InAppBrowser" />
+        <plugin name="NetworkStatus" value="org.apache.cordova.NetworkManager" />
         <plugin name="SplashScreen" value="org.apache.cordova.SplashScreen" />
 
         <plugin name="PhoneDiedPlugin" value="com.phonedied.android.PhoneDiedPlugin" />

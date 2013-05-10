@@ -256,21 +256,57 @@ fmb.views.Account.prototype.render = function() {
  */
 fmb.views.Account.prototype.onClickLogin_ = function() {
   //document.location = fmb.models.SERVER + '/auth/google';
-  var userToken = fmb.models.getUid();
-  var ref = window.open(fmb.models.SERVER +
-                        '/login?user_token=' + window.escape(userToken),
-      '_blank',
-      'location=0');
+  fmb.log('fmb.views.Account onClickLogin_');
 
-  var oauthInterval = window.setInterval(_.bind(function() {
-    if (ref.closed) {
-      window.clearInterval(oauthInterval);
-      fmb.log('calling syncByToken')
-      this.model.syncByToken(userToken);
+  this.model.loginToken_ = fmb.models.getUid();
+
+  this.loginRef_ = window.open(
+      fmb.models.SERVER + '/login?user_token=' +
+          window.escape(this.model.loginToken_),
+      '_blank',
+      'location=no');
+
+  // For Phonegap's InAppBrowser.
+  this.loginRef_.addEventListener('loadstop',
+      _.bind(this.onLoginRefLoadStop_, this),
+      false);
+  this.loginRef_.addEventListener('exit',
+      _.bind(this.onLoginRefExit_, this),
+      false);
+
+  // For not-Phonegap.
+  this.loginInterval_ = window.setInterval(_.bind(function() {
+    if (this.loginRef_.closed) {
+      this.onLoginRefExit_();
     }
   }, this), 500);
 };
 
+fmb.views.Account.prototype.onLoginRefLoadStop_ = function(e) {
+  fmb.log('fmb.views.Account onLoginRefLoadStop_', e.url);
+  if (e.url.indexOf('/profile') !== -1) {
+    this.loginRef_.close();
+    this.onLoginRefExit_();
+  }
+};
+
+
+fmb.views.Account.prototype.onLoginRefExit_ = function(e) {
+  fmb.log('fmb.views.Account onLoginRefExit_');
+  window.clearInterval(this.loginInterval_);
+
+  if (this.loginRef_.removeEventListener) {
+    this.loginRef_.removeEventListener('loadstop',
+        _.bind(this.onLoginRefLoadStop_, this));
+    this.loginRef_.removeEventListener('exit',
+        _.bind(this.onLoginRefExit_, this));
+  }
+
+  if (this.model.loginToken_) {
+    this.model.syncByToken(this.model.loginToken_);
+    this.model.loginToken_ = null;
+  }
+};
 
 /**
  * @param {Event} e A change event.

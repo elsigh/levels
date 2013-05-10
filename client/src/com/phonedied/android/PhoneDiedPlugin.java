@@ -35,21 +35,24 @@ public class PhoneDiedPlugin extends Plugin {
                                        PhoneDiedService.class);
 
             String apiToken = "";
-            String uuid = "";
+            String userId = "";
+            String deviceId = "";
             String updateFrequency = "";
             String updatePath = "";
             try {
                 apiToken = args.getString(0);
-                uuid = args.getString(1);
-                updateFrequency = args.getString(2);
-                updatePath = args.getString(3);
+                userId = args.getString(1);
+                deviceId = args.getString(2);
+                updateFrequency = args.getString(3);
+                updatePath = args.getString(4);
             } catch(JSONException e) {
               e.printStackTrace();
               return new PluginResult(PluginResult.Status.JSON_EXCEPTION);
             }
 
             intent.putExtra(PhoneDiedService.EXTRAS_API_TOKEN, apiToken);
-            intent.putExtra(PhoneDiedService.EXTRAS_UUID, uuid);
+            intent.putExtra(PhoneDiedService.EXTRAS_USER_ID, userId);
+            intent.putExtra(PhoneDiedService.EXTRAS_DEVICE_ID, deviceId);
             intent.putExtra(PhoneDiedService.EXTRAS_UPDATE_FREQUENCY, updateFrequency);
             intent.putExtra(PhoneDiedService.EXTRAS_UPDATE_PATH, updatePath);
 

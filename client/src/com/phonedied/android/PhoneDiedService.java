@@ -22,7 +22,8 @@ public class PhoneDiedService extends Service {
     private Boolean isRunning = false;
 
     public static String EXTRAS_API_TOKEN = "api_token";
-    public static String EXTRAS_UUID = "uuid";
+    public static String EXTRAS_USER_ID = "user_id";
+    public static String EXTRAS_DEVICE_ID = "device_id";
     public static String EXTRAS_UPDATE_PATH = "update_path";
     public static String EXTRAS_UPDATE_FREQUENCY = "update_frequency";
 
@@ -49,13 +50,14 @@ public class PhoneDiedService extends Service {
 
         if (intent != null) {
             String apiToken = intent.getStringExtra(EXTRAS_API_TOKEN);
-            String uuid = intent.getStringExtra(EXTRAS_UUID);
+            String userId = intent.getStringExtra(EXTRAS_USER_ID);
+            String deviceId = intent.getStringExtra(EXTRAS_DEVICE_ID);
             String updatePath = intent.getStringExtra(EXTRAS_UPDATE_PATH);
             String updateFrequency = intent.getStringExtra(EXTRAS_UPDATE_FREQUENCY);
             Log.d(TAG, "onStart, w/ intent" +
-                  apiToken + ", " + uuid + ", " +
+                  apiToken + ", " + userId + ", " + deviceId + ", " +
                   updatePath + ", " + updateFrequency);
-            alarm.SetPrefs(this, updatePath, uuid, apiToken, updateFrequency);
+            alarm.SetPrefs(this, apiToken, userId, deviceId, updatePath, updateFrequency);
         }
 
         if (!isRunning) {
