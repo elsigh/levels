@@ -34,7 +34,7 @@ fmb.models.SERVER_LOCAL = 'http://localhost:8080';
 fmb.models.SERVER_PROD = 'https://followmybattery.appspot.com';
 
 // Useful for testing from the filesystem locally.
-fmb.models.SERVER_PROD = fmb.models.SERVER_LOCAL;
+//fmb.models.SERVER_PROD = fmb.models.SERVER_LOCAL;
 
 
 /**
@@ -386,7 +386,7 @@ fmb.models.User.prototype.initialize = function(options) {
   this.once('change:api_token', function() {
     fmb.log('Set API token for fmb.models.sync', this.get('api_token'));
     fmb.models.sync.apiToken = this.get('api_token');
-  }
+  });
 };
 
 
@@ -413,6 +413,7 @@ fmb.models.User.prototype.syncByToken = function(token) {
     url: fmb.models.getApiUrl('/user/token'),
     success: _.bind(function(model, response, options) {
       fmb.log('fmb.models.User syncByToken MONEY TRAIN!!', response);
+      this.unset('user_token', {silent: true});
     }, this),
     error: function(model, xhr, options) {
       alert('LA BOMBA');

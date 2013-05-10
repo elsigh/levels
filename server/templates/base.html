@@ -35,7 +35,7 @@
       ">
 
       <div class="nav">
-        {% if logged_in %}
+        {% if current_user %}
           <a href="/logout?continue={{url_path}}">sign out</a>
         {% else %}
           <a href="/login">sign in</a>

@@ -132,8 +132,7 @@ class WebRequestHandler(webapp2.RequestHandler):
             'build_version': self.version,
             'url_for': self.uri_for,
             'url_path': self.request.path,
-            'logged_in': self.logged_in,
-            'flashes': self.session.get_flashes(),
+            'current_user': self.current_user,
         })
 
         try:

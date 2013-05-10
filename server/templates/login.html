@@ -3,7 +3,7 @@
 {% block body %}
   <p>This is a test to demonstrate SimpleAuth.</p>
 
-  {% if logged_in %}
+  {% if current_user %}
     <p>Hey there. Looks like you're logged in already.</p>
     <a href="{{ url_for('profile') }}" class="btn">my profile</a>
     <a href="/logout" class="btn">logout</a>
