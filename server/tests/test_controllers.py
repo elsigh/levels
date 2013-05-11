@@ -39,6 +39,20 @@ class RequestHandlerTest(unittest.TestCase):
         self.testbed.deactivate()
         WebRequestHandler.unit_test_current_user = None
 
+    def test_DeviceModel_to_dict(self):
+        device = models.Device(uuid='test_uuid')
+        device.put()
+        for i in range(10):
+            battery_level = 50 + i
+            settings = models.Settings(
+                parent=device.key,
+                battery_level=battery_level
+            )
+            settings.put()
+        data = device.to_dict()
+        assert 'settings' in data
+        assert len(data['settings']) == 10
+
     # def test_ApiUserHandler(self):
     #     self.testapp.get('/api/user/foo', status=404)
 

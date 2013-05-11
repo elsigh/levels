@@ -379,20 +379,8 @@ class ApiFollowingHandler(ApiRequestHandler):
             }
             q_device = models.Device.query(ancestor=followed_user.key)
             q_device.order(-models.Device.created)
-
             for device in q_device:
-                q_settings = models.Settings.query(ancestor=device.key)
-                q_settings.order(-models.Settings.created)
-                settings = q_settings.get()
-                if settings is None:
-                    settings_tpl_data = {}
-                else:
-                    settings_tpl_data = settings.to_dict()
-                followed_device = {
-                  'device': device.to_dict(),
-                  'settings': settings_tpl_data
-                }
-                followed_obj['devices'].append(followed_device)
+                followed_obj['devices'].append(device.to_dict())
 
             obj['following'].append(followed_obj)
 

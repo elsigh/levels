@@ -76,6 +76,15 @@ class Device(FMBModel):
     platform = ndb.StringProperty()
     version = ndb.StringProperty()
 
+    def to_dict(self):
+        obj = super(Device, self).to_dict()
+        q_settings = Settings.query(ancestor=self.key)
+        q_settings.order(-Settings.created)
+        obj['settings'] = []
+        for setting in q_settings.fetch(60):
+            obj['settings'].append(setting.to_dict())
+        return obj
+
 
 class Settings(FMBModel, ndb.Expando):
     created = ndb.DateTimeProperty(auto_now_add=True)

@@ -246,7 +246,37 @@ fmb.views.Account.prototype.render = function() {
 
   this.$('select').val(this.device.get('update_frequency'));
 
+  this.renderChart_();
+
   return this;
+};
+
+
+/**
+ * @private
+ */
+fmb.views.Account.prototype.renderChart_ = function() {
+  var graph = new Rickshaw.Graph({
+    element: this.$('.battery-chart').get(0),
+    renderer: 'line',
+    height: 300,
+    width: 800,
+    series: [
+      {
+        data: [ { x: 0, y: 120 }, { x: 1, y: 890 }, { x: 2, y: 38 }, { x: 3, y: 70 }, { x: 4, y: 32 } ],
+        color: "#c05020"
+      }
+    ]
+  });
+
+  var yTicks = new Rickshaw.Graph.Axis.Y({
+    graph: graph,
+    orientation: 'left',
+    tickFormat: Rickshaw.Fixtures.Number.formatKMBT,
+    element: this.$('.y-axis').get(0),
+  });
+
+  graph.render();
 };
 
 

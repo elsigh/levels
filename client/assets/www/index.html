@@ -28,6 +28,7 @@
     <link rel="stylesheet" href="css/base.css">
     <link rel="stylesheet" href="css/account.css">
     <link rel="stylesheet" href="css/following.css">
+    <link rel="stylesheet" href="css/rickshaw.css">
 
     <title>Follow My Battery</title>
     <!--<script src="http://localhost:8090/target/target-script-min.js#anonymous"></script>-->
@@ -59,6 +60,9 @@
     <script src="js/app.js"></script>
     <script src="js/models.js"></script>
     <script src="js/views.js"></script>
+
+    <script src="js/d3.v2.js"></script>
+    <script src="js/rickshaw.js"></script>
 
     <script id="tpl_account" type="text/html">
       <h2>Account</h2>
@@ -127,6 +131,12 @@
 
           <!--<input type="submit">-->
         </form>
+
+        <div class="battery-chart">
+          <div class="y-axis"></div>
+          <div class="chart"></div>
+        </div>
+
       {{/user.api_token}}
     </script>
 

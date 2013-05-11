@@ -213,9 +213,9 @@ fmb.models.App.prototype.initialize = function() {
     // Deferred so model references are set on window.app.
     _.defer(_.bind(function() {
       this.user.fetch();
-      //this.device.fetch();
-      //this.following.fetch();
-      //this.notifying.fetch();
+      this.device.fetch();
+      this.following.fetch();
+      this.notifying.fetch();
     }, this));
 
   } else {
