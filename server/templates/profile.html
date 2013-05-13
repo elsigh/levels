@@ -3,69 +3,12 @@
 
 {% block head %}
   <link rel="stylesheet" href="/static/css/index.css">
-  <style>
-    p {
-      padding: 10px;
-      font-weight: bold;
-    }
-    ul {
-      margin: 0;
-      line-height: 1.5;
-      font-weight: bold;
-    }
-    .www-contents {
-      margin: 10px;
-    }
-
-    footer {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      color: #fff;
-      padding: 15px;
-      background: #aaa;
-      text-align: center;
-    }
-
-    .battery-level-c {
-      text-align: center;
-    }
-    .battery-level {
-      font-size: 2em;
-      font-weight: bold;
-      padding-left: 10px;
-      display: inline-block;
-      border: 2px solid #000;
-      border-radius: 5px;
-      padding-left: 10px;
-    }
-    .battery-level:after {
-      content: "";
-      left: 5px;
-      position: relative;
-      display: inline-block;
-      line-height: 1;
-      top: -2px;
-      width: 4px;
-      height: 13px;
-      background: #000;
-      border-top-right-radius: 10px;
-      border-bottom-right-radius: 10px;
-    }
-
-    .charging-1:before {
-      content: "charging";
-      display: block;
-      font-size: 50%;
-      font-weight: normal;
-    }
-    .battery-created {
-      font-size: 70%;
-    }
-  </style>
+  <link rel="stylesheet" href="/static/css/profile.css">
+  <link rel="stylesheet" href="/static/css/rickshaw.css">
 
   <script src="/static/js/zepto-1.0rc1.js"></script>
+  <script src="/static/js/d3.v2.js"></script>
+  <script src="/static/js/rickshaw.js"></script>
 
 {% endblock %}
 
@@ -74,6 +17,12 @@
     <div class="img avatar">
       <img src="{{ user.avatar_url }}">
     </div>
+
+    <div class="battery-chart">
+      <div class="y-axis"></div>
+      <div class="chart"></div>
+    </div>
+
     <div class="body">
       <h1 style="margin-top: 0; padding-top: 0">
         {{ user.name }}
@@ -112,54 +61,11 @@
         {% endfor %}
       </tbody>
     </table>
-    <script>
-    var fmb = {
-      models: {}
-    };
-    /**
-     * @param {number} time An ISO time.
-     */
-    fmb.models.prettyDate = function(time){
-      var date = new Date(time),
-        diff = (((new Date()).getTime() - date.getTime()) / 1000),
-        day_diff = Math.floor(diff / 86400);
 
-      if ( isNaN(day_diff) || day_diff < 0 || day_diff >= 31 )
-        return;
-
-      return day_diff === 0 && (
-          diff < 60 && "just now" ||
-          diff < 120 && "1 minute ago" ||
-          diff < 3600 && Math.floor( diff / 60 ) + " minutes ago" ||
-          diff < 7200 && "1 hour ago" ||
-          diff < 86400 && Math.floor( diff / 3600 ) + " hours ago") ||
-        day_diff == 1 && "Yesterday" ||
-        day_diff < 7 && day_diff + " days ago" ||
-        day_diff < 31 && Math.ceil( day_diff / 7 ) + " weeks ago";
-    };
-
-    $('.battery-created').each(function(i, el) {
-      var $el = $(el);
-      var time = $el.text().trim();
-      $el.text(fmb.models.prettyDate(time * 1000));
-    });
-
-
-    $('.battery-level').each(function(i, el) {
-      var $el = $(el);
-      var level = $el.data('level');
-      $el.css('background-image',
-              '-webkit-gradient(linear, left top, right top, ' +
-                                'color-stop(' + level + '%, green), ' +
-                                'color-stop(' + level + '%, white))');
-    });
-
-
-    </script>
 
     <br>
     <p>
-      {{user.username}} is using the FollowMyBattery App and you can too!
+      {{user.name}} is using the FollowMyBattery App and you can too!
     </p>
     <p>
       <a href="http://play.google.com/store/apps/details?id=com.phonedied.android">
@@ -183,25 +89,35 @@
       <a href="mailto:elsigh@gmail.com?Subject=FollowMyBattery">Talk to Us!</a>
     </p>
 
-
-    <h2>webapp2 auth session</h2>
-    <table>
-      <tbody>
-        {% if session %}
-          {% for k, v in session.items() -%}
-            <tr>
-              <td style="padding-right: 5px">{{ k }}:</td>
-              <td>{{ v }}</td>
-            </tr>
-          {% endfor -%}
-        {% endif %}
-      </tbody>
-    </table>
+    {# Commented out
+      <h2>webapp2 auth session</h2>
+      <table>
+        <tbody>
+          {% if session %}
+            {% for k, v in session.items() -%}
+              <tr>
+                <td style="padding-right: 5px">{{ k }}:</td>
+                <td>{{ v }}</td>
+              </tr>
+            {% endfor -%}
+          {% endif %}
+        </tbody>
+      </table>
+    #}
 
     <footer>
-      @Copyright 2012 - FollowMyBattery
+      @Copyright 2013 - FollowMyBattery
     </footer>
   </section>
+
+  <script>
+    window.fmbUser = {{user_json|safe}};
+  </script>
+  <script src="/static/js/www.js"></script>
+  <script>
+    fmbProfile.init();
+  </script>
+
 
   {% if close %}
     <script>

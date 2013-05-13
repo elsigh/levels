@@ -129,11 +129,7 @@ class ApiRequestHandler(WebRequestHandler):
         self.apply_cors_headers()
         self.response.headers['Content-Type'] = 'application/json'
         logging.info('output_json response: %s' % obj)
-
-        # fixes a datetime encoding issue.
-        date_handler = lambda obj: obj.isoformat() if isinstance(obj, datetime) else None
-        json_out = json.dumps(obj, default=date_handler)
-
+        json_out = models.FMBModel.json_dump(obj)
         self.response.out.write(json_out)
 
     def output_json_success(self, obj={}):

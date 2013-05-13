@@ -231,7 +231,10 @@ fmb.views.Account.prototype.initialize = function(options) {
   fmb.log('views.Account initialize');
   this.device = options.device;
   this.model.on('change', this.render, this);
-  this.device.on('change', this.render, this);
+  this.device.on('change', function() {
+    this.render();
+    this.renderChart_();
+  }, this);
 };
 
 
@@ -246,8 +249,6 @@ fmb.views.Account.prototype.render = function() {
 
   this.$('select').val(this.device.get('update_frequency'));
 
-  this.renderChart_();
-
   return this;
 };
 
@@ -256,14 +257,28 @@ fmb.views.Account.prototype.render = function() {
  * @private
  */
 fmb.views.Account.prototype.renderChart_ = function() {
+  fmb.log('fmb.views.Account renderChart_');
+  var settingsData = this.device.get('settings');
+  if (!settingsData.length) {
+    fmb.log('No setting data to render chart with.')
+    return;
+  }
+  var dataSeries = [];
+  _.each(settingsData, function(setting, i) {
+    dataSeries.push({
+      x: i,
+      y: setting['battery_level']
+    })
+  });
+
   var graph = new Rickshaw.Graph({
     element: this.$('.battery-chart').get(0),
     renderer: 'line',
     height: 300,
-    width: 800,
+    width: $(document.body).width() - 40,
     series: [
       {
-        data: [ { x: 0, y: 120 }, { x: 1, y: 890 }, { x: 2, y: 38 }, { x: 3, y: 70 }, { x: 4, y: 32 } ],
+        data: dataSeries,
         color: "#c05020"
       }
     ]
