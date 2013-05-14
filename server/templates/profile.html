@@ -24,12 +24,9 @@
     </div>
 
     <div class="body">
-      <h1 style="margin-top: 0; padding-top: 0">
+      <h1>
         {{ user.name }}
       </h1>
-      <p>
-        <a href="{{ user.link }}" target="_blank" rel="nofollow">{{ user.link }}</a>
-      </p>
     </div>
   </div>
 
@@ -42,19 +39,19 @@
         </tr>
       </thead>
       <tbody>
-        {% for item in devices %}
+        {% for device in user.devices %}
           <tr>
             <td>
-              {{item.device.name}}
+              {{ device.platform }} {{ device.name }}
             </td>
-            <td class="battery-level-c charging-{{item.settings.is_charging}}">
+            <td class="battery-level-c charging-{{ device.settings.0.is_charging }}">
               <div class="battery-level"
-                data-level="{{item.settings.battery_level}}">
-                {{item.settings.battery_level}}%
+                data-level="{{ device.settings.0.battery_level }}">
+                {{ device.settings.0.battery_level }}%
               </div>
 
               <div class="battery-created">
-                {{item.settings.created}}
+                {{ device.settings.0.created }}
               </div>
             </td>
           </tr>
@@ -75,13 +72,13 @@
     </p>
     <ul>
       <li>
-        Automatically lets your friends or family know when you're battery's dying.
+        Automatically lets your friends or family know BEFORE your battery dies!
       </li>
       <li>
-        Instant view of loved ones battery status if they don't answer the phone.
+        Instant view of loved ones' battery status if they don't answer the phone.
       </li>
       <li>
-        More device support coming soon (maybe you need new batteries =)
+        Battery history / recommendations based on power drain.
       </li>
     </ul>
 

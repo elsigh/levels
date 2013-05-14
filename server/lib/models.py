@@ -15,10 +15,14 @@
 # limitations under the License.
 
 import datetime
-import json
 import sys
 import time
 import uuid
+
+try:
+    import json
+except:
+    import simplejson
 
 from google.appengine.ext import ndb
 sys.modules['ndb'] = ndb
@@ -79,11 +83,12 @@ class Device(FMBModel):
     version = ndb.StringProperty()
 
     def to_dict(self):
+        NUM_SETTINGS_TO_FETCH = 30
         obj = super(Device, self).to_dict()
         q_settings = Settings.query(ancestor=self.key)
         q_settings.order(-Settings.created)
         obj['settings'] = []
-        for setting in q_settings.fetch(60):
+        for setting in q_settings.fetch(NUM_SETTINGS_TO_FETCH):
             obj['settings'].append(setting.to_dict())
         return obj
 

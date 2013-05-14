@@ -89,6 +89,8 @@ fmb.models.prettyDate = function(time){
 
 /** @inheritDoc */
 fmb.models.sync = function(method, model, options) {
+  fmb.log('fmb.models.sync', method, model);
+
   options = options ? _.clone(options) : {};
 
   if (options['local_storage_only']) {
@@ -160,71 +162,12 @@ Backbone.sync = function() {
 
 
 /**
- * @extends {Backbone.Model}
+ * @extends {fmb.Model}
  * @constructor
  */
-fmb.models.App = Backbone.Model.extend();
-
-
-/** @inheritDoc */
-fmb.models.App.prototype.initialize = function() {
-  fmb.log('fmb.models.App.initialize');
-
-  // id is necessary for localStorage plugin with a model.
-  var userId = localStorage.getItem('user_id');
-  fmb.log('userId from localStorage', userId);
-  if (userId) {
-    this.user = new fmb.models.User({
-      id: userId
-    });
-    this.user.fetchFromStorage();
-  } else {
-    this.user = new fmb.models.User();
-  }
-
-  var deviceId = localStorage.getItem('device_id');
-  fmb.log('deviceId from localStorage', deviceId);
-  if (deviceId) {
-    this.device = new fmb.models.Device({
-      id: deviceId
-    });
-    this.device.fetchFromStorage();
-  } else {
-    this.device = new fmb.models.Device({
-      'uuid': window.device && window.device.uuid || fmb.models.getUid(),
-      'name': window.device && window.device.name || navigator.appName,
-      'platform': window.device && window.device.platform || navigator.platform,
-      'version': window.device && window.device.version || navigator.appVersion
-    });
-  }
-
-  this.notifying = new fmb.models.NotifyingCollection(null, {
-    user: this.user
-  });
-
-  this.following = new fmb.models.FollowingCollection(null, {
-    user: this.user
-  });
-
-  // Fetch all from the server if the user model has an id
-  // which is only true when the user has previously authenticated
-  // and been fully set up.
-  if (this.user.id) {
-    // Deferred so model references are set on window.app.
-    _.defer(_.bind(function() {
-      this.user.fetch();
-      this.device.fetch();
-      this.following.fetch();
-      this.notifying.fetch();
-    }, this));
-
-  } else {
-    this.user.once('change:id', _.bind(function() {
-      fmb.log('** SAVE DEVICE for the first time');
-      this.device.saveToServer();
-    }, this));
-  }
-};
+fmb.models.AjaxSyncModel= Backbone.Model.extend({
+  sync: fmb.models.sync
+});
 
 
 /******************************************************************************/
@@ -241,15 +184,20 @@ fmb.Collection = Backbone.Collection.extend();
 /** @inheritDoc */
 fmb.Collection.prototype.initialize = function(opt_options) {
   //fmb.log('initialize collection')
-  this.fetchFromStorage({silent: true});
-  this.on('reset', function() {
-    this.each(function(model) {
-      model.saveToStorage();
-    });
-  }, this);
+  if (this.localStorage) {
+    this.fetchFromStorage({silent: true});
+    this.on('reset', function() {
+      this.each(function(model) {
+        model.saveToStorage();
+      });
+    }, this);
+  }
 };
 
 
+/**
+ * @param {Object=} opt_options An options config.
+ */
 fmb.Collection.prototype.fetchFromStorage = function(opt_options) {
   // Pretend to be async.
   _.defer(_.bind(function() {
@@ -257,6 +205,22 @@ fmb.Collection.prototype.fetchFromStorage = function(opt_options) {
     //fmb.log('fetchFromStorage:' + JSON.stringify(results));
     this.reset(results, opt_options);
   }, this));
+};
+
+
+/** @inheritDoc */
+fmb.Collection.prototype.toJSON = function() {
+  return this.map(function(model) {
+    return model.toJSON();
+  })
+};
+
+
+/** @inheritDoc */
+fmb.Collection.prototype.getStorageData = function() {
+  return this.map(function(model) {
+    return model.getStorageData();
+  })
 };
 
 
@@ -284,19 +248,73 @@ fmb.Model.prototype.getTemplateData = function() {
   return templateData;
 };
 
+/** @inheritDoc */
+fmb.Model.prototype.set = function(opt_data, opt_options) {
+  var data = opt_data || {};
+  var options = opt_options || {};
+
+  if (this.subcollections) {
+    _.each(this.subcollections,
+      _.bind(function(constructor, subcollectionName) {
+
+        fmb.log('Looking for subcollectionName', subcollectionName,
+                'in data yields:',
+                data[subcollectionName] &&
+                data[subcollectionName].length);
+
+        if (this.get(subcollectionName) instanceof constructor) {
+          // Don't unset the collection on set calls which simply don't include
+          // data about the subcollection.
+          if (data[subcollectionName]) {
+            this.get(subcollectionName).set(data[subcollectionName], {
+              add: true,
+              remove: true,
+              merge: true
+            });
+            delete data[subcollectionName];
+            fmb.log('Updated the subcollection w/ data!');
+          }
+
+        // Let a new constructor instance pass through.
+        } else {
+          data[subcollectionName] =
+              new constructor(data[subcollectionName], {
+                parent: this
+              });
+          fmb.log('Made new subcollection!');
+        }
+      }, this));
+  }
+
+  //fmb.log('Calling base set with data:', data);
+  return Backbone.Model.prototype.set.call(this, data, options);
+};
+
+
+/** @inheritDoc */
+fmb.Model.prototype.toJSON = function() {
+  var json = Backbone.Model.prototype.toJSON.call(this);
+  _.each(this.subcollections,
+      _.bind(function(constructor, subcollectionName) {
+        if (json[subcollectionName]) {
+          json[subcollectionName] = this.get(subcollectionName).toJSON()
+        }
+      }, this));
+  return json;
+};
+
 
 /** @inheritDoc */
 fmb.Model.prototype.parse = function(response, xhr) {
-  //fmb.log('fmb.Model parse: ' + this.id + ', ' + JSON.stringify(response));
+  fmb.log('fmb.Model parse: ', this.id);
 
   // Always store server data to localStorage.
-  if (response['status'] === 0) {
+  if (response['status'] === 0 && this.localStorage) {
     _.defer(_.bind(function() {
       //fmb.log('storing local data', response)
       this.saveToStorage();
     }, this));
   }
-
   delete response['status'];  // Not for model data.
 
   return response;
@@ -326,7 +344,25 @@ fmb.Model.prototype.saveToServer = function(opt_data, opt_options) {
 
 
 /**
- * Save me.
+ * Note: Our modified copy of Backbone.localStorage assumes this
+ * function's existence.
+ * @return {Object} Overridable by subclasses.
+ */
+fmb.Model.prototype.getStorageData = function() {
+  var data = fmb.clone(this.toJSON());
+  _.each(this.subcollections,
+      _.bind(function(constructor, subcollectionName) {
+        var subcollection = this.get(subcollectionName);
+        if (subcollection && subcollection.getStorageData) {
+          data[subcollectionName] = subcollection.getStorageData();
+        }
+      }, this));
+  return data;
+};
+
+
+/**
+ * Save me - to storage..
  */
 fmb.Model.prototype.saveToStorage = function() {
   fmb.log('saveToStorage called for id:' + this.id);
@@ -352,7 +388,7 @@ fmb.Model.prototype.fetchFromStorage = function(opt_options) {
   // Pretend to be async.
   _.defer(_.bind(function() {
     var results = this.localStorage.findAll();
-    fmb.log('fetchFromStorage RESULTS:', results);
+    //fmb.log('fetchFromStorage RESULTS:', results);
     if (results.length) {
       this.set(results[results.length - 1], opt_options);
     }
@@ -360,163 +396,65 @@ fmb.Model.prototype.fetchFromStorage = function(opt_options) {
 };
 
 
-
 /******************************************************************************/
 
 
 
 /**
- * @extends {fmb.Model}
+ * @extends {Backbone.Model}
  * @constructor
  */
-fmb.models.User = fmb.Model.extend({
-  localStorage: new Backbone.LocalStorage('User')
-});
+fmb.models.App = Backbone.Model.extend();
 
 
 /** @inheritDoc */
-fmb.models.User.prototype.initialize = function(options) {
-  this.once('change:id', function() {
-    fmb.log('Saved user_id to localStorage:', this.id,
-            'and set for fmb.models.sync');
-    localStorage.setItem('user_id', this.id);
-    fmb.models.sync.userId = this.id;
-  }, this);
+fmb.models.App.prototype.initialize = function() {
+  fmb.log('fmb.models.App.initialize');
 
-  this.once('change:api_token', function() {
-    fmb.log('Set API token for fmb.models.sync', this.get('api_token'));
-    fmb.models.sync.apiToken = this.get('api_token');
-  });
-};
-
-
-/**
- * @return {string}
- */
-fmb.models.User.prototype.url = function() {
-  return fmb.models.getApiUrl('/user');
-};
-
-
-/**
- * The login flow has us using a string token that gets saved into
- * memcache on the server so we can map the user who opens the popup
- * to this user.
- * @param {string} token A login request token.
- */
-fmb.models.User.prototype.syncByToken = function(token) {
-  fmb.log('fmb.models.User syncByToken', token);
-
-  this.saveToServer({
-    'user_token': token
-  }, {
-    url: fmb.models.getApiUrl('/user/token'),
-    success: _.bind(function(model, response, options) {
-      fmb.log('fmb.models.User syncByToken MONEY TRAIN!!', response);
-      this.unset('user_token', {silent: true});
-    }, this),
-    error: function(model, xhr, options) {
-      alert('LA BOMBA');
-    }
-  });
-};
-
-
-/******************************************************************************/
-
-
-
-/**
- * @extends {fmb.Model}
- * @constructor
- */
-fmb.models.AjaxSyncModel= Backbone.Model.extend({
-  sync: fmb.models.sync
-});
-
-
-/******************************************************************************/
-
-
-
-/**
- * @extends {fmb.Model}
- * @constructor
- */
-fmb.models.Device = fmb.Model.extend({
-  localStorage: new Backbone.LocalStorage('Device'),
-  defaults: {
-    'user_agent_string': window.navigator.userAgent,
-    'update_enabled': 1,
-    'update_frequency': 10,
-    'notify_level': 10
+  // id is necessary for localStorage plugin with a model.
+  var userId = localStorage.getItem('user_id');
+  fmb.log('userId from localStorage', userId);
+  if (userId) {
+    this.user = new fmb.models.User({
+      id: userId
+    });
+    this.user.fetchFromStorage();
+  } else {
+    this.user = new fmb.models.User();
   }
-});
 
-
-/** @inheritDoc */
-fmb.models.Device.prototype.initialize = function(options) {
-  if (this.id) {
-    _.defer(function() {
-      cordova.require('cordova/plugin/phonediedservice').startService();
+  var deviceId = localStorage.getItem('device_id');
+  fmb.log('deviceId from localStorage', deviceId);
+  if (deviceId) {
+    this.device = new fmb.models.MyDevice({
+      id: deviceId
+    });
+    this.device.fetchFromStorage();
+  } else {
+    this.device = new fmb.models.MyDevice({
+      'uuid': window.device && window.device.uuid || navigator.appVersion,
+      'name': window.device && window.device.name || navigator.appName,
+      'platform': window.device && window.device.platform || navigator.platform,
+      'version': window.device && window.device.version || navigator.productSub
     });
   }
-  this.on('change', this.onChange_, this);
-};
 
+  // Fetch all from the server if the user model has an id
+  // which is only true when the user has previously authenticated
+  // and been fully set up.
+  if (this.user.id) {
+    // Deferred so model references are set on window.app.
+    _.defer(_.bind(function() {
+      this.user.fetch();
+      this.device.fetch();
+    }, this));
 
-/**
- * @private
- */
-fmb.models.Device.prototype.onChange_ = function() {
-  var plugin = cordova.require('cordova/plugin/phonediedservice');
-  var changedAttributes = this.changedAttributes();
-  fmb.log('Device onChange_' +  JSON.stringify(changedAttributes));
-
-  if (plugin && changedAttributes) {
-
-    if ((_.has(changedAttributes, 'update_enabled') ||
-         _.has(changedAttributes, 'update_frequency')) &&
-        this.has('created')) {
-
-      fmb.log('Device onChange update_enabled CHANGED');
-      if (this.get('update_enabled')) {
-        plugin.startService(function() {fmb.log('win'); },
-                            function(err) { fmb.log('lose', err); });
-      } else {
-        plugin.stopService(function() {fmb.log('win'); },
-                           function(err) { fmb.log('lose', err); });
-      }
-
-    // First time device install, start the service.
-    } else if (_.has(changedAttributes, 'id')) {
-      fmb.log('Device change:id FIRST TIME.', this.id);
-      localStorage.setItem('device_id', this.id);
-      plugin.startService();
-    }
-
+  } else {
+    this.user.once('change:id', _.bind(function() {
+      fmb.log('** SAVE DEVICE for the first time');
+      this.device.saveToServer();
+    }, this));
   }
-};
-
-
-/**
- * @return {string} An url.
- */
-fmb.models.Device.prototype.url = function() {
-  return fmb.models.getApiUrl('/device');
-};
-
-
-/**
- * @return {Object} Template data
- */
-fmb.models.Device.prototype.getTemplateData = function() {
-  var templateData = fmb.Model.prototype.getTemplateData.call(this);
-  // Converts 0 to no-key for mustache falsitude.
-  if (!templateData['update_enabled']) {
-    delete templateData['update_enabled'];
-  }
-  return templateData;
 };
 
 
@@ -529,7 +467,7 @@ fmb.models.Device.prototype.getTemplateData = function() {
  * @constructor
  */
 fmb.models.NotifyingCollection = fmb.Collection.extend({
-  localStorage: new Backbone.LocalStorage('NotifyingCollection'),
+  //localStorage: new Backbone.LocalStorage('NotifyingCollection'),
   model: fmb.Model
 });
 
@@ -538,7 +476,7 @@ fmb.models.NotifyingCollection = fmb.Collection.extend({
 fmb.models.NotifyingCollection.prototype.initialize =
     function(models, options) {
   fmb.Collection.prototype.initialize.call(this);
-  this.user = options.user;
+  this.device = this.parent;
 };
 
 
@@ -549,8 +487,9 @@ fmb.models.NotifyingCollection.prototype.url = function() {
 
 
 /** @inheritDoc */
-fmb.models.NotifyingCollection.prototype.parse = function(response) {
-  return response['notifying'];
+fmb.models.NotifyingCollection.prototype.parse = function(response, xhr) {
+  var obj = fmb.Model.prototype.parse.apply(this, arguments);
+  return obj['notifying'];
 };
 
 
@@ -626,8 +565,149 @@ fmb.models.NotifyingCollection.prototype.removeByMeans = function(means) {
  * @extends {Backbone.Collection}
  * @constructor
  */
+fmb.models.SettingsCollection = fmb.Collection.extend({
+  model: fmb.Model
+});
+
+
+/******************************************************************************/
+
+
+
+/**
+ * @extends {fmb.Model}
+ * @constructor
+ */
+fmb.models.Device = fmb.Model.extend({
+  localStorage: new Backbone.LocalStorage('Device'),
+  defaults: {
+    'user_agent_string': window.navigator.userAgent,
+    'update_enabled': 1,
+    'update_frequency': 10,
+    'notify_level': 10
+  },
+  subcollections: {
+    'notifying': fmb.models.NotifyingCollection,
+    'settings': fmb.models.SettingsCollection
+  }
+});
+
+
+/** @inheritDoc */
+fmb.models.Device.prototype.getStorageData = function() {
+  var obj = fmb.Model.prototype.getStorageData.call(this);
+
+  // Don't store the long list of historical settings data.
+  delete obj['settings'];
+
+  return obj;
+};
+
+
+/**
+ * @return {string} An url.
+ */
+fmb.models.Device.prototype.url = function() {
+  return fmb.models.getApiUrl('/device');
+};
+
+
+/**
+ * @return {Object} Template data
+ */
+fmb.models.Device.prototype.getTemplateData = function() {
+  var templateData = fmb.Model.prototype.getTemplateData.call(this);
+  // Converts 0 to no-key for mustache falsitude.
+  if (!templateData['update_enabled']) {
+    delete templateData['update_enabled'];
+  }
+  return templateData;
+};
+
+
+/******************************************************************************/
+
+
+
+/**
+ * @extends {fmb.Model}
+ * @constructor
+ */
+fmb.models.MyDevice = fmb.models.Device.extend({
+  localStorage: new Backbone.LocalStorage('Device')
+});
+
+
+/** @inheritDoc */
+fmb.models.MyDevice.prototype.initialize = function(options) {
+  this.once('change:id', function() {
+    fmb.log('Saved device_id to localStorage:', this.id,
+            'and set for fmb.models.sync');
+    localStorage.setItem('device_id', this.id);
+    fmb.models.sync.deviceId = this.id;
+
+    var plugin = cordova.require('cordova/plugin/phonediedservice');
+    if (plugin) {
+      plugin.startService();
+    }
+  }, this);
+
+  /*
+  if (this.id) {
+    _.defer(function() {
+      cordova.require('cordova/plugin/phonediedservice').startService();
+    });
+  }
+  this.on('change', this.onChange_, this);
+  */
+};
+
+
+/**
+ * DEPRECATED - unless we ever want to allow config of update freq.
+ * @private
+ */
+fmb.models.MyDevice.prototype.onChange_ = function() {
+  var changedAttributes = this.changedAttributes();
+  fmb.log('fmb.models.MyDevice onChange_');
+  var plugin = cordova.require('cordova/plugin/phonediedservice');
+  if (plugin && changedAttributes) {
+
+    if ((_.has(changedAttributes, 'update_enabled') ||
+         _.has(changedAttributes, 'update_frequency')) &&
+        this.has('created')) {
+
+      fmb.log('Device onChange update_enabled CHANGED');
+      if (this.get('update_enabled')) {
+        plugin.startService(function() {fmb.log('win'); },
+                            function(err) { fmb.log('lose', err); });
+      } else {
+        plugin.stopService(function() {fmb.log('win'); },
+                           function(err) { fmb.log('lose', err); });
+      }
+
+    // First time device install, start the service.
+    } else if (_.has(changedAttributes, 'id')) {
+      fmb.log('Device change:id FIRST TIME.', this.id);
+      localStorage.setItem('device_id', this.id);
+      fmb.models.sync.deviceId = this.id;
+      plugin.startService();
+    }
+
+  }
+};
+
+
+/******************************************************************************/
+
+
+
+/**
+ * @extends {Backbone.Collection}
+ * @constructor
+ */
 fmb.models.FollowingCollection = fmb.Collection.extend({
-  localStorage: new Backbone.LocalStorage('FollowingCollection'),
+  //localStorage: new Backbone.LocalStorage('FollowingCollection'),
   model: fmb.Model
 });
 
@@ -638,20 +718,21 @@ fmb.models.FollowingCollection = fmb.Collection.extend({
 fmb.models.FollowingCollection.prototype.initialize =
     function(models, options) {
   fmb.Collection.prototype.initialize.call(this);
-  this.user = options.user;
+  this.user = this.parent;
 };
 
 
 /** @inheritDoc */
-fmb.models.FollowingCollection.prototype.parse = function(response) {
-  _.each(response['following'], function(following) {
+fmb.models.FollowingCollection.prototype.parse = function(response, xhr) {
+  var obj = fmb.Model.prototype.parse.apply(this, arguments);
+  _.each(obj['following'], function(following) {
     _.each(following['devices'], function(device) {
       var createdTs = device['battery']['created'] * 1000;
       device['battery']['created_pretty'] =
           fmb.models.prettyDate(createdTs);
     });
   });
-  return response['following'];
+  return obj['following'];
 };
 
 
@@ -730,4 +811,84 @@ fmb.models.FollowingCollection.prototype.removeByUsername = function(userKey) {
 fmb.models.FollowingCollection.prototype.url = function() {
   return fmb.models.getApiUrl('/following');
 };
+
+
+/******************************************************************************/
+
+
+
+/**
+ * @extends {Backbone.Collection}
+ * @constructor
+ */
+fmb.models.DeviceCollection = fmb.Collection.extend({
+  model: fmb.models.Device
+});
+
+
+/******************************************************************************/
+
+
+
+/**
+ * @extends {fmb.Model}
+ * @constructor
+ */
+fmb.models.User = fmb.Model.extend({
+  localStorage: new Backbone.LocalStorage('User'),
+  subcollections: {
+    'following': fmb.models.FollowingCollection,
+    'devices': fmb.models.DeviceCollection
+  }
+});
+
+
+/** @inheritDoc */
+fmb.models.User.prototype.initialize = function(options) {
+  this.once('change:id', function() {
+    fmb.log('Saved user_id to localStorage:', this.id,
+            'and set for fmb.models.sync');
+    localStorage.setItem('user_id', this.id);
+    fmb.models.sync.userId = this.id;
+  }, this);
+
+  this.once('change:api_token', function() {
+    fmb.log('Set API token for fmb.models.sync', this.get('api_token'));
+    fmb.models.sync.apiToken = this.get('api_token');
+  });
+};
+
+
+/**
+ * @return {string}
+ */
+fmb.models.User.prototype.url = function() {
+  return fmb.models.getApiUrl('/user');
+};
+
+
+/**
+ * The login flow has us using a string token that gets saved into
+ * memcache on the server so we can map the user who opens the popup
+ * to this user.
+ * @param {string} token A login request token.
+ */
+fmb.models.User.prototype.syncByToken = function(token) {
+  fmb.log('fmb.models.User syncByToken', token);
+
+  this.saveToServer({
+    'user_token': token
+  }, {
+    url: fmb.models.getApiUrl('/user/token'),
+    success: _.bind(function(model, response, options) {
+      fmb.log('fmb.models.User syncByToken MONEY TRAIN!!', response);
+      this.unset('user_token', {silent: true});
+    }, this),
+    error: function(model, xhr, options) {
+      alert('LA BOMBA');
+    }
+  });
+};
+
+
 

@@ -36,8 +36,6 @@ class ProfileHandler(WebRequestHandler):
         except:
             user = models.FMBUser()
 
-    logging.info('user: %s', user.to_dict())
-
     template_data = {
         'user': user.to_dict(),
         'user_json': user.to_json(),

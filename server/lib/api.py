@@ -191,7 +191,8 @@ class ApiDeviceHandler(ApiRequestHandler):
                     parent=self.current_user.key
                 )
             else:
-                # TODO(elsigh): This means you can take over an existing
+                # TODO(elsigh): This means the user making this request
+                # will take over ownership of an existing
                 # device record which may or may not be desirable.
                 device = q.get()
                 device.parent = self.current_user.key

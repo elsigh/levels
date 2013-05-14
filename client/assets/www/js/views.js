@@ -177,6 +177,7 @@ fmb.views.App.prototype.transitionPage = function(route) {
         device: this.model.device
       });
     }
+
     newView = this.viewAccount;
     this.$('.tabs .account').addClass('selected');
 
@@ -184,23 +185,12 @@ fmb.views.App.prototype.transitionPage = function(route) {
     if (!this.viewFollowing) {
       this.viewFollowing = new fmb.views.Following({
         user: this.model.user,
-        device: this.model.device,
-        model: this.model.following
+        device: this.model.device
       });
     }
     newView = this.viewFollowing;
     this.$('.tabs .following').addClass('selected');
 
-  } else if (_.isEqual(fmb.App.Routes.NOTIFYING, route)) {
-    if (!this.viewNotifying) {
-      this.viewNotifying = new fmb.views.Notifying({
-        user: this.model.user,
-        device: this.model.device,
-        model: this.model.notifying
-      });
-    }
-    newView = this.viewNotifying;
-    this.$('.tabs .notifying').addClass('selected');
   }
 
   this.setCurrentView(newView);
@@ -218,7 +208,7 @@ fmb.views.App.prototype.transitionPage = function(route) {
 fmb.views.Account = Backbone.View.extend({
   el: '.fmb-account',
   events: {
-    'tap .gplus-login': 'onClickLogin_',
+    'tap .login-google': 'onClickLogin_',
     'submit form.device-update': 'onSubmitUpdateDevice_',
     'tap input[type="radio"]': 'onChangeUpdateEnabled_',
     'change [name="update_frequency"]': 'onChangeUpdateFrequency_'
@@ -230,6 +220,13 @@ fmb.views.Account = Backbone.View.extend({
 fmb.views.Account.prototype.initialize = function(options) {
   fmb.log('views.Account initialize');
   this.device = options.device;
+
+  this.viewNotifying = new fmb.views.Notifying({
+    user: this.model,
+    device: this.device,
+    model: this.device.get('notifying')
+  });
+
   this.model.on('change', this.render, this);
   this.device.on('change', function() {
     this.render();
@@ -271,15 +268,16 @@ fmb.views.Account.prototype.renderChart_ = function() {
     })
   });
 
+  var $graphEl = this.$('.battery-chart .chart');
   var graph = new Rickshaw.Graph({
-    element: this.$('.battery-chart').get(0),
-    renderer: 'line',
-    height: 300,
-    width: $(document.body).width() - 40,
+    element: $graphEl.get(0),
+    renderer: 'area',
+    height: $graphEl.height(),
+    width: $graphEl.width(),
     series: [
       {
         data: dataSeries,
-        color: "#c05020"
+        color: 'steelblue'
       }
     ]
   });
@@ -288,7 +286,7 @@ fmb.views.Account.prototype.renderChart_ = function() {
     graph: graph,
     orientation: 'left',
     tickFormat: Rickshaw.Fixtures.Number.formatKMBT,
-    element: this.$('.y-axis').get(0),
+    element: this.$('.battery-chart .y-axis').get(0),
   });
 
   graph.render();
@@ -544,6 +542,8 @@ fmb.views.Following = Backbone.View.extend({
 fmb.views.Following.prototype.initialize = function(options) {
   this.user = options.user;
   this.device = options.device;
+
+  this.model = this.user.following;
   this.model.on('all', this.onAll_, this);
   this.device.on('battery_status', this.render, this);
   this.device.on('change', this.render, this);
@@ -594,7 +594,7 @@ fmb.views.Following.prototype.render = _.debounce(function() {
           window.navigator.battery.isPlugged ? 1 : 0
     }
   };
-  fmb.log('Following render.', thisPhoneTemplateData);
+  //fmb.log('Following render.', thisPhoneTemplateData);
   var templateData = {
     'following': this.model.toJSON(),
     'this_phone': thisPhoneTemplateData,
