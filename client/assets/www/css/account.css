@@ -28,3 +28,17 @@
 .fmb-account .login-google span {
   display: none;
 }
+
+.fmb-account .user-img-name {
+  margin-bottom: 1em;
+}
+
+.fmb-account .user-img-name > img,
+.fmb-account .user-img-name > h2 {
+  display: inline-block;
+  vertical-align: top;
+}
+
+.fmb-account .user-img-name > img {
+  margin-right: 1em;
+}

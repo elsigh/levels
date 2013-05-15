@@ -16,385 +16,6 @@ $.ajaxSettings['error'] = function(xhr, status) {
 };
 */
 
-/**
- * @type {Object} Models namespace.
- */
-fmb.models = {};
-
-
-/**
- * @type {string}
- */
-fmb.models.SERVER_LOCAL = 'http://localhost:8080';
-
-
-/**
- * @type {string}
- */
-fmb.models.SERVER_PROD = 'https://followmybattery.appspot.com';
-
-// Useful for testing from the filesystem locally.
-//fmb.models.SERVER_PROD = fmb.models.SERVER_LOCAL;
-
-
-/**
- * @type {string}
- */
-fmb.models.SERVER = window.location.protocol == 'http:' ?
-    fmb.models.SERVER_LOCAL : fmb.models.SERVER_PROD;
-
-
-/**
- * @return {string} An url.
- */
-fmb.models.getApiUrl = function(endpoint) {
-  return fmb.models.SERVER + '/api' + endpoint;
-};
-
-
-/**
- * @return {string} A uuid, ripped from lawnchair/Backbone.localstorage.js.
- */
-fmb.models.getUid = function() {
-  var S4 = function() {
-    return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
-  };
-  return (S4() + S4() + '-' + S4() + '-' + S4() + '-' + S4() +
-          '-' + S4() + S4() + S4());
-};
-
-
-/**
- * @param {number} time An ISO time.
- */
-fmb.models.prettyDate = function(time){
-  var date = new Date(time),
-    diff = (((new Date()).getTime() - date.getTime()) / 1000),
-    day_diff = Math.floor(diff / 86400);
-
-  if ( isNaN(day_diff) || day_diff < 0 || day_diff >= 31 )
-    return;
-
-  return day_diff === 0 && (
-      diff < 60 && "just now" ||
-      diff < 120 && "1 minute ago" ||
-      diff < 3600 && Math.floor( diff / 60 ) + " minutes ago" ||
-      diff < 7200 && "1 hour ago" ||
-      diff < 86400 && Math.floor( diff / 3600 ) + " hours ago") ||
-    day_diff == 1 && "Yesterday" ||
-    day_diff < 7 && day_diff + " days ago" ||
-    day_diff < 31 && Math.ceil( day_diff / 7 ) + " weeks ago";
-};
-
-
-/** @inheritDoc */
-fmb.models.sync = function(method, model, options) {
-  fmb.log('fmb.models.sync', method, model);
-
-  options = options ? _.clone(options) : {};
-
-  if (options['local_storage_only']) {
-    fmb.log('sync, but local storage only');
-    return;
-  }
-
-  var url = options.url || model.url();
-  if (!url) {
-    return;
-  }
-
-  // Ensure JSON content-type.
-  options.contentType = 'application/json; charset=utf8';
-
-  // Includes our auth token in requests.
-  if (fmb.models.sync.userId) {
-    if (method == 'update' || method == 'create' || method == 'delete') {
-      var data = model.toJSON();  // Typical Backbone.
-      data['api_token'] = fmb.models.sync.apiToken;
-      data['user_id'] = fmb.models.sync.userId;
-
-      if (fmb.models.sync.deviceId) {
-        data['device_id'] = fmb.models.sync.deviceId;
-      }
-      options.data = JSON.stringify(data);
-    } else {
-      options.data = {
-        'api_token': fmb.models.sync.apiToken,
-        'user_id': fmb.models.sync.userId
-      };
-      if (fmb.models.sync.deviceId) {
-        options.data['device_id'] = fmb.models.sync.deviceId;
-      }
-    }
-  }
-  fmb.log('---------------> AJAX SYNC', method, url);
-  Backbone.ajaxSync.call(this, method, model, options);
-};
-
-
-/**
- * @type {string}
- */
-fmb.models.sync.apiToken = null;
-
-
-/**
- * @type {string}
- */
-fmb.models.sync.userId = null;
-
-
-/**
- * @type {string}
- */
-fmb.models.sync.deviceId = null;
-
-
-// All sync calls do double duty.
-Backbone.sync = function() {
-  Backbone.LocalStorage.sync.apply(this, arguments);
-  return fmb.models.sync.apply(this, arguments);
-};
-
-
-/******************************************************************************/
-
-
-
-/**
- * @extends {fmb.Model}
- * @constructor
- */
-fmb.models.AjaxSyncModel= Backbone.Model.extend({
-  sync: fmb.models.sync
-});
-
-
-/******************************************************************************/
-
-
-
-/**
- * @extends {Backbone.Model}
- * @constructor
- */
-fmb.Collection = Backbone.Collection.extend();
-
-
-/** @inheritDoc */
-fmb.Collection.prototype.initialize = function(opt_options) {
-  //fmb.log('initialize collection')
-  if (this.localStorage) {
-    this.fetchFromStorage({silent: true});
-    this.on('reset', function() {
-      this.each(function(model) {
-        model.saveToStorage();
-      });
-    }, this);
-  }
-};
-
-
-/**
- * @param {Object=} opt_options An options config.
- */
-fmb.Collection.prototype.fetchFromStorage = function(opt_options) {
-  // Pretend to be async.
-  _.defer(_.bind(function() {
-    var results = this.localStorage.findAll();
-    //fmb.log('fetchFromStorage:' + JSON.stringify(results));
-    this.reset(results, opt_options);
-  }, this));
-};
-
-
-/** @inheritDoc */
-fmb.Collection.prototype.toJSON = function() {
-  return this.map(function(model) {
-    return model.toJSON();
-  })
-};
-
-
-/** @inheritDoc */
-fmb.Collection.prototype.getStorageData = function() {
-  return this.map(function(model) {
-    return model.getStorageData();
-  })
-};
-
-
-/******************************************************************************/
-
-
-
-/**
- * @extends {Backbone.Model}
- * @constructor
- */
-fmb.Model = Backbone.Model.extend();
-
-
-/**
- * @return {Object} A template data object.
- */
-fmb.Model.prototype.getTemplateData = function() {
-  var templateData = {};
-  _.each(this.toJSON(), function(val, key) {
-    if (val) {
-      templateData[key] = val;
-    }
-  });
-  return templateData;
-};
-
-/** @inheritDoc */
-fmb.Model.prototype.set = function(opt_data, opt_options) {
-  var data = opt_data || {};
-  var options = opt_options || {};
-
-  if (this.subcollections) {
-    _.each(this.subcollections,
-      _.bind(function(constructor, subcollectionName) {
-
-        fmb.log('Looking for subcollectionName', subcollectionName,
-                'in data yields:',
-                data[subcollectionName] &&
-                data[subcollectionName].length);
-
-        if (this.get(subcollectionName) instanceof constructor) {
-          // Don't unset the collection on set calls which simply don't include
-          // data about the subcollection.
-          if (data[subcollectionName]) {
-            this.get(subcollectionName).set(data[subcollectionName], {
-              add: true,
-              remove: true,
-              merge: true
-            });
-            delete data[subcollectionName];
-            fmb.log('Updated the subcollection w/ data!');
-          }
-
-        // Let a new constructor instance pass through.
-        } else {
-          data[subcollectionName] =
-              new constructor(data[subcollectionName], {
-                parent: this
-              });
-          fmb.log('Made new subcollection!');
-        }
-      }, this));
-  }
-
-  //fmb.log('Calling base set with data:', data);
-  return Backbone.Model.prototype.set.call(this, data, options);
-};
-
-
-/** @inheritDoc */
-fmb.Model.prototype.toJSON = function() {
-  var json = Backbone.Model.prototype.toJSON.call(this);
-  _.each(this.subcollections,
-      _.bind(function(constructor, subcollectionName) {
-        if (json[subcollectionName]) {
-          json[subcollectionName] = this.get(subcollectionName).toJSON()
-        }
-      }, this));
-  return json;
-};
-
-
-/** @inheritDoc */
-fmb.Model.prototype.parse = function(response, xhr) {
-  fmb.log('fmb.Model parse: ', this.id);
-
-  // Always store server data to localStorage.
-  if (response['status'] === 0 && this.localStorage) {
-    _.defer(_.bind(function() {
-      //fmb.log('storing local data', response)
-      this.saveToStorage();
-    }, this));
-  }
-  delete response['status'];  // Not for model data.
-
-  return response;
-};
-
-
-/**
- * @param {Object=} opt_data Data to save.
- * @param {Object=} opt_options Options config.
- */
-fmb.Model.prototype.saveToServer = function(opt_data, opt_options) {
-  fmb.log('saveToServer called for id:' + this.id);
-
-  // ghetto!
-  Backbone.sync = function() {
-    return fmb.models.sync.apply(this, arguments);
-  };
-
-  this.save(opt_data, opt_options);
-
-  // ghetto!
-  Backbone.sync = function() {
-    Backbone.LocalStorage.sync.apply(this, arguments);
-    return fmb.models.sync.apply(this, arguments);
-  };
-};
-
-
-/**
- * Note: Our modified copy of Backbone.localStorage assumes this
- * function's existence.
- * @return {Object} Overridable by subclasses.
- */
-fmb.Model.prototype.getStorageData = function() {
-  var data = fmb.clone(this.toJSON());
-  _.each(this.subcollections,
-      _.bind(function(constructor, subcollectionName) {
-        var subcollection = this.get(subcollectionName);
-        if (subcollection && subcollection.getStorageData) {
-          data[subcollectionName] = subcollection.getStorageData();
-        }
-      }, this));
-  return data;
-};
-
-
-/**
- * Save me - to storage..
- */
-fmb.Model.prototype.saveToStorage = function() {
-  fmb.log('saveToStorage called for id:' + this.id);
-  // ghetto!
-  Backbone.sync = function() {
-    return Backbone.LocalStorage.sync.apply(this, arguments);
-  };
-
-  this.save();
-
-  // ghetto!
-  Backbone.sync = function() {
-    Backbone.LocalStorage.sync.apply(this, arguments);
-    return fmb.models.sync.apply(this, arguments);
-  };
-};
-
-
-/**
- * @param {Object=} opt_options Options config.
- */
-fmb.Model.prototype.fetchFromStorage = function(opt_options) {
-  // Pretend to be async.
-  _.defer(_.bind(function() {
-    var results = this.localStorage.findAll();
-    //fmb.log('fetchFromStorage RESULTS:', results);
-    if (results.length) {
-      this.set(results[results.length - 1], opt_options);
-    }
-  }, this));
-};
-
 
 /******************************************************************************/
 
@@ -408,8 +29,9 @@ fmb.models.App = Backbone.Model.extend();
 
 
 /** @inheritDoc */
-fmb.models.App.prototype.initialize = function() {
+fmb.models.App.prototype.initialize = function(opt_data, opt_options) {
   fmb.log('fmb.models.App.initialize');
+  fmb.Model.prototype.initialize.apply(this, arguments);
 
   // id is necessary for localStorage plugin with a model.
   var userId = localStorage.getItem('user_id');
@@ -474,8 +96,8 @@ fmb.models.NotifyingCollection = fmb.Collection.extend({
 
 /** @inheritDoc */
 fmb.models.NotifyingCollection.prototype.initialize =
-    function(models, options) {
-  fmb.Collection.prototype.initialize.call(this);
+    function(opt_data, opt_options) {
+  fmb.Collection.prototype.initialize.apply(this, arguments);
   this.device = this.parent;
 };
 
@@ -586,7 +208,7 @@ fmb.models.Device = fmb.Model.extend({
     'update_frequency': 10,
     'notify_level': 10
   },
-  subcollections: {
+  submodels: {
     'notifying': fmb.models.NotifyingCollection,
     'settings': fmb.models.SettingsCollection
   }
@@ -639,7 +261,8 @@ fmb.models.MyDevice = fmb.models.Device.extend({
 
 
 /** @inheritDoc */
-fmb.models.MyDevice.prototype.initialize = function(options) {
+fmb.models.MyDevice.prototype.initialize = function(opt_data, opt_options) {
+  fmb.Model.prototype.initialize.apply(this, arguments);
   this.once('change:id', function() {
     fmb.log('Saved device_id to localStorage:', this.id,
             'and set for fmb.models.sync');
@@ -716,8 +339,8 @@ fmb.models.FollowingCollection = fmb.Collection.extend({
  * @return {string}
  */
 fmb.models.FollowingCollection.prototype.initialize =
-    function(models, options) {
-  fmb.Collection.prototype.initialize.call(this);
+    function(opt_data, opt_options) {
+  fmb.Collection.prototype.initialize.apply(this, arguments);
   this.user = this.parent;
 };
 
@@ -836,7 +459,7 @@ fmb.models.DeviceCollection = fmb.Collection.extend({
  */
 fmb.models.User = fmb.Model.extend({
   localStorage: new Backbone.LocalStorage('User'),
-  subcollections: {
+  submodels: {
     'following': fmb.models.FollowingCollection,
     'devices': fmb.models.DeviceCollection
   }
@@ -844,7 +467,8 @@ fmb.models.User = fmb.Model.extend({
 
 
 /** @inheritDoc */
-fmb.models.User.prototype.initialize = function(options) {
+fmb.models.User.prototype.initialize = function(opt_data, opt_options) {
+  fmb.Model.prototype.initialize.apply(this, arguments);
   this.once('change:id', function() {
     fmb.log('Saved user_id to localStorage:', this.id,
             'and set for fmb.models.sync');
