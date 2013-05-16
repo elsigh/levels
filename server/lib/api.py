@@ -129,11 +129,7 @@ class ApiRequestHandler(WebRequestHandler):
         self.apply_cors_headers()
         self.response.headers['Content-Type'] = 'application/json'
         logging.info('output_json response: %s' % obj)
-
-        # fixes a datetime encoding issue.
-        date_handler = lambda obj: obj.isoformat() if isinstance(obj, datetime) else None
-        json_out = json.dumps(obj, default=date_handler)
-
+        json_out = models.FMBModel.json_dump(obj)
         self.response.out.write(json_out)
 
     def output_json_success(self, obj={}):
@@ -195,7 +191,8 @@ class ApiDeviceHandler(ApiRequestHandler):
                     parent=self.current_user.key
                 )
             else:
-                # TODO(elsigh): This means you can take over an existing
+                # TODO(elsigh): This means the user making this request
+                # will take over ownership of an existing
                 # device record which may or may not be desirable.
                 device = q.get()
                 device.parent = self.current_user.key
@@ -379,20 +376,8 @@ class ApiFollowingHandler(ApiRequestHandler):
             }
             q_device = models.Device.query(ancestor=followed_user.key)
             q_device.order(-models.Device.created)
-
             for device in q_device:
-                q_settings = models.Settings.query(ancestor=device.key)
-                q_settings.order(-models.Settings.created)
-                settings = q_settings.get()
-                if settings is None:
-                    settings_tpl_data = {}
-                else:
-                    settings_tpl_data = settings.to_dict()
-                followed_device = {
-                  'device': device.to_dict(),
-                  'settings': settings_tpl_data
-                }
-                followed_obj['devices'].append(followed_device)
+                followed_obj['devices'].append(device.to_dict())
 
             obj['following'].append(followed_obj)
 

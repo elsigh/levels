@@ -1,22 +1,4 @@
 <!DOCTYPE html>
-<!--
-    Licensed to the Apache Software Foundation (ASF) under one
-    or more contributor license agreements.  See the NOTICE file
-    distributed with this work for additional information
-    regarding copyright ownership.  The ASF licenses this file
-    to you under the Apache License, Version 2.0 (the
-    "License"); you may not use this file except in compliance
-    with the License.  You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-    Unless required by applicable law or agreed to in writing,
-    software distributed under the License is distributed on an
-    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-     KIND, either express or implied.  See the License for the
-    specific language governing permissions and limitations
-    under the License.
-  -->
   <html>
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -28,22 +10,25 @@
     <link rel="stylesheet" href="css/base.css">
     <link rel="stylesheet" href="css/account.css">
     <link rel="stylesheet" href="css/following.css">
+    <link rel="stylesheet" href="css/rickshaw.css">
 
-    <title>Follow My Battery</title>
+    <title>Level</title>
     <!--<script src="http://localhost:8090/target/target-script-min.js#anonymous"></script>-->
   </head>
   <body>
     <div class="fmb-app">
-      <h1>Follow My Battery</h1>
+      <h1>Level</h1>
       <section class="tabs">
         <a href="following" class="following">Following</a><a
-          href="notifying" class="notifying">Notifying</a><a
           href="account" class="account">Account</a><span
           class="share">Share!</share>
       </section>
-      <section class="fmb-tab fmb-account"></section>
-      <section class="fmb-tab fmb-notifying"></section>
-      <section class="fmb-tab fmb-following"></section>
+      <section class="fmb-tab fmb-tab-account">
+        <div class="fmb-account"></div>
+      </section>
+      <section class="fmb-tab fmb-tab-following">
+        <div class="fmb-following"></div>
+      </section>
     </div>
 
     <script src="js/cordova-2.5.0.js"></script>
@@ -57,78 +42,80 @@
     <script src="js/backbone.localStorage.js"></script>
     <script src="js/hogan-2.0.0.js"></script>
     <script src="js/app.js"></script>
+    <script src="js/models_fmb.js"></script>
     <script src="js/models.js"></script>
     <script src="js/views.js"></script>
 
+    <script src="js/d3.v2.js"></script>
+    <script src="js/rickshaw.js"></script>
+
     <script id="tpl_account" type="text/html">
-      <h2>Account</h2>
       {{^user.api_token}}
-        <h3>Welcome to the App!</h3>
+        <h2>Welcome to the App!</h2>
         <p>
-          <button class="gplus-login">G+ Login</button>
+          Send family and friends a notification *before* your battery dies!
         </p>
+        <p>
+          To get started:
+        </p>
+        <div class="login-google"><span>Sign in with Google</span></div>
       {{/user.api_token}}
 
       {{#user.api_token}}
-        <form method="post"
-          class="device-update"
-          action="{{api_server}}/api/device">
-          <img
-            src="{{user.avatar_url}}" width="100"
-            align="left">
-          <h2>
-            {{user.name}}
-          </h2>
-
-          <h3>
-            {{device.platform}}
-            {{device.name}}
-            {{device.version}}
-          </h3>
-
-          <!--
-          <div>
-            Battery Updates:
-            <label>
-              <code>On:</code>
-              <input type="radio" name="update_enabled" value="1"
-                {{#device.update_enabled}}checked{{/device.update_enabled}}>
-            </label>
-            <label>
-              <code>Off:</code>
-              <input type="radio" name="update_enabled" value="0"
-                {{^device.update_enabled}}checked{{/device.update_enabled}}>
-            </label>
-          </div>
-          -->
-
-          {{#device.update_enabled}}
-            <!--
-            <div>
-              <label>
-                every
-                <select name="update_frequency">
-                  <option>1</option>
-                  <option>5</option>
-                  <option>10</option>
-                  <option>20</option>
-                  <option>30</option>
-                </select>
-                min.
-              </label>
-            </div>
-            -->
-          {{/device.update_enabled}}
-          {{^device.update_enabled}}
-            <input type="hidden" name="update_frequency"
-              value="{{device.update_frequency}}">
-          {{/device.update_enabled}}
-
-
-          <!--<input type="submit">-->
-        </form>
+        <div class="user-img-name">
+          <img src="{{user.avatar_url}}" width="100" alt="">
+          <h2>{{user.name}}</h2>
+        </div>
       {{/user.api_token}}
     </script>
+
+    <script id="tpl_device" type="text/html">
+      <form method="post"
+        class="device-update"
+        action="{{api_server}}/api/device">
+        <h3>
+          {{platform}}
+          {{name}}
+        </h3>
+      </form>
+    </script>
+
+    <script id="tpl_notifying" type="text/html">
+      <p>
+        Send a notification when your battery hits 10%
+      </p>
+
+      <button class="notifying-add-phone">+ by phone</button>
+      <button class="notifying-add-email">+ by email</button>
+
+      <table>
+        <thead>
+          <tr>
+            <th>name</th>
+            <th>contact</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#notifying.length}}
+            {{#notifying}}
+              <tr>
+                <td>
+                  <span class="notifying-name">{{name}}</span>
+                </td>
+                <td>
+                  {{means}}
+                </td>
+                <td class="remove-cell">
+                  <div class="remove" data-means="{{means}}">X</div>
+                </td>
+              </tr>
+            {{/notifying}}
+          {{/notifying.length}}
+        </tbody>
+      </table>
+    </script>
+
 
     <script id="tpl_following" type="text/html">
       <h2>Following</h2>
@@ -196,65 +183,6 @@
       </table>
     </script>
 
-    <script id="tpl_notifying" type="text/html">
-      <h2>Notifying</h2>
-      <p>
-        Sends a notification out when your battery is at 10%
-      </p>
-      <button class="notifying-add-phone">+ phone</button>
-      <button class="notifying-add-email">+ email</button>
-      <table>
-        <thead>
-          <tr>
-            <th>name</th>
-            <th>contact</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          {{#notifying}}
-            <tr>
-              <td>
-                <span class="notifying-name">{{name}}</span>
-              </td>
-              <td>
-                {{means}}
-              </td>
-              <td class="remove-cell">
-                <div class="remove" data-means="{{means}}">X</div>
-              </td>
-            </tr>
-          {{/notifying}}
-          {{^notifying}}
-            <tr>
-              <td colspan="3">Notify them before your battery dies.</td>
-            </tr>
-          {{/notifying}}
-        </tbody>
-        <!--
-        <tfoot>
-          <tr>
-            <td colspan="3">
-              At
-              <form method="post"
-                class="device-update"
-                action="{{api_server}}/api/device/{{device.uuid}}">
-                <select name="notify_level">
-                  <option>5</option>
-                  <option>10</option>
-                  <option>20</option>
-                  <option>30</option>
-                  <option>99</option>
-                </select>
-              </form>%
-              sends automatic notifications.
-
-            </td>
-          </tr>
-        </tfoot>
-        -->
-      </table>
-    </script>
 
     <script>
       window.onerror = function(message, url, lineNumber) {
@@ -262,7 +190,7 @@
                     url + ', ' + lineNumber);
       };
       window.templates = {};
-      _.each(['account', 'following', 'notifying'], function(name) {
+      _.each(['account', 'device', 'following', 'notifying'], function(name) {
         var html = $('#tpl_' + name).html().trim();
         window.templates[name] = Hogan.compile(html);
       });

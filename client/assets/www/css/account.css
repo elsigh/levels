@@ -13,3 +13,32 @@
 .fmb-account .username code{
   font-size: 3em;
 }
+
+.fmb-account .login-google {
+  background: url(../img/sign-in-with-google.png) 0 0 no-repeat;
+  background-size: 100%;
+  border: 0;
+  height: 55px;
+  margin: 0;
+  padding: 0;
+  width: 250px;
+  -webkit-appearance: none;
+}
+
+.fmb-account .login-google span {
+  display: none;
+}
+
+.fmb-account .user-img-name {
+  margin-bottom: 1em;
+}
+
+.fmb-account .user-img-name > img,
+.fmb-account .user-img-name > h2 {
+  display: inline-block;
+  vertical-align: top;
+}
+
+.fmb-account .user-img-name > img {
+  margin-right: 1em;
+}

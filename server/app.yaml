@@ -23,7 +23,7 @@ libraries:
 
 builtins:
 - deferred: on
-#uncomment to turn on page performance
+- remote_api: on
 #- appstats: on
 
 

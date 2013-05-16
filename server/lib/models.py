@@ -19,6 +19,11 @@ import sys
 import time
 import uuid
 
+try:
+    import json
+except:
+    import simplejson
+
 from google.appengine.ext import ndb
 sys.modules['ndb'] = ndb
 
@@ -26,6 +31,15 @@ from webapp2_extras.appengine.auth.models import User
 
 
 class FMBModel(ndb.Model):
+
+    @classmethod
+    def json_dump(cls, obj):
+        date_handler = lambda obj: obj.isoformat() if isinstance(obj, datetime.datetime) else None
+        return json.dumps(obj, default=date_handler)
+
+    def to_json(self):
+        return FMBModel.json_dump(self.to_dict())
+
     def to_dict(self, include_api_token=False):
         obj = super(FMBModel, self).to_dict()
         obj['id'] = self.key.id()
@@ -34,6 +48,8 @@ class FMBModel(ndb.Model):
 
         if 'api_token' in obj and not include_api_token:
             obj.pop('api_token')
+        if 'password' in obj:
+            obj.pop('password')
 
         return obj
 
@@ -43,24 +59,14 @@ class FMBUser(User, FMBModel):
         if not hasattr(self, 'api_token'):
             self.api_token = str(uuid.uuid4())
 
-    def get_template_data(self):
-        template_data = {
-          'user': self.to_dict(),
-          'devices': []
-        }
+    def to_dict(self, include_api_token=False):
+        obj = super(FMBUser, self).to_dict(include_api_token=include_api_token)
+        obj['devices'] = []
         q_device = Device.query(ancestor=self.key)
         q_device.order(-Device.created)
         for device in q_device:
-            q_settings = Settings.query(ancestor=device.key)
-            q_settings.order(-Settings.created)
-            last_settings = q_settings.get()
-            if last_settings is not None:
-                device_data = {
-                  'device': device.to_dict(),
-                  'settings': last_settings.to_dict()
-                }
-                template_data['devices'].append(device_data)
-        return template_data
+            obj['devices'].append(device.to_dict())
+        return obj
 
 
 class Device(FMBModel):
@@ -75,6 +81,21 @@ class Device(FMBModel):
     name = ndb.StringProperty()
     platform = ndb.StringProperty()
     version = ndb.StringProperty()
+
+    def to_dict(self):
+        NUM_SETTINGS_TO_FETCH = 10
+        obj = super(Device, self).to_dict()
+
+        # settings
+        q_settings = Settings.query(ancestor=self.key)
+        q_settings.order(-Settings.created)
+        obj['settings'] = []
+        for setting in q_settings.fetch(NUM_SETTINGS_TO_FETCH):
+            obj['settings'].append(setting.to_dict())
+
+        # notifying
+
+        return obj
 
 
 class Settings(FMBModel, ndb.Expando):

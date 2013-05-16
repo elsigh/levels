@@ -138,6 +138,7 @@ class WebRequestHandler(webapp2.RequestHandler):
         try:
             self.response.write(self.jinja2.render_template(
                 tpl_name, **tpl_data))
+            logging.info('output_response: done')
         except TemplateNotFound:
             self.abort(404)
 
