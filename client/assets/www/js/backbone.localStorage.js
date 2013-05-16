@@ -44,7 +44,8 @@ _.extend(Backbone.LocalStorage.prototype, {
         model.id = guid();
         model.set(model.idAttribute, model.id);
     }
-    this.localStorage().setItem(this.name+"-"+model.id, JSON.stringify(model));
+    //this.localStorage().setItem(this.name+"-"+model.id, JSON.stringify(model));
+    this.localStorage().setItem(this.name+"-"+model.id, JSON.stringify(model.getStorageData()));
     this.records.push(model.id.toString());
     this.save();
     return model.toJSON();
@@ -52,7 +53,8 @@ _.extend(Backbone.LocalStorage.prototype, {
 
   // Update a model by replacing its copy in `this.data`.
   update: function(model) {
-    this.localStorage().setItem(this.name+"-"+model.id, JSON.stringify(model));
+    //this.localStorage().setItem(this.name+"-"+model.id, JSON.stringify(model));
+    this.localStorage().setItem(this.name+"-"+model.id, JSON.stringify(model.getStorageData()));
     if (!_.include(this.records, model.id.toString())) this.records.push(model.id.toString()); this.save();
     return model.toJSON();
   },
@@ -88,6 +90,7 @@ _.extend(Backbone.LocalStorage.prototype, {
 // *localStorage* property, which should be an instance of `Store`.
 // window.Store.sync and Backbone.localSync is deprectated, use Backbone.LocalStorage.sync instead
 Backbone.LocalStorage.sync = window.Store.sync = Backbone.localSync = function(method, model, options) {
+  window.console.log('Backbone.LocalStorage.sync', method, model.id);
   var store = model.localStorage || model.collection.localStorage;
 
   var resp, syncDfd = $.Deferred && $.Deferred(); //If $ is having Deferred - use it.

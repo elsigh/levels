@@ -58,6 +58,8 @@ public class PhoneDiedAlarm extends BroadcastReceiver {
         //url with the post data
         HttpPost httpPost = new HttpPost(updatePath);
 
+        //httpPost.setHeader("User-Agent", "Android");
+
         //passes the results to a string builder/entity
         StringEntity se = new StringEntity(json.toString());
         httpPost.setEntity(se);
