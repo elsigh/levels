@@ -40,21 +40,23 @@
       </thead>
       <tbody>
         {% for device in user.devices %}
-          <tr>
-            <td>
-              {{ device.platform }} {{ device.name }}
-            </td>
-            <td class="battery-level-c charging-{{ device.settings.0.is_charging }}">
-              <div class="battery-level"
-                data-level="{{ device.settings.0.battery_level }}">
-                {{ device.settings.0.battery_level }}%
-              </div>
+          {% if device.settings.length %}
+            <tr>
+              <td>
+                {{ device.platform }} {{ device.name }}
+              </td>
+              <td class="battery-level-c charging-{{ device.settings.0.is_charging }}">
+                <div class="battery-level"
+                  data-level="{{ device.settings.0.battery_level }}">
+                  {{ device.settings.0.battery_level }}%
+                </div>
 
-              <div class="battery-created">
-                {{ device.settings.0.created }}
-              </div>
-            </td>
-          </tr>
+                <div class="battery-created">
+                  {{ device.settings.0.created }}
+                </div>
+              </td>
+            </tr>
+          {% endif %}
         {% endfor %}
       </tbody>
     </table>

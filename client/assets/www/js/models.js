@@ -110,6 +110,7 @@ fmb.models.NotifyingCollection.prototype.url = function() {
 
 /** @inheritDoc */
 fmb.models.NotifyingCollection.prototype.parse = function(response, xhr) {
+  fmb.log('fmb.models.NotifyingCollection parse');
   var obj = fmb.Model.prototype.parse.apply(this, arguments);
   return obj['notifying'];
 };
