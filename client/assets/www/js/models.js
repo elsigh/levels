@@ -61,6 +61,9 @@ fmb.models.App.prototype.initialize = function(opt_data, opt_options) {
     });
   }
 
+  // Get the device into the user's devices collection if not there already.
+  this.user.get('devices').add(this.device);
+
   // Fetch all from the server if the user model has an id
   // which is only true when the user has previously authenticated
   // and been fully set up.
@@ -95,14 +98,6 @@ fmb.models.NotifyingCollection = fmb.Collection.extend({
 
 
 /** @inheritDoc */
-fmb.models.NotifyingCollection.prototype.initialize =
-    function(opt_data, opt_options) {
-  fmb.Collection.prototype.initialize.apply(this, arguments);
-  this.device = this.parent;
-};
-
-
-/** @inheritDoc */
 fmb.models.NotifyingCollection.prototype.url = function() {
   return fmb.models.getApiUrl('/notifying');
 };
@@ -110,11 +105,20 @@ fmb.models.NotifyingCollection.prototype.url = function() {
 
 /** @inheritDoc */
 fmb.models.NotifyingCollection.prototype.parse = function(response, xhr) {
-  fmb.log('fmb.models.NotifyingCollection parse');
+  fmb.log('fmb.models.NotifyingCollection parse', response);
   var obj = fmb.Model.prototype.parse.apply(this, arguments);
-  return obj['notifying'];
+  return obj['notifying'] ? obj['notifying'] : obj;
 };
 
+
+fmb.models.NotifyingCollection.prototype.fetch =
+    function(opt_options) {
+  var options = opt_options || {};
+  options.data = {
+    'device_id': this.parent.id
+  };
+  fmb.Collection.prototype.fetch.call(this, options);
+}
 
 /**
  * @param {Object} obj A contact object.
@@ -126,6 +130,9 @@ fmb.models.NotifyingCollection.prototype.addContact = function(obj) {
   if (means === '') {
     return;
   }
+
+  // Adds in the parent device_id.
+  obj['device_id'] = this.parent.id;
 
   var alreadyNotifying = this.find(function(model) {
     return model.get('means') == means;
@@ -142,12 +149,13 @@ fmb.models.NotifyingCollection.prototype.addContact = function(obj) {
   }, this);
   addModel.save(obj, {
     success: _.bind(function() {
-      fmb.log('MONEY TRAIN, refetching goodies from server.');
+      fmb.log('MONEY TRAIN NotifyingCollection, refetching from server.');
       this.fetch();
     }, this),
     error: function(model, xhr, options) {
       if (xhr.status === 404) {
-        alert('La bomba, seems we could not find delete ' + means);
+        fmb.log('Gah, serious error in NotifyingCollection addContact');
+        alert('La bomba w/ ' + means);
       } else if (xhr.status === 409) {
         //alert('already notifying');
       }
@@ -163,14 +171,15 @@ fmb.models.NotifyingCollection.prototype.removeByMeans = function(means) {
   var notifyModel = new fmb.models.AjaxSyncModel();
 
   notifyModel.url = _.bind(function() {
-    return fmb.models.getApiUrl('/notifying/delete/');
+    return fmb.models.getApiUrl('/notifying/delete');
   }, this);
 
   notifyModel.save({
-    'means': means
+    'device_id': this.parent.id,
+    'means': means.toString()
   }, {
     success: _.bind(function() {
-      fmb.log('MONEY TRAIN, refetching goodies from server.');
+      fmb.log('MONEY TRAIN, refetching notifying data from server.');
       this.fetch();
     }, this),
     error: function(model, xhr, options) {
@@ -227,6 +236,16 @@ fmb.models.Device.prototype.getStorageData = function() {
 };
 
 
+/** @inheritDoc */
+fmb.models.Device.prototype.fetch = function(opt_options) {
+  var options = opt_options || {};
+  options.data = {
+    'device_id': this.id
+  };
+  fmb.Model.prototype.fetch.call(this, options);
+};
+
+
 /**
  * @return {string} An url.
  */
@@ -268,7 +287,7 @@ fmb.models.MyDevice.prototype.initialize = function(opt_data, opt_options) {
     fmb.log('Saved device_id to localStorage:', this.id,
             'and set for fmb.models.sync');
     localStorage.setItem('device_id', this.id);
-    fmb.models.sync.deviceId = this.id;
+    //fmb.models.sync.deviceId = this.id;
 
     var plugin = cordova.require('cordova/plugin/phonediedservice');
     if (plugin) {
@@ -314,7 +333,7 @@ fmb.models.MyDevice.prototype.onChange_ = function() {
     } else if (_.has(changedAttributes, 'id')) {
       fmb.log('Device change:id FIRST TIME.', this.id);
       localStorage.setItem('device_id', this.id);
-      fmb.models.sync.deviceId = this.id;
+      //fmb.models.sync.deviceId = this.id;
       plugin.startService();
     }
 
@@ -334,16 +353,6 @@ fmb.models.FollowingCollection = fmb.Collection.extend({
   //localStorage: new Backbone.LocalStorage('FollowingCollection'),
   model: fmb.Model
 });
-
-
-/**
- * @return {string}
- */
-fmb.models.FollowingCollection.prototype.initialize =
-    function(opt_data, opt_options) {
-  fmb.Collection.prototype.initialize.apply(this, arguments);
-  this.user = this.parent;
-};
 
 
 /** @inheritDoc */
@@ -368,7 +377,7 @@ fmb.models.FollowingCollection.prototype.addByUserKey = function(userKey) {
 
   // Can't follow yerself or no one.
   if (userKey === '' ||
-      userKey == this.user.get('key')) {
+      userKey == this.parent.get('key')) {
     return;
   }
 
@@ -388,7 +397,7 @@ fmb.models.FollowingCollection.prototype.addByUserKey = function(userKey) {
   followModel.save({'user_key': userKey}, {
     //url: url,  // why this no work?
     success: _.bind(function() {
-      fmb.log('MONEY TRAIN, refetching goodies from server.');
+      fmb.log('MONEY TRAIN, refetching following data from server.');
       this.fetch();
     }, this),
     error: function(model, xhr, options) {
@@ -417,9 +426,9 @@ fmb.models.FollowingCollection.prototype.removeByUsername = function(userKey) {
   }, {
     // Why does url not work here?
     //url: fmb.models.getApiUrl('/following/delete/') +
-    //     this.user.get('userKey'),
+    //     this.parent.get('userKey'),
     success: _.bind(function() {
-      fmb.log('MONEY TRAIN, refetching goodies from server.');
+      fmb.log('MONEY TRAIN, refetching following data from server.');
       this.fetch();
     }, this),
     error: function(model, xhr, options) {

@@ -258,7 +258,8 @@ fmb.views.Account.prototype.setUpDeviceViews_ = function(e) {
   fmb.log('fmb.views.Account setUpDeviceViews_',
           this.model.get('devices').length);
   this.model.get('devices').each(_.bind(function(device) {
-    if (!this.viewDevices_[device.id]) {
+    // Don't make views for devices without ids.
+    if (device.id && !this.viewDevices_[device.id]) {
       this.viewDevices_[device.id] = new fmb.views.Device({
         parent: this,
         model: device
@@ -524,7 +525,7 @@ fmb.views.Notifying.prototype.render = function() {
  * @private
  */
 fmb.views.Notifying.prototype.onClickNotifyingAdd_ = function(e) {
-  if (fmb.models.SERVER == fmb.models.SERVER_PROD) {
+  if (fmb.ua.IS_ANDROID && fmb.ua.IS_CORDOVA) {
     var emailOrPhone = $(e.currentTarget).hasClass('notifying-add-phone') ?
         'phone' : 'email';
     fmb.log('onClickNotifyingAdd_ emailOrPhone', emailOrPhone);
@@ -632,22 +633,11 @@ fmb.views.Following.prototype.onAll_ = function(event) {
 
 /** @inheritDoc */
 fmb.views.Following.prototype.render = _.debounce(function() {
-  var thisPhoneTemplateData = {
-    'user': this.user.getTemplateData(),
-    'device': this.device.getTemplateData(),
-    'settings': {
-      'created_pretty': 'live!',
-      'battery_level': window.navigator.battery && window.navigator.battery.level ||
-          50,
-      'is_charging': window.navigator.battery &&
-          window.navigator.battery.isPlugged ? 1 : 0
-    }
-  };
-  //fmb.log('Following render.', thisPhoneTemplateData);
+  var following = fmb.clone(this.model.toJSON());
+  following.unshift(app.model.user.toJSON());
+  fmb.log('fmb.views.Following render', following)
   var templateData = {
-    'following': this.model.toJSON(),
-    'this_phone': thisPhoneTemplateData,
-    'device': this.device.getTemplateData()
+    'following': following
   };
   this.$el.html(fmb.views.getTemplateHtml('following', templateData));
   return this;
