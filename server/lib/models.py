@@ -94,6 +94,11 @@ class Device(FMBModel):
             obj['settings'].append(setting.to_dict())
 
         # notifying
+        q_notifying = Notifying.query(ancestor=self.key)
+        q_notifying.order(-Settings.created)
+        obj['notifying'] = []
+        for notifying in q_notifying:
+            obj['notifying'].append(notifying.to_dict())
 
         return obj
 

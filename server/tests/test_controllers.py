@@ -53,33 +53,26 @@ class RequestHandlerTest(unittest.TestCase):
         assert 'settings' in data
         assert len(data['settings']) == 10
 
-    # def test_ApiUserHandler(self):
-    #     self.testapp.get('/api/user/foo', status=404)
+    def test_ApiUserHandler(self):
+        self.testapp.get('/api/user', status=500)
 
-    #     response = self.testapp.post_json('/api/user/',
-    #                                       params=dict(name='elsigh',
-    #                                                   id='foo'))
-    #     body = response.normal_body
-    #     obj = json.loads(body)
-    #     self.assertEquals('elsigh', obj['name'])
-    #     self.assertTrue('user_id' in obj)
-    #     self.assertNotEquals('', obj['user_id'])
+        user = models.FMBUser(
+            name='elsighmon'
+        )
+        user.put()
 
-    #     # Trying to create again with this name should fail.
-    #     response = self.testapp.post_json('/api/user/',
-    #                                       params=dict(name='elsigh',
-    #                                                   id='foo'),
-    #                                       status=409)
-    #     body = response.normal_body
-    #     obj = json.loads(body)
-    #     self.assertEquals('exists', obj['error'])
+        # Without an api_token, we should bomb.
+        response = self.testapp.get('/api/user',
+                                    params=dict(user_id=user.key.id()),
+                                    status=500)
 
-    #     # But we should be able to retrieve it, sans user_id.
-    #     response = self.testapp.get('/api/user/elsigh')
-    #     body = response.normal_body
-    #     obj = json.loads(body)
-    #     self.assertEquals('elsigh', obj['name'])
-    #     self.assertTrue('user_id' not in obj)
+        response = self.testapp.get('/api/user',
+                                    params=dict(api_token=user.api_token,
+                                                user_id=user.key.id()))
+
+        body = response.normal_body
+        obj = json.loads(body)
+        self.assertEquals(user.key.id(), obj['id'])
 
     def test_ApiUserTokenHandler(self):
         user = models.FMBUser(

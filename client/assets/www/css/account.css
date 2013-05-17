@@ -42,3 +42,15 @@
 .fmb-account .user-img-name > img {
   margin-right: 1em;
 }
+
+/* Device */
+.fmb-device {
+  border: 1px solid #ccc;
+  margin-bottom: 2em;
+  padding: 5px;
+}
+
+.fmb-device h3 {
+  margin-top: 0;
+  padding-top: 0;
+}

@@ -31,6 +31,15 @@ from lib.external.twilio.rest import TwilioRestClient
 import settings
 
 
+def api_token_required(handler_method):
+    """A decorator to require that an API token is passed in."""
+    def check_api_token(self, *args, **kwargs):
+        api_token = self.request.get('api_token')
+        assert api_token
+        handler_method(self, *args, **kwargs)
+    return check_api_token
+
+
 class ApiRequestHandler(WebRequestHandler):
     def initialize(self, request, response):
         logging.info('ApiRequestHandler initialize - %s %s' %
@@ -38,7 +47,7 @@ class ApiRequestHandler(WebRequestHandler):
         super(ApiRequestHandler, self).initialize(request, response)
         self._set_json_request_data()
         self._assert_user_id()
-        self._assert_device()
+        self._assert_api_token()
 
     def _set_json_request_data(self):
         self._json_request_data = {}
@@ -88,7 +97,7 @@ class ApiRequestHandler(WebRequestHandler):
         #    (self.current_user.key.id(), self._json_request_data['user_id']))
         assert self.current_user.key.id() == int(self._json_request_data['user_id'])
 
-    def _assert_device(self):
+    def _get_device_by_device_id(self):
         """Ensures that the passed in device_id is owned by current_user."""
         if 'device_id' not in self._json_request_data:
             return
@@ -96,7 +105,14 @@ class ApiRequestHandler(WebRequestHandler):
         device = ndb.Key(models.Device, int(device_id),
                          parent=self.current_user.key).get()
         assert device
-        self._device = device
+        return device
+
+    def _assert_api_token(self):
+        """Ensures an API token is passed for all but /api/user/token."""
+        url = self.request.path
+        if url != '/api/user/token':
+            assert 'api_token' in self._json_request_data
+
 
     @webapp2.cached_property
     def current_user(self):
@@ -147,11 +163,7 @@ class ApiUserHandler(ApiRequestHandler):
         user = self.current_user
         if not user:
              return self.output_json_error({}, 404)
-        return self.output_json_success(user.to_dict())
-
-    # TODO(elsigh): Update User.name, etc..
-    #def post(self, user_key=None):
-
+        return self.output_json_success(user.to_dict(include_api_token=True))
 
 
 class ApiUserTokenHandler(ApiRequestHandler):
@@ -174,7 +186,8 @@ class ApiUserTokenHandler(ApiRequestHandler):
 
 class ApiDeviceHandler(ApiRequestHandler):
     def get(self):
-        return self.output_json_success(self._device.to_dict())
+        device = self._get_device_by_device_id()
+        return self.output_json_success(device.to_dict())
 
     def post(self):
         # update
@@ -230,10 +243,10 @@ def _send_notification_templater(user_id, device_id, notifying_id, tpl_name):
 
     # Make sure we haven't sent this means a notification in the last N hours.
     q = models.NotificationSent.query(ancestor=device.key)
-    q.filter(models.NotificationSent.means == notifying.means)
+    q = q.filter(models.NotificationSent.means == notifying.means)
 
     from_time = datetime.now() - timedelta(hours=12)
-    q.filter(models.NotificationSent.created > from_time)
+    q = q.filter(models.NotificationSent.created > from_time)
 
     if q.count() != 0:
         logging.info('Nope, we already sent them a notification recently.')
@@ -329,30 +342,31 @@ def send_battery_notifications(user_id, device_id):
 
 class ApiSettingsHandler(ApiRequestHandler):
     def post(self):
+        device = self._get_device_by_device_id()
         battery_level = self._json_request_data['battery_level']
-        is_this_update_over_notify_level = int(battery_level) > int(self._device.notify_level)
+        is_this_update_over_notify_level = int(battery_level) > int(device.notify_level)
 
         logging.info('_device.is_last_update_over_notify_level %s, '
                      'is_this_update_over_notify_level %s' %
-                     (self._device.is_last_update_over_notify_level,
+                     (device.is_last_update_over_notify_level,
                       is_this_update_over_notify_level))
-        if (self._device.is_last_update_over_notify_level and
+        if (device.is_last_update_over_notify_level and
             not is_this_update_over_notify_level):
             logging.info('^^^^ DO NOTIFICATIONS! ^^^^')
             deferred.defer(send_battery_notifications,
                            self.current_user.key.id(),
-                           self._device.key.id())
+                           device.key.id())
 
         settings = models.Settings(
-            parent=self._device.key
+            parent=device.key
         )
         settings_data = self.pruned_json_request_data
         settings.populate(**settings_data)
         settings.put()
 
-        if is_this_update_over_notify_level != self._device.is_last_update_over_notify_level:
-            self._device.is_last_update_over_notify_level = is_this_update_over_notify_level
-            self._device.put()
+        if is_this_update_over_notify_level != device.is_last_update_over_notify_level:
+            device.is_last_update_over_notify_level = is_this_update_over_notify_level
+            device.put()
 
         # Hack in is_last_update_over_notify_level
         json_output = settings.to_dict()
@@ -370,16 +384,7 @@ class ApiFollowingHandler(ApiRequestHandler):
         for followed in q:
             followed_user = followed.following.get()
             logging.info('followed_user: %s' % followed_user.name)
-            followed_obj = {
-              'user': followed_user.to_dict(),
-              'devices': []
-            }
-            q_device = models.Device.query(ancestor=followed_user.key)
-            q_device.order(-models.Device.created)
-            for device in q_device:
-                followed_obj['devices'].append(device.to_dict())
-
-            obj['following'].append(followed_obj)
+            obj['following'].append(followed_user.to_dict())
 
         return self.output_json_success(obj)
 
@@ -390,7 +395,7 @@ class ApiFollowingHandler(ApiRequestHandler):
 
         # Now make sure they're not already following that user.
         q = models.Following.query(ancestor=self.current_user.key)
-        q.filter(models.Following.following == follow_user.key)
+        q = q.filter(models.Following.following == follow_user.key)
         if q.count() > 0:
             logging.info('ALREADY following!')
             return self.output_json_error({'error': 'exists'}, 409)
@@ -410,7 +415,7 @@ class ApiFollowingDeleteHandler(ApiRequestHandler):
             return self.output_json_error()
 
         q = models.Following.query(ancestor=self.current_user.key)
-        q.filter(models.Following.following == follow_user.key)
+        q = q.filter(models.Following.following == follow_user.key)
 
         if q.count() == 0:
             return self.output_json_error()
@@ -424,7 +429,8 @@ class ApiFollowingDeleteHandler(ApiRequestHandler):
 
 class ApiNotifyingHandler(ApiRequestHandler):
     def get(self):
-        q = models.Notifying.query(ancestor=self._device.key)
+        device = self._get_device_by_device_id()
+        q = models.Notifying.query(ancestor=device.key)
         obj = {'notifying': []}
         for notifying in q:
             obj['notifying'].append(notifying.to_dict())
@@ -432,15 +438,17 @@ class ApiNotifyingHandler(ApiRequestHandler):
         return self.output_json_success(obj)
 
     def post(self):
+        device = self._get_device_by_device_id()
         # Now make sure they're not already following that user.
-        q = models.Notifying.query(ancestor=self._device.key)
-        q.filter(models.Notifying.means == self._json_request_data['means'])
+        q = models.Notifying.query(ancestor=device.key)
+        q = q.filter(models.Notifying.means == self._json_request_data['means'])
         if q.count() > 0:
-            logging.info('ALREADY notifying!')
+            logging.info('ALREADY notifying %s!' %
+                         self._json_request_data['means'])
             return self.output_json_error({'error': 'exists'}, 409)
 
         notifying = models.Notifying(
-            parent=self._device.key,
+            parent=device.key,
             means=self._json_request_data['means'],
             name=self._json_request_data['name'],
             type=self._json_request_data['type']
@@ -451,9 +459,10 @@ class ApiNotifyingHandler(ApiRequestHandler):
 
 class ApiNotifyingDeleteHandler(ApiRequestHandler):
     def post(self):
+        device = self._get_device_by_device_id()
         # Now make sure they're not already following that user.
-        q = models.Notifying.query(ancestor=self._device.key)
-        q.filter(models.Notifying.means == self._json_request_data['means'])
+        q = models.Notifying.query(ancestor=device.key)
+        q = q.filter(models.Notifying.means == self._json_request_data['means'])
 
         if q.count() == 0:
             return self.output_json_error()
