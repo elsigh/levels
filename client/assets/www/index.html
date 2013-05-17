@@ -82,7 +82,7 @@
 
     <script id="tpl_notifying" type="text/html">
       <p>
-        Send a notification when your battery hits 10%
+        Sends a notification when your battery hits 10%
       </p>
 
       <button class="notifying-add-phone">+ by phone</button>
@@ -112,6 +112,15 @@
               </tr>
             {{/notifying}}
           {{/notifying.length}}
+
+          {{^notifying.length}}
+            <tr>
+              <td colspan="3">
+                Show them you care, add somebody you love.
+              </td>
+            </tr>
+          {{/notifying.length}}
+
         </tbody>
       </table>
     </script>
@@ -131,46 +140,30 @@
         </thead>
         <tbody>
 
-          {{#this_phone}}
-            <tr>
-              <td>{{user.name}}</td>
-              <td class="battery-level-c charging-{{settings.is_charging}}">
-                <div class="battery-level"
-                  style="background-image:-webkit-gradient(linear, left top, right top, color-stop({{settings.battery_level}}%, green), color-stop({{settings.battery_level}}%, white))">
-                  {{settings.battery_level}}%
-                </div>
-                <div class="battery-created">
-                  {{settings.created_pretty}}
-                </div>
-              </td>
-              <td>{{device.name}}</td>
-              <td></td>
-            </tr>
-          {{/this_phone}}
-
           {{#following}}
-            {{#user}}
-              {{#devices}}
-                <tr>
-                  <td>
-                    <span class="following-username">{{user.name}}</span>
-                  </td>
-                  <td class="battery-level-c charging-{{settings.is_charging}}">
-                    <div class="battery-level"
-                      style="background-image:-webkit-gradient(linear, left top, right top, color-stop({{settings.battery_level}}%, green), color-stop({{settings.battery_level}}%, white))">
-                      {{settings.battery_level}}%
-                    </div>
-                    <div class="battery-created">
-                      {{settings.created_pretty}}
-                    </div>
-                  </td>
-                  <td>{{device.name}}</td>
-                  <td class="remove-cell">
-                    <div class="remove" data-username="{{user.name}}">X</div>
-                  </td>
-                </tr>
-              {{/devices}}
-            {{/user}}
+            <tr>
+              <td colspan="3">{{name}}</td>
+              <td class="remove-cell">
+                <div class="remove" data-userkey="{{key}}">X</div>
+              </td>
+            </tr>
+            {{#devices}}
+              <tr>
+                <td>
+                </td>
+                <td class="battery-level-c charging-{{settings.0.is_charging}}">
+                  <div class="battery-level"
+                    style="background-image:-webkit-gradient(linear, left top, right top, color-stop({{settings.0.battery_level}}%, green), color-stop({{settings.0.battery_level}}%, white))">
+                    {{settings.0.battery_level}}%
+                  </div>
+                  <div class="battery-created">
+                    {{settings.0.created}}
+                  </div>
+                </td>
+                <td>{{platform}} {{name}}</td>
+                <td></td>
+              </tr>
+            {{/devices}}
           {{/following}}
         </tbody>
         <tfoot>
