@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>Level client tests</title>
+    <script>
+      var base = {};
+    </script>
+
+    <script src="closure_jsunit.js"></script>
+    <script src="closure_jsunit_xmlreporter.js"></script>
+    <script src="sinon.js"></script>
+
+    <script src="../js/zepto-1.0rc1.js"></script>
+    <script src="../js/touch.js"></script>
+    <script src="../js/underscore-1.4.4.js"></script>
+    <script src="../js/backbone-1.0.js"></script>
+    <script src="../js/backbone.localStorage.js"></script>
+    <script src="../js/backbone-identity-map.js"></script>
+    <script src="../js/hogan-2.0.0.js"></script>
+    <script src="../js/d3.v2.js"></script>
+    <script src="../js/rickshaw.js"></script>
+
+    <script src="../js/app.js"></script>
+    <script src="../js/models_fmb.js"></script>
+    <script src="../js/models.js"></script>
+    <script src="../js/views.js"></script>
+
+
+  </head>
+  <body>
+    <h1>Level client tests</h1>
+
+    <script>
+
+    var clock;
+    var server;
+
+    var modelWithSubmodels = fmb.Model.extend({
+      localStorage: new Backbone.LocalStorage('modelWithSubmodels'),
+      submodels: {
+        'submodel_1': fmb.Collection,
+        'submodel_2': fmb.Collection
+      }
+    });
+
+    var collectionOfModelsWithSubmodels = fmb.Collection.extend({
+      model: modelWithSubmodels
+    });
+
+    var modelWithNestedSubmodels = fmb.Model.extend({
+      localStorage: new Backbone.LocalStorage('modelWithNestedSubmodels'),
+      submodels: {
+        'submodel_3': collectionOfModelsWithSubmodels
+      }
+    });
+
+    var modelWithNestedSubmodelsMapped = Backbone.IdentityMap(
+        modelWithNestedSubmodels);
+
+    function setUp() {
+      clock = sinon.useFakeTimers();
+      server = sinon.fakeServer.create();
+    }
+
+    function tearDown() {
+      localStorage.clear();
+      clock.restore();
+      server.restore();
+    }
+
+    /*************************************************************************/
+
+    function testSubmodelsConstructorCreatesSubmodelsWithoutData() {
+      var model = new modelWithSubmodels({
+        'foo': 'bar'
+      });
+      assertEquals('bar', model.get('foo'));
+      assertNotUndefined(model.get('submodel_1'));
+      assertNotUndefined(model.get('submodel_2'));
+      assertEquals(0, model.get('submodel_1').length);
+      assertEquals(0, model.get('submodel_2').length);
+    }
+
+    function testSubmodelsConstructorCreatesSubmodelsWithData() {
+      var model = new modelWithSubmodels({
+        'foo': 'bar',
+        'submodel_1': [{
+          'a': 'b'
+        }],
+        'submodel_2': [{
+          'c': 'd'
+        }, {
+          'e': 'f'
+        }],
+      });
+      assertEquals(1, model.get('submodel_1').length);
+      assertEquals(2, model.get('submodel_2').length);
+    }
+
+    function testSubmodelsNested() {
+      var model = new modelWithNestedSubmodels({
+        'foo': 'bar',
+        'submodel_3': [{
+          'baz': 'bat',
+          'submodel_1': [{
+            'a': 'b'
+          }]
+        }]
+      });
+      assertEquals('bar', model.get('foo'));
+      assertEquals(1, model.get('submodel_3').length);
+      assertEquals(1, model.get('submodel_3').at(0).get('submodel_1').length);
+      assertEquals('bat', model.get('submodel_3').at(0).get('baz'));
+    }
+
+    function testSubmodelsNested_storage() {
+      var model = new modelWithNestedSubmodels({
+        'id': 'abc',
+        'foo': 'bar',
+        'submodel_3': [{
+          'baz': 'bat',
+          'submodel_1': [{
+            'a': 'b'
+          }]
+        }]
+      });
+
+      model.saveToStorage();
+
+      fmb.log('-------------------------------------')
+      var model2 = new modelWithNestedSubmodels({
+        'id': 'abc'
+      });
+      model2.fetchFromStorage();
+      clock.tick(1);  // fetchFromStorage is async
+
+      assertNotEquals(model.cid, model2.cid);
+      assertObjectEquals(model.toJSON(), model2.toJSON());
+    }
+
+
+    function testSubmodelsNestedMapped_storage() {
+      var model = new modelWithNestedSubmodelsMapped({
+        'id': 'abc',
+        'foo': 'bar',
+        'submodel_3': [{
+          'baz': 'bat',
+          'submodel_1': [{
+            'a': 'b'
+          }]
+        }]
+      });
+
+      model.saveToStorage();
+
+      fmb.log('-------------------------------------')
+      var model2 = new modelWithNestedSubmodelsMapped({
+        'id': 'abc'
+      });
+
+      assertEquals(model.cid, model2.cid);
+      assertObjectEquals(model.toJSON(), model2.toJSON());
+    }
+
+    </script>
+</body>
+</html>
