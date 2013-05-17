@@ -41,13 +41,13 @@
     <script src="js/backbone-1.0.js"></script>
     <script src="js/backbone.localStorage.js"></script>
     <script src="js/hogan-2.0.0.js"></script>
+    <script src="js/d3.v2.js"></script>
+    <script src="js/rickshaw.js"></script>
+
     <script src="js/app.js"></script>
     <script src="js/models_fmb.js"></script>
     <script src="js/models.js"></script>
     <script src="js/views.js"></script>
-
-    <script src="js/d3.v2.js"></script>
-    <script src="js/rickshaw.js"></script>
 
     <script id="tpl_account" type="text/html">
       {{^user.api_token}}
@@ -142,16 +142,16 @@
 
           {{#following}}
             <tr>
-              <td colspan="3">{{name}}</td>
+              <td>{{name}}</td>
+              <td colspan="2"></td>
               <td class="remove-cell">
                 <div class="remove" data-userkey="{{key}}">X</div>
               </td>
             </tr>
             {{#devices}}
               <tr>
-                <td>
-                </td>
-                <td class="battery-level-c charging-{{settings.0.is_charging}}">
+                <td colspan="2"
+                  class="battery-level-c charging-{{settings.0.is_charging}}">
                   <div class="battery-level"
                     style="background-image:-webkit-gradient(linear, left top, right top, color-stop({{settings.0.battery_level}}%, green), color-stop({{settings.0.battery_level}}%, white))">
                     {{settings.0.battery_level}}%
