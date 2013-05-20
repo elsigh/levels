@@ -5,6 +5,8 @@ cordova.define('cordova/plugin/phonediedservice', function(require, exports, mod
   var plugin = {};
 
   plugin.startService = function(win, fail) {
+    fmb.log('PhoneDiedServicePlugin - startService',
+            app.model.user.get('api_token'));
     return exec(win, fail, 'PhoneDiedPlugin', 'startService',
         [app.model.user.get('api_token'),
          app.model.user.get('id'),

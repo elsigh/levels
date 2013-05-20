@@ -171,7 +171,7 @@ fmb.App.prototype.initHistory_ = function() {
 /**
  * @type {RegExp}
  */
-fmb.App.FOLLOWING_URL_RE = /http:\/\/www\.followmybattery\.com\/(.*)/;
+fmb.App.FOLLOWING_URL_RE = /followmybattery\.com\/profile\/(.*)/;
 
 
 /**
@@ -258,7 +258,7 @@ fmb.App.prototype.onPhonePause = function() {
  * @private
  */
 fmb.App.prototype.onPhonePause_ = function() {
-  fmb.log('onPhonePause_');
+  fmb.log('fmb.App onPhonePause_');
   window.removeEventListener('batterystatus',
                              fmb.App.onBatteryStatus_,
                              false);
@@ -292,7 +292,7 @@ fmb.App.prototype.onPhoneResume = function() {
  * @private
  */
 fmb.App.prototype.onPhoneResume_ = function() {
-  fmb.log('onPhoneResume_');
+  fmb.log('fmb.App onPhoneResume_');
 
   window.addEventListener('batterystatus',
                           fmb.App.onBatteryStatus_,

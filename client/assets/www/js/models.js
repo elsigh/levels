@@ -111,8 +111,8 @@ fmb.models.NotifyingCollection.prototype.parse = function(response, xhr) {
 };
 
 
-fmb.models.NotifyingCollection.prototype.fetch =
-    function(opt_options) {
+/** @inheritDoc */
+fmb.models.NotifyingCollection.prototype.fetch = function(opt_options) {
   var options = opt_options || {};
   options.data = {
     'device_id': this.parent.id
@@ -124,7 +124,7 @@ fmb.models.NotifyingCollection.prototype.fetch =
  * @param {Object} obj A contact object.
  */
 fmb.models.NotifyingCollection.prototype.addContact = function(obj) {
-  fmb.log('addContact:', obj);
+  fmb.log('fmb.models.NotifyingCollection addContact:', obj);
 
   var means = obj['means'];
   if (means === '') {
@@ -349,9 +349,24 @@ fmb.models.MyDevice.prototype.onChange_ = function() {
  * @extends {Backbone.Collection}
  * @constructor
  */
+fmb.models.FollowingUser = fmb.Model.extend({
+  submodels: {
+    'devices': fmb.models.DeviceCollection
+  }
+});
+
+
+/******************************************************************************/
+
+
+
+/**
+ * @extends {Backbone.Collection}
+ * @constructor
+ */
 fmb.models.FollowingCollection = fmb.Collection.extend({
   //localStorage: new Backbone.LocalStorage('FollowingCollection'),
-  model: fmb.Model
+  model: fmb.models.FollowingUser
 });
 
 
@@ -373,11 +388,12 @@ fmb.models.FollowingCollection.prototype.parse = function(response, xhr) {
  * @param {string} userKey A userKey to follow.
  */
 fmb.models.FollowingCollection.prototype.addByUserKey = function(userKey) {
-  fmb.log('addByUsername:', userKey);
+  fmb.log('fmb.models.FollowingCollection addByUserKey', userKey);
 
   // Can't follow yerself or no one.
   if (userKey === '' ||
       userKey == this.parent.get('key')) {
+    fmb.log('fmb.models.FollowingCollection addByUserKey cant follow yoself');
     return;
   }
 

@@ -54,7 +54,7 @@ public class PhoneDiedService extends Service {
             String deviceId = intent.getStringExtra(EXTRAS_DEVICE_ID);
             String updatePath = intent.getStringExtra(EXTRAS_UPDATE_PATH);
             String updateFrequency = intent.getStringExtra(EXTRAS_UPDATE_FREQUENCY);
-            Log.d(TAG, "onStart, w/ intent" +
+            Log.d(TAG, "onStart via intent: " +
                   apiToken + ", " + userId + ", " + deviceId + ", " +
                   updatePath + ", " + updateFrequency);
             alarm.SetPrefs(this, apiToken, userId, deviceId, updatePath, updateFrequency);

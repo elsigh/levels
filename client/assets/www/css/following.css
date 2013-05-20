@@ -45,3 +45,23 @@
 .fmb-following footer {
   font-size: 90%;
 }
+
+/*
+.fmb-following-device .battery-graph {
+  display: inline-block;
+  position: relative;
+}
+
+.fmb-following-device .battery-graph .chart {
+  position: relative;
+  left: 40px;
+}
+
+.fmb-following-device .battery-graph .y-axis {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 40px;
+}
+*/
