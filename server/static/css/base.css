@@ -110,6 +110,13 @@ input[type="range"] {
   position: static;
 }
 
+.fmb-tab-header h2 {
+  display: inline-block;
+  margin: 0 1em 0 0;
+  padding: 0;
+  vertical-align: bottom;
+}
+
 .tabs {
   background: #000;
   -webkit-box-shadow: 0 2px 3px #333;

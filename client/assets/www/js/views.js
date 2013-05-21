@@ -1,3 +1,22 @@
+
+
+
+// Proxy click as zepto tap so we can bind to "tap"
+(function($) {
+  // only do this if not on a touch device
+  if (!('ontouchend' in window)) {
+    $(document).delegate('body', 'click', function(e) {
+      e.preventDefault();
+      $(e.target).trigger('tap', e);
+    });
+  } else {
+    $(document).delegate('body', 'click', function(e) {
+      e.preventDefault();
+    });
+  }
+})(window.Zepto);
+
+
 /**
  * @type {Object} Views namespace.
  */
@@ -173,8 +192,7 @@ fmb.views.App.prototype.transitionPage = function(route) {
   if (_.isEqual(fmb.App.Routes.ACCOUNT, route)) {
     if (!this.viewAccount) {
       this.viewAccount = new fmb.views.Account({
-        model: this.model.user,
-        device: this.model.device
+        model: this.model.user
       });
       this.viewAccount.render();
     }
@@ -187,8 +205,7 @@ fmb.views.App.prototype.transitionPage = function(route) {
     if (!this.viewFollowing) {
       this.viewFollowing = new fmb.views.Following({
         model: this.model.user.get('following'),
-        user: this.model.user,
-        device: this.model.device
+        user: this.model.user
       });
       this.viewFollowing.render();
     }
@@ -427,7 +444,7 @@ fmb.views.Account.prototype.updateDevice_ = function() {
     data['update_frequency'] = parseInt(data['update_frequency'], 10);
   }
   fmb.log('updateDevice_ w/', data);
-  this.device.save(data);
+  this.model.device.save(data);
 };
 
 
@@ -559,7 +576,6 @@ fmb.views.Following = Backbone.View.extend({
 /** @inheritDoc */
 fmb.views.Following.prototype.initialize = function(options) {
   this.user = options.user;
-  this.device = options.device;
   this.subViews_ = {};
   this.listenTo(this.model, 'add', this.render);
   this.listenTo(this.model, 'remove', this.onRemove_);
@@ -572,7 +588,7 @@ fmb.views.Following.prototype.initialize = function(options) {
 fmb.views.Following.prototype.setIsActive = function(isActive) {
   this.model.stopFetchPoll();
   if (isActive) {
-    fmb.log('Set following fetch interval.');
+    //fmb.log('Set following fetch interval.');
     this.model.startFetchPoll(30 * 1000);
   }
 };
@@ -592,9 +608,10 @@ fmb.views.Following.prototype.onRemove_ = function(model) {
 fmb.views.Following.prototype.render = function() {
   fmb.log('fmb.views.Following render');
   if (!this.rendered_) {
+    this.rendered_ = true;
     this.$el.html(fmb.views.getTemplateHtml('following', {}));
     this.$table = this.$('table');
-    // Add yo-self
+    // Add yo-self into the view.
     this.addSubview_(this.user);
   }
 
@@ -615,7 +632,6 @@ fmb.views.Following.prototype.addSubview_ = function(model) {
     });
     this.subViews_[model.id].render();
     this.$table.append(this.subViews_[model.id].$el);
-    fmb.log('this.$table',this.$table, this.subViews_[model.id].$el)
   }
 };
 
@@ -707,6 +723,7 @@ fmb.views.FollowingUser.prototype.onChange_ = function(model) {
 fmb.views.FollowingUser.prototype.render = function() {
   fmb.log('fmb.views.FollowingUser render', this.$el);
   if (!this.rendered_) {
+    this.rendered_ = true;
     var templateData = this.model.toJSON();
     this.$el.html(fmb.views.getTemplateHtml('following_user', templateData));
   }
@@ -760,7 +777,7 @@ fmb.views.FollowingDevice.prototype.initialize = function() {
 /** @inheritDoc */
 fmb.views.FollowingDevice.prototype.render = function() {
   var templateData = this.model.toJSON();
-  fmb.log('templateData', templateData);
+  //fmb.log('fmb.views.FollowingDevice templateData', templateData);
   this.$el.html(fmb.views.getTemplateHtml('following_device', templateData));
   this.$graph = this.$('.battery-graph');
   this.$graphY = this.$('.y-axis');
@@ -783,27 +800,37 @@ fmb.views.FollowingDevice.prototype.renderGraph_ = function() {
     var xTime = xDate.getTime();
     //fmb.log('xDate', xDate, xTime);
     dataSeries.push({
-      x: xTime,
+      //x: xTime,
+      x: i,
+      x_readable: xDate.toString(),
       y: model.get('battery_level')
     })
   });
-  window.console.log('dataSeries', dataSeries);
+  fmb.log('fmb.views.FollowingDevice dataSeries', dataSeries);
   this.$graph.html('');  // reset
+
+  var xdataSeries = [
+            { x: 0, y: 40 },
+            { x: 1, y: 49 },
+            { x: 2, y: 38 },
+            { x: 3, y: 30 },
+            { x: 4, y: 32 } ];
 
   var graph = new Rickshaw.Graph({
     element: this.$graph.get(0),
-    renderer: 'line',
+    //renderer: 'line',
     height: 100,
     width: 200,
     series: [
       {
         data: dataSeries,
-        color: 'steelblue',
+        color: 'green',
         name: this.model.get('name')
       }
     ]
   });
 
+  /*
   var yAxis = new Rickshaw.Graph.Axis.Y({
     graph: graph
   });
@@ -811,6 +838,7 @@ fmb.views.FollowingDevice.prototype.renderGraph_ = function() {
   var xAxis = new Rickshaw.Graph.Axis.Time({
     graph: graph
   });
+  */
 
   graph.render();
 };

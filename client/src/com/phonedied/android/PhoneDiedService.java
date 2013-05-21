@@ -60,6 +60,9 @@ public class PhoneDiedService extends Service {
             alarm.SetPrefs(this, apiToken, userId, deviceId, updatePath, updateFrequency);
         }
 
+        // Enusure any existing alarm is nuked.
+        alarm.CancelAlarm(this);
+
         if (!isRunning) {
             alarm.SetAlarm(this);
             isRunning = true;
@@ -69,7 +72,6 @@ public class PhoneDiedService extends Service {
 
         // Update the alarm timing.
         } else {
-            alarm.CancelAlarm(this);
             alarm.SetAlarm(this);
             Toast.makeText(this.getApplicationContext(),
                            "Battery updates ENABLED (updated).",

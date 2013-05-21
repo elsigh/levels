@@ -48,21 +48,28 @@ fmb.models.App.prototype.initialize = function(opt_data, opt_options) {
   var deviceId = localStorage.getItem('device_id');
   fmb.log('deviceId from localStorage', deviceId);
   if (deviceId) {
-    this.device = new fmb.models.MyDevice({
+    this.user.device = new fmb.models.Device({
       id: deviceId
+    }, {
+      isUserDevice: true
     });
-    this.device.fetchFromStorage();
+    this.user.device.fetchFromStorage();
   } else {
-    this.device = new fmb.models.MyDevice({
+    this.user.device = new fmb.models.Device({
       'uuid': window.device && window.device.uuid || navigator.appVersion,
       'name': window.device && window.device.name || navigator.appName,
       'platform': window.device && window.device.platform || navigator.platform,
       'version': window.device && window.device.version || navigator.productSub
+    }, {
+      isUserDevice: true
     });
   }
 
-  // Get the device into the user's devices collection if not there already.
-  this.user.get('devices').add(this.device);
+  // Booya for cyclical refs.
+  this.user.device.user = this.user;
+
+  // Get the device into the user's "devices" collection if not there already.
+  this.user.get('devices').add(this.user.device);
 
   // Fetch all from the server if the user model has an id
   // which is only true when the user has previously authenticated
@@ -71,13 +78,13 @@ fmb.models.App.prototype.initialize = function(opt_data, opt_options) {
     // Deferred so model references are set on window.app.
     _.defer(_.bind(function() {
       this.user.fetch();
-      this.device.fetch();
+      this.user.device.fetch();
     }, this));
 
   } else {
     this.user.once('change:id', _.bind(function() {
       fmb.log('** SAVE DEVICE for the first time');
-      this.device.saveToServer();
+      this.user.device.saveToServer();
     }, this));
   }
 };
@@ -210,7 +217,7 @@ fmb.models.SettingsCollection = fmb.Collection.extend({
  * @extends {fmb.Model}
  * @constructor
  */
-fmb.models.Device = fmb.Model.extend({
+fmb.models.DeviceUnMapped = fmb.Model.extend({
   localStorage: new Backbone.LocalStorage('Device'),
   defaults: {
     'user_agent_string': window.navigator.userAgent,
@@ -226,7 +233,43 @@ fmb.models.Device = fmb.Model.extend({
 
 
 /** @inheritDoc */
-fmb.models.Device.prototype.getStorageData = function() {
+fmb.models.DeviceUnMapped.prototype.initialize = function(opt_data, opt_options) {
+  fmb.Model.prototype.initialize.apply(this, arguments);
+  var options = opt_options || {};
+
+  if (options.isUserDevice) {
+    this.on('battery_status', this.onBatteryStatus_, this);
+    this.once('change:id', function() {
+      fmb.log('fmb.models.MyDevice saved device_id to localStorage:', this.id,
+              'and set for fmb.models.sync');
+      localStorage.setItem('device_id', this.id);
+
+      if (this.user.get('api_token')) {
+        fmb.log('fmb.models.MyDevice START phonediedservice plugin!');
+        var plugin = cordova.require('cordova/plugin/phonediedservice');
+        plugin && plugin.startService();
+      }
+    }, this);
+  }
+};
+
+
+/**
+ * @private
+ */
+fmb.models.DeviceUnMapped.prototype.onBatteryStatus_ = function() {
+  var setting = new fmb.Model({
+    'created': fmb.models.getISODate(),
+    'battery_level': window.navigator.battery.level,
+    'is_charging': window.navigator.battery.isPlugged
+  });
+  this.get('settings').unshift(setting);
+  fmb.log('fmb.models.Device onBatteryStatus_', setting.toJSON());
+};
+
+
+/** @inheritDoc */
+fmb.models.DeviceUnMapped.prototype.getStorageData = function() {
   var obj = fmb.Model.prototype.getStorageData.call(this);
 
   // Don't store the long list of historical settings data.
@@ -237,7 +280,7 @@ fmb.models.Device.prototype.getStorageData = function() {
 
 
 /** @inheritDoc */
-fmb.models.Device.prototype.fetch = function(opt_options) {
+fmb.models.DeviceUnMapped.prototype.fetch = function(opt_options) {
   var options = opt_options || {};
   options.data = {
     'device_id': this.id
@@ -249,7 +292,7 @@ fmb.models.Device.prototype.fetch = function(opt_options) {
 /**
  * @return {string} An url.
  */
-fmb.models.Device.prototype.url = function() {
+fmb.models.DeviceUnMapped.prototype.url = function() {
   return fmb.models.getApiUrl('/device');
 };
 
@@ -257,7 +300,7 @@ fmb.models.Device.prototype.url = function() {
 /**
  * @return {Object} Template data
  */
-fmb.models.Device.prototype.getTemplateData = function() {
+fmb.models.DeviceUnMapped.prototype.getTemplateData = function() {
   var templateData = fmb.Model.prototype.getTemplateData.call(this);
   // Converts 0 to no-key for mustache falsitude.
   if (!templateData['update_enabled']) {
@@ -267,49 +310,16 @@ fmb.models.Device.prototype.getTemplateData = function() {
 };
 
 
+fmb.models.Device = Backbone.IdentityMap(
+    fmb.models.DeviceUnMapped);
+
+
 /******************************************************************************/
-
-
-
-/**
- * @extends {fmb.Model}
- * @constructor
- */
-fmb.models.MyDevice = fmb.models.Device.extend({
-  localStorage: new Backbone.LocalStorage('Device')
-});
-
-
-/** @inheritDoc */
-fmb.models.MyDevice.prototype.initialize = function(opt_data, opt_options) {
-  fmb.Model.prototype.initialize.apply(this, arguments);
-  this.once('change:id', function() {
-    fmb.log('Saved device_id to localStorage:', this.id,
-            'and set for fmb.models.sync');
-    localStorage.setItem('device_id', this.id);
-    //fmb.models.sync.deviceId = this.id;
-
-    var plugin = cordova.require('cordova/plugin/phonediedservice');
-    if (plugin) {
-      plugin.startService();
-    }
-  }, this);
-
-  /*
-  if (this.id) {
-    _.defer(function() {
-      cordova.require('cordova/plugin/phonediedservice').startService();
-    });
-  }
-  this.on('change', this.onChange_, this);
-  */
-};
 
 
 /**
  * DEPRECATED - unless we ever want to allow config of update freq.
  * @private
- */
 fmb.models.MyDevice.prototype.onChange_ = function() {
   var changedAttributes = this.changedAttributes();
   fmb.log('fmb.models.MyDevice onChange_');
@@ -333,12 +343,25 @@ fmb.models.MyDevice.prototype.onChange_ = function() {
     } else if (_.has(changedAttributes, 'id')) {
       fmb.log('Device change:id FIRST TIME.', this.id);
       localStorage.setItem('device_id', this.id);
-      //fmb.models.sync.deviceId = this.id;
       plugin.startService();
     }
 
   }
 };
+*/
+
+
+/******************************************************************************/
+
+
+
+/**
+ * @extends {Backbone.Collection}
+ * @constructor
+ */
+fmb.models.DeviceCollection = fmb.Collection.extend({
+  model: fmb.models.Device
+});
 
 
 /******************************************************************************/
@@ -368,20 +391,6 @@ fmb.models.FollowingCollection = fmb.Collection.extend({
   //localStorage: new Backbone.LocalStorage('FollowingCollection'),
   model: fmb.models.FollowingUser
 });
-
-
-/** @inheritDoc */
-fmb.models.FollowingCollection.prototype.parse = function(response, xhr) {
-  var obj = fmb.Model.prototype.parse.apply(this, arguments);
-  _.each(obj['following'], function(following) {
-    _.each(following['devices'], function(device) {
-      var createdTs = device['battery']['created'] * 1000;
-      device['battery']['created_pretty'] =
-          fmb.models.prettyDate(createdTs);
-    });
-  });
-  return obj['following'];
-};
 
 
 /**
@@ -427,6 +436,14 @@ fmb.models.FollowingCollection.prototype.addByUserKey = function(userKey) {
 };
 
 
+/** @inheritDoc */
+fmb.models.FollowingCollection.prototype.parse = function(response, xhr) {
+  fmb.log('fmb.models.FollowingCollection parse', response);
+  var obj = fmb.Model.prototype.parse.apply(this, arguments);
+  return obj['following'] ? obj['following'] : obj;
+};
+
+
 /**
  * @param {string} userKey A userKey to follow.
  */
@@ -467,19 +484,6 @@ fmb.models.FollowingCollection.prototype.url = function() {
 
 
 /**
- * @extends {Backbone.Collection}
- * @constructor
- */
-fmb.models.DeviceCollection = fmb.Collection.extend({
-  model: fmb.models.Device
-});
-
-
-/******************************************************************************/
-
-
-
-/**
  * @extends {fmb.Model}
  * @constructor
  */
@@ -505,7 +509,13 @@ fmb.models.User.prototype.initialize = function(opt_data, opt_options) {
   this.once('change:api_token', function() {
     fmb.log('Set API token for fmb.models.sync', this.get('api_token'));
     fmb.models.sync.apiToken = this.get('api_token');
-  });
+
+    var plugin = cordova.require('cordova/plugin/phonediedservice');
+    if (this.device.id && plugin) {
+      fmb.log('fmb.models.MyDevice got API token, start plugin service!');
+      plugin.startService();
+    }
+  }, this);
 };
 
 

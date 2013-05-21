@@ -1,23 +1,5 @@
 
 
-/**
- * @type {Object} UA namespace.
- */
-fmb.ua = {};
-
-
-/**
- * @type {boolean}
- */
-fmb.ua.IS_ANDROID = window.navigator.userAgent.indexOf('Android') !== -1;
-
-
-/**
- * @type {boolean}
- */
-fmb.ua.IS_CORDOVA = typeof cordova !== 'undefined';
-
-
 
 /**
  * @type {Object} Models namespace.
@@ -68,15 +50,39 @@ fmb.models.getUid = function() {
 
 
 /**
+ * @param {string|number} num A number.
+ * @return {string|number} The number padded with a leading zero, if 1 char.
+ */
+fmb.models.padNum2Chars = function(num) {
+  return num < 10 ? '0' + num : num;
+};
+
+
+/**
+ * @param {number} time An ISO time.
+ * @return {string} A date string ala 2013-05-20T15:40:40.290320.
+ */
+fmb.models.getISODate = function(opt_date) {
+  var d = opt_date || new Date();
+  return d.getUTCFullYear() + '-' +
+      fmb.models.padNum2Chars(d.getUTCMonth() + 1) + '-' +
+      fmb.models.padNum2Chars(d.getUTCDate()) + 'T' +
+      fmb.models.padNum2Chars(d.getUTCHours()) + ':' +
+      fmb.models.padNum2Chars(d.getUTCMinutes()) + ':' +
+      fmb.models.padNum2Chars(d.getUTCSeconds()) + 'Z';
+};
+
+
+/**
  * @param {number} time An ISO time.
  */
-fmb.models.prettyDate = function(time){
+fmb.models.prettyDate = function(time) {
   var date = new Date(time),
     diff = (((new Date()).getTime() - date.getTime()) / 1000),
     day_diff = Math.floor(diff / 86400);
 
   if ( isNaN(day_diff) || day_diff < 0 || day_diff >= 31 )
-    return;
+    return 'a bit ago';
 
   return day_diff === 0 && (
       diff < 60 && "just now" ||
@@ -222,6 +228,12 @@ fmb.Model.prototype.set = function(key, value, options) {
 
   var data = attrs;
 
+  // Injects "created_pretty" for the templates.
+  if (data['created']) {
+    data['created_pretty'] = fmb.models.prettyDate(
+        new Date(data['created']).getTime());
+  }
+
   if (this.submodels) {
     //fmb.log('Iterating through submodels', _.keys(this.submodels).length);
     _.each(this.submodels,
@@ -242,6 +254,7 @@ fmb.Model.prototype.set = function(key, value, options) {
         }
 
         if (!this.has(submodelName)) {
+          //fmb.log('creating submodel for', submodelName, ctor)
           data[submodelName] = new ctor(data[submodelName], {
             parent: this
           });
