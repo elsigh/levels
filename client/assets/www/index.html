@@ -13,7 +13,9 @@
     <link rel="stylesheet" href="css/rickshaw.css">
 
     <title>Level</title>
-    <!--<script src="http://localhost:8090/target/target-script-min.js#anonymous"></script>-->
+    <!--
+    <script src="http://192.168.1.8:8090/target/target-script-min.js#anonymous"></script>
+    -->
   </head>
   <body>
     <div class="fmb-app">
@@ -40,6 +42,7 @@
     <script src="js/underscore-1.4.4.js"></script>
     <script src="js/backbone-1.0.js"></script>
     <script src="js/backbone.localStorage.js"></script>
+    <script src="js/backbone-identity-map.js"></script>
     <script src="js/hogan-2.0.0.js"></script>
     <script src="js/d3.v2.js"></script>
     <script src="js/rickshaw.js"></script>
@@ -127,45 +130,19 @@
 
 
     <script id="tpl_following" type="text/html">
-      <h2>Following</h2>
-      <button class="share">+ someone</button>
+      <div class="fmb-tab-header">
+        <h2>Following</h2>
+        <button class="share">+ someone</button>
+      </div>
       <table>
         <thead>
           <tr>
             <th>name</th>
-            <th>battery</th>
             <th>device</th>
-            <th></th>
+            <th colspan="2">battery</th>
           </tr>
         </thead>
-        <tbody>
-
-          {{#following}}
-            <tr>
-              <td>{{name}}</td>
-              <td colspan="2"></td>
-              <td class="remove-cell">
-                <div class="remove" data-userkey="{{key}}">X</div>
-              </td>
-            </tr>
-            {{#devices}}
-              <tr>
-                <td colspan="2"
-                  class="battery-level-c charging-{{settings.0.is_charging}}">
-                  <div class="battery-level"
-                    style="background-image:-webkit-gradient(linear, left top, right top, color-stop({{settings.0.battery_level}}%, green), color-stop({{settings.0.battery_level}}%, white))">
-                    {{settings.0.battery_level}}%
-                  </div>
-                  <div class="battery-created">
-                    {{settings.0.created}}
-                  </div>
-                </td>
-                <td>{{platform}} {{name}}</td>
-                <td></td>
-              </tr>
-            {{/devices}}
-          {{/following}}
-        </tbody>
+        <tbody></tbody>
         <tfoot>
           <tr>
             <td colspan="5">
@@ -176,6 +153,38 @@
       </table>
     </script>
 
+    <script id="tpl_following_user" type="text/html">
+      <tr>
+        <td>
+          <h3>{{name}}</h3>
+        </td>
+        <td colspan="2"></td>
+        <td class="remove-cell">
+          <div class="remove" data-userkey="{{key}}">X</div>
+        </td>
+      </tr>
+    </script>
+
+    <script id="tpl_following_device" type="text/html">
+      <td></td>
+      <td>{{platform}} {{name}}</td>
+      <td
+        class="battery-level-c charging-{{settings.0.is_charging}}">
+        <div class="battery-level"
+          style="background-image:-webkit-gradient(linear, left top, right top, color-stop({{settings.0.battery_level}}%, green), color-stop({{settings.0.battery_level}}%, white))">
+          {{settings.0.battery_level}}%
+        </div>
+        <div class="battery-created">
+          {{settings.0.created_pretty}}
+        </div>
+      </td>
+      <td>
+        <div class="battery-graph">
+          <div class="y-axis"></div>
+          <div class="chart"></div>
+        </div>
+      </td>
+    </script>
 
     <script>
       window.onerror = function(message, url, lineNumber) {
@@ -183,8 +192,9 @@
                     url + ', ' + lineNumber);
       };
       window.templates = {};
-      _.each(['account', 'device', 'following', 'notifying'], function(name) {
-        var html = $('#tpl_' + name).html().trim();
+      $('script[type="text/html"]').each(function(i, script) {
+        var name = script.id.replace('tpl_', '');
+        var html = $(script).html().trim();
         window.templates[name] = Hogan.compile(html);
       });
 
@@ -192,6 +202,22 @@
         window['app'] = new fmb.App();
       }, false);
 
+    </script>
+
+    <script>
+      // Super-wild-west-runtime-unit-testing.
+      //$(document).ready(function() {
+        if (window.location.search === '?test=1') {
+          var testFiles = [
+            'tests/closure_jsunit.js',
+            'tests/sinon.js',
+            'tests/app_test.js'
+          ];
+          $.each(testFiles, function(i, src) {
+            document.write('<scr'+'ipt src="' + src + '"></sc'+'ript>');
+          })
+        }
+      //})
     </script>
   </body>
   </html>

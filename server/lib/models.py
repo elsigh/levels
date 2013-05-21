@@ -63,7 +63,7 @@ class FMBUser(User, FMBModel):
         obj = super(FMBUser, self).to_dict(include_api_token=include_api_token)
         obj['devices'] = []
         q_device = Device.query(ancestor=self.key)
-        q_device.order(-Device.created)
+        q_device = q_device.order(-Device.created)
         for device in q_device:
             obj['devices'].append(device.to_dict())
         return obj
@@ -87,15 +87,13 @@ class Device(FMBModel):
         obj = super(Device, self).to_dict()
 
         # settings
-        q_settings = Settings.query(ancestor=self.key)
-        q_settings.order(-Settings.created)
+        q_settings = Settings.query(ancestor=self.key).order(-Settings.created)
         obj['settings'] = []
         for setting in q_settings.fetch(NUM_SETTINGS_TO_FETCH):
             obj['settings'].append(setting.to_dict())
 
         # notifying
-        q_notifying = Notifying.query(ancestor=self.key)
-        q_notifying.order(-Settings.created)
+        q_notifying = Notifying.query(ancestor=self.key).order(-Notifying.created)
         obj['notifying'] = []
         for notifying in q_notifying:
             obj['notifying'].append(notifying.to_dict())

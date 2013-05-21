@@ -28,8 +28,22 @@ indexes:
   - name: means
   - name: created
 
+- kind: Notifying
+  ancestor: yes
+  properties:
+  - name: created
+    direction: desc
+
 - kind: Settings
   ancestor: yes
   properties:
   - name: created
+    direction: desc
+
+- kind: Settings
+  ancestor: yes
+  properties:
+  - name: created
+    direction: desc
+  - name: __key__
     direction: desc
