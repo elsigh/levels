@@ -211,19 +211,20 @@ public class PhoneDiedAlarm extends BroadcastReceiver {
         String userId = settings.getString(PhoneDiedService.EXTRAS_USER_ID, null);
         String deviceId = settings.getString(PhoneDiedService.EXTRAS_DEVICE_ID, null);
         String updatePath = settings.getString(PhoneDiedService.EXTRAS_UPDATE_PATH, null);
-        Log.d(TAG, "onReceive w/ prefs: " + updatePath + ", " + deviceId + ", " + userId);
+        Log.d(TAG, "onReceive w/ prefs: " + apiToken + ", " + userId + ", " +
+              deviceId + ", " + updatePath);
 
-        if (updatePath != null && deviceId != null && userId != null) {
+        if (apiToken != null && updatePath != null && deviceId != null && userId != null) {
             SendBatteryStatus(context, apiToken, userId, deviceId, updatePath);
         } else {
-            Log.d(TAG, "Unable to SendBatteryStatus - too damn much null!");
+            Log.d(TAG, "Unable to SendBatteryStatus - TOO DAMN MUCH NULL!");
         }
     }
 
     public void SetPrefs(Context context, String apiToken, String userId,
                          String deviceId, String updatePath, String updateFrequency) {
-        Log.d(TAG, "SetPrefs: " + updatePath + ", " + deviceId + ", " + userId +
-              ", " + updateFrequency);
+        Log.d(TAG, "SetPrefs: " + apiToken + ", " + updatePath + ", " +
+              deviceId + ", " + userId + ", " + updateFrequency);
 
         SharedPreferences settings = context.getApplicationContext().
                 getSharedPreferences(PREFS_NAME, 0);

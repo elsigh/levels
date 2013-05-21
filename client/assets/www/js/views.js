@@ -1,3 +1,22 @@
+
+
+
+// Proxy click as zepto tap so we can bind to "tap"
+(function($) {
+  // only do this if not on a touch device
+  if (!('ontouchend' in window)) {
+    $(document).delegate('body', 'click', function(e) {
+      e.preventDefault();
+      $(e.target).trigger('tap', e);
+    });
+  } else {
+    $(document).delegate('body', 'click', function(e) {
+      e.preventDefault();
+    });
+  }
+})(window.Zepto);
+
+
 /**
  * @type {Object} Views namespace.
  */
@@ -173,8 +192,7 @@ fmb.views.App.prototype.transitionPage = function(route) {
   if (_.isEqual(fmb.App.Routes.ACCOUNT, route)) {
     if (!this.viewAccount) {
       this.viewAccount = new fmb.views.Account({
-        model: this.model.user,
-        device: this.model.device
+        model: this.model.user
       });
       this.viewAccount.render();
     }
@@ -187,8 +205,7 @@ fmb.views.App.prototype.transitionPage = function(route) {
     if (!this.viewFollowing) {
       this.viewFollowing = new fmb.views.Following({
         model: this.model.user.get('following'),
-        user: this.model.user,
-        device: this.model.device
+        user: this.model.user
       });
       this.viewFollowing.render();
     }
@@ -226,10 +243,10 @@ fmb.views.Account.prototype.initialize = function(options) {
   this.$account = $('<div class="account"></div>');
   this.$devices = $('<div class="devices"></div>');
 
-  this.viewDevices_ = {};
+  this.subViews_ = {};
   this.setUpDeviceViews_();
-  this.model.get('devices').on('add change remove',
-      this.setUpDeviceViews_, this);
+  this.listenTo(this.model.get('devices'), 'add change remove',
+      this.setUpDeviceViews_);
 };
 
 
@@ -257,15 +274,15 @@ fmb.views.Account.prototype.render = function() {
 fmb.views.Account.prototype.setUpDeviceViews_ = function(e) {
   fmb.log('fmb.views.Account setUpDeviceViews_',
           this.model.get('devices').length);
-  this.model.get('devices').each(_.bind(function(device) {
+  this.model.get('devices').each(_.bind(function(model) {
     // Don't make views for devices without ids.
-    if (device.id && !this.viewDevices_[device.id]) {
-      this.viewDevices_[device.id] = new fmb.views.Device({
+    if (model.id && !this.subViews_[model.id]) {
+      this.subViews_[model.id] = new fmb.views.Device({
         parent: this,
-        model: device
+        model: model
       });
-      this.viewDevices_[device.id].render();
-      this.$devices.append(this.viewDevices_[device.id].$el);
+      this.subViews_[model.id].render();
+      this.$devices.append(this.subViews_[model.id].$el);
     }
   }, this));
 };
@@ -276,7 +293,7 @@ fmb.views.Account.prototype.setUpDeviceViews_ = function(e) {
  * @private
  */
 fmb.views.Account.prototype.onChangeDeviceView_ = function(e) {
-  //var deviceView = this.viewDevices_[device.id];
+  //var deviceView = this.subViews_[device.id];
 };
 
 
@@ -297,12 +314,14 @@ fmb.views.Account.prototype.onClickLogin_ = function() {
       'location=no');
 
   // For Phonegap's InAppBrowser.
-  this.loginRef_.addEventListener('loadstop',
-      _.bind(this.onLoginRefLoadStop_, this),
-      false);
-  this.loginRef_.addEventListener('exit',
-      _.bind(this.onLoginRefExit_, this),
-      false);
+  if (this.loginRef_.addEventListener) {
+    this.loginRef_.addEventListener('loadstop',
+        _.bind(this.onLoginRefLoadStop_, this),
+        false);
+    this.loginRef_.addEventListener('exit',
+        _.bind(this.onLoginRefExit_, this),
+        false);
+  }
 
   // For not-Phonegap.
   this.loginInterval_ = window.setInterval(_.bind(function() {
@@ -361,14 +380,10 @@ fmb.views.Device = Backbone.View.extend({
 /** @inheritDoc */
 fmb.views.Device.prototype.initialize = function(options) {
   this.$device = $('<div class="device"></div>');
-  this.$graph = $('<div class="battery-chart">' +
-    '<div class="y-axis"></div>' +
-    '<div class="chart"></div>' + '</div>');
   this.viewNotifying = new fmb.views.Notifying({
     model: this.model.get('notifying'),
     device: this.model
   });
-  this.model.on('change:settings', this.renderChart_, this);
 };
 
 
@@ -378,7 +393,6 @@ fmb.views.Device.prototype.render = function() {
   if (!this.rendered_) {
     this.rendered_ = true;
     this.$el.append(this.$device);
-    this.$el.append(this.$graph);
 
     this.viewNotifying.render();
     this.$el.append(this.viewNotifying.$el);
@@ -388,48 +402,6 @@ fmb.views.Device.prototype.render = function() {
   return this;
 };
 
-
-/**
- * @private
- */
-fmb.views.Device.prototype.renderChart_ = function() {
-  fmb.log('fmb.views.Account renderChart_');
-  if (!this.model.get('settings').length) {
-    fmb.log('No setting data to render chart with.')
-    return;
-  }
-  var dataSeries = [];
-  this.model.get('settings').each(function(model, i) {
-    dataSeries.push({
-      x: i,
-      y: model.get('battery_level')
-    })
-  });
-
-  this.$graph.html('');  // reset
-
-  var graph = new Rickshaw.Graph({
-    element: this.$graph.get(0),
-    renderer: 'area',
-    height: this.$graph.height(),
-    width: this.$graph.width(),
-    series: [
-      {
-        data: dataSeries,
-        color: 'steelblue'
-      }
-    ]
-  });
-
-  var yTicks = new Rickshaw.Graph.Axis.Y({
-    graph: graph,
-    orientation: 'left',
-    tickFormat: Rickshaw.Fixtures.Number.formatKMBT,
-    element: this.$('.battery-chart .y-axis').get(0),
-  });
-
-  graph.render();
-};
 
 /**
  * @param {Event} e A change event.
@@ -472,7 +444,7 @@ fmb.views.Account.prototype.updateDevice_ = function() {
     data['update_frequency'] = parseInt(data['update_frequency'], 10);
   }
   fmb.log('updateDevice_ w/', data);
-  this.device.save(data);
+  this.model.device.save(data);
 };
 
 
@@ -504,7 +476,7 @@ fmb.views.Notifying = Backbone.View.extend({
 
 /** @inheritDoc */
 fmb.views.Notifying.prototype.initialize = function(options) {
-  this.model.on('add change remove', this.render, this);
+  this.listenTo(this.model, 'add change remove', this.render);
 };
 
 
@@ -596,8 +568,7 @@ fmb.views.Notifying.prototype.onClickRemove_ = function(e) {
 fmb.views.Following = Backbone.View.extend({
   el: '.fmb-following',
   events: {
-    'tap .following-user': 'onClickFollowingUser_',
-    'tap .remove': 'onClickRemove_'
+
   }
 });
 
@@ -605,11 +576,9 @@ fmb.views.Following = Backbone.View.extend({
 /** @inheritDoc */
 fmb.views.Following.prototype.initialize = function(options) {
   this.user = options.user;
-  this.device = options.device;
-
-  this.model.on('all', this.onAll_, this);
-  this.device.on('battery_status', this.render, this);
-  this.device.on('change', this.render, this);
+  this.subViews_ = {};
+  this.listenTo(this.model, 'add', this.render);
+  this.listenTo(this.model, 'remove', this.onRemove_);
 };
 
 
@@ -619,41 +588,90 @@ fmb.views.Following.prototype.initialize = function(options) {
 fmb.views.Following.prototype.setIsActive = function(isActive) {
   this.model.stopFetchPoll();
   if (isActive) {
-    fmb.log('Set following fetch interval.');
+    //fmb.log('Set following fetch interval.');
     this.model.startFetchPoll(30 * 1000);
   }
 };
 
 
-fmb.views.Following.prototype.onAll_ = function(event) {
-  //fmb.log('onAll!', arguments)
-  this.render();
+/**
+ * @param {Backbone.Model}
+ * @private
+ */
+fmb.views.Following.prototype.onRemove_ = function(model) {
+  this.subViews_[model.id].remove();
+  delete this.subViews_[model.id];
 };
 
 
 /** @inheritDoc */
-fmb.views.Following.prototype.render = _.debounce(function() {
-  var following = fmb.clone(this.model.toJSON());
-  following.unshift(app.model.user.toJSON());
-  fmb.log('fmb.views.Following render', following)
-  var templateData = {
-    'following': following
-  };
-  this.$el.html(fmb.views.getTemplateHtml('following', templateData));
+fmb.views.Following.prototype.render = function() {
+  fmb.log('fmb.views.Following render');
+  if (!this.rendered_) {
+    this.rendered_ = true;
+    this.$el.html(fmb.views.getTemplateHtml('following', {}));
+    this.$table = this.$('table');
+    // Add yo-self into the view.
+    this.addSubview_(this.user);
+  }
+
+  this.model.each(_.bind(function(model) {
+    this.addSubview_(model);
+  }, this));
   return this;
-}, 500);
+};
+
+
+fmb.views.Following.prototype.addSubview_ = function(model) {
+  fmb.log('fmb.views.Following addSubview_', model.id);
+  // Don't make views for models without ids.
+  if (model.id && !this.subViews_[model.id]) {
+    this.subViews_[model.id] = new fmb.views.FollowingUser({
+      parent: this,
+      model: model
+    });
+    this.subViews_[model.id].render();
+    this.$table.append(this.subViews_[model.id].$el);
+  }
+};
+
+
+/******************************************************************************/
+
+
+
+/**
+ * @extends {Backbone.View}
+ * @constructor
+ */
+fmb.views.FollowingUser = Backbone.View.extend({
+  className: 'fmb-following-user',
+  tagName: 'tbody',
+  events: {
+    'tap .following-user': 'onClickFollowingUser_',
+    'tap .remove': 'onClickRemove_'
+  }
+});
+
+
+/** @inheritDoc */
+fmb.views.FollowingUser.prototype.initialize = function() {
+  this.listenTo(this.model.get('devices'), 'add', this.render);
+  this.listenTo(this.model.get('devices'), 'remove', this.onRemoveDevice_);
+  this.subViews_ = {};
+};
 
 
 /**
  * @param {Event} e A click event.
  * @private
  */
-fmb.views.Following.prototype.onClickFollowingUser_ = function(e) {
+fmb.views.FollowingUser.prototype.onClickFollowingUser_ = function(e) {
   return; // TODO(elsigh): Something fun like this.
   var extras = {};
   extras[WebIntent.EXTRA_TEXT] = fmb.models.SERVER + '/profile/' +
       this.model.user.get('key');
-  extras[WebIntent.EXTRA_SUBJECT] = 'Dude, you need to charge your phone!';
+  extras[WebIntent.EXTRA_SUBJECT] = 'Dude, charge your battery!';
   window.plugins.webintent.startActivity({
     action: WebIntent.ACTION_SEND,
     type: 'text/plain',
@@ -667,10 +685,20 @@ fmb.views.Following.prototype.onClickFollowingUser_ = function(e) {
 
 
 /**
+ * @param {Backbone.Model}
+ * @private
+ */
+fmb.views.Following.prototype.onRemoveUser_ = function(model) {
+  this.subViews_[model.id].remove();
+  delete this.subViews_[model.id];
+};
+
+
+/**
  * @param {Event} e A click event.
  * @private
  */
-fmb.views.Following.prototype.onClickRemove_ = function(e) {
+fmb.views.FollowingUser.prototype.onClickRemove_ = function(e) {
   var userKey = $(e.currentTarget).data('key');
   var isSure = window.confirm('Really remove them from your list?');
   if (!isSure) {
@@ -681,4 +709,137 @@ fmb.views.Following.prototype.onClickRemove_ = function(e) {
 };
 
 
+/**
+ * @param {Backbone.Model} model A model instance.
+ * @private
+ */
+fmb.views.FollowingUser.prototype.onChange_ = function(model) {
+  fmb.log('fmb.views.FollowingUser onChange_', model.id);
+  this.render();
+};
+
+
+/** @inheritDoc */
+fmb.views.FollowingUser.prototype.render = function() {
+  fmb.log('fmb.views.FollowingUser render', this.$el);
+  if (!this.rendered_) {
+    this.rendered_ = true;
+    var templateData = this.model.toJSON();
+    this.$el.html(fmb.views.getTemplateHtml('following_user', templateData));
+  }
+  this.model.get('devices').each(_.bind(function(model) {
+    // Don't make views for models without ids.
+    if (model.id && !this.subViews_[model.id]) {
+      this.subViews_[model.id] = new fmb.views.FollowingDevice({
+        parent: this,
+        model: model
+      });
+      this.subViews_[model.id].render();
+      this.$el.append(this.subViews_[model.id].$el);
+    }
+  }, this));
+  return this;
+};
+
+
+/** @inheritDoc */
+fmb.views.FollowingUser.prototype.remove = function() {
+  _.each(this.subViews_, function(view, id) {
+    view.remove();
+    delete this.subViews_[id];
+  });
+  Backbone.View.prototype.remove.apply(this, arguments);
+};
+
+
+
+/******************************************************************************/
+
+
+
+/**
+ * @extends {Backbone.View}
+ * @constructor
+ */
+fmb.views.FollowingDevice = Backbone.View.extend({
+  className: 'fmb-following-device',
+  tagName: 'tr',
+  events: {}
+});
+
+
+/** @inheritDoc */
+fmb.views.FollowingDevice.prototype.initialize = function() {
+  this.listenTo(this.model, 'change', this.render);
+  this.listenTo(this.model.get('settings'), 'all', this.render);
+};
+
+/** @inheritDoc */
+fmb.views.FollowingDevice.prototype.render = function() {
+  var templateData = this.model.toJSON();
+  //fmb.log('fmb.views.FollowingDevice templateData', templateData);
+  this.$el.html(fmb.views.getTemplateHtml('following_device', templateData));
+  this.$graph = this.$('.battery-graph');
+  this.$graphY = this.$('.y-axis');
+  this.renderGraph_();
+};
+
+
+/**
+ * @private
+ */
+fmb.views.FollowingDevice.prototype.renderGraph_ = function() {
+  fmb.log('fmb.views.FollowingDevice renderGraph_');
+  if (!this.model.get('settings').length) {
+    fmb.log('No setting data to render chart with.')
+    return;
+  }
+  var dataSeries = [];
+  this.model.get('settings').each(function(model, i) {
+    var xDate = new Date(model.get('created'));
+    var xTime = xDate.getTime();
+    //fmb.log('xDate', xDate, xTime);
+    dataSeries.push({
+      //x: xTime,
+      x: i,
+      x_readable: xDate.toString(),
+      y: model.get('battery_level')
+    })
+  });
+  fmb.log('fmb.views.FollowingDevice dataSeries', dataSeries);
+  this.$graph.html('');  // reset
+
+  var xdataSeries = [
+            { x: 0, y: 40 },
+            { x: 1, y: 49 },
+            { x: 2, y: 38 },
+            { x: 3, y: 30 },
+            { x: 4, y: 32 } ];
+
+  var graph = new Rickshaw.Graph({
+    element: this.$graph.get(0),
+    //renderer: 'line',
+    height: 100,
+    width: 200,
+    series: [
+      {
+        data: dataSeries,
+        color: 'green',
+        name: this.model.get('name')
+      }
+    ]
+  });
+
+  /*
+  var yAxis = new Rickshaw.Graph.Axis.Y({
+    graph: graph
+  });
+
+  var xAxis = new Rickshaw.Graph.Axis.Time({
+    graph: graph
+  });
+  */
+
+  graph.render();
+};
 

@@ -5,47 +5,75 @@
 var fmb = {};
 
 
-(function($) {
-  // only do this if not on a touch device
-  if (!('ontouchend' in window)) {
-    $(document).delegate('body', 'click', function(e) {
-      e.preventDefault();
-      $(e.target).trigger('tap', e);
-    });
-  } else {
-    $(document).delegate('body', 'click', function(e) {
-      e.preventDefault();
-    });
-  }
-})(window.Zepto);
+/******************************************************************************/
+
+
+/**
+ * @type {Object} UA namespace.
+ */
+fmb.ua = {};
+
+
+/**
+ * @type {boolean}
+ */
+fmb.ua.IS_ANDROID = window.navigator.userAgent.indexOf('Android') !== -1;
+
+
+/**
+ * @type {boolean}
+ */
+fmb.ua.IS_CORDOVA = typeof cordova !== 'undefined';
+
+
+/******************************************************************************/
+
+
+/**
+ * @return {Function} The native console.log implementation.
+ * @private
+ */
+fmb.getConsoleLogger_ = function() {
+  return _.bind(console.log, console);
+};
+
+
+/**
+ * @return {Function} A wrapped up stringifier.
+ * @private
+ */
+fmb.getWebViewLogger_ = function() {
+  return _.bind(function() {
+      var argumentsArray = _.toArray(arguments);
+      var consoleStrings = [];
+      _.each(argumentsArray, function(logLine) {
+        if (_.isElement(logLine)) {
+          consoleStrings.push('isElement-className: ' + logLine.className);
+        } else if (_.isObject(logLine)) {
+          // Some of our objects have circular references..
+          try {
+            // Wrapped in quotation marks for later parseability.
+            var stringified = '"' + JSON.stringify(logLine) + '"';
+            consoleStrings.push(stringified);
+          } catch (err) {
+            consoleStrings.push(logLine);
+          }
+        } else {
+          consoleStrings.push(logLine);
+        }
+      });
+
+      var consoleString = consoleStrings.join(', ');
+      console.log(consoleString);
+    }, console);
+};
 
 
 /**
  * Good times, wrap fmb.log
  */
-fmb.log = function() {
-  var argumentsArray = _.toArray(arguments);
-  var consoleStrings = [];
-  _.each(argumentsArray, function(logLine) {
-    if (_.isElement(logLine)) {
-      consoleStrings.push('isElement-className: ' + logLine.className);
-    } else if (_.isObject(logLine)) {
-      // Some of our objects have circular references..
-      try {
-        // Wrapped in quotation marks for later parseability.
-        var stringified = '"' + JSON.stringify(logLine) + '"';
-        consoleStrings.push(stringified);
-      } catch (err) {
-        consoleStrings.push(logLine);
-      }
-    } else {
-      consoleStrings.push(logLine);
-    }
-  });
-
-  var consoleString = consoleStrings.join(', ');
-  console.log.call(console, consoleString);
-};
+fmb.log = fmb.ua.IS_ANDROID && fmb.ua.IS_CORDOVA ?
+    fmb.getWebViewLogger_() : fmb.getConsoleLogger_();
 
 
 /**
@@ -102,7 +130,7 @@ fmb.App.onBatteryStatus_ = function(batteryInfo) {
   window.navigator.battery = window.navigator.battery || {};
   window.navigator.battery.level = batteryInfo['level'];
   window.navigator.battery.isPlugged = batteryInfo['isPlugged'];
-  window['app'].model.device.trigger('battery_status');
+  window['app'].model.user.device.trigger('battery_status');
 };
 
 
@@ -171,7 +199,7 @@ fmb.App.prototype.initHistory_ = function() {
 /**
  * @type {RegExp}
  */
-fmb.App.FOLLOWING_URL_RE = /http:\/\/www\.followmybattery\.com\/(.*)/;
+fmb.App.FOLLOWING_URL_RE = /followmybattery\.com\/profile\/(.*)/;
 
 
 /**
@@ -258,7 +286,7 @@ fmb.App.prototype.onPhonePause = function() {
  * @private
  */
 fmb.App.prototype.onPhonePause_ = function() {
-  fmb.log('onPhonePause_');
+  fmb.log('fmb.App onPhonePause_');
   window.removeEventListener('batterystatus',
                              fmb.App.onBatteryStatus_,
                              false);
@@ -292,7 +320,7 @@ fmb.App.prototype.onPhoneResume = function() {
  * @private
  */
 fmb.App.prototype.onPhoneResume_ = function() {
-  fmb.log('onPhoneResume_');
+  fmb.log('fmb.App onPhoneResume_');
 
   window.addEventListener('batterystatus',
                           fmb.App.onBatteryStatus_,
