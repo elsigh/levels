@@ -20,6 +20,12 @@ fmb.models.SERVER_PROD = 'https://followmybattery.appspot.com';
 
 // Useful for testing from the filesystem locally.
 //fmb.models.SERVER_PROD = fmb.models.SERVER_LOCAL;
+//fmb.models.SERVER_LOCAL = fmb.models.SERVER_PROD;
+
+/**
+ * @type {string}
+ */
+fmb.models.SERVER_SHARE = 'http://www.followmybattery.com';
 
 
 /**
@@ -123,11 +129,11 @@ fmb.models.sync = function(method, model, options) {
   options.contentType = 'application/json; charset=utf8';
 
   // Includes our auth token in requests.
-  if (fmb.models.sync.userId) {
+  if (fmb.models.sync.userKey) {
     if (method == 'update' || method == 'create' || method == 'delete') {
       var data = options.data ? options.data : model.toJSON();
       data['api_token'] = fmb.models.sync.apiToken;
-      data['user_id'] = fmb.models.sync.userId;
+      data['user_key'] = fmb.models.sync.userKey;
 
       //if (fmb.models.sync.deviceId) {
       //  data['device_id'] = fmb.models.sync.deviceId;
@@ -139,7 +145,7 @@ fmb.models.sync = function(method, model, options) {
       var data = options.data || {};
       _.extend(data, {
         'api_token': fmb.models.sync.apiToken,
-        'user_id': fmb.models.sync.userId
+        'user_key': fmb.models.sync.userKey
       });
       options.data = data;
     }
@@ -161,7 +167,7 @@ fmb.models.sync.apiToken = null;
 /**
  * @type {string}
  */
-fmb.models.sync.userId = null;
+fmb.models.sync.userKey = null;
 
 
 /**
@@ -191,7 +197,9 @@ fmb.models.AjaxSyncModel= Backbone.Model.extend({
  * @extends {Backbone.Model}
  * @constructor
  */
-fmb.Model = Backbone.Model.extend();
+fmb.Model = Backbone.Model.extend({
+  idAttribute: 'key'
+});
 
 
 /**

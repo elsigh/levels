@@ -22,8 +22,8 @@ public class PhoneDiedService extends Service {
     private Boolean isRunning = false;
 
     public static String EXTRAS_API_TOKEN = "api_token";
-    public static String EXTRAS_USER_ID = "user_id";
-    public static String EXTRAS_DEVICE_ID = "device_id";
+    public static String EXTRAS_USER_KEY = "user_key";
+    public static String EXTRAS_DEVICE_KEY = "device_key";
     public static String EXTRAS_UPDATE_PATH = "update_path";
     public static String EXTRAS_UPDATE_FREQUENCY = "update_frequency";
 
@@ -50,14 +50,14 @@ public class PhoneDiedService extends Service {
 
         if (intent != null) {
             String apiToken = intent.getStringExtra(EXTRAS_API_TOKEN);
-            String userId = intent.getStringExtra(EXTRAS_USER_ID);
-            String deviceId = intent.getStringExtra(EXTRAS_DEVICE_ID);
+            String userKey = intent.getStringExtra(EXTRAS_USER_KEY);
+            String deviceKey = intent.getStringExtra(EXTRAS_DEVICE_KEY);
             String updatePath = intent.getStringExtra(EXTRAS_UPDATE_PATH);
             String updateFrequency = intent.getStringExtra(EXTRAS_UPDATE_FREQUENCY);
             Log.d(TAG, "onStart via intent: " +
-                  apiToken + ", " + userId + ", " + deviceId + ", " +
+                  apiToken + ", " + userKey + ", " + deviceKey + ", " +
                   updatePath + ", " + updateFrequency);
-            alarm.SetPrefs(this, apiToken, userId, deviceId, updatePath, updateFrequency);
+            alarm.SetPrefs(this, apiToken, userKey, deviceKey, updatePath, updateFrequency);
         }
 
         // Enusure any existing alarm is nuked.

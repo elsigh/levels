@@ -44,7 +44,6 @@ function testApp() {
 
   var userTokenResponse = {
     'status': 0,
-    'id': 1,
     'key': 'test_user_key',
     'api_token': 'test_api_token',
     'name': 'test_user_name'
@@ -52,12 +51,12 @@ function testApp() {
   server.requests[0].respond(200, API_RESPONSE_HEADERS,
        JSON.stringify(userTokenResponse));
   assertUndefined(app.model.user.get('user_token'));  // now undefined.
-  assertEquals(userTokenResponse['id'], app.model.user.get('id'));
-  assertEquals(userTokenResponse['id'].toString(),
-               localStorage.getItem('user_id'));
+  assertEquals(userTokenResponse['key'], app.model.user.get('key'));
+  assertEquals(userTokenResponse['key'],
+               localStorage.getItem('user_key'));
   assertEquals(userTokenResponse['api_token'], app.model.user.get('api_token'));
   assertEquals(userTokenResponse['name'],
-               app.view.currentView.$el.find('h2').text());
+               app.view.currentView.$el.find('h3').text());
 
   assertEquals(2, server.requests.length);
   assertEquals(fmb.models.getApiUrl('/device'),
@@ -65,17 +64,16 @@ function testApp() {
 
   var deviceResponse = {
     'status': 0,
-    'id': 10,
     'key': 'test_device_key'
   };
   server.requests[1].respond(200, API_RESPONSE_HEADERS,
        JSON.stringify(deviceResponse));
-  assertEquals(deviceResponse['id'],
-               app.model.user.get('devices').at(0).get('id'));
-  assertEquals(deviceResponse['id'],
-               app.model.user.device.get('id'));
-  assertEquals(deviceResponse['id'].toString(),
-               localStorage.getItem('device_id'));
+  assertEquals(deviceResponse['key'],
+               app.model.user.get('devices').at(0).get('key'));
+  assertEquals(deviceResponse['key'],
+               app.model.user.device.get('key'));
+  assertEquals(deviceResponse['key'],
+               localStorage.getItem('device_key'));
   clock.tick(1);
 
   // Tests that the device rendered with its notification view.
@@ -104,7 +102,7 @@ function testApp() {
   app.model.user.get('following').fetch();
   var expectedUrl = fmb.models.getApiUrl('/following') + '?' +
       'api_token=' + app.model.user.get('api_token') + '&' +
-      'user_id=' + app.model.user.id;
+      'user_key=' + app.model.user.id;
   assertEquals(expectedUrl,
                server.requests[2].url);
 
@@ -129,18 +127,16 @@ function testApp() {
     'status': 0,
     'following': [
       {
-        'id': 'following_user_1',
         'key': 'following_user_1_key',
         'name': 'following_user_1',
         'devices': [
           {
-            'id': 'following_device_1',
             'key': 'following_device_1_key',
             'platform': 'Android',
             'name': 'kokomo',
             'settings': [
               {
-                'id': 'following_settings_1',
+                'key': 'following_settings_1',
                 'created': fmb.models.getISODate(
                     new Date(Date.now() - 60 * 1000 * 1)),
                 'battery_level': 65,
@@ -148,7 +144,7 @@ function testApp() {
               },
 
               {
-                'id': 'following_settings_2',
+                'key': 'following_settings_2',
                 'created': fmb.models.getISODate(
                     new Date(Date.now() - 60 * 1000 * 1 * 10)),
                 'battery_level': 45,
@@ -156,7 +152,7 @@ function testApp() {
               },
 
               {
-                'id': 'following_settings_3',
+                'key': 'following_settings_3',
                 'created': fmb.models.getISODate(
                     new Date(Date.now() - 60 * 1000 * 20)),
                 'battery_level': 35,
@@ -164,7 +160,7 @@ function testApp() {
               },
 
               {
-                'id': 'following_settings_4',
+                'key': 'following_settings_4',
                 'created': fmb.models.getISODate(
                     new Date(Date.now() - 60 * 1000 * 30)),
                 'battery_level': 75,

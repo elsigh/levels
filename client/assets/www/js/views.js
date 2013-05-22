@@ -130,7 +130,7 @@ fmb.views.App.prototype.onClickShare_ = function(e) {
   }, this), 500);
 
   var extras = {};
-  extras[WebIntent.EXTRA_TEXT] = fmb.models.SERVER + '/profile/' +
+  extras[WebIntent.EXTRA_TEXT] = fmb.models.SERVER_SHARE + '/profile/' +
       this.model.user.get('key');
   extras[WebIntent.EXTRA_SUBJECT] = 'Level - Check my stats!';
   window.plugins.webintent.startActivity({
@@ -238,7 +238,7 @@ fmb.views.Account = Backbone.View.extend({
 /** @inheritDoc */
 fmb.views.Account.prototype.initialize = function(options) {
   fmb.log('views.Account initialize');
-  this.model.on('change:id', this.render, this);
+  this.model.on('change:key', this.render, this);
 
   this.$account = $('<div class="account"></div>');
   this.$devices = $('<div class="devices"></div>');
@@ -809,18 +809,12 @@ fmb.views.FollowingDevice.prototype.renderGraph_ = function() {
   fmb.log('fmb.views.FollowingDevice dataSeries', dataSeries);
   this.$graph.html('');  // reset
 
-  var xdataSeries = [
-            { x: 0, y: 40 },
-            { x: 1, y: 49 },
-            { x: 2, y: 38 },
-            { x: 3, y: 30 },
-            { x: 4, y: 32 } ];
-
+  fmb.log('GRAH SIZE', this.$graph.parent().width(), this.$graph.height())
   var graph = new Rickshaw.Graph({
     element: this.$graph.get(0),
     //renderer: 'line',
-    height: 100,
-    width: 200,
+    height: this.$graph.height() || 50,
+    width: this.$graph.width() || 100,
     series: [
       {
         data: dataSeries,
