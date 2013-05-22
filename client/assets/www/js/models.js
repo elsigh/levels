@@ -34,22 +34,24 @@ fmb.models.App.prototype.initialize = function(opt_data, opt_options) {
   fmb.Model.prototype.initialize.apply(this, arguments);
 
   // id is necessary for localStorage plugin with a model.
-  var userId = localStorage.getItem('user_id');
-  fmb.log('userId from localStorage', userId);
-  if (userId) {
+  var userKey = localStorage.getItem('user_key');
+  fmb.log('userKey from localStorage', userKey);
+  if (userKey) {
     this.user = new fmb.models.User({
-      id: userId
+      id: userKey,
+      key: userKey
     });
     this.user.fetchFromStorage();
   } else {
     this.user = new fmb.models.User();
   }
 
-  var deviceId = localStorage.getItem('device_id');
-  fmb.log('deviceId from localStorage', deviceId);
-  if (deviceId) {
+  var deviceKey = localStorage.getItem('device_key');
+  fmb.log('deviceKey from localStorage', deviceKey);
+  if (deviceKey) {
     this.user.device = new fmb.models.Device({
-      id: deviceId
+      id: deviceKey,
+      key: deviceKey
     }, {
       isUserDevice: true
     });
@@ -78,11 +80,10 @@ fmb.models.App.prototype.initialize = function(opt_data, opt_options) {
     // Deferred so model references are set on window.app.
     _.defer(_.bind(function() {
       this.user.fetch();
-      this.user.device.fetch();
     }, this));
 
   } else {
-    this.user.once('change:id', _.bind(function() {
+    this.user.once('change:key', _.bind(function() {
       fmb.log('** SAVE DEVICE for the first time');
       this.user.device.saveToServer();
     }, this));
@@ -122,7 +123,7 @@ fmb.models.NotifyingCollection.prototype.parse = function(response, xhr) {
 fmb.models.NotifyingCollection.prototype.fetch = function(opt_options) {
   var options = opt_options || {};
   options.data = {
-    'device_id': this.parent.id
+    'device_key': this.parent.id
   };
   fmb.Collection.prototype.fetch.call(this, options);
 }
@@ -138,8 +139,8 @@ fmb.models.NotifyingCollection.prototype.addContact = function(obj) {
     return;
   }
 
-  // Adds in the parent device_id.
-  obj['device_id'] = this.parent.id;
+  // Adds in the parent device_key.
+  obj['device_key'] = this.parent.id;
 
   var alreadyNotifying = this.find(function(model) {
     return model.get('means') == means;
@@ -182,7 +183,7 @@ fmb.models.NotifyingCollection.prototype.removeByMeans = function(means) {
   }, this);
 
   notifyModel.save({
-    'device_id': this.parent.id,
+    'device_key': this.parent.id,
     'means': means.toString()
   }, {
     success: _.bind(function() {
@@ -239,10 +240,10 @@ fmb.models.DeviceUnMapped.prototype.initialize = function(opt_data, opt_options)
 
   if (options.isUserDevice) {
     this.on('battery_status', this.onBatteryStatus_, this);
-    this.once('change:id', function() {
-      fmb.log('fmb.models.MyDevice saved device_id to localStorage:', this.id,
+    this.once('change:key', function() {
+      fmb.log('fmb.models.MyDevice saved device_key to localStorage:', this.id,
               'and set for fmb.models.sync');
-      localStorage.setItem('device_id', this.id);
+      localStorage.setItem('device_key', this.id);
 
       if (this.user.get('api_token')) {
         fmb.log('fmb.models.MyDevice START phonediedservice plugin!');
@@ -283,7 +284,7 @@ fmb.models.DeviceUnMapped.prototype.getStorageData = function() {
 fmb.models.DeviceUnMapped.prototype.fetch = function(opt_options) {
   var options = opt_options || {};
   options.data = {
-    'device_id': this.id
+    'device_key': this.id
   };
   fmb.Model.prototype.fetch.call(this, options);
 };
@@ -341,8 +342,8 @@ fmb.models.MyDevice.prototype.onChange_ = function() {
 
     // First time device install, start the service.
     } else if (_.has(changedAttributes, 'id')) {
-      fmb.log('Device change:id FIRST TIME.', this.id);
-      localStorage.setItem('device_id', this.id);
+      fmb.log('Device change:key FIRST TIME.', this.id);
+      localStorage.setItem('device_key', this.id);
       plugin.startService();
     }
 
@@ -419,7 +420,9 @@ fmb.models.FollowingCollection.prototype.addByUserKey = function(userKey) {
   followModel.url = _.bind(function() {
     return fmb.models.getApiUrl('/following');
   }, this);
-  followModel.save({'user_key': userKey}, {
+  followModel.save({
+    'following_user_key': userKey
+  }, {
     //url: url,  // why this no work?
     success: _.bind(function() {
       fmb.log('MONEY TRAIN, refetching following data from server.');
@@ -455,7 +458,7 @@ fmb.models.FollowingCollection.prototype.removeByUsername = function(userKey) {
   }, this);
 
   followModel.save({
-    'user_key': userKey
+    'following_user_key': userKey
   }, {
     // Why does url not work here?
     //url: fmb.models.getApiUrl('/following/delete/') +
@@ -499,13 +502,13 @@ fmb.models.User = fmb.Model.extend({
 /** @inheritDoc */
 fmb.models.User.prototype.initialize = function(opt_data, opt_options) {
   fmb.Model.prototype.initialize.apply(this, arguments);
-  this.once('change:id', function() {
-    fmb.log('Saved user_id to localStorage:', this.id,
-            'and set for fmb.models.sync');
-    localStorage.setItem('user_id', this.id);
-    fmb.models.sync.userId = this.id;
-  }, this);
+  if (this.id) {
+    this.setUserKey_();
+  } else {
+    this.once('change:key', this.setUserKey_, this);
+  }
 
+  // API Token will always fire change, even when init'ing from localStorage.
   this.once('change:api_token', function() {
     fmb.log('Set API token for fmb.models.sync', this.get('api_token'));
     fmb.models.sync.apiToken = this.get('api_token');
@@ -516,6 +519,17 @@ fmb.models.User.prototype.initialize = function(opt_data, opt_options) {
       plugin.startService();
     }
   }, this);
+};
+
+
+/**
+ * @private
+ */
+fmb.models.User.prototype.setUserKey_ = function() {
+  fmb.log('fmb.models.User setUserKey saved to localStorage:', this.id,
+          'and set for fmb.models.sync.userKey');
+  localStorage.setItem('user_key', this.id);
+  fmb.models.sync.userKey = this.id;
 };
 
 
