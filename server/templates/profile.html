@@ -24,9 +24,9 @@
     </div>
 
     <div class="body">
-      <h1>
+      <h2>
         {{ user.name }}
-      </h1>
+      </h2>
     </div>
   </div>
 
@@ -40,7 +40,7 @@
       </thead>
       <tbody>
         {% for device in user.devices %}
-          {% if device.settings.length %}
+          {% if device.settings|length %}
             <tr>
               <td>
                 {{ device.platform }} {{ device.name }}

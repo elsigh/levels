@@ -220,7 +220,7 @@ fmb.App.prototype.checkIntent_ = function() {
         if (match && match.length) {
           var userKey = match[1];
           _.delay(_.bind(function() {
-            app.model.following.addByUserKey(userKey);
+            app.model.user.get('following').addByUserKey(userKey);
           }, window['app']), 300);
         }
       });

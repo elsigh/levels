@@ -42,8 +42,8 @@ class FMBModel(ndb.Model):
 
     def to_dict(self, include_api_token=False):
         obj = super(FMBModel, self).to_dict()
-        obj['id'] = self.key.id()
         urlsafe_key = self.key.urlsafe()
+        #obj['id'] = urlsafe_key
         obj['key'] = urlsafe_key
 
         if 'api_token' in obj and not include_api_token:
@@ -59,13 +59,13 @@ class FMBUser(User, FMBModel):
         if not hasattr(self, 'api_token'):
             self.api_token = str(uuid.uuid4())
 
-    def to_dict(self, include_api_token=False):
+    def to_dict(self, include_api_token=False, include_device_notifying=False):
         obj = super(FMBUser, self).to_dict(include_api_token=include_api_token)
         obj['devices'] = []
         q_device = Device.query(ancestor=self.key)
         q_device = q_device.order(-Device.created)
         for device in q_device:
-            obj['devices'].append(device.to_dict())
+            obj['devices'].append(device.to_dict(include_notifying=include_device_notifying))
         return obj
 
 
@@ -82,7 +82,7 @@ class Device(FMBModel):
     platform = ndb.StringProperty()
     version = ndb.StringProperty()
 
-    def to_dict(self):
+    def to_dict(self, include_notifying=True):
         NUM_SETTINGS_TO_FETCH = 10
         obj = super(Device, self).to_dict()
 
@@ -93,10 +93,11 @@ class Device(FMBModel):
             obj['settings'].append(setting.to_dict())
 
         # notifying
-        q_notifying = Notifying.query(ancestor=self.key).order(-Notifying.created)
-        obj['notifying'] = []
-        for notifying in q_notifying:
-            obj['notifying'].append(notifying.to_dict())
+        if include_notifying:
+            q_notifying = Notifying.query(ancestor=self.key).order(-Notifying.created)
+            obj['notifying'] = []
+            for notifying in q_notifying:
+                obj['notifying'].append(notifying.to_dict())
 
         return obj
 

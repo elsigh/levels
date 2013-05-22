@@ -20,7 +20,7 @@ class LoginHandler(WebRequestHandler):
     logging.info('SET USER TOKEN %s' % user_token)
     tpl_data = {}
     if self.current_user:
-      memcache.set('user_token-%s' % user_token, self.current_user.key.id(), 60)
+      memcache.set('user_token-%s' % user_token, self.current_user.key.urlsafe(), 60)
       uri = '/profile/%s' % self.current_user.key.urlsafe()
       if user_token:
         uri = uri + '?close=1'

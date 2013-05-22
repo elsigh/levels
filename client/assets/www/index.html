@@ -67,7 +67,7 @@
       {{#user.api_token}}
         <div class="user-img-name">
           <img src="{{user.avatar_url}}" width="100" alt="">
-          <h2>{{user.name}}</h2>
+          <h3>{{user.name}}</h3>
         </div>
       {{/user.api_token}}
     </script>
@@ -131,7 +131,7 @@
 
     <script id="tpl_following" type="text/html">
       <div class="fmb-tab-header">
-        <h2>Following</h2>
+        <h3>Following</h3>
         <button class="share">+ someone</button>
       </div>
       <table>
@@ -166,8 +166,7 @@
     </script>
 
     <script id="tpl_following_device" type="text/html">
-      <td></td>
-      <td>{{platform}} {{name}}</td>
+      <td colspan="2">{{platform}} {{name}}</td>
       <td
         class="battery-level-c charging-{{settings.0.is_charging}}">
         <div class="battery-level"

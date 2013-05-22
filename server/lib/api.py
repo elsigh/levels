@@ -46,7 +46,7 @@ class ApiRequestHandler(WebRequestHandler):
                      (request.method, request.path))
         super(ApiRequestHandler, self).initialize(request, response)
         self._set_json_request_data()
-        self._assert_user_id()
+        self._assert_user_key()
         self._assert_api_token()
 
     def _set_json_request_data(self):
@@ -70,10 +70,10 @@ class ApiRequestHandler(WebRequestHandler):
         elif self.request.method == 'GET':
             if self.request.get('api_token'):
                 self._json_request_data['api_token'] = self.request.get('api_token')
-            if self.request.get('user_id'):
-                self._json_request_data['user_id'] = int(self.request.get('user_id'))
-            if self.request.get('device_id'):
-                self._json_request_data['device_id'] = int(self.request.get('device_id'))
+            if self.request.get('user_key'):
+                self._json_request_data['user_key'] = self.request.get('user_key')
+            if self.request.get('device_key'):
+                self._json_request_data['device_key'] = self.request.get('device_key')
 
         logging.info('JSON REQ DATA: %s' % self._json_request_data)
 
@@ -82,28 +82,31 @@ class ApiRequestHandler(WebRequestHandler):
         obj = self._json_request_data.copy()
         try:
             obj.pop('api_token')
-            obj.pop('user_id')
-            obj.pop('device_id')
+            obj.pop('user_key')
+            obj.pop('device_key')
         except KeyError:
             pass
         return obj
 
-    def _assert_user_id(self):
-        """Ensures that the passed in user_id data matches the logged in user."""
-        if 'user_id' not in self._json_request_data:
+    def _assert_user_key(self):
+        """Ensures that the passed in user_key data matches the logged in user.
+
+        Admins could theoretically bypass this check to get data for other
+        users.
+        """
+        if 'user_key' not in self._json_request_data:
             return
         assert self.current_user is not None
         #logging.info('_assert_user_id %s vs %s' %
-        #    (self.current_user.key.id(), self._json_request_data['user_id']))
-        assert self.current_user.key.id() == int(self._json_request_data['user_id'])
+        #    (self.current_user.key.urlsafe(), self._json_request_data['user_key']))
+        assert self.current_user.key.urlsafe() == self._json_request_data['user_key']
 
-    def _get_device_by_device_id(self):
-        """Ensures that the passed in device_id is owned by current_user."""
-        if 'device_id' not in self._json_request_data:
+    def _get_device_by_device_key(self):
+        """Ensures that the passed in device_key is owned by current_user."""
+        if 'device_key' not in self._json_request_data:
             return
-        device_id = self._json_request_data['device_id']
-        device = ndb.Key(models.Device, int(device_id),
-                         parent=self.current_user.key).get()
+        device_key = self._json_request_data['device_key']
+        device = ndb.Key(urlsafe=device_key).get()
         assert device
         return device
 
@@ -122,13 +125,12 @@ class ApiRequestHandler(WebRequestHandler):
 
         # For our api_token situation, which is special because we can't go
         # setting a cookie for our domain in both our JS client and Java client.
-        if ('user_id' in self._json_request_data and
+        if ('user_key' in self._json_request_data and
             'api_token' in self._json_request_data):
-            user_id = self._json_request_data['user_id']
+            user_key = self._json_request_data['user_key']
             api_token = self._json_request_data['api_token']
-            user = self.auth.store.user_model.get_by_id(int(user_id))
-            logging.info('coolio %s, %s, %s' %
-                (user_id, api_token, user))
+            user = ndb.Key(urlsafe=user_key).get()
+            logging.info('CURRENT_USER: %s, %s' % (user.name, user))
             if user.api_token == api_token:
                 return user
 
@@ -144,8 +146,8 @@ class ApiRequestHandler(WebRequestHandler):
     def output_json(self, obj):
         self.apply_cors_headers()
         self.response.headers['Content-Type'] = 'application/json'
-        logging.info('output_json response: %s' % obj)
         json_out = models.FMBModel.json_dump(obj)
+        logging.info('output_json: %s' % json_out)
         self.response.out.write(json_out)
 
     def output_json_success(self, obj={}):
@@ -163,30 +165,32 @@ class ApiUserHandler(ApiRequestHandler):
         user = self.current_user
         if not user:
              return self.output_json_error({}, 404)
-        return self.output_json_success(user.to_dict(include_api_token=True))
+        return self.output_json_success(
+            user.to_dict(include_api_token=True, include_device_notifying=True))
 
 
 class ApiUserTokenHandler(ApiRequestHandler):
     """Returns some pretty important data back to the user."""
     def post(self):
         memcache_key = 'user_token-%s' % self._json_request_data['user_token']
-        user_id = memcache.get(memcache_key)
-        assert user_id
+        user_key = memcache.get(memcache_key)
+        assert user_key
 
-        user = ndb.Key(models.FMBUser, int(user_id)).get()
-        logging.info('ApiUserTokenHandler user_id: %s, user: %s' %
-                     (user_id, user))
+        user = ndb.Key(urlsafe=user_key).get()
+        logging.info('ApiUserTokenHandler user_key: %s, user: %s' %
+                     (user_key, user))
         assert user
 
         # Ok, now clear the memcache token - it's only good once.
         memcache.delete(memcache_key)
 
-        return self.output_json_success(user.to_dict(include_api_token=True))
+        return self.output_json_success(
+            user.to_dict(include_api_token=True, include_device_notifying=True))
 
 
 class ApiDeviceHandler(ApiRequestHandler):
     def get(self):
-        device = self._get_device_by_device_id()
+        device = self._get_device_by_device_key()
         return self.output_json_success(device.to_dict())
 
     def post(self):
@@ -336,17 +340,16 @@ def send_battery_notifications(user_id, device_id):
             logging.critical('Bad type for notifying: %s' % str(notifying.key))
             continue
 
-        deferred.defer(fn, user_id, device_id,
-                       notifying.key.id())
+        deferred.defer(fn, user_id, device_id, notifying.key.id())
 
 
 class ApiSettingsHandler(ApiRequestHandler):
     def post(self):
-        device = self._get_device_by_device_id()
+        device = self._get_device_by_device_key()
         battery_level = self._json_request_data['battery_level']
         is_this_update_over_notify_level = int(battery_level) > int(device.notify_level)
 
-        logging.info('_device.is_last_update_over_notify_level %s, '
+        logging.info('device.is_last_update_over_notify_level %s, '
                      'is_this_update_over_notify_level %s' %
                      (device.is_last_update_over_notify_level,
                       is_this_update_over_notify_level))
@@ -383,13 +386,16 @@ class ApiFollowingHandler(ApiRequestHandler):
         obj = {'following': []}
         for followed in q:
             followed_user = followed.following.get()
-            logging.info('followed_user: %s' % followed_user.name)
-            obj['following'].append(followed_user.to_dict())
+            logging.info('followed_user: %s %s' %
+                         (followed_user.key.urlsafe(), followed_user.name))
+            followed_user_dict = followed_user.to_dict(
+                include_device_notifying=False)
+            obj['following'].append(followed_user_dict)
 
         return self.output_json_success(obj)
 
     def post(self):
-        follow_user = ndb.Key(urlsafe=self._json_request_data['user_key']).get()
+        follow_user = ndb.Key(urlsafe=self._json_request_data['following_user_key']).get()
         if follow_user is None:
             return self.output_json_error()
 
@@ -410,7 +416,7 @@ class ApiFollowingHandler(ApiRequestHandler):
 
 class ApiFollowingDeleteHandler(ApiRequestHandler):
     def post(self):
-        follow_user = ndb.Key(urlsafe=self._json_request_data['user_key']).get()
+        follow_user = ndb.Key(urlsafe=self._json_request_data['following_user_key']).get()
         if follow_user is None:
             return self.output_json_error()
 
@@ -429,7 +435,7 @@ class ApiFollowingDeleteHandler(ApiRequestHandler):
 
 class ApiNotifyingHandler(ApiRequestHandler):
     def get(self):
-        device = self._get_device_by_device_id()
+        device = self._get_device_by_device_key()
         q = models.Notifying.query(ancestor=device.key)
         obj = {'notifying': []}
         for notifying in q:
@@ -438,7 +444,7 @@ class ApiNotifyingHandler(ApiRequestHandler):
         return self.output_json_success(obj)
 
     def post(self):
-        device = self._get_device_by_device_id()
+        device = self._get_device_by_device_key()
         # Now make sure they're not already following that user.
         q = models.Notifying.query(ancestor=device.key)
         q = q.filter(models.Notifying.means == self._json_request_data['means'])
@@ -459,7 +465,7 @@ class ApiNotifyingHandler(ApiRequestHandler):
 
 class ApiNotifyingDeleteHandler(ApiRequestHandler):
     def post(self):
-        device = self._get_device_by_device_id()
+        device = self._get_device_by_device_key()
         # Now make sure they're not already following that user.
         q = models.Notifying.query(ancestor=device.key)
         q = q.filter(models.Notifying.means == self._json_request_data['means'])
