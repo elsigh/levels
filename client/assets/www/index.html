@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="css/loading.css">
     <link rel="stylesheet" href="css/account.css">
     <link rel="stylesheet" href="css/following.css">
-    <link rel="stylesheet" href="css/rickshaw.css">
+    <link rel="stylesheet" href="css/xcharts.css">
 
     <title>Level</title>
     <!--
@@ -32,6 +32,8 @@
       <section class="fmb-tab fmb-tab-following">
         <div class="fmb-following"></div>
       </section>
+      <div class="fmb-loading"
+        style="display:none;position:absolute;top:10px;right:10px;"></div>
     </div>
 
     <script src="js/cordova-2.5.0.js"></script>
@@ -46,7 +48,7 @@
     <script src="js/backbone-identity-map.js"></script>
     <script src="js/hogan-2.0.0.js"></script>
     <script src="js/d3.v2.js"></script>
-    <script src="js/rickshaw.js"></script>
+    <script src="js/xcharts.js"></script>
 
     <script src="js/app.js"></script>
     <script src="js/models_fmb.js"></script>
@@ -77,10 +79,10 @@
       <form method="post"
         class="device-update"
         action="{{api_server}}/api/device">
-        <h3>
+        <h4>
           {{platform}}
           {{name}}
-        </h3>
+        </h4>
       </form>
     </script>
 
@@ -145,15 +147,13 @@
       <table>
         <thead>
           <tr>
-            <th>name</th>
             <th>device</th>
-            <th colspan="2">battery</th>
+            <th>battery</th>
           </tr>
         </thead>
-        <tbody></tbody>
         <tfoot>
           <tr>
-            <td colspan="5">
+            <td colspan="2">
               Follow more batteries!
             </td>
           </tr>
@@ -163,32 +163,32 @@
 
     <script id="tpl_following_user" type="text/html">
       <tr>
-        <td colspan="3">
+        <td>
           <h3>{{name}}</h3>
         </td>
         <td class="remove-cell">
-          <div class="remove" data-userkey="{{key}}">X</div>
+          {{^is_current_user}}
+            <div class="remove">X</div>
+          {{/is_current_user}}
         </td>
       </tr>
     </script>
 
     <script id="tpl_following_device" type="text/html">
-      <td colspan="2">{{platform}} {{name}}</td>
-      <td
-        class="battery-level-c charging-{{settings.0.is_charging}}">
-        <div class="battery-level"
-          style="background-image:-webkit-gradient(linear, left top, right top, color-stop({{settings.0.battery_level}}%, green), color-stop({{settings.0.battery_level}}%, white))">
-          {{settings.0.battery_level}}%
-        </div>
-        <div class="battery-created">
-          {{settings.0.created_pretty}}
+      <td>
+        <h4>{{platform}} {{name}}</h4>
+        <div class="battery-level-c charging-{{settings.0.is_charging}}">
+          <div class="battery-level"
+            style="background-image:-webkit-gradient(linear, left top, right top, color-stop({{settings.0.battery_level}}%, green), color-stop({{settings.0.battery_level}}%, white))">
+            {{settings.0.battery_level}}%
+          </div>
+          <div class="battery-created">
+            {{settings.0.created_pretty}}
+          </div>
         </div>
       </td>
       <td>
-        <div class="battery-graph">
-          <div class="y-axis"></div>
-          <div class="chart"></div>
-        </div>
+        <figure class="battery-graph"></figure>
       </td>
     </script>
 

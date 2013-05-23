@@ -45,12 +45,11 @@ fmbProfile.drawDeviceChart = function(device) {
   var dataSeries = [];
   $(settingsData).each(function(i, setting) {
     var xDate = new Date(setting['created']);
-    var xTime = xDate.getTime();
     dataSeries.push({
-      'x': xTime,
+      'x': xDate.getTime(),
       'x_readable': xDate.toString(),
       'y': setting['battery_level']
-    })
+    });
   });
 
   var data = {

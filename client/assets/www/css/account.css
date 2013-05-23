@@ -42,7 +42,7 @@
 .fmb-account .user-img-name > img {
   margin-right: 1em;
   box-shadow: 1px 1px 2px #ccc;
-  min-height: 75px;
+  height: 75px;
 }
 
 /* Device */

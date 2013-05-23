@@ -110,6 +110,7 @@ class Settings(FMBModel, ndb.Expando):
 
 class Following(FMBModel):
     created = ndb.DateTimeProperty(auto_now_add=True)
+    cid = ndb.StringProperty()
     following = ndb.KeyProperty(kind=FMBUser)
 
 

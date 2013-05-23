@@ -397,10 +397,11 @@ class ApiFollowingHandler(ApiRequestHandler):
 
     def post(self):
         follow_user = ndb.Key(urlsafe=self._json_request_data['following_user_key']).get()
+        # Makes sure a user with that key exists in our app.
         if follow_user is None:
             return self.output_json_error()
 
-        # Now make sure they're not already following that user.
+        # Makes sure they're not already following that user.
         q = models.Following.query(ancestor=self.current_user.key)
         q = q.filter(models.Following.following == follow_user.key)
         if q.count() > 0:
@@ -409,15 +410,22 @@ class ApiFollowingHandler(ApiRequestHandler):
 
         following = models.Following(
             parent=self.current_user.key,
+            cid=self._json_request_data['cid'],
             following=follow_user.key
         )
         following.put()
-        return self.output_json_success(follow_user.to_dict())
+
+        # Includes the cid for this one here so the client can match up
+        out_dict = follow_user.to_dict()
+        out_dict.update({
+            'cid': self._json_request_data['cid']
+        })
+        return self.output_json_success(out_dict)
 
 
 class ApiFollowingDeleteHandler(ApiRequestHandler):
     def post(self):
-        follow_user = ndb.Key(urlsafe=self._json_request_data['following_user_key']).get()
+        follow_user = ndb.Key(urlsafe=self._json_request_data['key']).get()
         if follow_user is None:
             return self.output_json_error()
 
@@ -468,7 +476,10 @@ class ApiNotifyingHandler(ApiRequestHandler):
 class ApiNotifyingDeleteHandler(ApiRequestHandler):
     def post(self):
         device = self._get_device_by_device_key()
-        key_str = self._json_request_data['key']
         notifying = ndb.Key(urlsafe=self._json_request_data['key']).get()
+
+        if notifying is None:
+            return self.output_json_error()
+
         notifying.key.delete()
         return self.output_json_success(notifying.to_dict())

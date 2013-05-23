@@ -3,11 +3,14 @@
 // Yep, we need zepto to work with CORS and cookies.
 $.ajaxSettings['beforeSend'] = function(xhr, settings) {
   xhr.withCredentials = true;
+  $('.fmb-app > .fmb-loading').show();
 };
-/*
+
 $.ajaxSettings['complete'] = function(xhr, status) {
-  // noop
+  $('.fmb-app > .fmb-loading').hide();
 };
+
+/*
 $.ajaxSettings['success'] = function(xhr, status) {
   // noop
 };
@@ -162,10 +165,10 @@ fmb.models.NotifyingCollection.prototype.add = function(obj, options) {
     return;
   }
 
-  var alreadyNotifying = this.find(function(model) {
-    return model.get('means') == means;
+  var alreadyNotifying = this.findWhere({
+    'means': means
   });
-  if (alreadyNotifying) {
+  if (alreadyNotifying.length) {
     fmb.log('fmb.models.NotifyingCollection add bail, already notifying',
             means);
     alert('You are already notifying ' + means);
@@ -429,47 +432,10 @@ fmb.models.FollowingCollection = fmb.Collection.extend({
 
 
 /**
- * @param {string} userKey A userKey to follow.
+ * @return {string}
  */
-fmb.models.FollowingCollection.prototype.addByUserKey = function(userKey) {
-  fmb.log('fmb.models.FollowingCollection addByUserKey', userKey);
-
-  // Can't follow yerself or no one.
-  if (userKey === '' ||
-      userKey == this.parent.get('key')) {
-    fmb.log('fmb.models.FollowingCollection addByUserKey cant follow yoself');
-    return;
-  }
-
-  var alreadyFollowing = this.find(function(model) {
-    return model.get('user')['key'] == userKey;
-  });
-  if (alreadyFollowing) {
-    fmb.log('.. bail, already following', userKey);
-    alert('You are already following ' + userKey);
-    return;
-  }
-
-  var followModel = new fmb.models.AjaxSyncModel();
-  followModel.url = _.bind(function() {
-    return fmb.models.getApiUrl('/following');
-  }, this);
-  followModel.save({
-    'following_user_key': userKey
-  }, {
-    //url: url,  // why this no work?
-    success: _.bind(function() {
-      fmb.log('MONEY TRAIN, refetching following data from server.');
-      this.fetch();
-    }, this),
-    error: function(model, xhr, options) {
-      if (xhr.status === 404) {
-        alert('La bomba, seems we could not find a user ' + userKey);
-      } else if (xhr.status === 409) {
-        //alert('already following');
-      }
-    }
-  });
+fmb.models.FollowingCollection.prototype.url = function() {
+  return fmb.models.getApiUrl('/following');
 };
 
 
@@ -484,35 +450,82 @@ fmb.models.FollowingCollection.prototype.parse = function(response, xhr) {
 /**
  * @param {string} userKey A userKey to follow.
  */
-fmb.models.FollowingCollection.prototype.removeByUsername = function(userKey) {
-  var followModel = new fmb.models.AjaxSyncModel();
+fmb.models.FollowingCollection.prototype.addByKey = function(userKey) {
+  fmb.log('fmb.models.FollowingCollection addByKey', userKey);
 
-  followModel.url = _.bind(function() {
-    return fmb.models.getApiUrl('/following/delete');
-  }, this);
+  // Can't follow yerself or no one.
+  if (userKey === '' ||
+      userKey == this.parent.get('key')) {
+    fmb.log('fmb.models.FollowingCollection addByKey cant follow yoself');
+    return;
+  }
 
-  followModel.save({
-    'following_user_key': userKey
+  var alreadyFollowing = this.findWhere({
+    key: userKey
+  });
+  if (alreadyFollowing.length) {
+    fmb.log('.. bail, already following', userKey);
+    alert('You are already following ' + userKey);
+    return;
+  }
+
+  this.add({
+    'name': 'Adding w/' + userKey
+  });
+};
+
+
+/**
+ * @param {Backbone.Model} model A follow user model.
+ * @private
+ */
+fmb.models.FollowingCollection.prototype.onAdd_ = function(model) {
+  model.save({
+    'following_user_key': userKey,
+    'cid': this.cid
   }, {
-    // Why does url not work here?
-    //url: fmb.models.getApiUrl('/following/delete/') +
-    //     this.parent.get('userKey'),
+    wait: true,
+    url: fmb.models.getApiUrl('/following'),
     success: _.bind(function() {
-      fmb.log('MONEY TRAIN, refetching following data from server.');
-      this.fetch();
+      fmb.log('MONEY TRAIN FollowingCollection onAdd_.');
+      //this.fetch();
     }, this),
     error: function(model, xhr, options) {
-      fmb.log('FAIL removing ', userKey, xhr.status);
+      if (xhr.status === 404) {
+        alert('La bomba, seems we could not find a user ' + userKey);
+      } else if (xhr.status === 409) {
+        //alert('already following');
+      }
     }
   });
 };
 
 
 /**
- * @return {string}
+ * @param {string} userKey A userKey to follow.
  */
-fmb.models.FollowingCollection.prototype.url = function() {
-  return fmb.models.getApiUrl('/following');
+fmb.models.FollowingCollection.prototype.removeByKey = function(userKey) {
+  var followModel = this.findWhere({
+    key: userKey
+  });
+  this.remove(followModel);
+};
+
+
+/**
+ * @param {Backbone.Model} followModel A follow user model.
+ * @private
+ */
+fmb.models.FollowingCollection.prototype.onRemove_ = function(followModel) {
+  followModel.save(null, {
+    url: fmb.models.getApiUrl('/following/delete/'),
+    success: _.bind(function() {
+      fmb.log('MONEY TRAIN w/ removeByKey', userKey);
+    }, this),
+    error: function(model, xhr, options) {
+      fmb.log('FAIL removing ', userKey, xhr.status);
+    }
+  });
 };
 
 
