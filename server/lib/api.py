@@ -175,6 +175,7 @@ class ApiUserTokenHandler(ApiRequestHandler):
         memcache_key = 'user_token-%s' % self._json_request_data['user_token']
         user_key = memcache.get(memcache_key)
         assert user_key
+        logging.info('UserTokenHandler user_key: %s' % user_key)
 
         user = ndb.Key(urlsafe=user_key).get()
         logging.info('ApiUserTokenHandler user_key: %s, user: %s' %
@@ -455,6 +456,7 @@ class ApiNotifyingHandler(ApiRequestHandler):
 
         notifying = models.Notifying(
             parent=device.key,
+            cid=self._json_request_data['cid'],
             means=self._json_request_data['means'],
             name=self._json_request_data['name'],
             type=self._json_request_data['type']
@@ -466,13 +468,7 @@ class ApiNotifyingHandler(ApiRequestHandler):
 class ApiNotifyingDeleteHandler(ApiRequestHandler):
     def post(self):
         device = self._get_device_by_device_key()
-        # Now make sure they're not already following that user.
-        q = models.Notifying.query(ancestor=device.key)
-        q = q.filter(models.Notifying.means == self._json_request_data['means'])
-
-        if q.count() == 0:
-            return self.output_json_error()
-
-        notifying = q.get()
+        key_str = self._json_request_data['key']
+        notifying = ndb.Key(urlsafe=self._json_request_data['key']).get()
         notifying.key.delete()
         return self.output_json_success(notifying.to_dict())

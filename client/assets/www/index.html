@@ -8,6 +8,7 @@
 
     <!-- target-densitydpi=device-dpi -->
     <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/loading.css">
     <link rel="stylesheet" href="css/account.css">
     <link rel="stylesheet" href="css/following.css">
     <link rel="stylesheet" href="css/rickshaw.css">
@@ -110,7 +111,14 @@
                   {{means}}
                 </td>
                 <td class="remove-cell">
-                  <div class="remove" data-means="{{means}}">X</div>
+                  <div class="remove" data-means="{{means}}">
+                    {{#key}}
+                      X
+                    {{/key}}
+                    {{^key}}
+                      <div class="fmb-loading"></div>
+                    {{/key}}
+                  </div>
                 </td>
               </tr>
             {{/notifying}}
@@ -155,10 +163,9 @@
 
     <script id="tpl_following_user" type="text/html">
       <tr>
-        <td>
+        <td colspan="3">
           <h3>{{name}}</h3>
         </td>
-        <td colspan="2"></td>
         <td class="remove-cell">
           <div class="remove" data-userkey="{{key}}">X</div>
         </td>

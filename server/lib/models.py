@@ -116,6 +116,7 @@ class Following(FMBModel):
 class Notifying(FMBModel):
     created = ndb.DateTimeProperty(auto_now_add=True)
     means = ndb.StringProperty(required=True)
+    cid = ndb.StringProperty()
     name = ndb.StringProperty()
     type = ndb.StringProperty()
 

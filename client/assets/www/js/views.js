@@ -505,19 +505,21 @@ fmb.views.Notifying.prototype.onClickNotifyingAdd_ = function(e) {
     cordova.require('cordova/plugin/contactview').show(
         _.bind(function(contact) {
           fmb.log('GOT CONTACT!' + JSON.stringify(contact));
-          //{"email":"elsigh@gmail.com","phone":"512-698-9983","name":"Lindsey Simon"}
+
           if (contact['phone']) {
-            this.model.addContact({
+            this.model.add({
               'name': contact['name'],
               'means': contact['phone'],
               'type': 'phone'
             });
+
           } else if (contact['email']) {
-            this.model.addContact({
+            this.model.add({
               'name': contact['name'],
               'means': contact['email'],
               'type': 'email'
             });
+
           } else {
             alert('Unable to get a means of contact for that record. =(');
           }
@@ -533,7 +535,7 @@ fmb.views.Notifying.prototype.onClickNotifyingAdd_ = function(e) {
     if (!means) {
       return;
     }
-    this.model.addContact({
+    this.model.add({
       'means': means,
       'name': 'Somebody',
       'type': 'phone'
@@ -552,7 +554,6 @@ fmb.views.Notifying.prototype.onClickRemove_ = function(e) {
   if (!isSure) {
     return;
   }
-  fmb.log('remove means', means);
   this.model.removeByMeans(means);
 };
 
@@ -809,7 +810,7 @@ fmb.views.FollowingDevice.prototype.renderGraph_ = function() {
   fmb.log('fmb.views.FollowingDevice dataSeries', dataSeries);
   this.$graph.html('');  // reset
 
-  fmb.log('GRAH SIZE', this.$graph.parent().width(), this.$graph.height())
+  //fmb.log('GRAH SIZE', this.$graph.parent().width(), this.$graph.height())
   var graph = new Rickshaw.Graph({
     element: this.$graph.get(0),
     //renderer: 'line',

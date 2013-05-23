@@ -37,13 +37,11 @@ indexes:
 - kind: Settings
   ancestor: yes
   properties:
-  - name: created
+  - name: __key__
     direction: desc
 
 - kind: Settings
   ancestor: yes
   properties:
   - name: created
-    direction: desc
-  - name: __key__
     direction: desc

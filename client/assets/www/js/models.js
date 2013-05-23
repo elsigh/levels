@@ -60,6 +60,7 @@ fmb.models.App.prototype.initialize = function(opt_data, opt_options) {
     this.user.device = new fmb.models.Device({
       'uuid': window.device && window.device.uuid || navigator.appVersion,
       'name': window.device && window.device.name || navigator.appName,
+      //'model': window.device && window.device.model || navigator.vendor,
       'platform': window.device && window.device.platform || navigator.platform,
       'version': window.device && window.device.version || navigator.productSub
     }, {
@@ -99,10 +100,34 @@ fmb.models.App.prototype.initialize = function(opt_data, opt_options) {
  * @extends {Backbone.Collection}
  * @constructor
  */
+fmb.models.Notify = fmb.Model.extend();
+
+
+/** @inheritDoc */
+fmb.models.Notify.prototype.url = function() {
+  return fmb.models.getApiUrl('/notifying');
+};
+
+
+/******************************************************************************/
+
+
+
+/**
+ * @extends {Backbone.Collection}
+ * @constructor
+ */
 fmb.models.NotifyingCollection = fmb.Collection.extend({
-  //localStorage: new Backbone.LocalStorage('NotifyingCollection'),
-  model: fmb.Model
+  model: fmb.models.Notify
 });
+
+
+/** @inheritDoc */
+fmb.models.NotifyingCollection.prototype.initialize = function() {
+  fmb.Collection.prototype.initialize.apply(this, arguments);
+  this.on('add', this.onAdd_, this);
+  this.on('remove', this.onRemove_, this);
+}
 
 
 /** @inheritDoc */
@@ -126,49 +151,55 @@ fmb.models.NotifyingCollection.prototype.fetch = function(opt_options) {
     'device_key': this.parent.id
   };
   fmb.Collection.prototype.fetch.call(this, options);
-}
+};
 
-/**
- * @param {Object} obj A contact object.
- */
-fmb.models.NotifyingCollection.prototype.addContact = function(obj) {
-  fmb.log('fmb.models.NotifyingCollection addContact:', obj);
 
+/** @inheritDoc */
+fmb.models.NotifyingCollection.prototype.add = function(obj, options) {
   var means = obj['means'];
+
   if (means === '') {
     return;
   }
-
-  // Adds in the parent device_key.
-  obj['device_key'] = this.parent.id;
 
   var alreadyNotifying = this.find(function(model) {
     return model.get('means') == means;
   });
   if (alreadyNotifying) {
-    fmb.log('.. bail, already notifying', means);
+    fmb.log('fmb.models.NotifyingCollection add bail, already notifying',
+            means);
     alert('You are already notifying ' + means);
     return;
   }
 
-  var addModel = new fmb.models.AjaxSyncModel();
-  addModel.url = _.bind(function() {
-    return fmb.models.getApiUrl('/notifying');
-  }, this);
-  addModel.save(obj, {
+  fmb.Collection.prototype.add.apply(this, arguments);
+};
+
+
+/**
+ * @param {fmb.Model} model A notifying model.
+ * @private
+ */
+fmb.models.NotifyingCollection.prototype.onAdd_ = function(model) {
+  fmb.log('fmb.models.NotifyingCollection onAdd:',
+           model.id, model.get('means'));
+
+  if (model.id) {
+    fmb.log('fmb.models.NotifyingCollection - no need to save', model.id,
+            'to server, already has id.');
+    return;
+  }
+
+  model.save({
+    'device_key': this.parent.id,
+    'cid': model.cid
+  }, {
     success: _.bind(function() {
-      fmb.log('MONEY TRAIN NotifyingCollection, refetching from server.');
-      this.fetch();
+      fmb.log('MONEY TRAIN save success w/ notify model', model.get('key'));
     }, this),
-    error: function(model, xhr, options) {
-      if (xhr.status === 404) {
-        fmb.log('Gah, serious error in NotifyingCollection addContact');
-        alert('La bomba w/ ' + means);
-      } else if (xhr.status === 409) {
-        //alert('already notifying');
-      }
-    }
+    wait: true
   });
+
 };
 
 
@@ -176,23 +207,26 @@ fmb.models.NotifyingCollection.prototype.addContact = function(obj) {
  * @param {string} means A means of contact.
  */
 fmb.models.NotifyingCollection.prototype.removeByMeans = function(means) {
-  var notifyModel = new fmb.models.AjaxSyncModel();
+  var notifyModel = this.findWhere({'means': means.toString()});
+  fmb.log('fmb.models.NotifyingCollection removeByMeans', means,
+          notifyModel);
+  this.remove(notifyModel);
+};
 
-  notifyModel.url = _.bind(function() {
-    return fmb.models.getApiUrl('/notifying/delete');
-  }, this);
 
-  notifyModel.save({
-    'device_key': this.parent.id,
-    'means': means.toString()
-  }, {
-    success: _.bind(function() {
-      fmb.log('MONEY TRAIN, refetching notifying data from server.');
-      this.fetch();
-    }, this),
-    error: function(model, xhr, options) {
-      fmb.log('FAIL removing ' +  means + ', ' + xhr.status);
-    }
+/**
+ * @param {fmb.Model} model A notifying model.
+ * @private
+ */
+fmb.models.NotifyingCollection.prototype.onRemove_ = function(model) {
+  if (!model.get('key')) {
+    fmb.log('fmb.models.NotifyingCollection onRemove no need',
+            'w/out key from server.', model.get('means'));
+    return;
+  }
+
+  model.save(null, {
+    url: fmb.models.getApiUrl('/notifying/delete')
   });
 };
 

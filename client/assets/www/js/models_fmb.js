@@ -255,14 +255,14 @@ fmb.Model.prototype.set = function(key, value, options) {
                 this.get(submodelName));
         */
 
-        // wait can result in this case so we correct for it.
+        // wait:true can result in this case so we correct for it.
         if (data[submodelName] instanceof Backbone.Model ||
             data[submodelName] instanceof Backbone.Collection) {
           data[submodelName] = data[submodelName].toJSON();
         }
 
         if (!this.has(submodelName)) {
-          //fmb.log('creating submodel for', submodelName, ctor)
+          //fmb.log('creating submodel for', submodelName)
           data[submodelName] = new ctor(data[submodelName], {
             parent: this
           });
