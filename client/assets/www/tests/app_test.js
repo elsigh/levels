@@ -254,4 +254,11 @@ function testApp() {
   assertEquals('65%', $(app.view.currentView.$(
       '.fmb-following-device .battery-level')[1]).text().trim());
 
+
+  fmb.App.onBatteryStatus_({
+    'level': 40,
+    'isPlugged': true
+  });
+  assertEquals('40%', $(app.view.currentView.$(
+      '.fmb-following-device .battery-level')[0]).text().trim());
 }

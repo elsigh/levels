@@ -298,8 +298,8 @@ fmb.models.DeviceUnMapped.prototype.onBatteryStatus_ = function() {
     'battery_level': window.navigator.battery.level,
     'is_charging': window.navigator.battery.isPlugged
   });
+  fmb.log('fmb.models.Device onBatteryStatus_ unshift', setting.toJSON());
   this.get('settings').unshift(setting);
-  fmb.log('fmb.models.Device onBatteryStatus_', setting.toJSON());
 };
 
 

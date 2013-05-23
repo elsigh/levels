@@ -7,8 +7,13 @@ ul {
   line-height: 1.5;
   font-weight: bold;
 }
-.www-contents {
-  margin: 10px;
+
+h3 {
+  margin-top: 0;
+}
+
+td {
+  text-align: center;
 }
 
 footer {
@@ -52,33 +57,58 @@ footer {
 .charging-1:before {
   content: "charging";
   display: block;
-  font-size: 50%;
+  font-size: 90%;
   font-weight: normal;
 }
+
 .battery-created {
   font-size: 70%;
 }
 
 .avatar {
   display: inline-block;
+  vertical-align: middle;
 }
 
-.battery-chart {
-  display: inline-block;
-  position: relative;
-  width: 400px;
-  height: 300px;
+.avatar img {
+  height: 150px;
 }
 
-.battery-chart .chart {
-  position: relative;
-  left: 40px;
-}
-
-.battery-chart .y-axis {
+.goog-play {
   position: absolute;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  width: 40px;
+  right: 10px;
+  margin: 40px 10px 0 0;
+}
+.goog-play img {
+  height: 60px;
+}
+
+.battery-graph {
+  display: inline-block;
+  width: 300px;
+  height: 150px;
+  border: 1px solid #ccc;
+  margin: 0;
+  padding: 0;
+}
+
+@media only screen and (max-width: 480px) {
+  body {
+    font-size: 13px;
+  }
+  .avatar img {
+    width: 100px;
+    height: 100px;
+  }
+  .goog-play {
+    margin-top: 30px;
+  }
+  .goog-play img {
+    height: 40px;
+  }
+
+  .battery-graph {
+    width: 180px;
+    height: 100px;
+  }
 }

@@ -777,8 +777,8 @@ fmb.views.FollowingDevice.prototype.initialize = function() {
 
 /** @inheritDoc */
 fmb.views.FollowingDevice.prototype.render = function() {
+  fmb.log('fmb.views.FollowingDevice render', this.model.id);
   var templateData = this.model.toJSON();
-  //fmb.log('fmb.views.FollowingDevice templateData', templateData);
   this.$el.html(fmb.views.getTemplateHtml('following_device', templateData));
   this.$graph = this.$('.battery-graph');
   this.$graphY = this.$('.y-axis');

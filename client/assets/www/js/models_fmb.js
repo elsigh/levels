@@ -385,6 +385,7 @@ fmb.Model.prototype.fetchTimeout_ = null;
  */
 fmb.Model.prototype.startFetchPoll = function(timeout) {
   this.stopFetchPoll();
+  this.fetch();
   this.fetchTimeout_ = window.setInterval(
       _.bind(this.fetch, this),
       timeout);
