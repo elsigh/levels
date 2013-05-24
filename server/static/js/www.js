@@ -30,53 +30,55 @@ var fmbProfile = {};
 fmbProfile.renderChart = function(user) {
   console.log('fmb.views.Account renderChart_', user['devices']);
 
-  var settingsData = user['devices'].length && user['devices'][0]['settings'] ||
-                     [];
+  $(user['devices']).each(function(i, device) {
+    fmbProfile.drawDeviceChart(device);
+  });
 
-  if (!settingsData.length) {
-    console.log('No setting data to render chart with.')
+};
+
+fmbProfile.drawDeviceChart = function(device) {
+  var settingsData = device['settings'];
+  if (!settingsData || !settingsData.length) {
+    console.log('No chart data for', device['key']);
     return;
   }
   var dataSeries = [];
   $(settingsData).each(function(i, setting) {
+    var xDate = new Date(setting['created']);
     dataSeries.push({
-      x: i,
-      y: setting['battery_level']
-    })
+      'x': xDate.getTime(),
+      'x_readable': xDate.toString(),
+      'y': setting['battery_level']
+    });
   });
 
-  /*
-  var dataSeries = [
-            { x: 0, y: 40 },
-            { x: 1, y: 49 },
-            { x: 2, y: 38 },
-            { x: 3, y: 70 },
-            { x: 4, y: 92 } ];
-  */
-  console.log('dataSeries', dataSeries);
-
-  var $graphEl = $('.battery-chart .chart');
-  var graph = new Rickshaw.Graph({
-    element: $graphEl.get(0),
-    renderer: 'area',
-    height: $graphEl.height(),
-    width: $graphEl.width(),
-    series: [
+  var data = {
+    'xScale': 'time',
+    'yScale': 'linear',
+    'yMin': 0,
+    'yMax': 100,
+    'type': 'line',
+    'main': [
       {
-        data: dataSeries,
-        color: 'steelblue'
+        'className': '.battery-graph-data-' + device['key'],
+        'data': dataSeries
       }
     ]
-  });
+  };
 
-  var yTicks = new Rickshaw.Graph.Axis.Y({
-    graph: graph,
-    orientation: 'left',
-    tickFormat: Rickshaw.Fixtures.Number.formatKMBT,
-    element: $('.battery-chart .y-axis').get(0),
-  });
+  var opts = {
+    'dataFormatX': function (x) { return new Date(x); },
+    'tickFormatX': function (x) { return d3.time.format('%a %I%p')(x); },
+    'axisPaddingTop': 20,
+    'tickHintX': 4,
+    'tickHintY': 2,
+    'interpolation': 'basis'
+  };
 
-  graph.render();
+  var myChart = new xChart('line', data,
+      '.fmb-device-' + device['key'] + ' .battery-graph',
+      opts);
+
 };
 
 

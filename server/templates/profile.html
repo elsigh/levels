@@ -4,11 +4,11 @@
 {% block head %}
   <link rel="stylesheet" href="/static/css/index.css">
   <link rel="stylesheet" href="/static/css/profile.css">
-  <link rel="stylesheet" href="/static/css/rickshaw.css">
+  <link rel="stylesheet" href="/static/css/xcharts.css">
 
   <script src="/static/js/zepto-1.0rc1.js"></script>
   <script src="/static/js/d3.v2.js"></script>
-  <script src="/static/js/rickshaw.js"></script>
+  <script src="/static/js/xcharts.js"></script>
 
 {% endblock %}
 
@@ -18,42 +18,45 @@
       <img src="{{ user.avatar_url }}">
     </div>
 
-    <div class="battery-chart">
-      <div class="y-axis"></div>
-      <div class="chart"></div>
-    </div>
+    <a class="goog-play"
+      href="//play.google.com/store/apps/details?id=com.phonedied.android">
+      <img alt="Android app on Google Play"
+        src="//developer.android.com/images/brand/en_generic_rgb_wo_60.png">
+    </a>
 
-    <div class="body">
-      <h2>
-        {{ user.name }}
-      </h2>
-    </div>
+    <h2>
+      {{ user.name }}
+    </h2>
+
   </div>
 
   <section class="www-contents">
     <table>
       <thead>
         <tr>
-          <th>device</th>
-          <th>battery</th>
+          <th>device/current</th>
+          <th>trend</th>
         </tr>
       </thead>
       <tbody>
         {% for device in user.devices %}
           {% if device.settings|length %}
-            <tr>
+            <tr class="fmb-device-{{ device.key }}">
               <td>
-                {{ device.platform }} {{ device.name }}
-              </td>
-              <td class="battery-level-c charging-{{ device.settings.0.is_charging }}">
-                <div class="battery-level"
-                  data-level="{{ device.settings.0.battery_level }}">
-                  {{ device.settings.0.battery_level }}%
-                </div>
+                <h3>{{ device.platform }} {{ device.name }}</h3>
+                <div class="battery-level-c charging-{{ device.settings.0.is_charging }}">
+                  <div class="battery-level"
+                    data-level="{{ device.settings.0.battery_level }}">
+                    {{ device.settings.0.battery_level }}%
+                  </div>
 
-                <div class="battery-created">
-                  {{ device.settings.0.created }}
+                  <div class="battery-created">
+                    {{ device.settings.0.created.strftime('%m/%d %I:%M %p') }}
+                  </div>
                 </div>
+              </td>
+              <td>
+                <figure class="battery-graph"></figure>
               </td>
             </tr>
           {% endif %}
@@ -65,12 +68,6 @@
     <br>
     <p>
       {{user.name}} is using the FollowMyBattery App and you can too!
-    </p>
-    <p>
-      <a href="http://play.google.com/store/apps/details?id=com.phonedied.android">
-        <img alt="Android app on Google Play"
-          src="http://developer.android.com/images/brand/en_generic_rgb_wo_60.png" />
-      </a>
     </p>
     <ul>
       <li>

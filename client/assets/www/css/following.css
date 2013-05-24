@@ -28,7 +28,12 @@
 }
 
 .fmb-following .remove-cell {
-  text-align: center;
+  text-align: right;
+}
+
+.fmb-following .remove {
+  display: inline-block;
+  padding: 10px;
 }
 
 .fmb-following .charging-1:before {
@@ -42,6 +47,14 @@
   font-size: 70%;
 }
 
+.fmb-following td {
+  text-align: center;
+}
+
+.fmb-following thead {
+  display: none;
+}
+
 .fmb-following footer {
   font-size: 90%;
 }
@@ -50,31 +63,19 @@
   display: none;
 }
 
-/* Following user table */
+.fmb-following h4 {
+  margin: 0 0 0.2em;
+  padding-top: 0;
+}
 
 
 .fmb-following-user tr:first-child td {
   border: 0;
 }
 
+
 .fmb-following-device .battery-graph {
-  xdisplay: inline-block;
-  position: relative;
-  height: 50px;
-  width: 100px;
+  height: 150px;
+  width: 250px;
 }
 
-/*
-.fmb-following-device .battery-graph .chart {
-  position: relative;
-  left: 40px;
-}
-
-.fmb-following-device .battery-graph .y-axis {
-  position: absolute;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  width: 40px;
-}
-*/
