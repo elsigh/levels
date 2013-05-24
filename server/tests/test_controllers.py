@@ -294,25 +294,28 @@ class RequestHandlerTest(unittest.TestCase):
             name='ded'
         )
         ded_user.put()
-        logging.info('DED KEY:: %s', ded_user.key.urlsafe())
         response = self.testapp.post_json('/api/following',
                                           params=dict(api_token=elsigh_user.api_token,
                                                       user_key=elsigh_user.key.urlsafe(),
-                                                      following_user_key=ded_user.key.urlsafe()))
+                                                      following_user_key=ded_user.key.urlsafe(),
+                                                      cid='test_cid'))
 
-
-        # TODOTODOTODO
-        return
 
         body = response.normal_body
         obj = json.loads(body)
         self.assertEquals('ded', obj['name'])
+        self.assertEquals('test_cid', obj['cid'])
+
+        q = models.Following.query(ancestor=elsigh_user.key)
+        q = q.filter(models.Following.following == ded_user.key)
+        assert 1 == q.count()
 
         # Trying to follow ded again should error.
         response = self.testapp.post_json('/api/following',
                                           params=dict(api_token=elsigh_user.api_token,
                                                       user_key=elsigh_user.key.urlsafe(),
-                                                      following_user_key=ded_user.key.urlsafe()),
+                                                      following_user_key=ded_user.key.urlsafe(),
+                                                      cid='test_cid_2'),
                                           status=409)
         body = response.normal_body
         obj = json.loads(body)
@@ -341,7 +344,7 @@ class RequestHandlerTest(unittest.TestCase):
         response = self.testapp.post_json('/api/following/delete',
                                           params=dict(api_token=elsigh_user.api_token,
                                                       user_key=elsigh_user.key.urlsafe(),
-                                                      following_user_key=ded_user.key.urlsafe()))
+                                                      key=ded_user.key.urlsafe()))
 
         body = response.normal_body
         obj = json.loads(body)
@@ -354,7 +357,7 @@ class RequestHandlerTest(unittest.TestCase):
         self.testapp.post_json('/api/following/delete',
                                params=dict(api_token=elsigh_user.api_token,
                                            user_key=elsigh_user.key.urlsafe(),
-                                           following_user_key=ded_user.key.urlsafe()),
+                                           key=ded_user.key.urlsafe()),
                                status=404)
 
     def test_ApiNotifyingRequestHandler_get(self):
@@ -413,6 +416,7 @@ class RequestHandlerTest(unittest.TestCase):
                                           params=dict(api_token=elsigh_user.api_token,
                                                       user_key=elsigh_user.key.urlsafe(),
                                                       device_key=elsigh_device.key.urlsafe(),
+                                                      cid='test_cid',
                                                       means='4152223333',
                                                       name='Dustin Diaz',
                                                       type='phone'))
@@ -420,12 +424,20 @@ class RequestHandlerTest(unittest.TestCase):
         q = models.Notifying.query(ancestor=elsigh_device.key)
         self.assertEquals(1, q.count())
 
+        body = response.normal_body
+        obj = json.loads(body)
+        self.assertEquals('test_cid', obj['cid'])
+        self.assertEquals('4152223333', obj['means'])
+
         # Trying to notify them again should error.
         response = self.testapp.post_json('/api/notifying',
                                           params=dict(api_token=elsigh_user.api_token,
                                                       user_key=elsigh_user.key.urlsafe(),
                                                       device_key=elsigh_device.key.urlsafe(),
-                                                      means='4152223333'),
+                                                      cid='test_cid',
+                                                      means='4152223333',
+                                                      name='Dustin Diaz',
+                                                      type='phone'),
                                           status=409)
         body = response.normal_body
         obj = json.loads(body)
@@ -458,7 +470,7 @@ class RequestHandlerTest(unittest.TestCase):
                                           params=dict(api_token=elsigh_user.api_token,
                                                       user_key=elsigh_user.key.urlsafe(),
                                                       device_key=elsigh_device.key.urlsafe(),
-                                                      means='4152223333'))
+                                                      key=ded_notifying.key.urlsafe()))
         self.assertNotEquals(None, response)
         q = models.Notifying.query(ancestor=elsigh_device.key)
         self.assertEquals(0, q.count())
@@ -468,7 +480,7 @@ class RequestHandlerTest(unittest.TestCase):
                                params=dict(api_token=elsigh_user.api_token,
                                            user_key=elsigh_user.key.urlsafe(),
                                            device_key=elsigh_device.key.urlsafe(),
-                                           means='4152223333'),
+                                           key=ded_notifying.key.urlsafe()),
                                status=404)
 
     def test_send_battery_notifications(self):

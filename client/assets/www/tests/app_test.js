@@ -1,4 +1,5 @@
 
+/*** UNIT TEST ***/
 
 var API_RESPONSE_HEADERS = {
   'Content-Type': 'application/json'
@@ -28,7 +29,10 @@ function tearDown() {
 
 /*************************************************************************/
 
+
+// This is one honkin long test with lots of stuff in it.
 function testApp() {
+  var serverRequestCountExpected = 0;
   clock.tick(1000000);  // get us into sane clock land.
 
   app = new fmb.App();
@@ -38,9 +42,10 @@ function testApp() {
   app.view.currentView.onClickLogin_();    // start oauth.
   assertEquals(1, window.open.callCount);
   app.view.currentView.onLoginRefExit_();  // oauth done.
-  assertEquals(1, server.requests.length);
+  serverRequestCountExpected++;
+  assertEquals(serverRequestCountExpected, server.requests.length);
   assertEquals(fmb.models.getApiUrl('/user/token'),
-               server.requests[0].url);
+               server.requests[serverRequestCountExpected - 1].url);
 
   var userTokenResponse = {
     'status': 0,
@@ -48,8 +53,9 @@ function testApp() {
     'api_token': 'test_api_token',
     'name': 'test_user_name'
   };
-  server.requests[0].respond(200, API_RESPONSE_HEADERS,
-       JSON.stringify(userTokenResponse));
+  server.requests[serverRequestCountExpected - 1].respond(
+      200, API_RESPONSE_HEADERS,
+      JSON.stringify(userTokenResponse));
   assertUndefined(app.model.user.get('user_token'));  // now undefined.
   assertEquals(userTokenResponse['key'], app.model.user.get('key'));
   assertEquals(userTokenResponse['key'],
@@ -57,17 +63,19 @@ function testApp() {
   assertEquals(userTokenResponse['api_token'], app.model.user.get('api_token'));
   assertEquals(userTokenResponse['name'],
                app.view.currentView.$el.find('h3').text());
-
-  assertEquals(2, server.requests.length);
+  serverRequestCountExpected++;
+  assertEquals(serverRequestCountExpected, server.requests.length);
   assertEquals(fmb.models.getApiUrl('/device'),
-               server.requests[1].url);
+               server.requests[serverRequestCountExpected - 1].url);
 
   var deviceResponse = {
     'status': 0,
     'key': 'test_device_key'
   };
-  server.requests[1].respond(200, API_RESPONSE_HEADERS,
-       JSON.stringify(deviceResponse));
+  server.requests[serverRequestCountExpected - 1].respond(
+      200, API_RESPONSE_HEADERS,
+      JSON.stringify(deviceResponse));
+
   assertEquals(deviceResponse['key'],
                app.model.user.get('devices').at(0).get('key'));
   assertEquals(deviceResponse['key'],
@@ -80,6 +88,65 @@ function testApp() {
   assertEquals(1, app.view.currentView.$('.fmb-device').length);
   assertEquals(1, app.view.currentView.$('.fmb-device .fmb-notifying').length);
 
+/******************************************************************************/
+
+  // Tests that we can add to the notification collection.
+  app.model.user.device.get('notifying').add({
+    'name': 'test_notify_name',
+    'means': 'test_notify_means',
+    'type': 'phone'
+  });
+  serverRequestCountExpected++;
+  assertEquals(fmb.models.getApiUrl('/notifying'),
+               server.requests[serverRequestCountExpected - 1].url);
+
+  // client already has notify model.
+  var notifyModel = app.model.user.device.get('notifying').at(0);
+  assertObjectEquals({
+    'cid': notifyModel.cid,
+    'name': 'test_notify_name',
+    'means': 'test_notify_means',
+    'type': 'phone',
+    'device_key': app.model.user.device.get('key'),
+    'api_token': app.model.user.get('api_token'),
+    'user_key': app.model.user.id
+  }, JSON.parse(server.requests[serverRequestCountExpected - 1].requestBody));
+
+  var notifySaveResponse = {
+    'status': 0,
+    'key': 'test_notify_key',
+    'cid': notifyModel.cid,
+    'name': 'test_notify_name',
+    'means': 'test_notify_means',
+    'type': 'phone'
+  };
+  server.requests[serverRequestCountExpected - 1].respond(
+      200, API_RESPONSE_HEADERS,
+      JSON.stringify(notifySaveResponse));
+
+/******************************************************************************/
+
+  // Tests that we can remove from the notification collection.
+  app.model.user.device.get('notifying').remove('test_notify_key');
+  serverRequestCountExpected++;
+  assertEquals(fmb.models.getApiUrl('/notifying/delete'),
+               server.requests[serverRequestCountExpected - 1].url);
+
+  var deleteRequestData =
+      JSON.parse(server.requests[serverRequestCountExpected - 1].requestBody);
+  assertTrue('key' in deleteRequestData);
+
+  var notifyDeleteResponse = {
+    'status': 0
+  };
+  server.requests[serverRequestCountExpected - 1].respond(
+      200, API_RESPONSE_HEADERS,
+      JSON.stringify(notifySaveResponse));
+  assertEquals(0, app.model.user.device.get('notifying').length);
+
+/******************************************************************************/
+
+
   // OK  - navigate to the following tab.
   $('.tabs .following').trigger('tap');
   assertTrue(app.view.currentView instanceof fmb.views.Following);
@@ -88,6 +155,9 @@ function testApp() {
   assertEquals(1, app.view.currentView.$('.fmb-following-user').length);
   assertEquals(1, app.view.currentView.$('.fmb-following-device').length);
 
+  // Should not be able to remove yourself.
+  assertEquals(0, app.view.currentView.$('.fmb-following-user .remove').length);
+
   // Now fire a battery_status event and test that it both updates our
   // local reference to the device as well as the identity mapped one in
   // the devices collection and draws it on the screen.
@@ -95,33 +165,58 @@ function testApp() {
     'level': 80,
     'isPlugged': false
   });
+  clock.tick(1);  // renderGraph is deferred
   assertEquals('80%', app.view.currentView.$(
+      '.fmb-following-device .battery-level').text().trim());
+
+  clock.tick(5000);
+
+  fmb.App.onBatteryStatus_({
+    'level': 70,
+    'isPlugged': false
+  });
+  clock.tick(1);  // renderGraph is deferred
+  assertEquals('70%', app.view.currentView.$(
+      '.fmb-following-device .battery-level').text().trim());
+
+  clock.tick(5000);
+
+  fmb.App.onBatteryStatus_({
+    'level': 70,
+    'isPlugged': false
+  });
+  clock.tick(1);  // renderGraph is deferred
+  assertEquals('70%', app.view.currentView.$(
       '.fmb-following-device .battery-level').text().trim());
 
   // Ensure no-op following fetch leaves current device in view.
   app.model.user.get('following').fetch();
+  serverRequestCountExpected++;
+
   var expectedUrl = fmb.models.getApiUrl('/following') + '?' +
       'api_token=' + app.model.user.get('api_token') + '&' +
       'user_key=' + app.model.user.id;
   assertEquals(expectedUrl,
-               server.requests[2].url);
+               server.requests[serverRequestCountExpected - 1].url);
 
   var followingResponse = {
     'status': 0,
     'following': []
   };
-  server.requests[2].respond(200, API_RESPONSE_HEADERS,
-       JSON.stringify(followingResponse));
+  server.requests[serverRequestCountExpected - 1].respond(
+      200, API_RESPONSE_HEADERS,
+      JSON.stringify(followingResponse));
 
   // aka nothing changed.
   assertEquals(1, app.view.currentView.$('.fmb-following-user').length);
   assertEquals(1, app.view.currentView.$('.fmb-following-device').length);
-  assertEquals('80%', app.view.currentView.$(
+  assertEquals('70%', app.view.currentView.$(
       '.fmb-following-device .battery-level').text().trim());
+
 
   // Tries out some following users in the response.
   app.model.user.get('following').fetch();
-
+  serverRequestCountExpected++;
 
   followingResponse = {
     'status': 0,
@@ -172,15 +267,26 @@ function testApp() {
       }
     ]
   };
-  server.requests[3].respond(200, API_RESPONSE_HEADERS,
-       JSON.stringify(followingResponse));
+  server.requests[serverRequestCountExpected - 1].respond(
+      200, API_RESPONSE_HEADERS,
+      JSON.stringify(followingResponse));
+  clock.tick(1);  // renderGraph is deferred
 
   // UI updates
   assertEquals(2, app.view.currentView.$('.fmb-following-user').length);
   assertEquals(2, app.view.currentView.$('.fmb-following-device').length);
-  assertEquals('80%', $(app.view.currentView.$(
+  assertEquals(1, app.view.currentView.$('.fmb-following-user .remove').length);
+  assertEquals('70%', $(app.view.currentView.$(
       '.fmb-following-device .battery-level')[0]).text().trim());
   assertEquals('65%', $(app.view.currentView.$(
       '.fmb-following-device .battery-level')[1]).text().trim());
 
+
+  fmb.App.onBatteryStatus_({
+    'level': 40,
+    'isPlugged': true
+  });
+  clock.tick(1);  // renderGraph is deferred
+  assertEquals('40%', $(app.view.currentView.$(
+      '.fmb-following-device .battery-level')[0]).text().trim());
 }

@@ -3,11 +3,14 @@
 // Yep, we need zepto to work with CORS and cookies.
 $.ajaxSettings['beforeSend'] = function(xhr, settings) {
   xhr.withCredentials = true;
+  $('.fmb-app > .fmb-loading').show();
 };
-/*
+
 $.ajaxSettings['complete'] = function(xhr, status) {
-  // noop
+  $('.fmb-app > .fmb-loading').hide();
 };
+
+/*
 $.ajaxSettings['success'] = function(xhr, status) {
   // noop
 };
@@ -60,6 +63,7 @@ fmb.models.App.prototype.initialize = function(opt_data, opt_options) {
     this.user.device = new fmb.models.Device({
       'uuid': window.device && window.device.uuid || navigator.appVersion,
       'name': window.device && window.device.name || navigator.appName,
+      //'model': window.device && window.device.model || navigator.vendor,
       'platform': window.device && window.device.platform || navigator.platform,
       'version': window.device && window.device.version || navigator.productSub
     }, {
@@ -99,10 +103,34 @@ fmb.models.App.prototype.initialize = function(opt_data, opt_options) {
  * @extends {Backbone.Collection}
  * @constructor
  */
+fmb.models.Notify = fmb.Model.extend();
+
+
+/** @inheritDoc */
+fmb.models.Notify.prototype.url = function() {
+  return fmb.models.getApiUrl('/notifying');
+};
+
+
+/******************************************************************************/
+
+
+
+/**
+ * @extends {Backbone.Collection}
+ * @constructor
+ */
 fmb.models.NotifyingCollection = fmb.Collection.extend({
-  //localStorage: new Backbone.LocalStorage('NotifyingCollection'),
-  model: fmb.Model
+  model: fmb.models.Notify
 });
+
+
+/** @inheritDoc */
+fmb.models.NotifyingCollection.prototype.initialize = function() {
+  fmb.Collection.prototype.initialize.apply(this, arguments);
+  this.on('add', this.onAdd_, this);
+  this.on('remove', this.onRemove_, this);
+}
 
 
 /** @inheritDoc */
@@ -126,73 +154,71 @@ fmb.models.NotifyingCollection.prototype.fetch = function(opt_options) {
     'device_key': this.parent.id
   };
   fmb.Collection.prototype.fetch.call(this, options);
-}
+};
 
-/**
- * @param {Object} obj A contact object.
- */
-fmb.models.NotifyingCollection.prototype.addContact = function(obj) {
-  fmb.log('fmb.models.NotifyingCollection addContact:', obj);
 
+/** @inheritDoc */
+fmb.models.NotifyingCollection.prototype.add = function(obj, options) {
   var means = obj['means'];
+
   if (means === '') {
     return;
   }
 
-  // Adds in the parent device_key.
-  obj['device_key'] = this.parent.id;
-
-  var alreadyNotifying = this.find(function(model) {
-    return model.get('means') == means;
+  var alreadyNotifying = this.findWhere({
+    'means': means
   });
   if (alreadyNotifying) {
-    fmb.log('.. bail, already notifying', means);
+    fmb.log('fmb.models.NotifyingCollection add bail, already notifying',
+            means);
     alert('You are already notifying ' + means);
     return;
   }
 
-  var addModel = new fmb.models.AjaxSyncModel();
-  addModel.url = _.bind(function() {
-    return fmb.models.getApiUrl('/notifying');
-  }, this);
-  addModel.save(obj, {
-    success: _.bind(function() {
-      fmb.log('MONEY TRAIN NotifyingCollection, refetching from server.');
-      this.fetch();
-    }, this),
-    error: function(model, xhr, options) {
-      if (xhr.status === 404) {
-        fmb.log('Gah, serious error in NotifyingCollection addContact');
-        alert('La bomba w/ ' + means);
-      } else if (xhr.status === 409) {
-        //alert('already notifying');
-      }
-    }
-  });
+  fmb.Collection.prototype.add.apply(this, arguments);
 };
 
 
 /**
- * @param {string} means A means of contact.
+ * @param {fmb.Model} model A notifying model.
+ * @private
  */
-fmb.models.NotifyingCollection.prototype.removeByMeans = function(means) {
-  var notifyModel = new fmb.models.AjaxSyncModel();
+fmb.models.NotifyingCollection.prototype.onAdd_ = function(model) {
+  fmb.log('fmb.models.NotifyingCollection onAdd:',
+           model.id, model.get('means'));
 
-  notifyModel.url = _.bind(function() {
-    return fmb.models.getApiUrl('/notifying/delete');
-  }, this);
+  if (model.id) {
+    fmb.log('fmb.models.NotifyingCollection - no need to save', model.id,
+            'to server, already has id.');
+    return;
+  }
 
-  notifyModel.save({
+  model.save({
     'device_key': this.parent.id,
-    'means': means.toString()
+    'cid': model.cid
   }, {
     success: _.bind(function() {
-      fmb.log('MONEY TRAIN, refetching notifying data from server.');
-      this.fetch();
+      fmb.log('MONEY TRAIN save success w/ notify model', model.get('key'));
     }, this),
-    error: function(model, xhr, options) {
-      fmb.log('FAIL removing ' +  means + ', ' + xhr.status);
-    }
+    wait: true
+  });
+
+};
+
+
+/**
+ * @param {fmb.Model} model A notifying model.
+ * @private
+ */
+fmb.models.NotifyingCollection.prototype.onRemove_ = function(model) {
+  if (!model.get('key')) {
+    fmb.log('fmb.models.NotifyingCollection onRemove no need',
+            'w/out key from server.', model.get('means'));
+    return;
+  }
+
+  model.save(null, {
+    url: fmb.models.getApiUrl('/notifying/delete')
   });
 };
 
@@ -264,8 +290,8 @@ fmb.models.DeviceUnMapped.prototype.onBatteryStatus_ = function() {
     'battery_level': window.navigator.battery.level,
     'is_charging': window.navigator.battery.isPlugged
   });
+  fmb.log('fmb.models.Device onBatteryStatus_ unshift', setting.toJSON());
   this.get('settings').unshift(setting);
-  fmb.log('fmb.models.Device onBatteryStatus_', setting.toJSON());
 };
 
 
@@ -395,47 +421,10 @@ fmb.models.FollowingCollection = fmb.Collection.extend({
 
 
 /**
- * @param {string} userKey A userKey to follow.
+ * @return {string}
  */
-fmb.models.FollowingCollection.prototype.addByUserKey = function(userKey) {
-  fmb.log('fmb.models.FollowingCollection addByUserKey', userKey);
-
-  // Can't follow yerself or no one.
-  if (userKey === '' ||
-      userKey == this.parent.get('key')) {
-    fmb.log('fmb.models.FollowingCollection addByUserKey cant follow yoself');
-    return;
-  }
-
-  var alreadyFollowing = this.find(function(model) {
-    return model.get('user')['key'] == userKey;
-  });
-  if (alreadyFollowing) {
-    fmb.log('.. bail, already following', userKey);
-    alert('You are already following ' + userKey);
-    return;
-  }
-
-  var followModel = new fmb.models.AjaxSyncModel();
-  followModel.url = _.bind(function() {
-    return fmb.models.getApiUrl('/following');
-  }, this);
-  followModel.save({
-    'following_user_key': userKey
-  }, {
-    //url: url,  // why this no work?
-    success: _.bind(function() {
-      fmb.log('MONEY TRAIN, refetching following data from server.');
-      this.fetch();
-    }, this),
-    error: function(model, xhr, options) {
-      if (xhr.status === 404) {
-        alert('La bomba, seems we could not find a user ' + userKey);
-      } else if (xhr.status === 409) {
-        //alert('already following');
-      }
-    }
-  });
+fmb.models.FollowingCollection.prototype.url = function() {
+  return fmb.models.getApiUrl('/following');
 };
 
 
@@ -450,35 +439,72 @@ fmb.models.FollowingCollection.prototype.parse = function(response, xhr) {
 /**
  * @param {string} userKey A userKey to follow.
  */
-fmb.models.FollowingCollection.prototype.removeByUsername = function(userKey) {
-  var followModel = new fmb.models.AjaxSyncModel();
+fmb.models.FollowingCollection.prototype.addByKey = function(userKey) {
+  fmb.log('fmb.models.FollowingCollection addByKey', userKey);
 
-  followModel.url = _.bind(function() {
-    return fmb.models.getApiUrl('/following/delete');
-  }, this);
+  // Can't follow yerself or no one.
+  if (userKey === '' ||
+      userKey == this.parent.get('key')) {
+    fmb.log('fmb.models.FollowingCollection addByKey cant follow yoself');
+    return;
+  }
 
-  followModel.save({
-    'following_user_key': userKey
+  var alreadyFollowing = this.findWhere({
+    key: userKey
+  });
+  if (alreadyFollowing) {
+    fmb.log('.. bail, already following', userKey);
+    alert('You are already following ' + userKey);
+    return;
+  }
+
+  this.add({
+    'name': 'Adding w/' + userKey
+  });
+};
+
+
+/**
+ * @param {Backbone.Model} model A follow user model.
+ * @private
+ */
+fmb.models.FollowingCollection.prototype.onAdd_ = function(model) {
+  model.save({
+    'following_user_key': userKey,
+    'cid': this.cid
   }, {
-    // Why does url not work here?
-    //url: fmb.models.getApiUrl('/following/delete/') +
-    //     this.parent.get('userKey'),
+    wait: true,
+    url: fmb.models.getApiUrl('/following'),
     success: _.bind(function() {
-      fmb.log('MONEY TRAIN, refetching following data from server.');
-      this.fetch();
+      fmb.log('MONEY TRAIN FollowingCollection onAdd_.');
+      //this.fetch();
     }, this),
     error: function(model, xhr, options) {
-      fmb.log('FAIL removing ', userKey, xhr.status);
+      if (xhr.status === 404) {
+        alert('La bomba, seems we could not find a user ' + userKey);
+      } else if (xhr.status === 409) {
+        //alert('already following');
+      }
     }
   });
 };
 
 
 /**
- * @return {string}
+ * @param {Backbone.Model} followModel A follow user model.
+ * @private
  */
-fmb.models.FollowingCollection.prototype.url = function() {
-  return fmb.models.getApiUrl('/following');
+fmb.models.FollowingCollection.prototype.onRemove_ = function(model) {
+  model.save(null, {
+    url: fmb.models.getApiUrl('/following/delete/'),
+    success: _.bind(function() {
+      fmb.log('fmb.models.FollowingCollection MONEY TRAIN w/ remove',
+              model.id);
+    }, this),
+    error: function(model, xhr, options) {
+      fmb.log('FAIL removing ', model.id, xhr.status);
+    }
+  });
 };
 
 

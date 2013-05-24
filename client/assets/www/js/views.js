@@ -129,19 +129,26 @@ fmb.views.App.prototype.onClickShare_ = function(e) {
     this.$('.tabs .share').removeClass('selected');
   }, this), 500);
 
-  var extras = {};
-  extras[WebIntent.EXTRA_TEXT] = fmb.models.SERVER_SHARE + '/profile/' +
-      this.model.user.get('key');
-  extras[WebIntent.EXTRA_SUBJECT] = 'Level - Check my stats!';
-  window.plugins.webintent.startActivity({
-      action: WebIntent.ACTION_SEND,
-      type: 'text/plain',
-      extras: extras
-  }, function() {
-      fmb.log('Share sent!');
-  }, function () {
-      fmb.log('Share fail!');
-  });
+
+  if (fmb.ua.IS_ANDROID && fmb.ua.IS_CORDOVA) {
+    var extras = {};
+    extras[WebIntent.EXTRA_TEXT] = fmb.models.SERVER_SHARE + '/profile/' +
+        this.model.user.get('key');
+    extras[WebIntent.EXTRA_SUBJECT] = 'Level - Check my stats!';
+    window.plugins.webintent.startActivity({
+        action: WebIntent.ACTION_SEND,
+        type: 'text/plain',
+        extras: extras
+    }, function() {
+        fmb.log('Share sent!');
+    }, function () {
+        fmb.log('Share fail!');
+    });
+
+  } else {
+    var userKey = window.prompt('Enter a user key to follow:');
+    this.model.user.get('following').addByKey(userKey);
+  }
 
 };
 
@@ -505,19 +512,21 @@ fmb.views.Notifying.prototype.onClickNotifyingAdd_ = function(e) {
     cordova.require('cordova/plugin/contactview').show(
         _.bind(function(contact) {
           fmb.log('GOT CONTACT!' + JSON.stringify(contact));
-          //{"email":"elsigh@gmail.com","phone":"512-698-9983","name":"Lindsey Simon"}
+
           if (contact['phone']) {
-            this.model.addContact({
+            this.model.add({
               'name': contact['name'],
               'means': contact['phone'],
               'type': 'phone'
             });
+
           } else if (contact['email']) {
-            this.model.addContact({
+            this.model.add({
               'name': contact['name'],
               'means': contact['email'],
               'type': 'email'
             });
+
           } else {
             alert('Unable to get a means of contact for that record. =(');
           }
@@ -533,7 +542,7 @@ fmb.views.Notifying.prototype.onClickNotifyingAdd_ = function(e) {
     if (!means) {
       return;
     }
-    this.model.addContact({
+    this.model.add({
       'means': means,
       'name': 'Somebody',
       'type': 'phone'
@@ -547,13 +556,12 @@ fmb.views.Notifying.prototype.onClickNotifyingAdd_ = function(e) {
  * @private
  */
 fmb.views.Notifying.prototype.onClickRemove_ = function(e) {
-  var means = $(e.currentTarget).data('means');
-  var isSure = window.confirm('Really remove ' + means + ' from the list?');
+  var isSure = window.confirm('Really remove this person from the list?');
   if (!isSure) {
     return;
   }
-  fmb.log('remove means', means);
-  this.model.removeByMeans(means);
+  var key = $(e.currentTarget).data('key');
+  this.model.remove(key);
 };
 
 
@@ -699,13 +707,12 @@ fmb.views.Following.prototype.onRemoveUser_ = function(model) {
  * @private
  */
 fmb.views.FollowingUser.prototype.onClickRemove_ = function(e) {
-  var userKey = $(e.currentTarget).data('key');
   var isSure = window.confirm('Really remove them from your list?');
   if (!isSure) {
     return;
   }
-  fmb.log('fmb.views.Following onClickRemove_ userKey', userKey);
-  this.model.removeByUserKey(userKey);
+  fmb.log('fmb.views.FollowingUser onClickRemove_', this.model.id);
+  this.model.remove(this.model.id);
 };
 
 
@@ -724,7 +731,11 @@ fmb.views.FollowingUser.prototype.render = function() {
   fmb.log('fmb.views.FollowingUser render', this.$el);
   if (!this.rendered_) {
     this.rendered_ = true;
+    this.$el.data('key', this.model.key);
     var templateData = this.model.toJSON();
+    if (app.model.user.id == this.model.id) {
+      templateData['is_current_user'] = true;
+    }
     this.$el.html(fmb.views.getTemplateHtml('following_user', templateData));
   }
   this.model.get('devices').each(_.bind(function(model) {
@@ -771,17 +782,26 @@ fmb.views.FollowingDevice = Backbone.View.extend({
 /** @inheritDoc */
 fmb.views.FollowingDevice.prototype.initialize = function() {
   this.listenTo(this.model, 'change', this.render);
-  this.listenTo(this.model.get('settings'), 'all', this.render);
+  this.listenTo(this.model.get('settings'), 'add change remove',
+                this.render);
 };
 
 /** @inheritDoc */
 fmb.views.FollowingDevice.prototype.render = function() {
+  fmb.log('fmb.views.FollowingDevice render', this.model.id);
   var templateData = this.model.toJSON();
-  //fmb.log('fmb.views.FollowingDevice templateData', templateData);
+  if (app.model.user.device.id == this.model.id) {
+    templateData['is_current_user_device'] = true;
+  }
+  this.$el.data('key', this.model.id);
   this.$el.html(fmb.views.getTemplateHtml('following_device', templateData));
-  this.$graph = this.$('.battery-graph');
-  this.$graphY = this.$('.y-axis');
-  this.renderGraph_();
+
+  // Need the figure element to actually be in the DOM for xCharts to work.
+  _.defer(_.bind(function() {
+    this.renderGraph_();
+  }, this));
+
+  return this;
 };
 
 
@@ -789,51 +809,47 @@ fmb.views.FollowingDevice.prototype.render = function() {
  * @private
  */
 fmb.views.FollowingDevice.prototype.renderGraph_ = function() {
-  fmb.log('fmb.views.FollowingDevice renderGraph_');
+  fmb.log('fmb.views.FollowingDevice renderGraph_', this.model.id);
   if (!this.model.get('settings').length) {
     fmb.log('No setting data to render chart with.')
-    return;
+    return this;
   }
+
   var dataSeries = [];
   this.model.get('settings').each(function(model, i) {
     var xDate = new Date(model.get('created'));
-    var xTime = xDate.getTime();
-    //fmb.log('xDate', xDate, xTime);
     dataSeries.push({
-      //x: xTime,
-      x: i,
-      x_readable: xDate.toString(),
-      y: model.get('battery_level')
-    })
+      'x': xDate.getTime(),
+      'x_readable': model.get('created_pretty'),
+      'y': model.get('battery_level')
+    });
   });
-  fmb.log('fmb.views.FollowingDevice dataSeries', dataSeries);
-  this.$graph.html('');  // reset
 
-  fmb.log('GRAH SIZE', this.$graph.parent().width(), this.$graph.height())
-  var graph = new Rickshaw.Graph({
-    element: this.$graph.get(0),
-    //renderer: 'line',
-    height: this.$graph.height() || 50,
-    width: this.$graph.width() || 100,
-    series: [
+  fmb.log('fmb.views.FollowingDevice dataSeries', dataSeries);
+
+  var data = {
+    'xScale': 'time',
+    'yScale': 'linear',
+    'yMin': 0,
+    'yMax': 100,
+    'type': 'line',
+    'main': [
       {
-        data: dataSeries,
-        color: 'green',
-        name: this.model.get('name')
+        'className': '.battery-graph-data-' + this.model.id,
+        'data': dataSeries
       }
     ]
-  });
+  };
 
-  /*
-  var yAxis = new Rickshaw.Graph.Axis.Y({
-    graph: graph
-  });
+  var opts = {
+    'dataFormatX': function (x) { return new Date(x); },
+    'tickFormatX': function (x) { return d3.time.format('%a %I%p')(x); },
+    'axisPaddingTop': 20,
+    'tickHintX': 4,
+    'tickHintY': 2,
+    'interpolation': 'basis'
+  };
 
-  var xAxis = new Rickshaw.Graph.Axis.Time({
-    graph: graph
-  });
-  */
-
-  graph.render();
+  var chart = new xChart('line', data, '.battery-graph-' + this.model.id, opts);
 };
 
