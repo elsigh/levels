@@ -168,7 +168,7 @@ fmb.models.NotifyingCollection.prototype.add = function(obj, options) {
   var alreadyNotifying = this.findWhere({
     'means': means
   });
-  if (alreadyNotifying.length) {
+  if (alreadyNotifying) {
     fmb.log('fmb.models.NotifyingCollection add bail, already notifying',
             means);
     alert('You are already notifying ' + means);
@@ -203,17 +203,6 @@ fmb.models.NotifyingCollection.prototype.onAdd_ = function(model) {
     wait: true
   });
 
-};
-
-
-/**
- * @param {string} means A means of contact.
- */
-fmb.models.NotifyingCollection.prototype.removeByMeans = function(means) {
-  var notifyModel = this.findWhere({'means': means.toString()});
-  fmb.log('fmb.models.NotifyingCollection removeByMeans', means,
-          notifyModel);
-  this.remove(notifyModel);
 };
 
 
@@ -463,7 +452,7 @@ fmb.models.FollowingCollection.prototype.addByKey = function(userKey) {
   var alreadyFollowing = this.findWhere({
     key: userKey
   });
-  if (alreadyFollowing.length) {
+  if (alreadyFollowing) {
     fmb.log('.. bail, already following', userKey);
     alert('You are already following ' + userKey);
     return;
@@ -502,28 +491,18 @@ fmb.models.FollowingCollection.prototype.onAdd_ = function(model) {
 
 
 /**
- * @param {string} userKey A userKey to follow.
- */
-fmb.models.FollowingCollection.prototype.removeByKey = function(userKey) {
-  var followModel = this.findWhere({
-    key: userKey
-  });
-  this.remove(followModel);
-};
-
-
-/**
  * @param {Backbone.Model} followModel A follow user model.
  * @private
  */
-fmb.models.FollowingCollection.prototype.onRemove_ = function(followModel) {
-  followModel.save(null, {
+fmb.models.FollowingCollection.prototype.onRemove_ = function(model) {
+  model.save(null, {
     url: fmb.models.getApiUrl('/following/delete/'),
     success: _.bind(function() {
-      fmb.log('MONEY TRAIN w/ removeByKey', userKey);
+      fmb.log('fmb.models.FollowingCollection MONEY TRAIN w/ remove',
+              model.id);
     }, this),
     error: function(model, xhr, options) {
-      fmb.log('FAIL removing ', userKey, xhr.status);
+      fmb.log('FAIL removing ', model.id, xhr.status);
     }
   });
 };

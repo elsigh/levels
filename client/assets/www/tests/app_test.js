@@ -127,7 +127,7 @@ function testApp() {
 /******************************************************************************/
 
   // Tests that we can remove from the notification collection.
-  app.model.user.device.get('notifying').removeByMeans('test_notify_means');
+  app.model.user.device.get('notifying').remove('test_notify_key');
   serverRequestCountExpected++;
   assertEquals(fmb.models.getApiUrl('/notifying/delete'),
                server.requests[serverRequestCountExpected - 1].url);
@@ -155,6 +155,9 @@ function testApp() {
   assertEquals(1, app.view.currentView.$('.fmb-following-user').length);
   assertEquals(1, app.view.currentView.$('.fmb-following-device').length);
 
+  // Should not be able to remove yourself.
+  assertEquals(0, app.view.currentView.$('.fmb-following-user .remove').length);
+
   // Now fire a battery_status event and test that it both updates our
   // local reference to the device as well as the identity mapped one in
   // the devices collection and draws it on the screen.
@@ -162,7 +165,28 @@ function testApp() {
     'level': 80,
     'isPlugged': false
   });
+  clock.tick(1);  // renderGraph is deferred
   assertEquals('80%', app.view.currentView.$(
+      '.fmb-following-device .battery-level').text().trim());
+
+  clock.tick(5000);
+
+  fmb.App.onBatteryStatus_({
+    'level': 70,
+    'isPlugged': false
+  });
+  clock.tick(1);  // renderGraph is deferred
+  assertEquals('70%', app.view.currentView.$(
+      '.fmb-following-device .battery-level').text().trim());
+
+  clock.tick(5000);
+
+  fmb.App.onBatteryStatus_({
+    'level': 70,
+    'isPlugged': false
+  });
+  clock.tick(1);  // renderGraph is deferred
+  assertEquals('70%', app.view.currentView.$(
       '.fmb-following-device .battery-level').text().trim());
 
   // Ensure no-op following fetch leaves current device in view.
@@ -186,8 +210,9 @@ function testApp() {
   // aka nothing changed.
   assertEquals(1, app.view.currentView.$('.fmb-following-user').length);
   assertEquals(1, app.view.currentView.$('.fmb-following-device').length);
-  assertEquals('80%', app.view.currentView.$(
+  assertEquals('70%', app.view.currentView.$(
       '.fmb-following-device .battery-level').text().trim());
+
 
   // Tries out some following users in the response.
   app.model.user.get('following').fetch();
@@ -245,11 +270,13 @@ function testApp() {
   server.requests[serverRequestCountExpected - 1].respond(
       200, API_RESPONSE_HEADERS,
       JSON.stringify(followingResponse));
+  clock.tick(1);  // renderGraph is deferred
 
   // UI updates
   assertEquals(2, app.view.currentView.$('.fmb-following-user').length);
   assertEquals(2, app.view.currentView.$('.fmb-following-device').length);
-  assertEquals('80%', $(app.view.currentView.$(
+  assertEquals(1, app.view.currentView.$('.fmb-following-user .remove').length);
+  assertEquals('70%', $(app.view.currentView.$(
       '.fmb-following-device .battery-level')[0]).text().trim());
   assertEquals('65%', $(app.view.currentView.$(
       '.fmb-following-device .battery-level')[1]).text().trim());
@@ -259,6 +286,7 @@ function testApp() {
     'level': 40,
     'isPlugged': true
   });
+  clock.tick(1);  // renderGraph is deferred
   assertEquals('40%', $(app.view.currentView.$(
       '.fmb-following-device .battery-level')[0]).text().trim());
 }

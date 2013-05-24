@@ -105,7 +105,7 @@
         <tbody>
           {{#notifying.length}}
             {{#notifying}}
-              <tr>
+              <tr data-key="{{key}}">
                 <td>
                   <span class="notifying-name">{{name}}</span>
                 </td>
@@ -113,7 +113,7 @@
                   {{means}}
                 </td>
                 <td class="remove-cell">
-                  <div class="remove" data-means="{{means}}">
+                  <div {{#key}}class="remove" data-key="{{key}}"{{/key}}>
                     {{#key}}
                       X
                     {{/key}}
@@ -188,7 +188,8 @@
         </div>
       </td>
       <td>
-        <figure class="battery-graph"></figure>
+        <figure
+          class="battery-graph battery-graph-{{key}}"></figure>
       </td>
     </script>
 

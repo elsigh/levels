@@ -556,12 +556,12 @@ fmb.views.Notifying.prototype.onClickNotifyingAdd_ = function(e) {
  * @private
  */
 fmb.views.Notifying.prototype.onClickRemove_ = function(e) {
-  var means = $(e.currentTarget).data('means');
-  var isSure = window.confirm('Really remove ' + means + ' from the list?');
+  var isSure = window.confirm('Really remove this person from the list?');
   if (!isSure) {
     return;
   }
-  this.model.removeByMeans(means);
+  var key = $(e.currentTarget).data('key');
+  this.model.remove(key);
 };
 
 
@@ -707,13 +707,12 @@ fmb.views.Following.prototype.onRemoveUser_ = function(model) {
  * @private
  */
 fmb.views.FollowingUser.prototype.onClickRemove_ = function(e) {
-  var userKey = this.model.id;
   var isSure = window.confirm('Really remove them from your list?');
   if (!isSure) {
     return;
   }
-  fmb.log('fmb.views.FollowingUser onClickRemove_ userKey', userKey);
-  this.model.removeByKey(userKey);
+  fmb.log('fmb.views.FollowingUser onClickRemove_', this.model.id);
+  this.model.remove(this.model.id);
 };
 
 
@@ -783,7 +782,8 @@ fmb.views.FollowingDevice = Backbone.View.extend({
 /** @inheritDoc */
 fmb.views.FollowingDevice.prototype.initialize = function() {
   this.listenTo(this.model, 'change', this.render);
-  this.listenTo(this.model.get('settings'), 'all', this.render);
+  this.listenTo(this.model.get('settings'), 'add change remove',
+                this.render);
 };
 
 /** @inheritDoc */
@@ -795,9 +795,13 @@ fmb.views.FollowingDevice.prototype.render = function() {
   }
   this.$el.data('key', this.model.id);
   this.$el.html(fmb.views.getTemplateHtml('following_device', templateData));
-  this.$graph = this.$('.battery-graph');
-  this.$graphY = this.$('.y-axis');
-  this.renderGraph_();
+
+  // Need the figure element to actually be in the DOM for xCharts to work.
+  _.defer(_.bind(function() {
+    this.renderGraph_();
+  }, this));
+
+  return this;
 };
 
 
@@ -805,10 +809,10 @@ fmb.views.FollowingDevice.prototype.render = function() {
  * @private
  */
 fmb.views.FollowingDevice.prototype.renderGraph_ = function() {
-  fmb.log('fmb.views.FollowingDevice renderGraph_');
+  fmb.log('fmb.views.FollowingDevice renderGraph_', this.model.id);
   if (!this.model.get('settings').length) {
     fmb.log('No setting data to render chart with.')
-    return;
+    return this;
   }
 
   var dataSeries = [];
@@ -816,7 +820,7 @@ fmb.views.FollowingDevice.prototype.renderGraph_ = function() {
     var xDate = new Date(model.get('created'));
     dataSeries.push({
       'x': xDate.getTime(),
-      'x_readable': xDate.toString(),
+      'x_readable': model.get('created_pretty'),
       'y': model.get('battery_level')
     });
   });
@@ -831,7 +835,7 @@ fmb.views.FollowingDevice.prototype.renderGraph_ = function() {
     'type': 'line',
     'main': [
       {
-        'className': '.battery-graph-data-' + this.id,
+        'className': '.battery-graph-data-' + this.model.id,
         'data': dataSeries
       }
     ]
@@ -846,11 +850,6 @@ fmb.views.FollowingDevice.prototype.renderGraph_ = function() {
     'interpolation': 'basis'
   };
 
-  var myChart = new xChart(
-      'line',
-      data,
-      this.$('.battery-graph').get(0),
-      opts);
-
+  var chart = new xChart('line', data, '.battery-graph-' + this.model.id, opts);
 };
 
