@@ -111,7 +111,9 @@ public class PhoneDiedAlarm extends BroadcastReceiver {
     }
 
     public void SendBatteryStatus(Context context,
-                                  String apiToken, String userKey, String deviceKey,
+                                  String apiToken,
+                                  String userKey,
+                                  String deviceKey,
                                   String updatePath) {
         Log.d(TAG, "SendBatteryStatus: " + apiToken + ", " + userKey + ", " +
               deviceKey + ", " + updatePath);

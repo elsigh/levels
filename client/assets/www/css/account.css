@@ -43,6 +43,7 @@
   margin-right: 1em;
   box-shadow: 1px 1px 2px #ccc;
   height: 75px;
+  min-width: 75px;
 }
 
 /* Device */

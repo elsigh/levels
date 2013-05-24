@@ -46,7 +46,7 @@ public class PhoneDiedService extends Service {
     @Override
     public void onStart(Intent intent, int startId) {
         super.onStart(intent, startId);
-        Log.d(TAG, "onStart");
+        Log.d(TAG, "onStart isRunning? " + isRunning);
 
         if (intent != null) {
             String apiToken = intent.getStringExtra(EXTRAS_API_TOKEN);
@@ -58,24 +58,22 @@ public class PhoneDiedService extends Service {
                   apiToken + ", " + userKey + ", " + deviceKey + ", " +
                   updatePath + ", " + updateFrequency);
             alarm.SetPrefs(this, apiToken, userKey, deviceKey, updatePath, updateFrequency);
-        }
 
-        // Enusure any existing alarm is nuked.
-        alarm.CancelAlarm(this);
+            if (isRunning) {
+                Toast.makeText(this.getApplicationContext(),
+                               "Battery updates are ON",
+                               Toast.LENGTH_SHORT).show();
+                alarm.SendBatteryStatus(this.getApplicationContext(),
+                    apiToken, userKey, deviceKey, updatePath);
+            }
+        }
 
         if (!isRunning) {
             alarm.SetAlarm(this);
             isRunning = true;
             Toast.makeText(this.getApplicationContext(),
-                           "Battery updates ENABLED.",
-                           Toast.LENGTH_LONG).show();
-
-        // Update the alarm timing.
-        } else {
-            alarm.SetAlarm(this);
-            Toast.makeText(this.getApplicationContext(),
-                           "Battery updates ENABLED (updated).",
-                           Toast.LENGTH_LONG).show();
+                           "Battery updates ENABLED",
+                           Toast.LENGTH_SHORT).show();
         }
     }
 
