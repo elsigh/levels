@@ -1,5 +1,9 @@
 
 
+.fmb-account .account {
+  padding: 0 10px;
+}
+
 .fmb-account .username-taken-err {
   display: none;
   font-size: 90%;
@@ -40,7 +44,6 @@
 }
 
 .fmb-account .user-img-name > img {
-  margin-right: 1em;
   box-shadow: 1px 1px 2px #ccc;
   height: 75px;
   min-width: 75px;
@@ -48,12 +51,9 @@
 
 /* Device */
 .fmb-device {
-  border: 1px solid #ccc;
   margin-bottom: 2em;
-  padding: 5px;
 }
 
 .fmb-device h3 {
-  margin-top: 0;
-  padding-top: 0;
+  border-bottom: 2px solid #666;
 }

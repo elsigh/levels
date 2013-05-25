@@ -70,7 +70,7 @@
       {{#user.api_token}}
         <div class="user-img-name">
           <img src="{{user.avatar_url}}" alt="">
-          <h3>{{user.name}}</h3>
+          <h2>{{user.name}}</h2>
         </div>
       {{/user.api_token}}
     </script>
@@ -79,10 +79,10 @@
       <form method="post"
         class="device-update"
         action="{{api_server}}/api/device">
-        <h4>
+        <h3>
           {{platform}}
           {{name}}
-        </h4>
+        </h3>
       </form>
     </script>
 
@@ -91,9 +91,12 @@
         Sends a notification when your battery hits 10%
       </p>
 
-      <button class="notifying-add-phone">+ by phone</button>
-      <button class="notifying-add-email">+ by email</button>
+      <div class="fmb-button-c">
+        <button class="notifying-add-phone">+ by phone</button>
+        <button class="notifying-add-email">+ by email</button>
+      </div>
 
+          {{#notifying.length}}
       <table>
         <thead>
           <tr>
@@ -103,7 +106,6 @@
           </tr>
         </thead>
         <tbody>
-          {{#notifying.length}}
             {{#notifying}}
               <tr data-key="{{key}}">
                 <td>
@@ -112,36 +114,25 @@
                 <td>
                   {{means}}
                 </td>
-                <td class="remove-cell">
-                  <div {{#key}}class="remove" data-key="{{key}}"{{/key}}>
-                    {{#key}}
-                      X
-                    {{/key}}
-                    {{^key}}
-                      <div class="fmb-loading"></div>
-                    {{/key}}
-                  </div>
+                <td>
+                  {{#key}}
+                    <div class="fmb-remove" data-key="{{key}}">X</div>
+                  {{/key}}
+                  {{^key}}
+                    <div class="fmb-loading"></div>
+                  {{/key}}
                 </td>
               </tr>
             {{/notifying}}
-          {{/notifying.length}}
-
-          {{^notifying.length}}
-            <tr>
-              <td colspan="3">
-                Show them you care, add somebody you love.
-              </td>
-            </tr>
-          {{/notifying.length}}
 
         </tbody>
       </table>
+          {{/notifying.length}}
     </script>
 
 
     <script id="tpl_following" type="text/html">
       <div class="fmb-tab-header">
-        <h3>Following</h3>
         <button class="share">+ someone</button>
       </div>
       <table>
@@ -163,13 +154,18 @@
 
     <script id="tpl_following_user" type="text/html">
       <tr>
-        <td>
-          <h3>{{name}}</h3>
-        </td>
-        <td class="remove-cell">
+        <td colspan="2">
+          <h2 class="user-name">{{name}}</h2>
+
           {{^is_current_user}}
-            <div class="remove">X</div>
+            {{#key}}
+              <div class="fmb-remove" data-key="{{key}}">X</div>
+            {{/key}}
+            {{^key}}
+              <div class="fmb-loading"></div>
+            {{/key}}
           {{/is_current_user}}
+
         </td>
       </tr>
     </script>
@@ -179,7 +175,7 @@
         <h4>{{platform}} {{name}}</h4>
         <div class="battery-level-c charging-{{settings.0.is_charging}}">
           <div class="battery-level"
-            style="background-image:-webkit-gradient(linear, left top, right top, color-stop({{settings.0.battery_level}}%, green), color-stop({{settings.0.battery_level}}%, white))">
+            style="background-image:-webkit-gradient(linear, left top, right top, color-stop({{settings.0.battery_level}}%, #3880aa), color-stop({{settings.0.battery_level}}%, #666666))">
             {{settings.0.battery_level}}%
           </div>
           <div class="battery-created">

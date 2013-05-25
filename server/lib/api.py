@@ -173,13 +173,12 @@ class ApiUserTokenHandler(ApiRequestHandler):
     """Returns some pretty important data back to the user."""
     def post(self):
         memcache_key = 'user_token-%s' % self._json_request_data['user_token']
-        user_key = memcache.get(memcache_key)
-        assert user_key
-        logging.info('UserTokenHandler user_key: %s' % user_key)
+        user_id = memcache.get(memcache_key)
+        assert user_id
+        logging.info('UserTokenHandler user_id: %s' % user_id)
 
-        user = ndb.Key(urlsafe=user_key).get()
-        logging.info('ApiUserTokenHandler user_key: %s, user: %s' %
-                     (user_key, user))
+        user = models.FMBUser.get_by_id(user_id)
+        logging.info('ApiUserTokenHandler user: %s' % user)
         assert user
 
         # Ok, now clear the memcache token - it's only good once.

@@ -84,7 +84,7 @@ class RequestHandlerTest(unittest.TestCase):
         assert elsigh_user.api_token is not None
 
         user_token = 'foobar'
-        memcache.add('user_token-%s' % user_token, elsigh_user.key.urlsafe())
+        memcache.add('user_token-%s' % user_token, elsigh_user.key.id())
         response = self.testapp.post_json('/api/user/token',
                                           params=dict(user_token=user_token))
         body = response.normal_body

@@ -165,7 +165,7 @@ function testApp() {
     'level': 80,
     'isPlugged': false
   });
-  clock.tick(1);  // renderGraph is deferred
+  clock.tick(2);  // render/renderGraph is deferred
   assertEquals('80%', app.view.currentView.$(
       '.fmb-following-device .battery-level').text().trim());
 
@@ -175,7 +175,7 @@ function testApp() {
     'level': 70,
     'isPlugged': false
   });
-  clock.tick(1);  // renderGraph is deferred
+  clock.tick(2);  // render/renderGraph is deferred
   assertEquals('70%', app.view.currentView.$(
       '.fmb-following-device .battery-level').text().trim());
 
@@ -185,7 +185,7 @@ function testApp() {
     'level': 70,
     'isPlugged': false
   });
-  clock.tick(1);  // renderGraph is deferred
+  clock.tick(2);  // render/renderGraph is deferred
   assertEquals('70%', app.view.currentView.$(
       '.fmb-following-device .battery-level').text().trim());
 
@@ -270,7 +270,7 @@ function testApp() {
   server.requests[serverRequestCountExpected - 1].respond(
       200, API_RESPONSE_HEADERS,
       JSON.stringify(followingResponse));
-  clock.tick(1);  // renderGraph is deferred
+  clock.tick(2);  // render/renderGraph is deferred
 
   // UI updates
   assertEquals(2, app.view.currentView.$('.fmb-following-user').length);
@@ -286,7 +286,7 @@ function testApp() {
     'level': 40,
     'isPlugged': true
   });
-  clock.tick(1);  // renderGraph is deferred
+  clock.tick(2);  // render/renderGraph is deferred
   assertEquals('40%', $(app.view.currentView.$(
       '.fmb-following-device .battery-level')[0]).text().trim());
 }
