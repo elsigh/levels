@@ -24,8 +24,9 @@ h1 {
   font-size: 1.6em;
   margin: 0;
   padding: 10px;
-  background: #100;
+  background: #111;
   font-weight: 400;
+  border-bottom: 2px solid #34b2e0;
 }
 
 h2 {
@@ -60,28 +61,17 @@ table {
   margin: 1em 0;
   width: 100%;
   border-collapse: collapse;
-  border-bottom: 1px solid rgba(0,0,0,0.25);
-
-  /*
-  -moz-box-shadow: 0 1px 3px rgba(0,0,0,0.8);
-  -webkit-box-shadow: 0 1px 3px rgba(0,0,0,0.8);
-  box-shadow: 0 1px 3px rgba(0,0,0,0.8);
-  */
 }
 
 th {
   text-align: left;
+  font-weight: 400;
 }
 
 th,
 td {
-  padding: 10px;
+  padding: 0.5em;
   border-top: 1px solid #666;
-}
-
-tr:first-child td {
-  border-top: 0;
-  border-bottom: 2px solid #666;
 }
 
 form > div {
@@ -96,10 +86,9 @@ input[type="text"] {
 
 input[type="submit"],
 button {
-  background: #3880aa;
+  background: #34b2e0;
   border: 0;
   display: inline-block;
-  margin: 0;
   padding: 10px 15px;
   color: #fff;
   text-decoration: none;
@@ -108,21 +97,22 @@ button {
   line-height: 1;
   font-size: 0.8em;
 
-  border-radius: 0;
+  border-radius: 2px;
 
-  -moz-box-shadow: 0 1px 1px rgba(0,0,0,0.8);
-  -webkit-box-shadow: 0 1px 1px rgba(0,0,0,0.8);
-  box-shadow: 0 1px 1px rgba(0,0,0,0.8);
 }
 
 input[type="submit"]:active,
 button:active {
-  -moz-box-shadow: 0 1px 5px rgba(0,0,0,0.9);
-  -webkit-box-shadow: 0 1px 5px rgba(0,0,0,0.9);
-  box-shadow: 0 1px 5px rgba(0,0,0,0.9);
+  text-shadow: -1px -1px 1px #000;
 }
 
-.nav {
+.fmb-remove {
+  position: absolute;
+  right: 10px;
+  display: inline-block;
+  padding: 5px 10px;
+  background: #222;
+  border-radius: 2px;
 }
 
 .nav a {
@@ -160,9 +150,9 @@ input[type="range"] {
 
 .tabs {
   background: #111;
-  -webkit-box-shadow: 0 2px 3px #333;
-  -moz-box-shadow: 0 2px 3px #333;
-  box-shadow: 0 2px 3px #333;
+  -webkit-box-shadow: 0 1px 1px #222;
+  -moz-box-shadow: 0 1px 1px #222;
+  box-shadow: 0 1px 1px #222;
 }
 
 .tabs a,
@@ -176,8 +166,8 @@ input[type="range"] {
   -webkit-box-sizing: border-box;
   width: 33%;
   text-decoration: none;
-  border-right: 1px solid #333;
-  border-bottom: 3px solid #000;
+  border-right: 1px solid #222;
+  border-bottom: 2px solid #000;
 }
 .tabs a:last-child,
 .tabs span:last-child {
@@ -185,20 +175,13 @@ input[type="range"] {
 }
 .tabs a.selected,
 .tabs span.selected {
-  border-bottom-color: #3880aa;
+  border-bottom-color: #34b2e0;
 }
 
 .content {
   padding: 10px;
 }
 
-.fmb-remove {
-  float: right;
-  display: inline-block;
-  padding: 5px 10px;
-  background: #022;
-}
-
 .fmb-button-c {
-  padding: 0 10px;
+  padding: 10px;
 }

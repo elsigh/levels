@@ -22,11 +22,11 @@
   font-size: 12px;
 }
 .xchart .color0 .line {
-  stroke: #3880aa;
+  stroke: #34b2e0;
 }
 .xchart .color0 rect,
 .xchart .color0 circle {
-  fill: #3880aa;
+  fill: #34b2e0;
 }
 .xchart .color0 .fill {
   fill: rgba(56, 128, 170, 0.1);

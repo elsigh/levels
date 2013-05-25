@@ -26,11 +26,6 @@
   border-bottom-right-radius: 10px;
 }
 
-.fmb-following .remove {
-  display: inline-block;
-  padding: 10px;
-}
-
 .fmb-following .charging-1:before {
   content: "charging";
   display: block;
@@ -42,6 +37,11 @@
   margin-top: 4px;
   font-size: 85%;
   font-weight: 500;
+}
+
+.fmb-following tr:first-child td {
+  border-top: 0;
+  border-bottom: 2px solid #666;
 }
 
 .fmb-following td {
@@ -66,12 +66,8 @@
 }
 
 
-.fmb-following-user h3 {
+.fmb-following-user h2 {
   display: inline-block;
-}
-
-.fmb-following-user h3 ~ div {
-  margin-left: 2em;
 }
 
 .fmb-following-user tr:first-child td {
@@ -81,6 +77,10 @@
 .fmb-following-user tr:first-child td:last-child {
   padding: 0;
   margin: 0;
+}
+
+.fmb-following-user .fmb-remove {
+  margin-top: 15px;
 }
 
 .fmb-following-device .battery-graph {
