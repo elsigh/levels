@@ -251,9 +251,9 @@ fmb.views.Account.prototype.initialize = function(options) {
   this.$devices = $('<div class="devices"></div>');
 
   this.subViews_ = {};
-  this.setUpDeviceViews_();
-  this.listenTo(this.model.get('devices'), 'add change remove',
-      this.setUpDeviceViews_);
+  this.onAddDevice_();
+  this.listenTo(this.model.get('devices'), 'add', this.onAddDevice_);
+  this.listenTo(this.model.get('devices'), 'remove', this.onRemoveDevice_);
 };
 
 
@@ -266,6 +266,8 @@ fmb.views.Account.prototype.render = function() {
     this.$el.append(this.$devices);
   }
 
+  this.$devices.toggle(this.model.get('id'));
+
   var templateData = {
     'user': this.model.getTemplateData()
   };
@@ -275,27 +277,37 @@ fmb.views.Account.prototype.render = function() {
 
 
 /**
- * @param {Event} e A change event.
+ * @param {Backbone.Model} e A backbone model.
  * @private
  */
-fmb.views.Account.prototype.setUpDeviceViews_ = function(e) {
-  fmb.log('fmb.views.Account setUpDeviceViews_',
+fmb.views.Account.prototype.onAddDevice_ = function(model) {
+  fmb.log('fmb.views.Account onAddDevice_',
           this.model.get('devices').length);
   this.model.get('devices').each(_.bind(function(model) {
-    // Don't make views for devices without ids.
-    if (model.id && !this.subViews_[model.id]) {
-      this.subViews_[model.id] = new fmb.views.Device({
+    if (!this.subViews_[model.cid]) {
+      this.subViews_[model.cid] = new fmb.views.Device({
         parent: this,
         model: model
       });
-      this.subViews_[model.id].render();
-      this.$devices.append(this.subViews_[model.id].$el);
+      this.subViews_[model.cid].render();
+      this.$devices.append(this.subViews_[model.cid].$el);
     }
   }, this));
 };
 
 
 /**
+ * @param {Backbone.Model} e A backbone model.
+ * @private
+ */
+fmb.views.Account.prototype.onRemoveDevice_ = function(model) {
+  this.subViews_[model.cid] && this.subViews_[model.cid].remove();
+  this.subViews_[model.cid] = null;
+};
+
+
+/**
+ * Wire up a SELECT to change the visible device one day.
  * @param {Event} e A change event.
  * @private
  */
@@ -379,6 +391,7 @@ fmb.views.Device = Backbone.View.extend({
   events: {
     'submit form.device-update': 'onSubmitUpdateDevice_',
     'tap input[type="radio"]': 'onChangeUpdateEnabled_',
+    'tap .fmb-remove': 'onClickRemove_',
     'change [name="update_frequency"]': 'onChangeUpdateFrequency_'
   }
 });
@@ -414,7 +427,21 @@ fmb.views.Device.prototype.render = function() {
  * @param {Event} e A change event.
  * @private
  */
-fmb.views.Account.prototype.onChangeUpdateEnabled_ = function(e) {
+fmb.views.Device.prototype.onClickRemove_ = function(e) {
+  var isSure = window.confirm(
+      'Really remove this device? - this is not revertable.');
+  if (!isSure) {
+    return;
+  }
+  this.model.collection.remove(this.model.id);
+};
+
+
+/**
+ * @param {Event} e A change event.
+ * @private
+ */
+fmb.views.Device.prototype.onChangeUpdateEnabled_ = function(e) {
   this.updateDevice_();
 };
 
@@ -423,7 +450,7 @@ fmb.views.Account.prototype.onChangeUpdateEnabled_ = function(e) {
  * @param {Event} e A change event.
  * @private
  */
-fmb.views.Account.prototype.onChangeUpdateFrequency_ = function(e) {
+fmb.views.Device.prototype.onChangeUpdateFrequency_ = function(e) {
   this.updateDevice_();
 };
 
@@ -432,7 +459,7 @@ fmb.views.Account.prototype.onChangeUpdateFrequency_ = function(e) {
  * @param {Event} e A submit event.
  * @private
  */
-fmb.views.Account.prototype.onSubmitUpdateDevice_ = function(e) {
+fmb.views.Device.prototype.onSubmitUpdateDevice_ = function(e) {
   e.preventDefault();
   this.updateDevice_();
 };
@@ -441,7 +468,7 @@ fmb.views.Account.prototype.onSubmitUpdateDevice_ = function(e) {
 /**
  * @private
  */
-fmb.views.Account.prototype.updateDevice_ = function() {
+fmb.views.Device.prototype.updateDevice_ = function() {
   var $form = this.$('form.device-update');
   var data = fmb.views.serializeFormToObject($form);
   if (_.has(data, 'update_enabled')) {
@@ -458,7 +485,7 @@ fmb.views.Account.prototype.updateDevice_ = function() {
 /**
  * @private
  */
-fmb.views.Account.prototype.debouncedUpdateDevice_ = _.debounce(function() {
+fmb.views.Device.prototype.debouncedUpdateDevice_ = _.debounce(function() {
   this.updateDevice_();
 }, 500);
 
@@ -476,7 +503,7 @@ fmb.views.Notifying = Backbone.View.extend({
   events: {
     'tap .notifying-add-phone': 'onClickNotifyingAdd_',
     'tap .notifying-add-email': 'onClickNotifyingAdd_',
-    'tap .remove': 'onClickRemove_'
+    'tap .fmb-remove': 'onClickRemove_'
   }
 });
 
@@ -607,8 +634,11 @@ fmb.views.Following.prototype.setIsActive = function(isActive) {
  * @private
  */
 fmb.views.Following.prototype.onRemove_ = function(model) {
-  this.subViews_[model.id].remove();
-  delete this.subViews_[model.id];
+  if (!this.subViews_[model.cid]) {
+    return;
+  }
+  this.subViews_[model.cid].remove();
+  delete this.subViews_[model.cid];
 };
 
 
@@ -633,13 +663,13 @@ fmb.views.Following.prototype.render = function() {
 fmb.views.Following.prototype.addSubview_ = function(model) {
   fmb.log('fmb.views.Following addSubview_', model.id);
   // Don't make views for models without ids.
-  if (model.id && !this.subViews_[model.id]) {
-    this.subViews_[model.id] = new fmb.views.FollowingUser({
+  if (!this.subViews_[model.cid]) {
+    this.subViews_[model.cid] = new fmb.views.FollowingUser({
       parent: this,
       model: model
     });
-    this.subViews_[model.id].render();
-    this.$table.append(this.subViews_[model.id].$el);
+    this.subViews_[model.cid].render();
+    this.$table.append(this.subViews_[model.cid].$el);
   }
 };
 
@@ -657,13 +687,15 @@ fmb.views.FollowingUser = Backbone.View.extend({
   tagName: 'tbody',
   events: {
     'tap .following-user': 'onClickFollowingUser_',
-    'tap .remove': 'onClickRemove_'
+    'tap .fmb-remove': 'onClickRemove_'
   }
 });
 
 
 /** @inheritDoc */
-fmb.views.FollowingUser.prototype.initialize = function() {
+fmb.views.FollowingUser.prototype.initialize = function(options) {
+  this.parent = options.parent;
+  this.listenTo(this.model, 'change', _.debounce(this.render, this));
   this.listenTo(this.model.get('devices'), 'add', this.render);
   this.listenTo(this.model.get('devices'), 'remove', this.onRemoveDevice_);
   this.subViews_ = {};
@@ -696,9 +728,9 @@ fmb.views.FollowingUser.prototype.onClickFollowingUser_ = function(e) {
  * @param {Backbone.Model}
  * @private
  */
-fmb.views.Following.prototype.onRemoveUser_ = function(model) {
-  this.subViews_[model.id].remove();
-  delete this.subViews_[model.id];
+fmb.views.FollowingUser.prototype.onRemoveDevice_ = function(model) {
+  this.subViews_[model.cid].remove();
+  delete this.subViews_[model.cid];
 };
 
 
@@ -712,53 +744,47 @@ fmb.views.FollowingUser.prototype.onClickRemove_ = function(e) {
     return;
   }
   fmb.log('fmb.views.FollowingUser onClickRemove_', this.model.id);
-  this.model.remove(this.model.id);
-};
-
-
-/**
- * @param {Backbone.Model} model A model instance.
- * @private
- */
-fmb.views.FollowingUser.prototype.onChange_ = function(model) {
-  fmb.log('fmb.views.FollowingUser onChange_', model.id);
-  this.render();
+  this.model.collection.remove(this.model.id);
 };
 
 
 /** @inheritDoc */
 fmb.views.FollowingUser.prototype.render = function() {
-  fmb.log('fmb.views.FollowingUser render', this.$el);
-  if (!this.rendered_) {
-    this.rendered_ = true;
-    this.$el.data('key', this.model.key);
-    var templateData = this.model.toJSON();
-    if (app.model.user.id == this.model.id) {
-      templateData['is_current_user'] = true;
-    }
-    this.$el.html(fmb.views.getTemplateHtml('following_user', templateData));
+  fmb.log('fmb.views.FollowingUser render',
+          this.model.id, this.model.get('name'));
+
+  this.$el.data('key', this.model.key);
+  var templateData = this.model.toJSON();
+  if (app.model.user.id == this.model.id) {
+    templateData['is_current_user'] = true;
   }
+
+  this.$userRow && this.$userRow.remove();
+  this.$userRow =
+      $(fmb.views.getTemplateHtml('following_user', templateData));
+  this.$el.prepend(this.$userRow);
+
   this.model.get('devices').each(_.bind(function(model) {
-    // Don't make views for models without ids.
-    if (model.id && !this.subViews_[model.id]) {
-      this.subViews_[model.id] = new fmb.views.FollowingDevice({
+    if (!this.subViews_[model.cid]) {
+      this.subViews_[model.cid] = new fmb.views.FollowingDevice({
         parent: this,
         model: model
       });
-      this.subViews_[model.id].render();
-      this.$el.append(this.subViews_[model.id].$el);
+      this.subViews_[model.cid].render();
+      this.$el.append(this.subViews_[model.cid].$el);
     }
   }, this));
+
   return this;
 };
 
 
 /** @inheritDoc */
 fmb.views.FollowingUser.prototype.remove = function() {
-  _.each(this.subViews_, function(view, id) {
-    view.remove();
-    delete this.subViews_[id];
-  });
+  _.each(this.subViews_, _.bind(function(view, cid) {
+    view && view.remove();
+    delete this.subViews_[cid];
+  }, this));
   Backbone.View.prototype.remove.apply(this, arguments);
 };
 
@@ -775,15 +801,18 @@ fmb.views.FollowingUser.prototype.remove = function() {
 fmb.views.FollowingDevice = Backbone.View.extend({
   className: 'fmb-following-device',
   tagName: 'tr',
-  events: {}
+  events: {
+    'tap .fmb-remove': 'onClickRemove_'
+  }
 });
 
 
 /** @inheritDoc */
-fmb.views.FollowingDevice.prototype.initialize = function() {
-  this.listenTo(this.model, 'change', this.render);
+fmb.views.FollowingDevice.prototype.initialize = function(options) {
+  this.parent = options.parent;
+  this.listenTo(this.model, 'change', _.debounce(this.render, this));
   this.listenTo(this.model.get('settings'), 'add change remove',
-                this.render);
+                _.debounce(this.render, this));
 };
 
 /** @inheritDoc */
@@ -844,7 +873,9 @@ fmb.views.FollowingDevice.prototype.renderGraph_ = function() {
   var opts = {
     'dataFormatX': function (x) { return new Date(x); },
     'tickFormatX': function (x) { return d3.time.format('%a %I%p')(x); },
-    'axisPaddingTop': 20,
+    'axisPaddingTop': 10,
+    'axisPaddingBottom': 0,
+    'axisPaddingLeft': 0,
     'tickHintX': 4,
     'tickHintY': 2,
     'interpolation': 'basis'

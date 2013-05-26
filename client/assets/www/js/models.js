@@ -184,7 +184,7 @@ fmb.models.NotifyingCollection.prototype.add = function(obj, options) {
  * @private
  */
 fmb.models.NotifyingCollection.prototype.onAdd_ = function(model) {
-  fmb.log('fmb.models.NotifyingCollection onAdd:',
+  fmb.log('fmb.models.NotifyingCollection onAdd_:',
            model.id, model.get('means'));
 
   if (model.id) {
@@ -199,8 +199,7 @@ fmb.models.NotifyingCollection.prototype.onAdd_ = function(model) {
   }, {
     success: _.bind(function() {
       fmb.log('MONEY TRAIN save success w/ notify model', model.get('key'));
-    }, this),
-    wait: true
+    }, this)
   });
 
 };
@@ -263,7 +262,6 @@ fmb.models.DeviceUnMapped = fmb.Model.extend({
 fmb.models.DeviceUnMapped.prototype.initialize = function(opt_data, opt_options) {
   fmb.Model.prototype.initialize.apply(this, arguments);
   var options = opt_options || {};
-
   if (options.isUserDevice) {
     this.on('battery_status', this.onBatteryStatus_, this);
     this.once('change:key', function() {
@@ -333,6 +331,10 @@ fmb.models.DeviceUnMapped.prototype.getTemplateData = function() {
   if (!templateData['update_enabled']) {
     delete templateData['update_enabled'];
   }
+  // Don't want to be able to delete the current device.
+  if (this.id === app.model.user.device.id) {
+    templateData['is_user_device'] = true;
+  }
   return templateData;
 };
 
@@ -391,6 +393,32 @@ fmb.models.DeviceCollection = fmb.Collection.extend({
 });
 
 
+/** @inheritDoc */
+fmb.models.DeviceCollection.prototype.initialize = function() {
+  fmb.Collection.prototype.initialize.apply(this, arguments);
+  this.on('remove', this.onRemove_, this);
+};
+
+
+/**
+ * @param {Backbone.Model} model A model.
+ * @private
+ */
+fmb.models.DeviceCollection.prototype.onRemove_ = function(model) {
+  model.save(null, {
+    url: fmb.models.getApiUrl('/device/delete'),
+    success: _.bind(function() {
+      fmb.log('fmb.models.DeviceCollection MONEY TRAIN w/ remove',
+              model.id);
+      this.parent.saveToStorage();
+    }, this),
+    error: function(model, xhr, options) {
+      fmb.log('FAIL removing ', model.id, xhr.status);
+    }
+  });
+};
+
+
 /******************************************************************************/
 
 
@@ -418,6 +446,14 @@ fmb.models.FollowingCollection = fmb.Collection.extend({
   //localStorage: new Backbone.LocalStorage('FollowingCollection'),
   model: fmb.models.FollowingUser
 });
+
+
+/** @inheritDoc */
+fmb.models.FollowingCollection.prototype.initialize = function() {
+  fmb.Collection.prototype.initialize.apply(this, arguments);
+  this.on('add', this.onAdd_, this);
+  this.on('remove', this.onRemove_, this);
+};
 
 
 /**
@@ -459,25 +495,32 @@ fmb.models.FollowingCollection.prototype.addByKey = function(userKey) {
   }
 
   this.add({
-    'name': 'Adding w/' + userKey
+    'name': 'Adding new friend ...',
+    'following_user_key': userKey
   });
 };
 
 
 /**
- * @param {Backbone.Model} model A follow user model.
+ * @param {Backbone.Model} model A model.
  * @private
  */
 fmb.models.FollowingCollection.prototype.onAdd_ = function(model) {
+  if (model.id) {
+    fmb.log('fmb.models.FollowingCollection - no onAdd_', model.id,
+            'to server, already has id.');
+    return;
+  }
+
+  fmb.log('fmb.models.FollowingCollection onAdd_',
+          model.get('following_user_key'));
   model.save({
-    'following_user_key': userKey,
-    'cid': this.cid
+    'cid': model.cid
   }, {
-    wait: true,
     url: fmb.models.getApiUrl('/following'),
     success: _.bind(function() {
       fmb.log('MONEY TRAIN FollowingCollection onAdd_.');
-      //this.fetch();
+      this.parent.saveToStorage();
     }, this),
     error: function(model, xhr, options) {
       if (xhr.status === 404) {
@@ -491,15 +534,16 @@ fmb.models.FollowingCollection.prototype.onAdd_ = function(model) {
 
 
 /**
- * @param {Backbone.Model} followModel A follow user model.
+ * @param {Backbone.Model} model A model.
  * @private
  */
 fmb.models.FollowingCollection.prototype.onRemove_ = function(model) {
   model.save(null, {
-    url: fmb.models.getApiUrl('/following/delete/'),
+    url: fmb.models.getApiUrl('/following/delete'),
     success: _.bind(function() {
       fmb.log('fmb.models.FollowingCollection MONEY TRAIN w/ remove',
               model.id);
+      this.parent.saveToStorage();
     }, this),
     error: function(model, xhr, options) {
       fmb.log('FAIL removing ', model.id, xhr.status);

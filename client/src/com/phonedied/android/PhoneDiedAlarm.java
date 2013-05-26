@@ -111,16 +111,19 @@ public class PhoneDiedAlarm extends BroadcastReceiver {
     }
 
     public void SendBatteryStatus(Context context,
-                                  String apiToken, String userKey, String deviceKey,
+                                  String apiToken,
+                                  String userKey,
+                                  String deviceKey,
                                   String updatePath) {
         Log.d(TAG, "SendBatteryStatus: " + apiToken + ", " + userKey + ", " +
               deviceKey + ", " + updatePath);
 
-        AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
-        ConnectivityManager connManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         PowerManager.WakeLock wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "");
         wl.acquire();
+
+        AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+        ConnectivityManager connManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
 
         IntentFilter batIntentFilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
         Intent batteryIntent = context.getApplicationContext().

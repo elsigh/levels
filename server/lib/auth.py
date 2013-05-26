@@ -17,11 +17,11 @@ class LoginHandler(WebRequestHandler):
     """Handles default landing page"""
     user_token = self.request.get('user_token')
     self.session['user_token'] = user_token
-    logging.info('SET USER TOKEN %s' % user_token)
     tpl_data = {}
     if self.current_user:
-      memcache.set('user_token-%s' % user_token, self.current_user.key.urlsafe(), 60)
-      logging.info('SET USER TOKEN KEY: %s' % self.current_user.key.urlsafe())
+      memcache.set('user_token-%s' % user_token, self.current_user.key.id(), 60)
+      logging.info('Set user_token<->id match - %s, %s' %
+                   (user_token, self.current_user.key.id()))
       uri = '/profile/%s' % self.current_user.key.urlsafe()
       if user_token:
         uri = uri + '?close=1'
