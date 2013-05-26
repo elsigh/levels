@@ -58,6 +58,7 @@ routes = [
     # WWW
     Route('/profile/<user_key>', handler='lib.www.ProfileHandler'),
     Route('/profile', handler='lib.www.ProfileHandler'),
+    Route('/', handler='lib.www.IndexHandler'),
 ]
 
 app = webapp2.WSGIApplication(routes, config=app_config, debug=True)

@@ -270,8 +270,8 @@ fmb.models.DeviceUnMapped.prototype.initialize = function(opt_data, opt_options)
       localStorage.setItem('device_key', this.id);
 
       if (this.user.get('api_token')) {
-        fmb.log('fmb.models.MyDevice START phonediedservice plugin!');
-        var plugin = cordova.require('cordova/plugin/phonediedservice');
+        fmb.log('fmb.models.MyDevice START levelsservice plugin!');
+        var plugin = cordova.require('cordova/plugin/levels');
         plugin && plugin.startService();
       }
     }, this);
@@ -352,7 +352,7 @@ fmb.models.Device = Backbone.IdentityMap(
 fmb.models.MyDevice.prototype.onChange_ = function() {
   var changedAttributes = this.changedAttributes();
   fmb.log('fmb.models.MyDevice onChange_');
-  var plugin = cordova.require('cordova/plugin/phonediedservice');
+  var plugin = cordova.require('cordova/plugin/levels');
   if (plugin && changedAttributes) {
 
     if ((_.has(changedAttributes, 'update_enabled') ||
@@ -583,7 +583,7 @@ fmb.models.User.prototype.initialize = function(opt_data, opt_options) {
     fmb.log('Set API token for fmb.models.sync', this.get('api_token'));
     fmb.models.sync.apiToken = this.get('api_token');
 
-    var plugin = cordova.require('cordova/plugin/phonediedservice');
+    var plugin = cordova.require('cordova/plugin/levels');
     if (this.device.id && plugin) {
       fmb.log('fmb.models.MyDevice got API token, start plugin service!');
       plugin.startService();
