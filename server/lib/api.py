@@ -289,7 +289,7 @@ def send_battery_notification_email(user_id, device_id, notifying_id, send=True)
         logging.info('BAIL CITY BABY, DONE EMAIL NOTIFIED ENUFF')
         return
 
-    mail.send_mail(sender='FollowMyBattery Alert <elsigh@followmybattery.com>',
+    mail.send_mail(sender='Levels Alert <elsigh@levels.com>',
                    to='%s <%s>' % (notifying.name, notifying.means),
                    subject='%s has a very sad phone =(' % notifying.name,
                    body=rendered)
