@@ -14,18 +14,6 @@ td {
   text-align: center;
 }
 
-footer {
-  color: #ddd;
-  position: fixed;
-  font-size: 90%;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  color: #fff;
-  padding: 10px;
-  text-align: center;
-}
-
 .avatar {
   display: inline-block;
   vertical-align: middle;
