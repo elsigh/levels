@@ -12,6 +12,7 @@ var server;
 // Don't rewrite our URLs
 sinon.stub(window.history, 'pushState');
 sinon.stub(window, 'open', function() { return {}; });
+sinon.stub(window, 'confirm', function() { return true; });
 sinon.stub(cordova, 'require');
 
 function setUp() {
@@ -62,7 +63,7 @@ function testApp() {
                localStorage.getItem('user_key'));
   assertEquals(userTokenResponse['api_token'], app.model.user.get('api_token'));
   assertEquals(userTokenResponse['name'],
-               app.view.currentView.$el.find('h3').text());
+               app.view.currentView.$el.find('h2').text());
   serverRequestCountExpected++;
   assertEquals(serverRequestCountExpected, server.requests.length);
   assertEquals(fmb.models.getApiUrl('/device'),
@@ -124,9 +125,11 @@ function testApp() {
       200, API_RESPONSE_HEADERS,
       JSON.stringify(notifySaveResponse));
 
+
 /******************************************************************************/
 
-  // Tests that we can remove from the notification collection.
+
+  // Tests that we can remove users from the notification collection.
   app.model.user.device.get('notifying').remove('test_notify_key');
   serverRequestCountExpected++;
   assertEquals(fmb.models.getApiUrl('/notifying/delete'),
@@ -143,6 +146,45 @@ function testApp() {
       200, API_RESPONSE_HEADERS,
       JSON.stringify(notifySaveResponse));
   assertEquals(0, app.model.user.device.get('notifying').length);
+
+
+/******************************************************************************/
+
+
+  // Tests that we can have and delete another device.
+  app.model.user.fetch();
+  serverRequestCountExpected++;
+  var expectedUrl = fmb.models.getApiUrl('/user') + '?' +
+      'api_token=' + app.model.user.get('api_token') + '&' +
+      'user_key=' + app.model.user.id;
+  assertEquals(expectedUrl,
+               server.requests[serverRequestCountExpected - 1].url);
+
+  var userFetchResponse = fmb.clone(app.model.user.toJSON());
+  userFetchResponse['devices'].push({
+    'key': 'test_device2_key',
+    'name': 'test_device2_name'
+  });
+  server.requests[serverRequestCountExpected - 1].respond(
+      200, API_RESPONSE_HEADERS,
+      JSON.stringify(userFetchResponse));
+  assertEquals(2, app.model.user.get('devices').length);
+
+  assertEquals(2, app.view.currentView.$('.fmb-device').length);
+  // Only the new one is deletable.
+  assertEquals(1, app.view.currentView.$('.fmb-device .fmb-remove').length);
+
+  app.view.currentView.$('.fmb-device .fmb-remove').trigger('tap');
+
+  serverRequestCountExpected++;
+  assertEquals(fmb.models.getApiUrl('/device/delete'),
+               server.requests[serverRequestCountExpected - 1].url);
+  server.requests[serverRequestCountExpected - 1].respond(
+      200, API_RESPONSE_HEADERS,
+      JSON.stringify({'status': 0}));
+  assertEquals(1, app.model.user.get('devices').length);
+  assertEquals(1, app.view.currentView.$('.fmb-device').length);
+
 
 /******************************************************************************/
 
@@ -165,7 +207,7 @@ function testApp() {
     'level': 80,
     'isPlugged': false
   });
-  clock.tick(1);  // renderGraph is deferred
+  clock.tick(2);  // render/renderGraph is deferred
   assertEquals('80%', app.view.currentView.$(
       '.fmb-following-device .battery-level').text().trim());
 
@@ -175,7 +217,7 @@ function testApp() {
     'level': 70,
     'isPlugged': false
   });
-  clock.tick(1);  // renderGraph is deferred
+  clock.tick(2);  // render/renderGraph is deferred
   assertEquals('70%', app.view.currentView.$(
       '.fmb-following-device .battery-level').text().trim());
 
@@ -185,7 +227,7 @@ function testApp() {
     'level': 70,
     'isPlugged': false
   });
-  clock.tick(1);  // renderGraph is deferred
+  clock.tick(2);  // render/renderGraph is deferred
   assertEquals('70%', app.view.currentView.$(
       '.fmb-following-device .battery-level').text().trim());
 
@@ -270,12 +312,12 @@ function testApp() {
   server.requests[serverRequestCountExpected - 1].respond(
       200, API_RESPONSE_HEADERS,
       JSON.stringify(followingResponse));
-  clock.tick(1);  // renderGraph is deferred
+  clock.tick(2);  // render/renderGraph is deferred
 
   // UI updates
   assertEquals(2, app.view.currentView.$('.fmb-following-user').length);
   assertEquals(2, app.view.currentView.$('.fmb-following-device').length);
-  assertEquals(1, app.view.currentView.$('.fmb-following-user .remove').length);
+  assertEquals(1, app.view.currentView.$('.fmb-following-user .fmb-remove').length);
   assertEquals('70%', $(app.view.currentView.$(
       '.fmb-following-device .battery-level')[0]).text().trim());
   assertEquals('65%', $(app.view.currentView.$(
@@ -286,7 +328,7 @@ function testApp() {
     'level': 40,
     'isPlugged': true
   });
-  clock.tick(1);  // renderGraph is deferred
+  clock.tick(2);  // render/renderGraph is deferred
   assertEquals('40%', $(app.view.currentView.$(
       '.fmb-following-device .battery-level')[0]).text().trim());
 }

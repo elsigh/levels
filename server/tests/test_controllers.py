@@ -84,7 +84,7 @@ class RequestHandlerTest(unittest.TestCase):
         assert elsigh_user.api_token is not None
 
         user_token = 'foobar'
-        memcache.add('user_token-%s' % user_token, elsigh_user.key.urlsafe())
+        memcache.add('user_token-%s' % user_token, elsigh_user.key.id())
         response = self.testapp.post_json('/api/user/token',
                                           params=dict(user_token=user_token))
         body = response.normal_body
@@ -137,7 +137,7 @@ class RequestHandlerTest(unittest.TestCase):
         obj = json.loads(body)
         self.assertEquals(1, obj['update_enabled'])
 
-        # Test an ancestor query
+        # Test an ancestor query to ensure all our relationships are setup.
         q = models.Device.query(ancestor=elsigh_user.key)
         self.assertEquals(1, q.count())
         query_device = q.get()
@@ -157,6 +157,39 @@ class RequestHandlerTest(unittest.TestCase):
         # body = response.normal_body
         # obj = json.loads(body)
         # self.assertEquals(0, obj['update_enabled'])
+
+
+    def test_ApiDeviceDeleteHandler(self):
+        elsigh_user = models.FMBUser(
+            name='elsighmon'
+        )
+        elsigh_user.put()
+
+        elsigh_device = models.Device(
+            uuid='test_device_uuid',
+            parent=elsigh_user.key,
+            notify_level=10
+        )
+        elsigh_device.put()
+
+        elsigh_device2 = models.Device(
+            uuid='test_device_uuid2',
+            parent=elsigh_user.key,
+            notify_level=10
+        )
+        elsigh_device2.put()
+
+        q = models.Device.query(ancestor=elsigh_user.key)
+        self.assertEquals(2, q.count())
+
+        response = self.testapp.post_json('/api/device/delete',
+                                          params=dict(api_token=elsigh_user.api_token,
+                                                      user_key=elsigh_user.key.urlsafe(),
+                                                      device_key=elsigh_device.key.urlsafe(),
+                                                      key=elsigh_device2.key.urlsafe()))
+
+        q = models.Device.query(ancestor=elsigh_user.key)
+        self.assertEquals(1, q.count())
 
     def test_ApiSettingsHandler(self):
         elsigh_user = models.FMBUser(

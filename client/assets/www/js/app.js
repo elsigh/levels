@@ -207,22 +207,31 @@ fmb.App.FOLLOWING_URL_RE = /followmybattery\.com\/profile\/(.*)/;
  */
 fmb.App.prototype.checkIntent_ = function() {
   fmb.log('fmb.App checkIntent');
-  window.plugins &&
-      window.plugins.webintent.getExtra(WebIntent.EXTRA_TEXT, function (url) {
-    //alert('GOT INTENT URL' + url);
-  }, function() {
-    //alert('Nada');
-  });
-  window.plugins && window.plugins.webintent.getUri(
+  if (!(window.plugins && window.plugins.webintent)) {
+    return;
+  }
+
+  window.plugins.webintent.getExtra(WebIntent.EXTRA_TEXT,
+      function (url) {
+        fmb.log('fmb.App webintent get EXTRA_TEXT got url', url);
+      },
+      function() {
+        fmb.log('fmb.App webintent get EXTRA_TEXT got NADA');
+      });
+
+  window.plugins.webintent.getUri(
       function(url) {
-        fmb.log('fmb.App checkIntent_ getUri:' + url);
         var match = fmb.App.FOLLOWING_URL_RE.exec(url);
+        fmb.log('fmb.App webintent getUri:', url, match);
         if (match && match.length) {
           var userKey = match[1];
           _.delay(_.bind(function() {
             app.model.user.get('following').addByKey(userKey);
           }, window['app']), 300);
         }
+      },
+      function() {
+        fmb.log('fmb.App webintent getUri NADA');
       });
 };
 
