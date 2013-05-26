@@ -95,9 +95,15 @@ fmbProfile.init = function() {
     var level = $el.data('level');
     $el.css('background-image',
             '-webkit-gradient(linear, left top, right top, ' +
-                              'color-stop(' + level + '%, green), ' +
-                              'color-stop(' + level + '%, white))');
+                              'color-stop(' + level + '%, #34b2e0), ' +
+                              'color-stop(' + level + '%, #666666))');
+  });
 
+  $('[data-utc-date]').each(function(i, el) {
+    var $el = $(el);
+    var utc = $el.data('utc-date');
+    var localDate = new Date(utc);
+    $el.text(fmb.models.prettyDate(localDate));
   });
 
   fmbProfile.renderChart(window.fmbUser);
