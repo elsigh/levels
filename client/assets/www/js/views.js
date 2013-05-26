@@ -134,7 +134,7 @@ fmb.views.App.prototype.onClickShare_ = function(e) {
     var extras = {};
     extras[WebIntent.EXTRA_TEXT] = fmb.models.SERVER_SHARE + '/profile/' +
         this.model.user.get('key');
-    extras[WebIntent.EXTRA_SUBJECT] = 'Level - Check my stats!';
+    extras[WebIntent.EXTRA_SUBJECT] = 'Levels - Check my stats!';
     window.plugins.webintent.startActivity({
         action: WebIntent.ACTION_SEND,
         type: 'text/plain',

@@ -49,7 +49,7 @@ class ProfileHandler(WebRequestHandler):
         if 'devices' in template_data['user'] and len(template_data['user']['devices']):
             if ('settings' in template_data['user']['devices'][0] and
                 len(template_data['user']['devices'][0]['settings'])):
-                template_data['title'] += str(template_data['user']['devices'][0]['settings']['battery_level']) + '%'
+                template_data['title'] += str(template_data['user']['devices'][0]['settings'][0]['battery_level']) + '%'
 
         template_data['title'] += ' - Levels'
 
@@ -58,5 +58,8 @@ class ProfileHandler(WebRequestHandler):
 
 class IndexHandler(WebRequestHandler):
   def get(self):
-    return self.redirect(
-        '/profile/ahNkZXZ-Zm9sbG93bXliYXR0ZXJ5cg8LEgdGTUJVc2VyGLmUAQw')
+    if self.is_production:
+        elsigh_key = 'ahFzfmZvbGxvd215YmF0dGVyeXIPCxIHRk1CVXNlchi5lAEM'
+    else:
+        elsigh_key = 'ahNkZXZ-Zm9sbG93bXliYXR0ZXJ5cg8LEgdGTUJVc2VyGLmUAQw'
+    return self.redirect('/profile/%s' % elsigh_key)
