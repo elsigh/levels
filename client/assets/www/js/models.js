@@ -332,6 +332,10 @@ fmb.models.DeviceUnMapped.prototype.getTemplateData = function() {
   if (!templateData['update_enabled']) {
     delete templateData['update_enabled'];
   }
+  // Don't want to be able to delete the current device.
+  if (this.id === app.model.user.device.id) {
+    templateData['is_user_device'] = true;
+  }
   return templateData;
 };
 
@@ -388,6 +392,32 @@ fmb.models.MyDevice.prototype.onChange_ = function() {
 fmb.models.DeviceCollection = fmb.Collection.extend({
   model: fmb.models.Device
 });
+
+
+/** @inheritDoc */
+fmb.models.DeviceCollection.prototype.initialize = function() {
+  fmb.Collection.prototype.initialize.apply(this, arguments);
+  this.on('remove', this.onRemove_, this);
+};
+
+
+/**
+ * @param {Backbone.Model} model A model.
+ * @private
+ */
+fmb.models.DeviceCollection.prototype.onRemove_ = function(model) {
+  model.save(null, {
+    url: fmb.models.getApiUrl('/device/delete'),
+    success: _.bind(function() {
+      fmb.log('fmb.models.DeviceCollection MONEY TRAIN w/ remove',
+              model.id);
+      this.parent.saveToStorage();
+    }, this),
+    error: function(model, xhr, options) {
+      fmb.log('FAIL removing ', model.id, xhr.status);
+    }
+  });
+};
 
 
 /******************************************************************************/
@@ -473,7 +503,7 @@ fmb.models.FollowingCollection.prototype.addByKey = function(userKey) {
 
 
 /**
- * @param {Backbone.Model} model A follow user model.
+ * @param {Backbone.Model} model A model.
  * @private
  */
 fmb.models.FollowingCollection.prototype.onAdd_ = function(model) {
@@ -505,7 +535,7 @@ fmb.models.FollowingCollection.prototype.onAdd_ = function(model) {
 
 
 /**
- * @param {Backbone.Model} followModel A follow user model.
+ * @param {Backbone.Model} model A model.
  * @private
  */
 fmb.models.FollowingCollection.prototype.onRemove_ = function(model) {

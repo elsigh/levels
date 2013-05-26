@@ -58,7 +58,11 @@
   border-bottom: 2px solid #666;
 }
 
-/* notifying */
+.fmb-device .device > .fmb-remove {
+  margin-top: 5px;
+}
+
+/* Notifying table */
 .fmb-notifying .fmb-remove {
   margin-top: -15px;
 }

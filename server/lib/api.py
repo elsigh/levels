@@ -105,9 +105,11 @@ class ApiRequestHandler(WebRequestHandler):
         """Ensures that the passed in device_key is owned by current_user."""
         if 'device_key' not in self._json_request_data:
             return
-        device_key = self._json_request_data['device_key']
-        device = ndb.Key(urlsafe=device_key).get()
+        device_key_urlsafe = self._json_request_data['device_key']
+        device_key = ndb.Key(urlsafe=device_key_urlsafe)
+        device = device_key.get()
         assert device
+        assert device_key.parent().id() == self.current_user.key.id()
         return device
 
     def _assert_api_token(self):
@@ -194,25 +196,18 @@ class ApiDeviceHandler(ApiRequestHandler):
         return self.output_json_success(device.to_dict())
 
     def post(self):
-        # update
-        if 'id' in self._json_request_data:
-            device = ndb.Key(models.Device, int(self._json_request_data['id'])).get()
-            assert device
-        else:
-            q = models.Device.query().filter(
-                models.Device.uuid == self._json_request_data['uuid']
-            )
-            if q.count() == 0:
-                device = models.Device(
-                    uuid=self._json_request_data['uuid'],
-                    parent=self.current_user.key
-                )
-            else:
-                # TODO(elsigh): This means the user making this request
-                # will take over ownership of an existing
-                # device record which may or may not be desirable.
-                device = q.get()
-                device.parent = self.current_user.key
+        q = models.Device.query().filter(
+            models.Device.uuid == self._json_request_data['uuid']
+        )
+
+        # Don't let post act like edit.
+        if q.count() != 0:
+             return self.output_json_error({}, 404)
+
+        device = models.Device(
+            uuid=self._json_request_data['uuid'],
+            parent=self.current_user.key
+        )
 
         device.user_agent_string = self._json_request_data['user_agent_string']
         device.update_enabled = int(self._json_request_data['update_enabled'])
@@ -225,6 +220,24 @@ class ApiDeviceHandler(ApiRequestHandler):
         device.put()
 
         return self.output_json_success(device.to_dict())
+
+
+class ApiDeviceDeleteHandler(ApiRequestHandler):
+    def post(self):
+        # Note we cannot use _get_device_by_device_key here because we will
+        # also pass in the device_key that is the actor in this case.
+        device_key = ndb.Key(urlsafe=self._json_request_data['key'])
+        device = device_key.get()
+        assert device_key.parent().id() == self.current_user.key.id()
+
+        # TODO(elsigh): Perhaps we shouldn't really delete data. duh.
+        # Note, we're leaving all the orphaned settings data hanging around but
+        # we'll no longer know what kind of device its tied to.
+        # We cannot just reassign the parent or assign it to None as it is
+        # inherently part of the key structure.
+        logging.info('Removing current_user from device %s' % device)
+        device.key.delete()
+        return self.output_json_success()
 
 
 app_for_taskqueue = webapp2.WSGIApplication()
@@ -437,7 +450,6 @@ class ApiFollowingDeleteHandler(ApiRequestHandler):
         follow_record = q.get()
         follow_record.key.delete()
         logging.info('Deleted follow_record!!')
-
         return self.output_json_success(follow_user.to_dict())
 
 

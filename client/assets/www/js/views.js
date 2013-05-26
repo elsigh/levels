@@ -251,9 +251,9 @@ fmb.views.Account.prototype.initialize = function(options) {
   this.$devices = $('<div class="devices"></div>');
 
   this.subViews_ = {};
-  this.setUpDeviceViews_();
-  this.listenTo(this.model.get('devices'), 'add change remove',
-      this.setUpDeviceViews_);
+  this.onAddDevice_();
+  this.listenTo(this.model.get('devices'), 'add', this.onAddDevice_);
+  this.listenTo(this.model.get('devices'), 'remove', this.onRemoveDevice_);
 };
 
 
@@ -277,11 +277,11 @@ fmb.views.Account.prototype.render = function() {
 
 
 /**
- * @param {Event} e A change event.
+ * @param {Backbone.Model} e A backbone model.
  * @private
  */
-fmb.views.Account.prototype.setUpDeviceViews_ = function(e) {
-  fmb.log('fmb.views.Account setUpDeviceViews_',
+fmb.views.Account.prototype.onAddDevice_ = function(model) {
+  fmb.log('fmb.views.Account onAddDevice_',
           this.model.get('devices').length);
   this.model.get('devices').each(_.bind(function(model) {
     if (!this.subViews_[model.cid]) {
@@ -293,6 +293,16 @@ fmb.views.Account.prototype.setUpDeviceViews_ = function(e) {
       this.$devices.append(this.subViews_[model.cid].$el);
     }
   }, this));
+};
+
+
+/**
+ * @param {Backbone.Model} e A backbone model.
+ * @private
+ */
+fmb.views.Account.prototype.onRemoveDevice_ = function(model) {
+  this.subViews_[model.cid] && this.subViews_[model.cid].remove();
+  this.subViews_[model.cid] = null;
 };
 
 
@@ -381,6 +391,7 @@ fmb.views.Device = Backbone.View.extend({
   events: {
     'submit form.device-update': 'onSubmitUpdateDevice_',
     'tap input[type="radio"]': 'onChangeUpdateEnabled_',
+    'tap .fmb-remove': 'onClickRemove_',
     'change [name="update_frequency"]': 'onChangeUpdateFrequency_'
   }
 });
@@ -416,7 +427,16 @@ fmb.views.Device.prototype.render = function() {
  * @param {Event} e A change event.
  * @private
  */
-fmb.views.Account.prototype.onChangeUpdateEnabled_ = function(e) {
+fmb.views.Device.prototype.onClickRemove_ = function(e) {
+  this.model.collection.remove(this.model.id);
+};
+
+
+/**
+ * @param {Event} e A change event.
+ * @private
+ */
+fmb.views.Device.prototype.onChangeUpdateEnabled_ = function(e) {
   this.updateDevice_();
 };
 
@@ -425,7 +445,7 @@ fmb.views.Account.prototype.onChangeUpdateEnabled_ = function(e) {
  * @param {Event} e A change event.
  * @private
  */
-fmb.views.Account.prototype.onChangeUpdateFrequency_ = function(e) {
+fmb.views.Device.prototype.onChangeUpdateFrequency_ = function(e) {
   this.updateDevice_();
 };
 
@@ -434,7 +454,7 @@ fmb.views.Account.prototype.onChangeUpdateFrequency_ = function(e) {
  * @param {Event} e A submit event.
  * @private
  */
-fmb.views.Account.prototype.onSubmitUpdateDevice_ = function(e) {
+fmb.views.Device.prototype.onSubmitUpdateDevice_ = function(e) {
   e.preventDefault();
   this.updateDevice_();
 };
@@ -443,7 +463,7 @@ fmb.views.Account.prototype.onSubmitUpdateDevice_ = function(e) {
 /**
  * @private
  */
-fmb.views.Account.prototype.updateDevice_ = function() {
+fmb.views.Device.prototype.updateDevice_ = function() {
   var $form = this.$('form.device-update');
   var data = fmb.views.serializeFormToObject($form);
   if (_.has(data, 'update_enabled')) {
@@ -460,7 +480,7 @@ fmb.views.Account.prototype.updateDevice_ = function() {
 /**
  * @private
  */
-fmb.views.Account.prototype.debouncedUpdateDevice_ = _.debounce(function() {
+fmb.views.Device.prototype.debouncedUpdateDevice_ = _.debounce(function() {
   this.updateDevice_();
 }, 500);
 
@@ -478,7 +498,7 @@ fmb.views.Notifying = Backbone.View.extend({
   events: {
     'tap .notifying-add-phone': 'onClickNotifyingAdd_',
     'tap .notifying-add-email': 'onClickNotifyingAdd_',
-    'tap .remove': 'onClickRemove_'
+    'tap .fmb-remove': 'onClickRemove_'
   }
 });
 
@@ -662,7 +682,7 @@ fmb.views.FollowingUser = Backbone.View.extend({
   tagName: 'tbody',
   events: {
     'tap .following-user': 'onClickFollowingUser_',
-    'tap .remove': 'onClickRemove_'
+    'tap .fmb-remove': 'onClickRemove_'
   }
 });
 
@@ -776,7 +796,9 @@ fmb.views.FollowingUser.prototype.remove = function() {
 fmb.views.FollowingDevice = Backbone.View.extend({
   className: 'fmb-following-device',
   tagName: 'tr',
-  events: {}
+  events: {
+    'tap .fmb-remove': 'onClickRemove_'
+  }
 });
 
 

@@ -76,6 +76,12 @@
     </script>
 
     <script id="tpl_device" type="text/html">
+      {{^is_user_device}}
+        {{#key}}
+          <div class="fmb-remove" data-key="{{key}}">X</div>
+        {{/key}}
+      {{/is_user_device}}
+
       <form method="post"
         class="device-update"
         action="{{api_server}}/api/device">
@@ -153,7 +159,7 @@
     </script>
 
     <script id="tpl_following_user" type="text/html">
-      <tr>
+      <tr class="fmb-following-ser">
         <td colspan="2">
           <h2 class="user-name">{{name}}</h2>
 

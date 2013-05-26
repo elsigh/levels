@@ -39,6 +39,7 @@ routes = [
     Route('/api/user/token', handler='lib.api.ApiUserTokenHandler'),
     Route('/api/user', handler='lib.api.ApiUserHandler'),
     Route('/api/device', handler='lib.api.ApiDeviceHandler'),
+    Route('/api/device/delete', handler='lib.api.ApiDeviceDeleteHandler'),
     Route('/api/settings', handler='lib.api.ApiSettingsHandler'),
     Route('/api/following/delete', handler='lib.api.ApiFollowingDeleteHandler'),
     Route('/api/following', handler='lib.api.ApiFollowingHandler'),
