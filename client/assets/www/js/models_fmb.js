@@ -25,7 +25,7 @@ fmb.models.SERVER_PROD = 'https://followmybattery.appspot.com';
 /**
  * @type {string}
  */
-fmb.models.SERVER_SHARE = 'http://www.followmybattery.com';
+fmb.models.SERVER_SHARE = 'http://www.levelsapp.com';
 
 
 /**

@@ -199,7 +199,7 @@ fmb.App.prototype.initHistory_ = function() {
 /**
  * @type {RegExp}
  */
-fmb.App.FOLLOWING_URL_RE = /followmybattery\.com\/profile\/(.*)/;
+fmb.App.FOLLOWING_URL_RE = /levelsapp\.com\/profile\/(.*)/;
 
 
 /**

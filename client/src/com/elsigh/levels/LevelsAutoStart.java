@@ -1,12 +1,12 @@
-package com.phonedied.android;
+package com.elsigh.levels;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
-public class PhoneDiedAutoStart extends BroadcastReceiver
+public class LevelsAutoStart extends BroadcastReceiver
 {
-    PhoneDiedAlarm alarm = new PhoneDiedAlarm();
+    LevelsAlarm alarm = new LevelsAlarm();
     @Override
     public void onReceive(Context context, Intent intent)
     {

@@ -1,4 +1,4 @@
-package com.phonedied.android;
+package com.elsigh.levels;
 
 import android.app.Activity;
 import android.content.Context;
@@ -13,10 +13,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import android.widget.Toast;
 
-import com.phonedied.android.PhoneDiedService;
+import com.elsigh.levels.LevelsService;
 
-public class PhoneDiedPlugin extends Plugin {
-    private static final String TAG = PhoneDiedActivity.class.getSimpleName();
+public class LevelsPlugin extends Plugin {
+    private static final String TAG = LevelsActivity.class.getSimpleName();
 
     /**
      * @param action Contains the action sent by the javascript. This can be used
@@ -32,7 +32,7 @@ public class PhoneDiedPlugin extends Plugin {
 
         if (action.equals("startService")) {
             Intent intent = new Intent(this.cordova.getActivity(),
-                                       PhoneDiedService.class);
+                                       LevelsService.class);
 
             String apiToken = "";
             String userKey = "";
@@ -50,11 +50,11 @@ public class PhoneDiedPlugin extends Plugin {
               return new PluginResult(PluginResult.Status.JSON_EXCEPTION);
             }
 
-            intent.putExtra(PhoneDiedService.EXTRAS_API_TOKEN, apiToken);
-            intent.putExtra(PhoneDiedService.EXTRAS_USER_KEY, userKey);
-            intent.putExtra(PhoneDiedService.EXTRAS_DEVICE_KEY, deviceKey);
-            intent.putExtra(PhoneDiedService.EXTRAS_UPDATE_FREQUENCY, updateFrequency);
-            intent.putExtra(PhoneDiedService.EXTRAS_UPDATE_PATH, updatePath);
+            intent.putExtra(LevelsService.EXTRAS_API_TOKEN, apiToken);
+            intent.putExtra(LevelsService.EXTRAS_USER_KEY, userKey);
+            intent.putExtra(LevelsService.EXTRAS_DEVICE_KEY, deviceKey);
+            intent.putExtra(LevelsService.EXTRAS_UPDATE_FREQUENCY, updateFrequency);
+            intent.putExtra(LevelsService.EXTRAS_UPDATE_PATH, updatePath);
 
             this.cordova.getActivity().startService(intent);
 
@@ -63,7 +63,7 @@ public class PhoneDiedPlugin extends Plugin {
 
         } else if (action.equals("stopService")) {
             Intent intent = new Intent(this.cordova.getActivity(),
-                PhoneDiedService.class);
+                LevelsService.class);
             this.cordova.getActivity().stopService(intent);
 
             return new PluginResult(status, "Stopped service.");

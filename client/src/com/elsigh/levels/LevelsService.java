@@ -1,6 +1,6 @@
 
 
-package com.phonedied.android;
+package com.elsigh.levels;
 
 import android.app.Service;
 import android.content.Context;
@@ -13,11 +13,11 @@ import android.widget.Toast;
 import org.json.JSONObject;
 import org.json.JSONException;
 
-import com.phonedied.android.PhoneDiedAlarm;
+import com.elsigh.levels.LevelsAlarm;
 
-public class PhoneDiedService extends Service {
+public class LevelsService extends Service {
 
-    private static final String TAG = PhoneDiedService.class.getSimpleName();
+    private static final String TAG = LevelsService.class.getSimpleName();
 
     private Boolean isRunning = false;
 
@@ -27,7 +27,7 @@ public class PhoneDiedService extends Service {
     public static String EXTRAS_UPDATE_PATH = "update_path";
     public static String EXTRAS_UPDATE_FREQUENCY = "update_frequency";
 
-    PhoneDiedAlarm alarm = new PhoneDiedAlarm();
+    LevelsAlarm alarm = new LevelsAlarm();
 
     //MixpanelAPI mMixpanel = null;
 

@@ -1,4 +1,4 @@
-followmybattery
+LEVELS
 ================
 
 You're going to need to do something like this on a Mac to get setup:
