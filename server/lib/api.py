@@ -196,9 +196,8 @@ class ApiDeviceHandler(ApiRequestHandler):
         return self.output_json_success(device.to_dict())
 
     def post(self):
-        q = models.Device.query().filter(
-            models.Device.uuid == self._json_request_data['uuid']
-        )
+        q = models.Device.query(ancestor=self.current_user.key).filter(
+            models.Device.uuid == self._json_request_data['uuid'])
 
         # Don't let post act like edit.
         if q.count() != 0:

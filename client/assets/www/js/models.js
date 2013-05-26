@@ -262,7 +262,6 @@ fmb.models.DeviceUnMapped = fmb.Model.extend({
 fmb.models.DeviceUnMapped.prototype.initialize = function(opt_data, opt_options) {
   fmb.Model.prototype.initialize.apply(this, arguments);
   var options = opt_options || {};
-
   if (options.isUserDevice) {
     this.on('battery_status', this.onBatteryStatus_, this);
     this.once('change:key', function() {

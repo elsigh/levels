@@ -428,6 +428,11 @@ fmb.views.Device.prototype.render = function() {
  * @private
  */
 fmb.views.Device.prototype.onClickRemove_ = function(e) {
+  var isSure = window.confirm(
+      'Really remove this device? - this is not revertable.');
+  if (!isSure) {
+    return;
+  }
   this.model.collection.remove(this.model.id);
 };
 

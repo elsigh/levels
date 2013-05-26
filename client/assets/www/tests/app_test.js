@@ -12,6 +12,7 @@ var server;
 // Don't rewrite our URLs
 sinon.stub(window.history, 'pushState');
 sinon.stub(window, 'open', function() { return {}; });
+sinon.stub(window, 'confirm', function() { return true; });
 sinon.stub(cordova, 'require');
 
 function setUp() {
@@ -174,6 +175,7 @@ function testApp() {
   assertEquals(1, app.view.currentView.$('.fmb-device .fmb-remove').length);
 
   app.view.currentView.$('.fmb-device .fmb-remove').trigger('tap');
+
   serverRequestCountExpected++;
   assertEquals(fmb.models.getApiUrl('/device/delete'),
                server.requests[serverRequestCountExpected - 1].url);
