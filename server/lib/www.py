@@ -23,28 +23,40 @@ import settings
 
 
 class ProfileHandler(WebRequestHandler):
-  def get(self, user_key=None):
-    """Handles GET /profile"""
+    def get(self, user_key=None):
+        """Handles GET /profile"""
 
-    close = self.request.get('close')
+        close = self.request.get('close')
 
-    if self.current_user and user_key is None:
-      user = self.current_user
-    elif user_key is not None:
-        try:
-            user = ndb.Key(urlsafe=user_key).get()
-        except:
-            user = models.FMBUser()
+        if self.current_user and user_key is None:
+          user = self.current_user
+        elif user_key is not None:
+            try:
+                user = ndb.Key(urlsafe=user_key).get()
+            except:
+                user = models.FMBUser()
 
-    logging.info('Profile user!: %s', user.to_dict())
-    template_data = {
-        'user': user.to_dict(),
-        'user_json': user.to_json(),
-        'session': self.auth.get_user_by_session(),
-        'close': close,
-    }
-    #template_data['title'] = template_data['profile']['username'] + \
-    #    ' ' + str(template_data['devices'][0]['last_settings']['battery_level']) + \
-    #    '% - FollowMyBattery'
+        logging.info('Profile user!: %s', user.to_dict())
+        template_data = {
+            'user': user.to_dict(),
+            'user_json': user.to_json(),
+            'session': self.auth.get_user_by_session(),
+            'close': close,
+        }
 
-    self.output_response(template_data, 'profile.html')
+        # TODO(elsigh): Allow user to set "default" device or order devices one day.
+        template_data['title'] = template_data['user']['name']
+        if 'devices' in template_data['user'] and len(template_data['user']['devices']):
+            if ('settings' in template_data['user']['devices'][0] and
+                len(template_data['user']['devices'][0]['settings'])):
+                template_data['title'] += str(template_data['user']['devices'][0]['settings']['battery_level']) + '%'
+
+        template_data['title'] += ' - Levels'
+
+        self.output_response(template_data, 'profile.html')
+
+
+class IndexHandler(WebRequestHandler):
+  def get(self):
+    return self.redirect(
+        '/profile/ahNkZXZ-Zm9sbG93bXliYXR0ZXJ5cg8LEgdGTUJVc2VyGLmUAQw')

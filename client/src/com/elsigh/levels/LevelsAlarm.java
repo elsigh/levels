@@ -1,6 +1,6 @@
 
 
-package com.phonedied.android;
+package com.elsigh.levels;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
@@ -35,14 +35,14 @@ import org.json.JSONException;
 
 import java.io.IOException;
 
-import com.phonedied.android.PhoneDiedService;
+import com.elsigh.levels.LevelsService;
 
 
-public class PhoneDiedAlarm extends BroadcastReceiver {
+public class LevelsAlarm extends BroadcastReceiver {
 
-    private static final String TAG = PhoneDiedAlarm.class.getSimpleName();
+    private static final String TAG = LevelsAlarm.class.getSimpleName();
 
-    public static final String PREFS_NAME = "PhoneDiedPrefs";
+    public static final String PREFS_NAME = "LevelsPrefs";
 
     private String updatePath = "";
     private String apiToken = "";
@@ -194,7 +194,7 @@ public class PhoneDiedAlarm extends BroadcastReceiver {
         // Send the battery update to our server.
         try {
             String jsonString = json.toString();
-            new PhoneDiedUpdateTask().execute(updatePath, jsonString);
+            new LevelsUpdateTask().execute(updatePath, jsonString);
         } catch (Exception e) {
             Log.d(TAG, "makeRequest Exception::" + Log.getStackTraceString(e));
         }
@@ -210,10 +210,10 @@ public class PhoneDiedAlarm extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         SharedPreferences settings = context.getApplicationContext().
                 getSharedPreferences(PREFS_NAME, 0);
-        String apiToken = settings.getString(PhoneDiedService.EXTRAS_API_TOKEN, null);
-        String userKey = settings.getString(PhoneDiedService.EXTRAS_USER_KEY, null);
-        String deviceKey = settings.getString(PhoneDiedService.EXTRAS_DEVICE_KEY, null);
-        String updatePath = settings.getString(PhoneDiedService.EXTRAS_UPDATE_PATH, null);
+        String apiToken = settings.getString(LevelsService.EXTRAS_API_TOKEN, null);
+        String userKey = settings.getString(LevelsService.EXTRAS_USER_KEY, null);
+        String deviceKey = settings.getString(LevelsService.EXTRAS_DEVICE_KEY, null);
+        String updatePath = settings.getString(LevelsService.EXTRAS_UPDATE_PATH, null);
         Log.d(TAG, "onReceive w/ prefs: " + apiToken + ", " + userKey + ", " +
               deviceKey + ", " + updatePath);
 
@@ -232,22 +232,22 @@ public class PhoneDiedAlarm extends BroadcastReceiver {
         SharedPreferences settings = context.getApplicationContext().
                 getSharedPreferences(PREFS_NAME, 0);
         SharedPreferences.Editor editor = settings.edit();
-        editor.putString(PhoneDiedService.EXTRAS_API_TOKEN, apiToken);
-        editor.putString(PhoneDiedService.EXTRAS_USER_KEY, userKey);
-        editor.putString(PhoneDiedService.EXTRAS_DEVICE_KEY, deviceKey);
-        editor.putString(PhoneDiedService.EXTRAS_UPDATE_PATH, updatePath);
-        editor.putString(PhoneDiedService.EXTRAS_UPDATE_FREQUENCY, updateFrequency);
+        editor.putString(LevelsService.EXTRAS_API_TOKEN, apiToken);
+        editor.putString(LevelsService.EXTRAS_USER_KEY, userKey);
+        editor.putString(LevelsService.EXTRAS_DEVICE_KEY, deviceKey);
+        editor.putString(LevelsService.EXTRAS_UPDATE_PATH, updatePath);
+        editor.putString(LevelsService.EXTRAS_UPDATE_FREQUENCY, updateFrequency);
         editor.commit();
     }
 
     public void SetAlarm(Context context) {
         AlarmManager am = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
-        Intent intent = new Intent(context, PhoneDiedAlarm.class);
+        Intent intent = new Intent(context, LevelsAlarm.class);
         PendingIntent pi = PendingIntent.getBroadcast(context, 0, intent, 0);
 
         SharedPreferences settings = context.getApplicationContext().
                 getSharedPreferences(PREFS_NAME, 0);
-        String updateFrequency = settings.getString(PhoneDiedService.EXTRAS_UPDATE_FREQUENCY, "");
+        String updateFrequency = settings.getString(LevelsService.EXTRAS_UPDATE_FREQUENCY, "");
 
         Log.d(TAG, "SetAlarm! w/ updateFrequency:" + updateFrequency);
         int alarmIntervalMs = 1000 * 60 * Integer.parseInt(updateFrequency);  // Millisec * Second * Minute
@@ -258,7 +258,7 @@ public class PhoneDiedAlarm extends BroadcastReceiver {
 
     public void CancelAlarm(Context context) {
         Log.d(TAG, "CancelAlarm!");
-        Intent intent = new Intent(context, PhoneDiedAlarm.class);
+        Intent intent = new Intent(context, LevelsAlarm.class);
         PendingIntent sender = PendingIntent.getBroadcast(context, 0, intent, 0);
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         alarmManager.cancel(sender);
@@ -267,8 +267,8 @@ public class PhoneDiedAlarm extends BroadcastReceiver {
 
 
 
-class PhoneDiedUpdateTask extends AsyncTask<String, Void, Void> {
-    private static final String TAG = PhoneDiedUpdateTask.class.getSimpleName();
+class LevelsUpdateTask extends AsyncTask<String, Void, Void> {
+    private static final String TAG = LevelsUpdateTask.class.getSimpleName();
 
     private Exception exception;
 

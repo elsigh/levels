@@ -1,5 +1,5 @@
 
-package com.phonedied.android;
+package com.elsigh.levels;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -11,17 +11,17 @@ import org.apache.cordova.*;
 //import com.google.android.gms.auth.GoogleAuthUtil;
 //import com.google.android.gms.common.GooglePlayServicesUtil;
 
-import com.phonedied.android.PhoneDiedService;
+import com.elsigh.levels.LevelsService;
 
 
-public class PhoneDiedActivity extends DroidGap {
+public class LevelsActivity extends DroidGap {
 
-    private static final String TAG = PhoneDiedActivity.class.getSimpleName();
+    private static final String TAG = LevelsActivity.class.getSimpleName();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.d(TAG, "PhoneDiedActivity onCreate w/ " +
+        Log.d(TAG, "LevelsActivity onCreate w/ " +
               "Build :: " +
               android.os.Build.BRAND + ", " +
               android.os.Build.DEVICE + ", " +
