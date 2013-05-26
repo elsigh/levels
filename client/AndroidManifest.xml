@@ -56,7 +56,7 @@
       android:theme="@android:style/Theme.Black.NoTitleBar"
       android:configChanges="orientation|keyboardHidden"
       android:windowSoftInputMode="adjustResize"
-      android:launchMode="singleTask"
+      android:launchMode="singleTop"
       android:screenOrientation="portrait">
 
       <intent-filter>

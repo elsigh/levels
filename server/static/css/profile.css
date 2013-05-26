@@ -26,43 +26,6 @@ footer {
   text-align: center;
 }
 
-.battery-level-c {
-  text-align: center;
-}
-.battery-level {
-  font-size: 2em;
-  font-weight: bold;
-  padding-left: 10px;
-  display: inline-block;
-  border: 2px solid #000;
-  border-radius: 5px;
-  padding-left: 10px;
-}
-.battery-level:after {
-  content: "";
-  left: 5px;
-  position: relative;
-  display: inline-block;
-  line-height: 1;
-  top: -2px;
-  width: 4px;
-  height: 13px;
-  background: #000;
-  border-top-right-radius: 10px;
-  border-bottom-right-radius: 10px;
-}
-
-.charging-1:before {
-  content: "charging";
-  display: block;
-  font-size: 90%;
-  font-weight: normal;
-}
-
-.battery-created {
-  font-size: 70%;
-}
-
 .avatar {
   display: inline-block;
   vertical-align: middle;
@@ -80,6 +43,47 @@ footer {
 .goog-play img {
   height: 60px;
 }
+
+
+.battery-level-c {
+  text-align: center;
+  white-space: nowrap;
+}
+
+.battery-level {
+  font-size: 1.5em;
+  display: inline-block;
+  border: 2px solid #666;
+  border-radius: 5px;
+  padding-left: 10px;
+}
+
+.battery-level:after {
+  content: "";
+  left: 5px;
+  position: relative;
+  display: inline-block;
+  line-height: 1;
+  top: -2px;
+  width: 4px;
+  height: 13px;
+  background: #666;
+  border-top-right-radius: 10px;
+  border-bottom-right-radius: 10px;
+}
+
+.charging-1:before {
+  content: "charging";
+  display: block;
+  font-size: 70%;
+  font-weight: 300;
+}
+.battery-created {
+  margin-top: 4px;
+  font-size: 85%;
+  font-weight: 500;
+}
+
 
 .battery-graph {
   display: inline-block;

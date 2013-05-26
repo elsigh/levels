@@ -49,8 +49,9 @@
                     {{ device.settings.0.battery_level }}%
                   </div>
 
-                  <div class="battery-created">
-                    {{ device.settings.0.created.strftime('%m/%d %I:%M %p') }}
+                  <div class="battery-created"
+                    data-utc-date="{{ device.settings.0.created.isoformat() }}">
+                    {{ device.settings.0.created.isoformat() }}
                   </div>
                 </div>
               </td>
