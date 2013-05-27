@@ -20,7 +20,19 @@ body {
 
 }
 
+footer {
+  color: #ddd;
+  margin-top: 7em;
+  font-size: 90%;
+  padding: 10px;
+  text-align: center;
+}
+
 h1 {
+  position: fixed;
+  top: 0;
+  z-index: 2;
+  width: 100%;
   font-size: 1.6em;
   margin: 0;
   padding: 10px;
@@ -115,9 +127,15 @@ button:active {
   border-radius: 2px;
 }
 
+.nav {
+  height: 55px;
+}
+
 .nav a {
-  float: right;
-  margin: 0.7em 10px 0 0;
+  position: fixed;
+  right: 10px;
+  z-index: 3;
+  margin-top: 0.8em;
 }
 
 .range {
@@ -148,11 +166,19 @@ input[type="range"] {
   vertical-align: bottom;
 }
 
-.tabs {
-  background: #111;
+.tabs-c {
+  height: 55px;
   -webkit-box-shadow: 0 1px 1px #222;
   -moz-box-shadow: 0 1px 1px #222;
   box-shadow: 0 1px 1px #222;
+}
+
+.tabs {
+  position: fixed;
+  top: 55px;
+  background: #111;
+  z-index: 2;
+  width: 100%;
 }
 
 .tabs a,
