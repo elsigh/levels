@@ -36,15 +36,15 @@ app_config = {
 
 routes = [
     # API
-    Route('/api/user/token', handler='lib.api.ApiUserTokenHandler'),
-    Route('/api/user', handler='lib.api.ApiUserHandler'),
-    Route('/api/device', handler='lib.api.ApiDeviceHandler'),
     Route('/api/device/delete', handler='lib.api.ApiDeviceDeleteHandler'),
-    Route('/api/settings', handler='lib.api.ApiSettingsHandler'),
+    Route('/api/device', handler='lib.api.ApiDeviceHandler'),
     Route('/api/following/delete', handler='lib.api.ApiFollowingDeleteHandler'),
     Route('/api/following', handler='lib.api.ApiFollowingHandler'),
     Route('/api/notifying/delete', handler='lib.api.ApiNotifyingDeleteHandler'),
     Route('/api/notifying', handler='lib.api.ApiNotifyingHandler'),
+    Route('/api/settings', handler='lib.api.ApiSettingsHandler'),
+    Route('/api/user/token', handler='lib.api.ApiUserTokenHandler'),
+    Route('/api/user', handler='lib.api.ApiUserHandler'),
 
     # AUTH
     Route('/login', handler='lib.auth.LoginHandler'),

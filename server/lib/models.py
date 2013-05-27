@@ -15,6 +15,7 @@
 # limitations under the License.
 
 import datetime
+import logging
 import sys
 import time
 import uuid
@@ -93,8 +94,10 @@ class Device(FMBModel):
             obj['settings'].append(setting.to_dict())
 
         # notifying
+        logging.info('FMBUser to dict include_notifying: %s' % include_notifying)
         if include_notifying:
             q_notifying = Notifying.query(ancestor=self.key).order(-Notifying.created)
+            logging.info('FMBUser notifying len: %s' % q_notifying.count())
             obj['notifying'] = []
             for notifying in q_notifying:
                 obj['notifying'].append(notifying.to_dict())

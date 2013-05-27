@@ -42,8 +42,8 @@ def api_token_required(handler_method):
 
 class ApiRequestHandler(WebRequestHandler):
     def initialize(self, request, response):
-        logging.info('ApiRequestHandler initialize - %s %s' %
-                     (request.method, request.path))
+        #logging.info('ApiRequestHandler initialize - %s %s' %
+        #             (request.method, request.path))
         super(ApiRequestHandler, self).initialize(request, response)
         self._set_json_request_data()
         self._assert_user_key()
@@ -106,8 +106,11 @@ class ApiRequestHandler(WebRequestHandler):
         if 'device_key' not in self._json_request_data:
             return
         device_key_urlsafe = self._json_request_data['device_key']
+        logging.info('device_key_urlsafe: %s' % device_key_urlsafe)
         device_key = ndb.Key(urlsafe=device_key_urlsafe)
+        logging.info('device_key: %s' % device_key)
         device = device_key.get()
+        logging.info('device: %s' % device)
         assert device
         assert device_key.parent().id() == self.current_user.key.id()
         return device
@@ -199,14 +202,13 @@ class ApiDeviceHandler(ApiRequestHandler):
         q = models.Device.query(ancestor=self.current_user.key).filter(
             models.Device.uuid == self._json_request_data['uuid'])
 
-        # Don't let post act like edit.
-        if q.count() != 0:
-             return self.output_json_error({}, 404)
-
-        device = models.Device(
-            uuid=self._json_request_data['uuid'],
-            parent=self.current_user.key
-        )
+        if q.count() == 0:
+            device = models.Device(
+                uuid=self._json_request_data['uuid'],
+                parent=self.current_user.key
+            )
+        elif q.count() == 1:
+            device = q.get()
 
         device.user_agent_string = self._json_request_data['user_agent_string']
         device.update_enabled = int(self._json_request_data['update_enabled'])
@@ -395,6 +397,7 @@ class ApiSettingsHandler(ApiRequestHandler):
 class ApiFollowingHandler(ApiRequestHandler):
     def get(self):
         q = models.Following.query(ancestor=self.current_user.key)
+        logging.info('ApiFollowingHandler following len: %s' % q.count())
         obj = {'following': []}
         for followed in q:
             followed_user = followed.following.get()

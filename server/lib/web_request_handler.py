@@ -77,7 +77,7 @@ class WebRequestHandler(webapp2.RequestHandler):
         return version
 
     def initialize(self, request, response):
-        logging.info('WebRequestHandler initialize.')
+        #logging.info('WebRequestHandler initialize.')
         super(WebRequestHandler, self).initialize(request, response)
         if request.method != 'OPTIONS':
             self.browser_detect()
