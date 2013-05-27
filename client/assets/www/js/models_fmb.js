@@ -116,12 +116,13 @@ fmb.models.sync = function(method, model, options) {
   }
 
   if (options['local_storage_only']) {
-    fmb.log('fmb.models.sync w/ local storage only');
+    //fmb.log('fmb.models.sync w/ local storage only');
     return;
   }
 
-  var url = options.url || model.url();
+  var url = options.url || model.url && model.url();
   if (!url) {
+    fmb.log('No url, no fetchery.');
     return;
   }
 
@@ -444,11 +445,11 @@ fmb.Collection.prototype.initialize = function(opt_models, opt_options) {
 fmb.Collection.prototype.fetchFromStorage = function(opt_options) {
   // Pretend to be async.
   if (this.localStorage) {
-    _.defer(_.bind(function() {
+    //_.defer(_.bind(function() {
       var results = this.localStorage.findAll();
       fmb.log('fmb.Collection fetchFromStorage:', results.length);
       this.reset(results, opt_options);
-    }, this));
+    //}, this));
   }
 };
 

@@ -43,6 +43,7 @@ function testApp() {
   app.view.currentView.onClickLogin_();    // start oauth.
   assertEquals(1, window.open.callCount);
   app.view.currentView.onLoginRefExit_();  // oauth done.
+
   serverRequestCountExpected++;
   assertEquals(serverRequestCountExpected, server.requests.length);
   assertEquals(fmb.models.getApiUrl('/user/token'),
@@ -64,6 +65,8 @@ function testApp() {
   assertEquals(userTokenResponse['api_token'], app.model.user.get('api_token'));
   assertEquals(userTokenResponse['name'],
                app.view.currentView.$el.find('h2').text());
+
+  // userTokenResponse causes the current device to be saved to the server.
   serverRequestCountExpected++;
   assertEquals(serverRequestCountExpected, server.requests.length);
   assertEquals(fmb.models.getApiUrl('/device'),
@@ -81,15 +84,17 @@ function testApp() {
                app.model.user.get('devices').at(0).get('key'));
   assertEquals(deviceResponse['key'],
                app.model.user.device.get('key'));
-  assertEquals(deviceResponse['key'],
-               localStorage.getItem('device_key'));
-  clock.tick(1);
 
   // Tests that the device rendered with its notification view.
   assertEquals(1, app.view.currentView.$('.fmb-device').length);
   assertEquals(1, app.view.currentView.$('.fmb-device .fmb-notifying').length);
 
+  // Ensures our identity map is setup properly
+  assertTrue(app.model.user.device === app.model.user.get('devices').at(0));
+
+
 /******************************************************************************/
+
 
   // Tests that we can add to the notification collection.
   app.model.user.device.get('notifying').add({
@@ -324,6 +329,8 @@ function testApp() {
       '.fmb-following-device .battery-level')[1]).text().trim());
 
 
+  // Ensures that new battery stats end up being rendered.
+  clock.tick(1000);
   fmb.App.onBatteryStatus_({
     'level': 40,
     'isPlugged': true

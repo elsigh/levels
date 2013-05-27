@@ -83,7 +83,8 @@
     <script id="tpl_device" type="text/html">
       {{^is_user_device}}
         {{#key}}
-          <div class="fmb-remove" data-key="{{key}}">X</div>
+          <div class="fmb-remove device-remove"
+            data-key="{{key}}">X</div>
         {{/key}}
       {{/is_user_device}}
 
@@ -117,25 +118,26 @@
           </tr>
         </thead>
         <tbody>
-            {{#notifying}}
-              <tr data-key="{{key}}">
-                <td>
-                  <span class="notifying-name">{{name}}</span>
-                </td>
-                <td>
-                  {{means}}
-                </td>
-                <td>
-                  {{#key}}
-                    <div class="fmb-remove" data-key="{{key}}">X</div>
-                  {{/key}}
-                  {{^key}}
-                    <div class="fmb-loading"></div>
-                  {{/key}}
-                </td>
-              </tr>
-            {{/notifying}}
-
+          {{#notifying}}
+            <tr data-key="{{key}}">
+              <td>
+                <span class="notifying-name">{{name}}</span>
+              </td>
+              <td>
+                {{means}}
+              </td>
+              <td>
+                {{#key}}
+                  <div class="fmb-remove notifying-remove"
+                    data-key="{{key}}"
+                    data-means="{{means}}">X</div>
+                {{/key}}
+                {{^key}}
+                  <div class="fmb-loading"></div>
+                {{/key}}
+              </td>
+            </tr>
+          {{/notifying}}
         </tbody>
       </table>
           {{/notifying.length}}
@@ -164,19 +166,19 @@
     </script>
 
     <script id="tpl_following_user" type="text/html">
-      <tr class="fmb-following-ser">
+      <tr class="following-user">
         <td colspan="2">
           <h2 class="user-name">{{name}}</h2>
 
           {{^is_current_user}}
             {{#key}}
-              <div class="fmb-remove" data-key="{{key}}">X</div>
+              <div class="fmb-remove following-user-remove"
+                data-key="{{key}}">X</div>
             {{/key}}
             {{^key}}
               <div class="fmb-loading"></div>
             {{/key}}
           {{/is_current_user}}
-
         </td>
       </tr>
     </script>

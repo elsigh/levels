@@ -30,8 +30,8 @@ footer {
 
 h1 {
   position: fixed;
-  z-index: 2;
   top: 0;
+  z-index: 2;
   width: 100%;
   font-size: 1.6em;
   margin: 0;
@@ -175,6 +175,7 @@ input[type="range"] {
 
 .tabs {
   position: fixed;
+  top: 55px;
   background: #111;
   z-index: 2;
   width: 100%;

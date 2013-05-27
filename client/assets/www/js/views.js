@@ -391,7 +391,7 @@ fmb.views.Device = Backbone.View.extend({
   events: {
     'submit form.device-update': 'onSubmitUpdateDevice_',
     'tap input[type="radio"]': 'onChangeUpdateEnabled_',
-    'tap .fmb-remove': 'onClickRemove_',
+    'tap .device-remove': 'onClickRemove_',
     'change [name="update_frequency"]': 'onChangeUpdateFrequency_'
   }
 });
@@ -503,7 +503,7 @@ fmb.views.Notifying = Backbone.View.extend({
   events: {
     'tap .notifying-add-phone': 'onClickNotifyingAdd_',
     'tap .notifying-add-email': 'onClickNotifyingAdd_',
-    'tap .fmb-remove': 'onClickRemove_'
+    'tap .notifying-remove': 'onClickRemove_'
   }
 });
 
@@ -583,7 +583,9 @@ fmb.views.Notifying.prototype.onClickNotifyingAdd_ = function(e) {
  * @private
  */
 fmb.views.Notifying.prototype.onClickRemove_ = function(e) {
-  var isSure = window.confirm('Really remove this person from the list?');
+  var isSure = window.confirm('Really remove ' +
+      $(e.currentTarget).data('means') +
+      ' from the notification list?');
   if (!isSure) {
     return;
   }
@@ -622,9 +624,11 @@ fmb.views.Following.prototype.initialize = function(options) {
  */
 fmb.views.Following.prototype.setIsActive = function(isActive) {
   this.model.stopFetchPoll();
+  this.user.stopFetchPoll();
   if (isActive) {
     //fmb.log('Set following fetch interval.');
     this.model.startFetchPoll(30 * 1000);
+    this.user.startFetchPoll(30 * 1000);
   }
 };
 
@@ -634,6 +638,7 @@ fmb.views.Following.prototype.setIsActive = function(isActive) {
  * @private
  */
 fmb.views.Following.prototype.onRemove_ = function(model) {
+  fmb.log('fmb.views.Following onRemove_', model.id);
   if (!this.subViews_[model.cid]) {
     return;
   }
@@ -649,6 +654,7 @@ fmb.views.Following.prototype.render = function() {
     this.rendered_ = true;
     this.$el.html(fmb.views.getTemplateHtml('following', {}));
     this.$table = this.$('table');
+
     // Add yo-self into the view.
     this.addSubview_(this.user);
   }
@@ -686,8 +692,8 @@ fmb.views.FollowingUser = Backbone.View.extend({
   className: 'fmb-following-user',
   tagName: 'tbody',
   events: {
-    'tap .following-user': 'onClickFollowingUser_',
-    'tap .fmb-remove': 'onClickRemove_'
+    //'tap .user-name': 'onClickFollowingUser_',
+    'tap .following-user-remove': 'onClickRemove_'
   }
 });
 
@@ -739,7 +745,8 @@ fmb.views.FollowingUser.prototype.onRemoveDevice_ = function(model) {
  * @private
  */
 fmb.views.FollowingUser.prototype.onClickRemove_ = function(e) {
-  var isSure = window.confirm('Really remove them from your list?');
+  var isSure = window.confirm('Really remove ' +
+      this.model.get('name') + ' from your Following list?');
   if (!isSure) {
     return;
   }
@@ -802,13 +809,13 @@ fmb.views.FollowingDevice = Backbone.View.extend({
   className: 'fmb-following-device',
   tagName: 'tr',
   events: {
-    'tap .fmb-remove': 'onClickRemove_'
   }
 });
 
 
 /** @inheritDoc */
 fmb.views.FollowingDevice.prototype.initialize = function(options) {
+  fmb.log('fmb.views.FollowingDevice initialize', this.model.id);
   this.parent = options.parent;
   this.listenTo(this.model, 'change', _.debounce(this.render, this));
   this.listenTo(this.model.get('settings'), 'add change remove',
