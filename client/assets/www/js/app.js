@@ -211,14 +211,6 @@ fmb.App.prototype.checkIntent_ = function() {
     return;
   }
 
-  window.plugins.webintent.getExtra(WebIntent.EXTRA_TEXT,
-      function (url) {
-        fmb.log('fmb.App webintent get EXTRA_TEXT got url', url);
-      },
-      function() {
-        fmb.log('fmb.App webintent get EXTRA_TEXT got NADA');
-      });
-
   window.plugins.webintent.getUri(
       function(url) {
         var match = fmb.App.FOLLOWING_URL_RE.exec(url);

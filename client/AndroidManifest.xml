@@ -77,13 +77,11 @@
 
     <service android:name="com.elsigh.levels.LevelsService" />
 
-    <!-- TODO(elsigh): Make sure this isn't a problem.
     <receiver android:name=".LevelsAutoStart">
       <intent-filter>
         <action android:name="android.intent.action.BOOT_COMPLETED"></action>
       </intent-filter>
     </receiver>
-    -->
 
     <receiver
       android:process=":remote"

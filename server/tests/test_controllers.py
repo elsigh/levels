@@ -42,7 +42,9 @@ class RequestHandlerTest(unittest.TestCase):
     def test_DeviceModel_to_dict(self):
         device = models.Device(uuid='test_uuid')
         device.put()
-        for i in range(10):
+
+        # Put in 5x the number of settings we want to see in the end.
+        for i in range(10 * 5):
             battery_level = 50 + i
             settings = models.Settings(
                 parent=device.key,
