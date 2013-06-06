@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 
 import org.apache.cordova.*;
 
@@ -35,6 +36,7 @@ public class LevelsActivity extends DroidGap {
         super.setIntegerProperty("splashscreen", R.drawable.splash);
         super.setBooleanProperty("keepRunning", false);
         super.loadUrl("file:///android_asset/www/index.html", 10000);
+        this.appView.setOverScrollMode(View.OVER_SCROLL_NEVER);
     }
 
 }

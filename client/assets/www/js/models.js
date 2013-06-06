@@ -496,6 +496,9 @@ fmb.models.FollowingCollection.prototype.addByKey = function(userKey) {
     'name': 'Adding new friend ...',
     'following_user_key': userKey
   });
+
+  var plugin = cordova.require('cordova/plugin/levels');
+  plugin && plugin.showToast('Adding new friend ...');
 };
 
 
@@ -516,13 +519,23 @@ fmb.models.FollowingCollection.prototype.onAdd_ = function(model) {
     'cid': model.cid
   }, {
     url: fmb.models.getApiUrl('/following'),
+
     success: _.bind(function() {
-      fmb.log('MONEY TRAIN FollowingCollection onAdd_.');
+      fmb.log('MONEY TRAIN FollowingCollection onAdd_', model.get('name'));
+      this.fetch();
+      var plugin = cordova.require('cordova/plugin/levels');
+      plugin && plugin.showToast('Added ' + model.get('name'));
       this.parent.saveToStorage();
     }, this),
+
     error: function(model, xhr, options) {
       if (xhr.status === 404) {
-        alert('La bomba, seems we could not find a user ' + userKey);
+        var plugin = cordova.require('cordova/plugin/levels');
+        if (plugin) {
+          plugin.showToast('Failure adding friend.');
+        } else {
+          alert('La bomba, seems we could not find a user ' + model.cid);
+        }
       } else if (xhr.status === 409) {
         //alert('already following');
       }

@@ -291,7 +291,7 @@ def send_battery_notification_email(user_id, device_id, notifying_id, send=True)
         logging.info('BAIL CITY BABY, DONE EMAIL NOTIFIED ENUFF')
         return
 
-    mail.send_mail(sender='Levels Alert <elsigh@levels.com>',
+    mail.send_mail(sender='Levels Alert <elsigh@levelsapp.com>',
                    to='%s <%s>' % (notifying.name, notifying.means),
                    subject='%s has a very sad phone =(' % notifying.name,
                    body=rendered)
@@ -317,7 +317,7 @@ def send_battery_notification_phone(user_id, device_id, notifying_id, send=True)
     twilio_message = None
     if send:
         client = TwilioRestClient(settings.TWILIO_ACCOUNT_SID,
-                                  settings.TWILIO_user_id)
+                                  settings.TWILIO_AUTH_TOKEN)
         twilio_message = client.sms.messages.create(to=notifying.means,
                                                     from_="+15084525193",
                                                     body=rendered)
