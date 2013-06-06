@@ -26,7 +26,11 @@ cordova.define('cordova/plugin/levels', function(require, exports, module) {
 
   plugin.beaconSettings = function(win, fail) {
     return exec(win, fail, 'LevelsPlugin', 'beaconSettings', []);
-  }
+  };
+
+  plugin.showToast = function(msg) {
+    return exec(null, null, 'LevelsPlugin', 'showToast', [msg]);
+  };
 
   module.exports = plugin;
 });

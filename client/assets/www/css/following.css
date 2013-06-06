@@ -68,6 +68,11 @@
 
 .fmb-following-user h2 {
   display: inline-block;
+  vertical-align: bottom;
+  padding-left: 50px;
+  background-size: 30px 30px;
+  background-position: 10px 10px;
+  background-repeat: no-repeat;
 }
 
 .fmb-following-user tr:first-child td {
