@@ -745,8 +745,7 @@ fmb.views.FollowingUser.prototype.onRemoveDevice_ = function(model) {
  * @private
  */
 fmb.views.FollowingUser.prototype.onClickRemove_ = function(e) {
-  var isSure = window.confirm('Really remove ' +
-      this.model.get('name') + ' from your Following list?');
+  var isSure = window.confirm('Really remove ' + this.model.get('name') + '?');
   if (!isSure) {
     return;
   }
@@ -885,7 +884,8 @@ fmb.views.FollowingDevice.prototype.renderGraph_ = function() {
     'axisPaddingLeft': 0,
     'tickHintX': 4,
     'tickHintY': 2,
-    'interpolation': 'basis'
+    'interpolation': 'basis',
+    'yMin': 0
   };
 
   var chart = new xChart('line', data, '.battery-graph-' + this.model.id, opts);

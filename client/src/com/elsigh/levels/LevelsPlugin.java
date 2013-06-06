@@ -73,8 +73,10 @@ public class LevelsPlugin extends Plugin {
             try {
                 textArg = args.getString(0);
             } catch (JSONException e) {}
+
             final String text = textArg;
             final Activity activity = this.cordova.getActivity();
+
             activity.runOnUiThread(new Runnable() {
               public void run() {
                 Log.d(TAG, "Showing toast: " + text);

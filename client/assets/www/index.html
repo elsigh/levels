@@ -26,7 +26,7 @@
       </div>
       <section class="tabs-c">
         <div class="tabs">
-          <a href="following" class="following">Following</a><a
+          <a href="following" class="following">Stats</a><a
             href="account" class="account">Account</a><span
             class="share">Share!</share>
         </div>
@@ -38,7 +38,7 @@
         <div class="fmb-following"></div>
       </section>
       <div class="fmb-loading"
-        style="display:none;position:absolute;top:10px;right:10px;"></div>
+        style="display:none;"></div>
     </div>
 
     <script src="js/cordova-2.5.0.js"></script>
@@ -146,7 +146,7 @@
 
     <script id="tpl_following" type="text/html">
       <div class="fmb-tab-header">
-        <button class="share">+ someone</button>
+        <button class="share">get more stats</button>
       </div>
       <table>
         <thead>
@@ -168,7 +168,8 @@
     <script id="tpl_following_user" type="text/html">
       <tr class="following-user">
         <td colspan="2">
-          <h2 class="user-name">{{name}}</h2>
+          <h2 class="user-name"
+            style="background-image:url({{avatar_url}})">{{name}}</h2>
 
           {{^is_current_user}}
             {{#key}}
