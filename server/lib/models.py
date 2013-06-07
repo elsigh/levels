@@ -70,6 +70,8 @@ class FMBUser(User, FMBModel):
         return obj
 
 
+NUM_SETTINGS_TO_FETCH = 10
+NUM_SETTINGS_MULTIPLIER = 10
 class Device(FMBModel):
     created = ndb.DateTimeProperty(auto_now_add=True)
     modified = ndb.DateTimeProperty(auto_now=True)
@@ -84,19 +86,18 @@ class Device(FMBModel):
     version = ndb.StringProperty()
 
     def to_dict(self, include_notifying=True):
-        NUM_SETTINGS_TO_FETCH = 10
-        MULITIPLIER = 5
         obj = super(Device, self).to_dict()
 
         # settings
         q_settings = Settings.query(ancestor=self.key).order(-Settings.created)
         obj['settings'] = []
-        results = q_settings.fetch(NUM_SETTINGS_TO_FETCH * MULITIPLIER, keys_only=True)
+        results = q_settings.fetch(NUM_SETTINGS_TO_FETCH * NUM_SETTINGS_MULTIPLIER,
+                                   keys_only=True)
         list_of_keys = []
         # prunes the results so we get a longer time-window picture of
         # the device's battery stats.
         for i in range(len(results)):
-            if i % MULITIPLIER == 0:
+            if i % NUM_SETTINGS_MULTIPLIER == 0:
                 list_of_keys.append(results[i])
         for setting in ndb.get_multi(list_of_keys):
             obj['settings'].append(setting.to_dict())

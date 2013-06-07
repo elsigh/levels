@@ -43,8 +43,7 @@ class RequestHandlerTest(unittest.TestCase):
         device = models.Device(uuid='test_uuid')
         device.put()
 
-        # Put in 5x the number of settings we want to see in the end.
-        for i in range(10 * 5):
+        for i in range(models.NUM_SETTINGS_TO_FETCH * models.NUM_SETTINGS_MULTIPLIER):
             battery_level = 50 + i
             settings = models.Settings(
                 parent=device.key,
@@ -53,7 +52,7 @@ class RequestHandlerTest(unittest.TestCase):
             settings.put()
         data = device.to_dict()
         assert 'settings' in data
-        assert len(data['settings']) == 10
+        assert len(data['settings']) == models.NUM_SETTINGS_TO_FETCH
 
     def test_ApiUserHandler(self):
         self.testapp.get('/api/user', status=500)
