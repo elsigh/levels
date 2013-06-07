@@ -42,7 +42,8 @@ class RequestHandlerTest(unittest.TestCase):
     def test_DeviceModel_to_dict(self):
         device = models.Device(uuid='test_uuid')
         device.put()
-        for i in range(10):
+
+        for i in range(models.NUM_SETTINGS_TO_FETCH * models.NUM_SETTINGS_MULTIPLIER):
             battery_level = 50 + i
             settings = models.Settings(
                 parent=device.key,
@@ -51,7 +52,7 @@ class RequestHandlerTest(unittest.TestCase):
             settings.put()
         data = device.to_dict()
         assert 'settings' in data
-        assert len(data['settings']) == 10
+        assert len(data['settings']) == models.NUM_SETTINGS_TO_FETCH
 
     def test_ApiUserHandler(self):
         self.testapp.get('/api/user', status=500)

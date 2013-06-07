@@ -70,9 +70,12 @@ fmbProfile.drawDeviceChart = function(device) {
     'dataFormatX': function (x) { return new Date(x); },
     'tickFormatX': function (x) { return d3.time.format('%a %I%p')(x); },
     'axisPaddingTop': 20,
+    'axisPaddingRight': 10,
     'tickHintX': 4,
     'tickHintY': 2,
-    'interpolation': 'basis'
+    'interpolation': 'basis',
+    'yMin': 0,
+    'yMax': 100
   };
 
   var myChart = new xChart('line', data,

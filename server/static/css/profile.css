@@ -39,7 +39,7 @@ td {
 }
 
 .battery-level {
-  font-size: 1.5em;
+  font-size: 3em;
   display: inline-block;
   border: 2px solid #666;
   border-radius: 5px;
@@ -47,14 +47,14 @@ td {
 }
 
 .battery-level:after {
-  content: "";
-  left: 5px;
   position: relative;
+  content: "";
+  top: -0.1em;
+  left: 0.2em;
   display: inline-block;
   line-height: 1;
-  top: -2px;
-  width: 4px;
-  height: 13px;
+  width: 0.2em;
+  height: 0.6em;
   background: #666;
   border-top-right-radius: 10px;
   border-bottom-right-radius: 10px;
@@ -82,22 +82,24 @@ td {
 }
 
 @media only screen and (max-width: 480px) {
-  body {
-    font-size: 13px;
-  }
   .avatar img {
     width: 100px;
     height: 100px;
   }
+
   .goog-play {
-    margin-top: 30px;
+    margin-top: 20px;
   }
-  .goog-play img {
-    height: 40px;
+
+  thead {
+    display: none;
+  }
+
+  td {
+    display: block;
   }
 
   .battery-graph {
-    width: 180px;
-    height: 100px;
+    margin-left: -50px;
   }
 }
