@@ -49,7 +49,10 @@ class ProfileHandler(WebRequestHandler):
         if 'devices' in template_data['user'] and len(template_data['user']['devices']):
             if ('settings' in template_data['user']['devices'][0] and
                 len(template_data['user']['devices'][0]['settings'])):
-                template_data['title'] += str(template_data['user']['devices'][0]['settings'][0]['battery_level']) + '%'
+                template_data['title'] += (
+                    ' - ' +
+                    str(template_data['user']['devices'][0]['settings'][0]['battery_level']) +
+                    '%')
 
         template_data['title'] += ' - Levels'
 

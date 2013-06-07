@@ -29,10 +29,6 @@ public class LevelsService extends Service {
 
     LevelsAlarm alarm = new LevelsAlarm();
 
-    //MixpanelAPI mMixpanel = null;
-
-    //public static final String mixpanelToken = "05816db61e038417de78b3ebc0859168";
-
     public Boolean isRunning() {
         return isRunning;
     }
@@ -57,14 +53,25 @@ public class LevelsService extends Service {
             Log.d(TAG, "onStart via intent: " +
                   apiToken + ", " + userKey + ", " + deviceKey + ", " +
                   updatePath + ", " + updateFrequency);
-            alarm.SetPrefs(this, apiToken, userKey, deviceKey, updatePath, updateFrequency);
 
-            if (isRunning) {
-                Toast.makeText(this.getApplicationContext(),
-                               "Battery updates are ON",
-                               Toast.LENGTH_SHORT).show();
-                alarm.SendBatteryStatus(this.getApplicationContext(),
-                    apiToken, userKey, deviceKey, updatePath);
+            // These may not be set if we're starting from LevelsAutoStart.
+            if (apiToken != null &&
+                userKey != null &&
+                deviceKey != null &&
+                updatePath != null &&
+                updateFrequency != null) {
+
+                alarm.SetPrefs(this, apiToken, userKey, deviceKey, updatePath, updateFrequency);
+
+                if (isRunning) {
+                    Toast.makeText(this.getApplicationContext(),
+                                   "Battery updates are ON",
+                                   Toast.LENGTH_SHORT).show();
+                    alarm.SendBatteryStatus(this.getApplicationContext(),
+                        apiToken, userKey, deviceKey, updatePath);
+                }
+            } else {
+                Log.d(TAG, "no Intent extras, so just a simple service start.");
             }
         }
 
