@@ -84,6 +84,10 @@
   margin: 0;
 }
 
+.fmb-following-user .fmb-loading {
+  display: inline-block;
+}
+
 .fmb-following-user .fmb-remove {
   margin-top: 15px;
 }

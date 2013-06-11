@@ -25,13 +25,13 @@ td {
 
 .goog-play {
   position: absolute;
-  right: 10px;
+  right: 20%;
   margin: 40px 10px 0 0;
 }
+
 .goog-play img {
   height: 60px;
 }
-
 
 .battery-level-c {
   text-align: center;
@@ -89,6 +89,7 @@ td {
 
   .goog-play {
     margin-top: 20px;
+    right: 10px;
   }
 
   thead {

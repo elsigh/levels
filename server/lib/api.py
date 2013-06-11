@@ -126,6 +126,7 @@ class ApiRequestHandler(WebRequestHandler):
     def current_user(self):
         user = super(ApiRequestHandler, self).current_user
         if user is not None:
+            logging.info('CURRENT_USER: %s, %s' % (user.name, user))
             return user
 
         # For our api_token situation, which is special because we can't go

@@ -36,6 +36,11 @@ fmb.models.App.prototype.initialize = function(opt_data, opt_options) {
   fmb.log('fmb.models.App.initialize');
   fmb.Model.prototype.initialize.apply(this, arguments);
 
+  // Phonegap's Android implementation of device.name is the product name
+  // not something people will ever understandably recognize. Fix that.
+  var plugin = cordova.require('cordova/plugin/levels');
+  plugin && plugin.setDeviceModel();
+
   // id is necessary for localStorage plugin with a model.
   var userKey = localStorage.getItem('user_key');
   fmb.log('userKey from localStorage', userKey);
@@ -62,6 +67,8 @@ fmb.models.App.prototype.initialize = function(opt_data, opt_options) {
         success: _.bind(function(model) {
           fmb.log('User fetch MONEY TRAIN, simulate battery_status');
           this.user.device && this.user.device.trigger('battery_status');
+          // TODO(elsigh): Should we do a following fetch with remove true
+          // to be sure we are sync'd correctly?
         }, this)
       });
     }, this));
@@ -75,8 +82,7 @@ fmb.models.App.prototype.initialize = function(opt_data, opt_options) {
       });
       device.saveToServer({
         'uuid': window.device && window.device.uuid || navigator.appVersion,
-        'name': window.device && window.device.name || navigator.appName,
-        //'model': window.device && window.device.model || navigator.vendor,
+        'name': window.device && window.device.model || navigator.appName,
         'platform': window.device && window.device.platform || navigator.platform,
         'version': window.device && window.device.version || navigator.productSub
       }, {
@@ -350,7 +356,8 @@ fmb.models.DeviceUnMapped.prototype.getTemplateData = function() {
     delete templateData['update_enabled'];
   }
   // Don't want to be able to delete the current device.
-  if (this.id === app.model.user.device.id) {
+  if (app.model.user.device &&
+      this.id === app.model.user.device.id) {
     templateData['is_user_device'] = true;
   }
   return templateData;
@@ -502,6 +509,18 @@ fmb.models.FollowingCollection.prototype.addByKey = function(userKey) {
 };
 
 
+/** @inheritDoc */
+fmb.models.FollowingCollection.prototype.fetch = function(options) {
+  options = options || {};
+  // Don't prune our following collection, otherwise we get
+  // hosed by eventual consistency.
+  if (!('remove' in options)) {
+    options['remove'] = false;
+  }
+  fmb.Collection.prototype.fetch.call(this, options);
+};
+
+
 /**
  * @param {Backbone.Model} model A model.
  * @private
@@ -522,7 +541,6 @@ fmb.models.FollowingCollection.prototype.onAdd_ = function(model) {
 
     success: _.bind(function() {
       fmb.log('MONEY TRAIN FollowingCollection onAdd_', model.get('name'));
-      this.fetch();
       var plugin = cordova.require('cordova/plugin/levels');
       plugin && plugin.showToast('Added ' + model.get('name'));
       this.parent.saveToStorage();
@@ -562,6 +580,10 @@ fmb.models.FollowingCollection.prototype.onRemove_ = function(model) {
       fmb.log('fmb.models.FollowingCollection MONEY TRAIN w/ remove',
               model.id);
       this.parent.saveToStorage();
+
+      var plugin = cordova.require('cordova/plugin/levels');
+      plugin && plugin.showToast('Removed ' + model.get('name'));
+
     }, this),
     error: function(model, xhr, options) {
       fmb.log('FAIL removing ', model.id, xhr.status);

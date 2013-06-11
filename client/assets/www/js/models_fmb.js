@@ -135,10 +135,6 @@ fmb.models.sync = function(method, model, options) {
       var data = options.data ? options.data : model.toJSON();
       data['api_token'] = fmb.models.sync.apiToken;
       data['user_key'] = fmb.models.sync.userKey;
-
-      //if (fmb.models.sync.deviceId) {
-      //  data['device_id'] = fmb.models.sync.deviceId;
-      //}
       options.data = JSON.stringify(data);
 
     // fetch = get
@@ -151,7 +147,7 @@ fmb.models.sync = function(method, model, options) {
       options.data = data;
     }
   }
-  fmb.log('---------------> AJAX SYNC', method, url);
+  fmb.log('--------> AJAX SYNC', method, url);
   Backbone.ajaxSync.call(this, method, model, options);
 };
 
