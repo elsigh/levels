@@ -36,9 +36,17 @@ h1 {
   font-size: 1.6em;
   margin: 0;
   padding: 10px;
-  background: #111;
+  background-color: #111;
+  background-image: url(../img/logo.png);
+  background-position: 10px 10px;
+  background-repeat: no-repeat;
+  background-size: 100px auto;
   font-weight: 400;
   border-bottom: 2px solid #34b2e0;
+}
+
+h1 > span {
+  visibility: hidden;
 }
 
 h2 {

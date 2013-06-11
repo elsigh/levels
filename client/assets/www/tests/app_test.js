@@ -193,10 +193,16 @@ function testApp() {
 
 /******************************************************************************/
 
+  assertEquals(serverRequestCountExpected, server.requests.length);
+  fmb.log('OKOKOKOKOKOKOKOKOKOKOKOKOKOK')
 
   // OK  - navigate to the following tab.
   $('.tabs .following').trigger('tap');
   assertTrue(app.view.currentView instanceof fmb.views.Following);
+
+  // Starts a fetch on both following and user.
+  serverRequestCountExpected += 2;
+  assertEquals(serverRequestCountExpected, server.requests.length);
 
   // It's our own device.
   assertEquals(1, app.view.currentView.$('.fmb-following-user').length);
@@ -212,7 +218,7 @@ function testApp() {
     'level': 80,
     'isPlugged': false
   });
-  clock.tick(2);  // render/renderGraph is deferred
+  clock.tick(2000);  // render/renderGraph is deferred
   assertEquals('80%', app.view.currentView.$(
       '.fmb-following-device .battery-level').text().trim());
 
@@ -222,7 +228,7 @@ function testApp() {
     'level': 70,
     'isPlugged': false
   });
-  clock.tick(2);  // render/renderGraph is deferred
+  clock.tick(2000);  // render/renderGraph is deferred
   assertEquals('70%', app.view.currentView.$(
       '.fmb-following-device .battery-level').text().trim());
 
@@ -232,7 +238,7 @@ function testApp() {
     'level': 70,
     'isPlugged': false
   });
-  clock.tick(2);  // render/renderGraph is deferred
+  clock.tick(2000);  // render/renderGraph is deferred
   assertEquals('70%', app.view.currentView.$(
       '.fmb-following-device .battery-level').text().trim());
 
@@ -253,6 +259,7 @@ function testApp() {
   server.requests[serverRequestCountExpected - 1].respond(
       200, API_RESPONSE_HEADERS,
       JSON.stringify(followingResponse));
+  assertEquals(serverRequestCountExpected, server.requests.length);
 
   // aka nothing changed.
   assertEquals(1, app.view.currentView.$('.fmb-following-user').length);
@@ -261,7 +268,53 @@ function testApp() {
       '.fmb-following-device .battery-level').text().trim());
 
 
+  // Tests our following "addByKey" functionality.
+  app.model.user.get('following').addByKey('following_user_1_key');
+  serverRequestCountExpected++;
+  assertEquals(fmb.models.getApiUrl('/following'),
+               server.requests[serverRequestCountExpected - 1].url);
+
+  // Shows basic info about some new user in the UI.
+  assertEquals(2, app.view.currentView.$('.fmb-following-user').length);
+
+  clock.tick(1000);  // trigger deferreds
+
+  var followingAddResponse = {
+    'status': 0,
+    'key': 'following_user_1_key',
+    'name': 'following_user_1_name',
+    'devices': [
+      {
+        'key': 'following_user_1_device_1_key',
+        'platform': 'Android',
+        'name': 'keekee',
+        'settings': [
+          {
+            'key': 'following_user_1_device_1_settings_1',
+            'created': fmb.models.getISODate(
+                new Date(Date.now() - 60 * 1000 * 1)),
+            'battery_level': 35,
+            'is_charging': false
+          }
+        ]
+      }
+    ]
+  };
+  server.requests[serverRequestCountExpected - 1].respond(
+      200, API_RESPONSE_HEADERS,
+      JSON.stringify(followingAddResponse));
+  clock.tick(2000);  // render/renderGraph is deferred
+
+  assertEquals(1, app.model.user.get('following').length);
+
+  var $newFollowingUser = $(app.view.currentView.$(
+      '.fmb-following-user')[1]);
+  assertEquals('following_user_1_name',
+      $($newFollowingUser.find('h2')).text().trim());
+
   // Tries out some following users in the response.
+  // Note - here we're *not* sending back the new followed user as
+  // the datastore hasn't quite finished with eventual consistency ;/
   app.model.user.get('following').fetch();
   serverRequestCountExpected++;
 
@@ -269,11 +322,11 @@ function testApp() {
     'status': 0,
     'following': [
       {
-        'key': 'following_user_1_key',
-        'name': 'following_user_1',
+        'key': 'following_user_2_key',
+        'name': 'following_user_2_name',
         'devices': [
           {
-            'key': 'following_device_1_key',
+            'key': 'following_user_2_device_1_key',
             'platform': 'Android',
             'name': 'kokomo',
             'settings': [
@@ -317,16 +370,18 @@ function testApp() {
   server.requests[serverRequestCountExpected - 1].respond(
       200, API_RESPONSE_HEADERS,
       JSON.stringify(followingResponse));
-  clock.tick(2);  // render/renderGraph is deferred
+  clock.tick(2000);  // render/renderGraph is deferred
 
   // UI updates
-  assertEquals(2, app.view.currentView.$('.fmb-following-user').length);
-  assertEquals(2, app.view.currentView.$('.fmb-following-device').length);
-  assertEquals(1, app.view.currentView.$('.fmb-following-user .fmb-remove').length);
+  assertEquals(3, app.view.currentView.$('.fmb-following-user').length);
+  assertEquals(3, app.view.currentView.$('.fmb-following-device').length);
+  assertEquals(2, app.view.currentView.$('.fmb-following-user .fmb-remove').length);
   assertEquals('70%', $(app.view.currentView.$(
       '.fmb-following-device .battery-level')[0]).text().trim());
-  assertEquals('65%', $(app.view.currentView.$(
+  assertEquals('35%', $(app.view.currentView.$(
       '.fmb-following-device .battery-level')[1]).text().trim());
+  assertEquals('65%', $(app.view.currentView.$(
+      '.fmb-following-device .battery-level')[2]).text().trim());
 
 
   // Ensures that new battery stats end up being rendered.
@@ -335,7 +390,7 @@ function testApp() {
     'level': 40,
     'isPlugged': true
   });
-  clock.tick(2);  // render/renderGraph is deferred
+  clock.tick(2000);  // render/renderGraph is deferred
   assertEquals('40%', $(app.view.currentView.$(
       '.fmb-following-device .battery-level')[0]).text().trim());
 }

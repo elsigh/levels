@@ -86,6 +86,10 @@ public class LevelsPlugin extends Plugin {
             });
             return new PluginResult(status, "");
 
+
+        } else if (action.equals("getDeviceModelName")) {
+            return new PluginResult(status, android.os.Build.MODEL);
+
         } else {
             return new PluginResult(PluginResult.Status.INVALID_ACTION);
         }

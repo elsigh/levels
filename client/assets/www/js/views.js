@@ -330,10 +330,13 @@ fmb.views.Account.prototype.onClickLogin_ = function() {
       fmb.models.SERVER + '/login?user_token=' +
           window.escape(this.model.loginToken_),
       '_blank',
-      'location=no');
+      'location=yes');
 
   // For Phonegap's InAppBrowser.
   if (this.loginRef_.addEventListener) {
+    this.loginRef_.addEventListener('loadstart',
+        _.bind(this.onLoginRefLoadStart_, this),
+        false);
     this.loginRef_.addEventListener('loadstop',
         _.bind(this.onLoginRefLoadStop_, this),
         false);
@@ -351,8 +354,26 @@ fmb.views.Account.prototype.onClickLogin_ = function() {
 };
 
 
+/**
+ * @param {Event} e An event.
+ * @private
+ */
+fmb.views.Account.prototype.onLoginRefLoadStart_ = function(e) {
+  fmb.log('fmb.views.Account onLoginRefLoadStart_', e.url);
+  navigator.notification &&
+      navigator.notification.activityStart('', 'Loading ...');
+};
+
+
+/**
+ * @param {Event} e An event.
+ * @private
+ */
 fmb.views.Account.prototype.onLoginRefLoadStop_ = function(e) {
   fmb.log('fmb.views.Account onLoginRefLoadStop_', e.url);
+
+  navigator.notification && navigator.notification.activityStop();
+
   if (e.url.indexOf('/profile') !== -1) {
     this.loginRef_.close();
     this.onLoginRefExit_();
@@ -362,6 +383,9 @@ fmb.views.Account.prototype.onLoginRefLoadStop_ = function(e) {
 
 fmb.views.Account.prototype.onLoginRefExit_ = function(e) {
   fmb.log('fmb.views.Account onLoginRefExit_');
+
+  navigator.notification && navigator.notification.activityStop();
+
   window.clearInterval(this.loginInterval_);
 
   if (this.loginRef_.removeEventListener) {
@@ -702,7 +726,7 @@ fmb.views.FollowingUser = Backbone.View.extend({
 fmb.views.FollowingUser.prototype.initialize = function(options) {
   this.parent = options.parent;
   this.listenTo(this.model, 'change', _.debounce(this.render, this));
-  this.listenTo(this.model.get('devices'), 'add', this.render);
+  this.listenTo(this.model.get('devices'), 'add', _.debounce(this.render));
   this.listenTo(this.model.get('devices'), 'remove', this.onRemoveDevice_);
   this.subViews_ = {};
 };

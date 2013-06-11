@@ -199,9 +199,9 @@ public class LevelsAlarm extends BroadcastReceiver {
             Log.d(TAG, "makeRequest Exception::" + Log.getStackTraceString(e));
         }
 
-        Toast.makeText(context,
-                       "Battery: " + batteryPercent + "%",
-                       Toast.LENGTH_SHORT).show();
+        //Toast.makeText(context,
+        //               "Battery: " + batteryPercent + "%",
+        //               Toast.LENGTH_SHORT).show();
 
         wl.release();
     }
