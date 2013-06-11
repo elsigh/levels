@@ -4,6 +4,16 @@ cordova.define('cordova/plugin/levels', function(require, exports, module) {
   var exec = require('cordova/exec');
   var plugin = {};
 
+  plugin.setDeviceModel = function() {
+    return exec(
+        function(result) {
+          window.device.model = result;
+          fmb.log('Set window.device.model to', result);
+        },
+        null,
+        'LevelsPlugin', 'getDeviceModelName', []);
+  };
+
   plugin.startService = _.debounce(function(win, fail) {
     fmb.log('LevelsServicePlugin - startService');
     if (!app.model.user.get('api_token')) {

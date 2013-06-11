@@ -2,9 +2,10 @@
   <html>
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="format-detection" content="telephone=no,email=no,address=no">
+    <meta name="format-detection"
+      content="telephone=no,email=no,address=no">
     <meta name="viewport"
-      content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height">
+      content="user-scalable=no,initial-scale=1,maximum-scale=1,minimum-scale=1,width=device-width,height=device-height">
 
     <!-- target-densitydpi=device-dpi -->
     <link rel="stylesheet" href="css/base.css">
@@ -15,14 +16,12 @@
     <link rel="stylesheet" href="css/xcharts.css">
 
     <title>Levels</title>
-    <!--
-    <script src="http://192.168.1.8:8090/target/target-script-min.js#anonymous"></script>
-    -->
+
   </head>
   <body>
     <div class="fmb-app">
       <div class="nav">
-        <h1>Levels</h1>
+        <h1><span>Levels</span></h1>
       </div>
       <section class="tabs-c">
         <div class="tabs">
@@ -62,14 +61,27 @@
 
     <script id="tpl_account" type="text/html">
       {{^user.api_token}}
-        <h2>Welcome to the App!</h2>
+        <h2>Welcome!</h2>
         <p>
-          Send family and friends a notification *before* your battery dies!
+          Automatically send your family and friends a
+          notification *before* your battery dies!
         </p>
         <p>
-          To get started:
+          Step 1:
         </p>
         <div class="login-google"><span>Sign in with Google</span></div>
+        <p>
+          <em>
+            This will open a new window for you to sign in to and
+            then bring you back to the app.
+          </em>
+        </p>
+        <p>
+          <em>
+            Fear not - Levels will never
+            automatically post anything to any social network on your behalf.
+          </em>
+        </p>
       {{/user.api_token}}
 
       {{#user.api_token}}
@@ -108,39 +120,39 @@
         <button class="notifying-add-email">+ by email</button>
       </div>
 
-          {{#notifying.length}}
-      <table>
-        <thead>
-          <tr>
-            <th>name</th>
-            <th>contact</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          {{#notifying}}
-            <tr data-key="{{key}}">
-              <td>
-                <span class="notifying-name">{{name}}</span>
-              </td>
-              <td>
-                {{means}}
-              </td>
-              <td>
-                {{#key}}
-                  <div class="fmb-remove notifying-remove"
-                    data-key="{{key}}"
-                    data-means="{{means}}">X</div>
-                {{/key}}
-                {{^key}}
-                  <div class="fmb-loading"></div>
-                {{/key}}
-              </td>
+      {{#notifying.length}}
+        <table>
+          <thead>
+            <tr>
+              <th>name</th>
+              <th>contact</th>
+              <th></th>
             </tr>
-          {{/notifying}}
-        </tbody>
-      </table>
-          {{/notifying.length}}
+          </thead>
+          <tbody>
+            {{#notifying}}
+              <tr data-key="{{key}}">
+                <td>
+                  <span class="notifying-name">{{name}}</span>
+                </td>
+                <td>
+                  {{means}}
+                </td>
+                <td>
+                  {{#key}}
+                    <div class="fmb-remove notifying-remove"
+                      data-key="{{key}}"
+                      data-means="{{means}}">X</div>
+                  {{/key}}
+                  {{^key}}
+                    <div class="fmb-loading"></div>
+                  {{/key}}
+                </td>
+              </tr>
+            {{/notifying}}
+          </tbody>
+        </table>
+      {{/notifying.length}}
     </script>
 
 

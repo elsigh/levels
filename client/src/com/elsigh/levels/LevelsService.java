@@ -64,9 +64,9 @@ public class LevelsService extends Service {
                 alarm.SetPrefs(this, apiToken, userKey, deviceKey, updatePath, updateFrequency);
 
                 if (isRunning) {
-                    Toast.makeText(this.getApplicationContext(),
-                                   "Battery updates are ON",
-                                   Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(this.getApplicationContext(),
+                    //               "Battery updates are ON",
+                    //               Toast.LENGTH_SHORT).show();
                     alarm.SendBatteryStatus(this.getApplicationContext(),
                         apiToken, userKey, deviceKey, updatePath);
                 }
@@ -78,9 +78,9 @@ public class LevelsService extends Service {
         if (!isRunning) {
             alarm.SetAlarm(this);
             isRunning = true;
-            Toast.makeText(this.getApplicationContext(),
-                           "Battery updates ENABLED",
-                           Toast.LENGTH_SHORT).show();
+            //Toast.makeText(this.getApplicationContext(),
+            //               "Battery updates ENABLED",
+            //               Toast.LENGTH_SHORT).show();
         }
     }
 

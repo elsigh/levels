@@ -121,6 +121,12 @@ class AuthHandler(WebRequestHandler, SimpleAuthHandler):
           'api_token': str(uuid.uuid4())
         })
 
+        # Default avatar url
+        if ('avatar_url' not in _attrs or _attrs['avatar_url'] == ''):
+          _attrs.update({
+            'avatar_url': models.DEFAULT_AVATAR_URL
+          })
+
         ok, user = self.auth.store.user_model.create_user(auth_id, **_attrs)
         if ok:
           self.auth.set_session(self.auth.store.user_to_dict(user))

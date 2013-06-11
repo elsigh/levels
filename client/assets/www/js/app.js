@@ -69,6 +69,18 @@ fmb.getWebViewLogger_ = function() {
 };
 
 
+fmb.injectScript = function(src) {
+  script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.async = true;
+  script.onload = function(){
+      // remote script has loaded
+  };
+  script.src = src;
+  $('head').get(0).appendChild(script);
+};
+
+
 /**
  * Good times, wrap fmb.log
  */
@@ -130,13 +142,16 @@ fmb.App.onBatteryStatus_ = function(batteryInfo) {
   window.navigator.battery = window.navigator.battery || {};
   window.navigator.battery.level = batteryInfo['level'];
   window.navigator.battery.isPlugged = batteryInfo['isPlugged'];
-  window['app'].model.user.device.trigger('battery_status');
+  window['app'].model.user.device &&
+      window['app'].model.user.device.trigger('battery_status');
 };
 
 
 /** @inheritDoc */
 fmb.App.prototype.initialize = function(options) {
   fmb.log('fmb.App initialize');
+
+  //fmb.injectScript('http://192.168.1.9:9090/target/target-script-min.js#anonymous');
 
   _.each(fmb.App.Routes, _.bind(function(route) {
     this.route(route.url, route.handler);

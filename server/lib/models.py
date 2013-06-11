@@ -55,6 +55,7 @@ class FMBModel(ndb.Model):
         return obj
 
 
+DEFAULT_AVATAR_URL = 'http://lh3.googleusercontent.com/-XdUIqdMkCWA/AAAAAAAAAAI/AAAAAAAAAAA/4252rscbv5M/s96/photo.jpg'
 class FMBUser(User, FMBModel):
     def _pre_put_hook(self):
         if not hasattr(self, 'api_token'):

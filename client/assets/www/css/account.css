@@ -70,3 +70,7 @@
 .fmb-notifying th {
   border-top: 0;
 }
+
+.fmb-notifying td {
+  padding: 1em 0.5em;
+}
