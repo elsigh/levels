@@ -44,7 +44,8 @@ FOURSQUARE_CLIENT_SECRET = 'client secret'
 AUTH_CONFIG = {
   # OAuth 2.0 providers
   'google'      : (GOOGLE_APP_ID, GOOGLE_APP_SECRET,
-                  'https://www.googleapis.com/auth/userinfo.profile'),
+                  ('https://www.googleapis.com/auth/userinfo.profile '
+                   'https://www.googleapis.com/auth/userinfo.email')),
   'facebook'    : (FACEBOOK_APP_ID, FACEBOOK_APP_SECRET,
                   'user_about_me'),
   'windows_live': (WL_CLIENT_ID, WL_CLIENT_SECRET,

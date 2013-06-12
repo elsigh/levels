@@ -609,13 +609,51 @@ fmb.models.User = fmb.Model.extend({
 });
 
 
+/**
+ * This is annoyingly a static function because it's passed in to Java as a
+ * string.
+ * @param {Object} e An object.
+ */
+fmb.models.User.GCMEvent = function(e) {
+  fmb.log('fmb.models.User.GCMEvent', e);
+  switch (e.event) {
+    case 'registered':
+      window['app'].model.user.save({
+        'gcm_push_token': e.regid
+      }, {
+        url: fmb.models.getApiUrl('/user/gcm_push_token'),
+        data: {
+          'gcm_push_token': e.regid
+        }
+      });
+      break;
+
+    case 'message':
+      fmb.log('message not yet implemented');
+      break;
+
+    case 'error':
+      fmb.log('ERROR');
+      break;
+
+    default:
+      fmb.log('UNKNOWN ERROR');
+      break
+  }
+};
+
+
 /** @inheritDoc */
 fmb.models.User.prototype.initialize = function(opt_data, opt_options) {
   fmb.Model.prototype.initialize.apply(this, arguments);
   if (this.id) {
     this.setUserKey_();
+    this.registerWithGCM_();
   } else {
-    this.once('change:key', this.setUserKey_, this);
+    this.once('change:key', function() {
+      this.setUserKey_();
+      this.registerWithGCM_();
+    }, this);
   }
 
   // API Token will always fire change, even when init'ing from localStorage.
@@ -633,6 +671,7 @@ fmb.models.User.prototype.initialize = function(opt_data, opt_options) {
 };
 
 
+
 /**
  * @private
  */
@@ -641,6 +680,34 @@ fmb.models.User.prototype.setUserKey_ = function() {
           'and set for fmb.models.sync.userKey');
   localStorage.setItem('user_key', this.id);
   fmb.models.sync.userKey = this.id;
+};
+
+
+
+/**
+ * @private
+ */
+fmb.models.User.prototype.registerWithGCM_ = function() {
+  window.plugins.GCM.register('652605517304', 'fmb.models.User.GCMEvent',
+      fmb.App.GCMWin, fmb.App.GCMFail);
+};
+
+
+/**
+ * Copied from marknutter's example.
+ * @param {Object} e An object.
+ */
+fmb.models.User.prototype.GCMWin = function(e) {
+  fmb.log('fmb.App.GCMWin!', e);
+};
+
+
+/**
+ * Copied from marknutter's example.
+ * @param {Object} e An object.
+ */
+fmb.models.User.prototype.GCMFail = function(e) {
+  fmb.log('fmb.App.GCMFail =(', e);
 };
 
 
