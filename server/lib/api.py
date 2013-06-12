@@ -175,6 +175,15 @@ class ApiUserHandler(ApiRequestHandler):
             user.to_dict(include_api_token=True, include_device_notifying=True))
 
 
+class ApiUserGCMPushTokenHandler(ApiRequestHandler):
+    def post(self):
+        self.current_user.gcm_push_token = self._json_request_data['gcm_push_token']
+        self.current_user.put()
+        return self.output_json_success(
+            self.current_user.to_dict(include_api_token=True,
+                                      include_device_notifying=True))
+
+
 class ApiUserTokenHandler(ApiRequestHandler):
     """Returns some pretty important data back to the user."""
     def post(self):
@@ -429,6 +438,8 @@ class ApiFollowingHandler(ApiRequestHandler):
             following=follow_user.key
         )
         following.put()
+
+        follow_user.send_message('%s is now following your Levels!' % self.current_user.name)
 
         # Includes the cid for this one here so the client can match up
         out_dict = follow_user.to_dict()

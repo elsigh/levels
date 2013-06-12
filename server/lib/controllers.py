@@ -43,6 +43,7 @@ routes = [
     Route('/api/notifying/delete', handler='lib.api.ApiNotifyingDeleteHandler'),
     Route('/api/notifying', handler='lib.api.ApiNotifyingHandler'),
     Route('/api/settings', handler='lib.api.ApiSettingsHandler'),
+    Route('/api/user/gcm_push_token', handler='lib.api.ApiUserGCMPushTokenHandler'),
     Route('/api/user/token', handler='lib.api.ApiUserTokenHandler'),
     Route('/api/user', handler='lib.api.ApiUserHandler'),
 
@@ -54,6 +55,9 @@ routes = [
     Route('/auth/<provider>/callback',
           handler='lib.auth.AuthHandler:_auth_callback',
           name='auth_callback'),
+
+    # Admin
+    Route('/admin/user_message_test', handler='lib.www.AdminUserMessageTestHandler'),
 
     # WWW
     Route('/profile/<user_key>', handler='lib.www.ProfileHandler'),
