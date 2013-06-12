@@ -180,6 +180,7 @@ fmb.App.prototype.initialize = function(options) {
           _.delay(window.navigator.splashscreen.hide, 2000);
     }, this));
   }, this));
+
 };
 
 

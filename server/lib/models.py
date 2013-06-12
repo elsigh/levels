@@ -25,10 +25,13 @@ try:
 except:
     import simplejson
 
+from google.appengine.api import mail
 from google.appengine.ext import ndb
 sys.modules['ndb'] = ndb
 
 from webapp2_extras.appengine.auth.models import User
+
+from lib.external.gae_python_gcm.gcm import GCMMessage, GCMConnection
 
 
 class FMBModel(ndb.Model):
@@ -69,6 +72,33 @@ class FMBUser(User, FMBModel):
         for device in q_device:
             obj['devices'].append(device.to_dict(include_notifying=include_device_notifying))
         return obj
+
+    def send_message(self, message):
+        """Tries a few different means/methods to send a message to a user."""
+        logging.info('FMBUser %s send_message %s' % (self.name, message))
+        if hasattr(self, 'gcm_push_token'):
+            push_token = self.gcm_push_token
+            android_payload = {
+                'message': message
+            }
+            gcm_message = GCMMessage(push_token, android_payload)
+            gcm_conn = GCMConnection()
+            logging.info('Attempting to send Android push notification %s to push_token %s.' %
+                         (repr(android_payload), repr(push_token)))
+            gcm_conn.notify_device(gcm_message)
+            return True
+
+        elif hasattr(self, 'email'):
+            mail.send_mail(sender='Levels Alert <elsigh@levelsapp.com>',
+                   to='%s <%s>' % (self.name, self.email),
+                   subject='A message from Levels',
+                   body=message)
+            logging.info('Sending email to user.')
+            return True
+
+        else:
+            logging.info('No means to send message to user.')
+            return False
 
 
 NUM_SETTINGS_TO_FETCH = 10

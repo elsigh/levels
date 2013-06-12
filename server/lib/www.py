@@ -13,13 +13,33 @@ sys.path.append(os.path.join(os.path.dirname(__file__), 'external'))
 
 from lib.web_request_handler import WebRequestHandler
 from google.appengine.ext import ndb
+sys.modules['ndb'] = ndb
 
 import webapp2
+
+from webapp2_extras.appengine.users import admin_required
 
 from lib import models
 
 # last import.
 import settings
+
+
+
+class AdminUserMessageTestHandler(WebRequestHandler):
+    @admin_required
+    def get(self):
+        self.output_response({'result': 'not yet'}, 'admin_user_message_test.html')
+
+    def post(self):
+        user_id = self.request.get('user_id')
+        message = self.request.get('message', 'Test message')
+        result = False
+        if user_id:
+            user = models.FMBUser.get_by_id(int(user_id))
+            if user:
+                result = user.send_message(message)
+        self.output_response({'result': result}, 'admin_user_message_test.html')
 
 
 class ProfileHandler(WebRequestHandler):

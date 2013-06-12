@@ -1,0 +1,42 @@
+{% extends "base.html"%}
+
+{% block head %}
+  <style>
+    .result-c {
+      margin: 1em 0;
+    }
+    .result {
+      display: inline-block;
+      border: 1px solid #999;
+      background-color: #ccc;
+      padding: 0.5em;
+    }
+  </style>
+{% endblock %}
+
+{% block body %}
+  <section>
+    <header>
+      <h1><span>Levels<span></h1>
+      <h2>Admin User Message Test</h2>
+    </header>
+
+    <div class="result-c">
+      <div class="result">
+        Result: {{result}}
+      </div>
+    </div>
+
+    <form method="POST" action="/admin/user_message_test">
+      <div>
+        <input type="text" name="user_id" placeholder="User ID" value="19001">
+      </div>
+      <div>
+        <textarea name="message">Test message</textarea>
+      </div>
+      <p>
+        <input type="submit">
+      </p>
+    </form>
+  </section>
+{% endblock %}

@@ -24,9 +24,6 @@
      -->
 
     <access origin="http://127.0.0.1*"/> <!-- allow local pages -->
-
-    <!-- <access origin="https://example.com" /> allow any secure requests to example.com -->
-    <!-- <access origin="https://example.com" subdomains="true" /> such as above, but including subdomains, such as www -->
     <access origin=".*"/>
 
     <log level="DEBUG"/>
@@ -41,6 +38,7 @@
         <plugin name="Notification" value="org.apache.cordova.Notification" />
         <plugin name="SplashScreen" value="org.apache.cordova.SplashScreen" />
 
+        <plugin name="GCMPlugin" value="com.marknutter.GCM.GCMPlugin" />
         <plugin name="LevelsPlugin" value="com.elsigh.levels.LevelsPlugin" />
         <plugin name="WebIntent" value="com.borismus.webintent.WebIntent" />
         <plugin name="ContactView" value="com.rearden.ContactView" />
