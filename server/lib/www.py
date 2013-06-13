@@ -43,19 +43,30 @@ class AdminUserMessageTestHandler(WebRequestHandler):
 
 
 class ProfileHandler(WebRequestHandler):
-    def get(self, user_key=None):
+    def get(self, user_identifier=None):
         """Handles GET /profile"""
 
         close = self.request.get('close')
 
-        if self.current_user and user_key is None:
+        if self.current_user and user_identifier is None:
             user = self.current_user
 
-        elif user_key is not None:
-            try:
-                user = ndb.Key(urlsafe=user_key).get()
-            except:
-                user = models.FMBUser()
+        elif user_identifier is not None:
+            # The URL is /p/unique_profile_str
+            if self.request.path.find('/p/') != -1:
+                q = models.FMBUser.query().filter(
+                    ndb.GenericProperty('unique_profile_str') == user_identifier)
+                user = q.get()
+
+                if user is None:
+                    self.abort(404)
+
+            # The URL is /profile/user_identifier
+            else:
+                try:
+                    user = ndb.Key(urlsafe=user_identifier).get()
+                except:
+                    self.abort(404)
 
         logging.info('Profile user!: %s', user.to_dict())
         template_data = {

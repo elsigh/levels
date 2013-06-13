@@ -8,6 +8,8 @@ var API_RESPONSE_HEADERS = {
 var app;
 var clock;
 var server;
+var serverRequestCountExpected;
+var initialAppHtml;
 
 // Don't rewrite our URLs
 sinon.stub(window.history, 'pushState');
@@ -16,30 +18,42 @@ sinon.stub(window, 'confirm', function() { return true; });
 sinon.stub(cordova, 'require');
 
 function setUp() {
-  localStorage.clear();
+  if (!initialAppHtml) {
+    initialAppHtml = $('.fmb-app').html();
+  }
   app = null;
+  localStorage.clear();
   clock = sinon.useFakeTimers(1269104389306);
+  clock.tick(1000000);  // get us into sane clock land.
   server = sinon.fakeServer.create();
+  serverRequestCountExpected = 0;
+  fmb.log('***************************************************************');
 }
 
 function tearDown() {
+  $('.fmb-app').html(initialAppHtml);  // reset to cleanliness
+  app = null;
+  Backbone.history.stop();
+  Backbone.IdentityMap.resetCache();
   localStorage.clear();
   clock.restore();
   server.restore();
 }
 
+
 /*************************************************************************/
 
-
-// This is one honkin long test with lots of stuff in it.
-function testApp() {
-  var serverRequestCountExpected = 0;
-  clock.tick(1000000);  // get us into sane clock land.
-
+function setUpAppNewInstall() {
   app = new fmb.App();
   clock.tick(5000);  // init
   assertTrue(app.view.currentView instanceof fmb.views.Account);
-  var user = app.model.user;
+}
+
+
+/*************************************************************************/
+
+function testNewInstallAndUserLogin() {
+  setUpAppNewInstall();
   app.view.currentView.onClickLogin_();    // start oauth.
   assertEquals(1, window.open.callCount);
   app.view.currentView.onInAppBrowserExit_();  // oauth done.
@@ -62,6 +76,7 @@ function testApp() {
   assertEquals(userTokenResponse['key'], app.model.user.get('key'));
   assertEquals(userTokenResponse['key'],
                localStorage.getItem('user_key'));
+
   assertEquals(userTokenResponse['api_token'], app.model.user.get('api_token'));
   assertEquals(userTokenResponse['name'],
                app.view.currentView.$el.find('h2').text());
@@ -91,11 +106,73 @@ function testApp() {
 
   // Ensures our identity map is setup properly
   assertTrue(app.model.user.device === app.model.user.get('devices').at(0));
+}
 
 
 /******************************************************************************/
 
 
+function setUpAppInstalled() {
+  var testUser = new fmb.models.User({
+    'key': 'test_user_key',
+    'api_token': 'test_user_api_token',
+    'name': 'Lindsey Simon',
+    'email': 'elsigh@gmail.com',
+    'unique_profile_str': 'elsigh',
+    'devices': [
+      {
+        'key': 'test_user_device_key',
+        'uuid': fmb.models.DeviceUnMapped.getUuid(),
+        'name': 'test_user_device_name',
+        'platform': 'test_user_device_platform',
+        'version': 'test_user_device_version',
+        'notifying': [],
+        'settings': []
+      }
+    ]
+  });
+  testUser.saveToStorage();
+  localStorage.setItem('user_key', testUser.id);
+  clock.tick(1000);
+  Backbone.IdentityMap.resetCache();
+
+  app = new fmb.App();
+  clock.tick(5000);  // init
+  //assertTrue(app.view.currentView instanceof fmb.views.Account);
+  serverRequestCountExpected++;  // First request is a user fetch / sync.
+}
+
+/******************************************************************************/
+
+function testAppInstalledInitialize() {
+  setUpAppInstalled();
+  assertEquals('test_user_key', app.model.user.id);
+  assertEquals('Lindsey Simon', app.model.user.get('name'));
+  assertEquals('test_user_key', fmb.models.sync.userKey);
+
+  // Ensure we mapped the user device to our static var.
+  assertEquals('test_user_device_name', app.model.user.device.get('name'));
+
+  // First request is a user fetch / sync.
+  var userSyncUrl = fmb.models.getApiUrl('/user') +
+      '?api_token=' + app.model.user.get('api_token') + '&' +
+      'user_key=' + app.model.user.id;
+  assertEquals(userSyncUrl,
+               server.requests[serverRequestCountExpected - 1].url);
+
+  var userSyncResponse = {
+    'status': 0,
+    'name': 'Lindsey Simon'
+  };
+  server.requests[serverRequestCountExpected - 1].respond(
+      200, API_RESPONSE_HEADERS,
+      JSON.stringify(userSyncResponse));
+}
+
+/******************************************************************************/
+
+function testNotifyingAdd() {
+  setUpAppInstalled();
   // Tests that we can add to the notification collection.
   app.model.user.device.get('notifying').add({
     'name': 'test_notify_name',
@@ -129,12 +206,13 @@ function testApp() {
   server.requests[serverRequestCountExpected - 1].respond(
       200, API_RESPONSE_HEADERS,
       JSON.stringify(notifySaveResponse));
-
+}
 
 /******************************************************************************/
 
-
+function testNotifyingDelete() {
   // Tests that we can remove users from the notification collection.
+  testNotifyingAdd();
   app.model.user.device.get('notifying').remove('test_notify_key');
   serverRequestCountExpected++;
   assertEquals(fmb.models.getApiUrl('/notifying/delete'),
@@ -142,21 +220,21 @@ function testApp() {
 
   var deleteRequestData =
       JSON.parse(server.requests[serverRequestCountExpected - 1].requestBody);
-  assertTrue('key' in deleteRequestData);
+  assertEquals('test_notify_key', deleteRequestData['key']);
 
   var notifyDeleteResponse = {
     'status': 0
   };
   server.requests[serverRequestCountExpected - 1].respond(
       200, API_RESPONSE_HEADERS,
-      JSON.stringify(notifySaveResponse));
+      JSON.stringify(notifyDeleteResponse));
   assertEquals(0, app.model.user.device.get('notifying').length);
-
+}
 
 /******************************************************************************/
 
-
-  // Tests that we can have and delete another device.
+function testMultipleDevices() {
+  setUpAppInstalled();
   app.model.user.fetch();
   serverRequestCountExpected++;
   var expectedUrl = fmb.models.getApiUrl('/user') + '?' +
@@ -174,11 +252,15 @@ function testApp() {
       200, API_RESPONSE_HEADERS,
       JSON.stringify(userFetchResponse));
   assertEquals(2, app.model.user.get('devices').length);
-
   assertEquals(2, app.view.currentView.$('.fmb-device').length);
   // Only the new one is deletable.
   assertEquals(1, app.view.currentView.$('.fmb-device .fmb-remove').length);
+}
 
+/******************************************************************************/
+
+function testDeleteNonUserDevice() {
+  testMultipleDevices();
   app.view.currentView.$('.fmb-device .fmb-remove').trigger('tap');
 
   serverRequestCountExpected++;
@@ -189,20 +271,19 @@ function testApp() {
       JSON.stringify({'status': 0}));
   assertEquals(1, app.model.user.get('devices').length);
   assertEquals(1, app.view.currentView.$('.fmb-device').length);
-
+}
 
 /******************************************************************************/
 
-  assertEquals(serverRequestCountExpected, server.requests.length);
-  fmb.log('OKOKOKOKOKOKOKOKOKOKOKOKOKOK')
 
+function testInitialFollowingView() {
+  setUpAppInstalled();
   // OK  - navigate to the following tab.
   $('.tabs .following').trigger('tap');
   assertTrue(app.view.currentView instanceof fmb.views.Following);
 
   // Starts a fetch on both following and user.
   serverRequestCountExpected += 2;
-  assertEquals(serverRequestCountExpected, server.requests.length);
 
   // It's our own device.
   assertEquals(1, app.view.currentView.$('.fmb-following-user').length);
@@ -210,6 +291,10 @@ function testApp() {
 
   // Should not be able to remove yourself.
   assertEquals(0, app.view.currentView.$('.fmb-following-user .remove').length);
+}
+
+function testUserDeviceBatteryStatusUpdatesFollowingView() {
+  testInitialFollowingView();
 
   // Now fire a battery_status event and test that it both updates our
   // local reference to the device as well as the identity mapped one in
@@ -267,12 +352,21 @@ function testApp() {
   assertEquals('70%', app.view.currentView.$(
       '.fmb-following-device .battery-level').text().trim());
 
+}
 
-  // Tests our following "addByKey" functionality.
+/******************************************************************************/
+
+function testFollowingAddByKey() {
+  testInitialFollowingView();
+
   app.model.user.get('following').addByKey('following_user_1_key');
   serverRequestCountExpected++;
   assertEquals(fmb.models.getApiUrl('/following'),
                server.requests[serverRequestCountExpected - 1].url);
+
+  var requestBody =
+      JSON.parse(server.requests[serverRequestCountExpected - 1].requestBody);
+  assertEquals('following_user_1_key', requestBody['following_user_key']);
 
   // Shows basic info about some new user in the UI.
   assertEquals(2, app.view.currentView.$('.fmb-following-user').length);
@@ -311,10 +405,68 @@ function testApp() {
       '.fmb-following-user')[1]);
   assertEquals('following_user_1_name',
       $($newFollowingUser.find('h2')).text().trim());
+}
 
+/******************************************************************************/
+
+function testFollowingAddByUniqueProfileStr() {
+  testInitialFollowingView();
+
+  app.model.user.get('following').addByUniqueProfileStr('gelabella');
+  serverRequestCountExpected++;
+  assertEquals(fmb.models.getApiUrl('/following'),
+               server.requests[serverRequestCountExpected - 1].url);
+
+  var requestBody =
+      JSON.parse(server.requests[serverRequestCountExpected - 1].requestBody);
+  assertEquals('gelabella', requestBody['following_user_unique_profile_str']);
+
+  // Shows basic info about some new user in the UI.
+  assertEquals(2, app.view.currentView.$('.fmb-following-user').length);
+
+  clock.tick(1000);  // trigger deferreds
+
+  var followingAddResponse = {
+    'status': 0,
+    'key': 'following_user_1_key',
+    'name': 'following_user_1_name',
+    'devices': [
+      {
+        'key': 'following_user_1_device_1_key',
+        'platform': 'Android',
+        'name': 'keekee',
+        'settings': [
+          {
+            'key': 'following_user_1_device_1_settings_1',
+            'created': fmb.models.getISODate(
+                new Date(Date.now() - 60 * 1000 * 1)),
+            'battery_level': 35,
+            'is_charging': false
+          }
+        ]
+      }
+    ]
+  };
+  server.requests[serverRequestCountExpected - 1].respond(
+      200, API_RESPONSE_HEADERS,
+      JSON.stringify(followingAddResponse));
+  clock.tick(2000);  // render/renderGraph is deferred
+
+  assertEquals(1, app.model.user.get('following').length);
+
+  var $newFollowingUser = $(app.view.currentView.$(
+      '.fmb-following-user')[1]);
+  assertEquals('following_user_1_name',
+      $($newFollowingUser.find('h2')).text().trim());
+}
+
+/******************************************************************************/
+
+function testFollowingSync() {
+  testFollowingAddByUniqueProfileStr();
   // Tries out some following users in the response.
-  // Note - here we're *not* sending back the new followed user as
-  // the datastore hasn't quite finished with eventual consistency ;/
+  // Note - here we're *not* sending back the new followed user to mimic
+  // the datastore reality of eventual consistency ;/
   app.model.user.get('following').fetch();
   serverRequestCountExpected++;
 
@@ -372,25 +524,23 @@ function testApp() {
       JSON.stringify(followingResponse));
   clock.tick(2000);  // render/renderGraph is deferred
 
+
   // UI updates
   assertEquals(3, app.view.currentView.$('.fmb-following-user').length);
   assertEquals(3, app.view.currentView.$('.fmb-following-device').length);
   assertEquals(2, app.view.currentView.$('.fmb-following-user .fmb-remove').length);
-  assertEquals('70%', $(app.view.currentView.$(
-      '.fmb-following-device .battery-level')[0]).text().trim());
+
   assertEquals('35%', $(app.view.currentView.$(
       '.fmb-following-device .battery-level')[1]).text().trim());
   assertEquals('65%', $(app.view.currentView.$(
       '.fmb-following-device .battery-level')[2]).text().trim());
 
-
-  // Ensures that new battery stats end up being rendered.
-  clock.tick(1000);
+  // Need data for the user device to be set.
   fmb.App.onBatteryStatus_({
-    'level': 40,
-    'isPlugged': true
+    'level': 70,
+    'isPlugged': false
   });
   clock.tick(2000);  // render/renderGraph is deferred
-  assertEquals('40%', $(app.view.currentView.$(
+  assertEquals('70%', $(app.view.currentView.$(
       '.fmb-following-device .battery-level')[0]).text().trim());
 }

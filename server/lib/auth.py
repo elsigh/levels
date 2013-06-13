@@ -22,7 +22,7 @@ class LoginHandler(WebRequestHandler):
       memcache.set('user_token-%s' % user_token, self.current_user.key.id(), 60)
       logging.info('Set user_token<->id match - %s, %s' %
                    (user_token, self.current_user.key.id()))
-      uri = '/profile/%s' % self.current_user.key.urlsafe()
+      uri = '/p/%s' % self.current_user.unique_profile_str
       if user_token:
         uri = uri + '?close=1'
       self.redirect(uri)
@@ -120,9 +120,9 @@ class AuthHandler(WebRequestHandler, SimpleAuthHandler):
         logging.info('Creating a brand new user')
 
         # Creates a FMB api_token for this user.
-        _attrs.update({
-          'api_token': str(uuid.uuid4())
-        })
+        #_attrs.update({
+        #  'api_token': str(uuid.uuid4())
+        #})
 
         ok, user = self.auth.store.user_model.create_user(auth_id, **_attrs)
         if ok:

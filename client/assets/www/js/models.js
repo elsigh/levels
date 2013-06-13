@@ -81,7 +81,7 @@ fmb.models.App.prototype.initialize = function(opt_data, opt_options) {
         isUserDevice: true
       });
       device.saveToServer({
-        'uuid': window.device && window.device.uuid || navigator.appVersion,
+        'uuid': fmb.models.DeviceUnMapped.getUuid(),
         'name': window.device && window.device.model || navigator.appName,
         'platform': window.device && window.device.platform || navigator.platform,
         'version': window.device && window.device.version || navigator.productSub
@@ -280,26 +280,25 @@ fmb.models.DeviceUnMapped = fmb.Model.extend({
 });
 
 
-/** @inheritDoc */
-fmb.models.DeviceUnMapped.prototype.initialize =
-    function(opt_data, opt_options) {
-  fmb.Model.prototype.initialize.apply(this, arguments);
-  var options = opt_options || {};
-  if (options.isUserDevice) {
-    this.on('battery_status', this.onBatteryStatus_, this);
-  }
+/**
+ * @return {string} The UUID of the current device.
+ */
+fmb.models.DeviceUnMapped.getUuid = function() {
+  return window.device && window.device.uuid || navigator.appVersion;
 };
 
 
 /**
  * @private
  */
-fmb.models.DeviceUnMapped.prototype.onBatteryStatus_ = function() {
+fmb.models.DeviceUnMapped.prototype.onBatteryStatus = function() {
+  fmb.log('fmb.models.Device onBatteryStatus');
   // This should result in a settings beacon via our already-running service.
   var plugin = cordova.require('cordova/plugin/levels');
   plugin && plugin.startService();
 
   if (!window.navigator.battery) {
+    fmb.log('No window.navigator.battery =(');
     return;
   }
 
@@ -312,7 +311,7 @@ fmb.models.DeviceUnMapped.prototype.onBatteryStatus_ = function() {
     'battery_level': window.navigator.battery.level,
     'is_charging': window.navigator.battery.isPlugged
   });
-  fmb.log('fmb.models.Device onBatteryStatus_', this.id, setting.toJSON());
+  fmb.log('fmb.models.Device onBatteryStatus', this.id, setting.toJSON());
   this.get('settings').add(setting);
 };
 
@@ -394,7 +393,7 @@ fmb.models.DeviceCollection.prototype.initialize = function() {
  * @private
  */
 fmb.models.DeviceCollection.prototype.onAdd_ = function(model) {
-  var uuid = window.device && window.device.uuid || navigator.appVersion;
+  var uuid = fmb.models.DeviceUnMapped.getUuid();
   if (uuid == model.get('uuid')) {
     fmb.log('fmb.models.DeviceCollection ONADD USER DEVICE!', model.toJSON());
     this.parent.setUserDevice(model);
@@ -478,6 +477,41 @@ fmb.models.FollowingCollection.prototype.parse = function(response, xhr) {
 
 
 /**
+ * @param {string} uniqueProfileStr A uniqueProfileStr to follow.
+ */
+fmb.models.FollowingCollection.prototype.addByUniqueProfileStr =
+    function(uniqueProfileStr) {
+  fmb.log('fmb.models.FollowingCollection addByUniqueProfileStr',
+          uniqueProfileStr);
+
+  // Can't follow yerself or no one.
+  if (uniqueProfileStr === '' ||
+      uniqueProfileStr == this.parent.get('unique_profile_str')) {
+    fmb.log('fmb.models.FollowingCollection addByUniqueProfileStr',
+            'cant follow yerself');
+    return;
+  }
+
+  var alreadyFollowing = this.findWhere({
+    'unique_profile_str': uniqueProfileStr
+  });
+  if (alreadyFollowing) {
+    fmb.log('.. bail, already following', uniqueProfileStr);
+    //alert('You are already following ' + uniqueProfileStr);
+    return;
+  }
+
+  this.add({
+    'name': 'Adding ' + uniqueProfileStr,
+    'following_user_unique_profile_str': uniqueProfileStr
+  });
+
+  var plugin = cordova.require('cordova/plugin/levels');
+  plugin && plugin.showToast('Adding ' + uniqueProfileStr);
+};
+
+
+/**
  * @param {string} userKey A userKey to follow.
  */
 fmb.models.FollowingCollection.prototype.addByKey = function(userKey) {
@@ -491,7 +525,7 @@ fmb.models.FollowingCollection.prototype.addByKey = function(userKey) {
   }
 
   var alreadyFollowing = this.findWhere({
-    key: userKey
+    'key': userKey
   });
   if (alreadyFollowing) {
     fmb.log('.. bail, already following', userKey);
@@ -671,6 +705,14 @@ fmb.models.User.prototype.initialize = function(opt_data, opt_options) {
 };
 
 
+/**
+ * @return {string} The user's profile link.
+ */
+fmb.models.User.prototype.getProfileUrl = function() {
+  return fmb.models.SERVER_SHARE.replace('http://', '') + '/p/' +
+      this.get('unique_profile_str');
+};
+
 
 /**
  * @private
@@ -720,6 +762,7 @@ fmb.models.User.prototype.GCMFail = function(e) {
  */
 fmb.models.User.prototype.setUserDevice = function(model) {
   this.device = model;
+  this.device.on('battery_status', this.device.onBatteryStatus, this.device);
 
   if (this.get('api_token')) {
     fmb.log('START levelsplugin!');

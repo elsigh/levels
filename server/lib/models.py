@@ -64,6 +64,12 @@ class FMBUser(User, FMBModel):
         if not hasattr(self, 'api_token'):
             self.api_token = str(uuid.uuid4())
 
+        if not hasattr(self, 'unique_profile_str'):
+            if hasattr(self, 'email') and self.email.find('@gmail.com') != -1:
+                self.unique_profile_str = self.email.replace('@gmail.com', '')
+            else:
+                self.unique_profile_str = str(uuid.uuid4())[:8]
+
     def to_dict(self, include_api_token=False, include_device_notifying=False):
         obj = super(FMBUser, self).to_dict(include_api_token=include_api_token)
         obj['devices'] = []
@@ -81,8 +87,8 @@ class FMBUser(User, FMBModel):
             obj['devices'].append(device.to_dict(include_notifying=include_device_notifying))
         return obj
 
-    def get_profile_link(self):
-        return 'www.levelsapp.com/profile/%s' % self.key.urlsafe()
+    def get_profile_url(self):
+        return 'www.levelsapp.com/p/%s' % self.unique_profile_str
 
     def send_message(self, message):
         """Tries a few different means/methods to send a message to a user."""

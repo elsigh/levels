@@ -60,9 +60,15 @@ routes = [
     Route('/admin/user_message_test', handler='lib.www.AdminUserMessageTestHandler'),
 
     # WWW
-    Route('/profile/<user_key>', handler='lib.www.ProfileHandler'),
+    Route('/p/<user_identifier>', handler='lib.www.ProfileHandler'),
+    Route('/profile/<user_identifier>', handler='lib.www.ProfileHandler'),
     Route('/profile', handler='lib.www.ProfileHandler'),
     Route('/', handler='lib.www.IndexHandler'),
 ]
 
-app = webapp2.WSGIApplication(routes, config=app_config, debug=True)
+is_debug = 'Development' in os.environ['SERVER_SOFTWARE']
+app = webapp2.WSGIApplication(routes, config=app_config,
+    debug=is_debug)
+
+app.error_handlers[404] = lib.web_request_handler.ErrorNotFoundRequestHandler
+app.error_handlers[500] = lib.web_request_handler.ErrorInternalRequestHandler
