@@ -87,6 +87,8 @@ class AuthHandler(WebRequestHandler, SimpleAuthHandler):
      data is a user info dictionary.
      auth_info contains access token or oauth token and secret.
     """
+    logging.info('_on_signin callback w/ %s, %s, %s' %
+                 (data, auth_info, provider))
     auth_id = '%s:%s' % (provider, data['id'])
     logging.info('Looking for a user with id %s', auth_id)
 
