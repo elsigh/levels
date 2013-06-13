@@ -132,10 +132,9 @@ fmb.views.App.prototype.onClickShare_ = function(e) {
 
   if (fmb.ua.IS_ANDROID && fmb.ua.IS_CORDOVA) {
     var extras = {};
-    extras[WebIntent.EXTRA_TEXT] = fmb.models.SERVER_SHARE + '/profile/' +
-        this.model.user.get('key');
+    extras[WebIntent.EXTRA_TEXT] = this.model.user.getProfileUrl();
     extras[WebIntent.EXTRA_SUBJECT] =
-        'Levels - Check my stats, and send me yours!';
+        'Check out my Levels, and send me yours!';
     window.plugins.webintent.startActivity({
         action: WebIntent.ACTION_SEND,
         type: 'text/plain',
@@ -609,7 +608,7 @@ fmb.views.Notifying.prototype.onClickNotifyingAdd_ = function(e) {
 fmb.views.Notifying.prototype.onClickRemove_ = function(e) {
   var isSure = window.confirm('Really remove ' +
       $(e.currentTarget).data('means') +
-      ' from the notification list?');
+      ' from your notification list?');
   if (!isSure) {
     return;
   }
@@ -739,8 +738,7 @@ fmb.views.FollowingUser.prototype.initialize = function(options) {
 fmb.views.FollowingUser.prototype.onClickFollowingUser_ = function(e) {
   return; // TODO(elsigh): Something fun like this.
   var extras = {};
-  extras[WebIntent.EXTRA_TEXT] = fmb.models.SERVER + '/profile/' +
-      this.model.user.get('key');
+  extras[WebIntent.EXTRA_TEXT] = this.model.user.getProfileUrl();
   extras[WebIntent.EXTRA_SUBJECT] = 'Dude, charge your battery!';
   window.plugins.webintent.startActivity({
     action: WebIntent.ACTION_SEND,

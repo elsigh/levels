@@ -318,7 +318,7 @@ class RequestHandlerTest(unittest.TestCase):
         obj = json.loads(body)
         self.assertEquals(2, len(obj['following']))
 
-    def test_ApiFollowingHandler_add(self):
+    def test_ApiFollowingHandler_add_by_key(self):
         elsigh_user = models.FMBUser(
             name='elsighmon'
         )
@@ -354,6 +354,32 @@ class RequestHandlerTest(unittest.TestCase):
         body = response.normal_body
         obj = json.loads(body)
         self.assertEquals('exists', obj['error'])
+
+    def test_ApiFollowingHandler_add_by_unique_profile_str(self):
+        elsigh_user = models.FMBUser(
+            name='elsighmon'
+        )
+        elsigh_user.put()
+
+        ded_user = models.FMBUser(
+            name='ded'
+        )
+        ded_user.put()
+        response = self.testapp.post_json('/api/following',
+                                          params=dict(api_token=elsigh_user.api_token,
+                                                      user_key=elsigh_user.key.urlsafe(),
+                                                      following_user_unique_profile_str=ded_user.unique_profile_str,
+                                                      cid='test_cid'))
+
+
+        body = response.normal_body
+        obj = json.loads(body)
+        self.assertEquals('ded', obj['name'])
+        self.assertEquals('test_cid', obj['cid'])
+
+        q = models.Following.query(ancestor=elsigh_user.key)
+        q = q.filter(models.Following.following == ded_user.key)
+        assert 1 == q.count()
 
     def test_ApiFollowingHandler_delete(self):
         elsigh_user = models.FMBUser(

@@ -158,24 +158,24 @@ def ErrorHandler(request, response, exception, code):
     logging.info('ErrorHandler code %s' % code)
     logging.info('Exception: %s' % exception)
 
-    user_agent_string = request.headers.get('USER_AGENT')
-    ua_dict = user_agent_parser.Parse(user_agent_string)
-    logging.info('UA: %s' % ua_dict)
-
     response.set_status(code)
     response.headers['Access-Control-Allow-Origin'] = '*'
     response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS, PUT'
     response.headers['Access-Control-Allow-Credentials'] = 'true'
     response.headers['Access-Control-Allow-Headers'] = 'Content-Type,X-Requested-With'
 
+    user_agent_string = request.headers.get('USER_AGENT')
+    ua_dict = user_agent_parser.Parse(user_agent_string)
+    logging.info('UA: %s' % ua_dict)
+
     tpl_data = {
-        'is_production': self.is_production,
         'error_code': code,
         'error_code_text': httplib.responses[code],
         'error_message': exception,
-        'user_agent_json': json.dumps(ua_dict),
+        'user_agent': ua_dict
     }
-    rendered = self.jinja2.render_template('error.html', **tpl_data)
+    jinja2_instance = jinja2.get_jinja2()
+    rendered = jinja2_instance.render_template('error.html', **tpl_data)
     response.write(rendered)
 
 

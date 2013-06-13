@@ -362,8 +362,9 @@ fmb.Model.prototype.fetchFromStorage = function(opt_options) {
   // Pretend to be async.
   _.defer(_.bind(function() {
     var results = this.localStorage.findAll();
-    //fmb.log('fetchFromStorage RESULTS:', results);
+    //fmb.log('fmb.Model fetchFromStorage RESULTS:', results);
     if (results.length) {
+      //fmb.log('fmb.Model fetchFromStorage set', results[results.length - 1]);
       this.set(results[results.length - 1], opt_options);
     }
   }, this));
