@@ -93,8 +93,4 @@ class ProfileHandler(WebRequestHandler):
 
 class IndexHandler(WebRequestHandler):
   def get(self):
-    if self.is_production:
-        elsigh_key = 'ahFzfmZvbGxvd215YmF0dGVyeXIPCxIHRk1CVXNlchi5lAEM'
-    else:
-        elsigh_key = 'ahNkZXZ-Zm9sbG93bXliYXR0ZXJ5cg8LEgdGTUJVc2VyGLmUAQw'
-    return self.redirect('/profile/%s' % elsigh_key)
+    return self.redirect('/p/elsigh')
