@@ -112,7 +112,7 @@
     </script>
 
     <script id="tpl_notifying" type="text/html">
-      <p>
+      <p class="info-headline">
         Sends a notification when your battery hits 10%
       </p>
 
@@ -153,6 +153,14 @@
             {{/notifying}}
           </tbody>
         </table>
+      {{/notifying.length}}
+      {{^notifying.length}}
+        <p>
+          Time to configure the sauce!
+        </p>
+        <p>
+          Add someone to be notified *BEFORE* your battery dies.
+        </p>
       {{/notifying.length}}
     </script>
 

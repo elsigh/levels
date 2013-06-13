@@ -164,8 +164,9 @@ fmb.App.prototype.initialize = function(options) {
   document.addEventListener('resume',
       _.bind(this.onPhoneResume, this),
       false);
-  window.plugins && window.plugins.webintent.onNewIntent(
-     _.bind(this.checkIntent_, this));
+  window.plugins && window.plugins.webintent &&
+      window.plugins.webintent.onNewIntent(
+          _.bind(this.checkIntent_, this));
 
   // We reference window.app so we need it to exist first.
   _.defer(_.bind(function() {
@@ -203,8 +204,13 @@ fmb.App.prototype.initHistory_ = function() {
   });
   if (!matchedRoute) {
     console.warn('No matchedRoute in initHistory');
-    if (this.model.user && this.model.user.get('api_token')) {
+
+    // Only take them to the stats page if they're pretty well set up.
+    if (this.model.user && this.model.user.get('api_token') &&
+        this.model.user.device &&
+        this.model.user.device.get('notifying').length) {
       this.navigate(fmb.App.Routes.FOLLOWING.url, {trigger: true});
+
     } else {
       this.navigate(fmb.App.Routes.ACCOUNT.url, {trigger: true});
     }

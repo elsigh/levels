@@ -28,7 +28,7 @@ fmb.models.prettyDate = function(time){
 var fmbProfile = {};
 
 fmbProfile.renderChart = function(user) {
-  console.log('fmb.views.Account renderChart_', user['devices']);
+  //console.log('fmb.views.Account renderChart_', user['devices']);
 
   $(user['devices']).each(function(i, device) {
     fmbProfile.drawDeviceChart(device);

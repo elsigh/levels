@@ -49,7 +49,8 @@ class ProfileHandler(WebRequestHandler):
         close = self.request.get('close')
 
         if self.current_user and user_key is None:
-          user = self.current_user
+            user = self.current_user
+
         elif user_key is not None:
             try:
                 user = ndb.Key(urlsafe=user_key).get()

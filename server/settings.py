@@ -14,6 +14,7 @@ SESSION_KEY = 'you gots ta follow dat battery all day erry day'
 # Twilio APIs
 TWILIO_ACCOUNT_SID = 'AC13e0edad6a784369a6500a5159be461a'
 TWILIO_AUTH_TOKEN = '39e9b2ee9eab31146cac977c1640321c'
+TWILIO_NUMBER = '+15084525193'
 
 # Google APIs
 GOOGLE_APP_ID = '652605517304.apps.googleusercontent.com'

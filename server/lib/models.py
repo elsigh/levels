@@ -69,9 +69,20 @@ class FMBUser(User, FMBModel):
         obj['devices'] = []
         q_device = Device.query(ancestor=self.key)
         q_device = q_device.order(-Device.created)
+
+        # Default avatar url
+        if ('avatar_url' not in obj or obj['avatar_url'] == '' or
+            obj['avatar_url'] is None):
+            obj.update({
+                'avatar_url': DEFAULT_AVATAR_URL
+            })
+
         for device in q_device:
             obj['devices'].append(device.to_dict(include_notifying=include_device_notifying))
         return obj
+
+    def get_profile_link(self):
+        return 'www.levelsapp.com/profile/%s' % self.key.urlsafe()
 
     def send_message(self, message):
         """Tries a few different means/methods to send a message to a user."""

@@ -48,7 +48,10 @@ class AuthHandler(WebRequestHandler, SimpleAuthHandler):
     'google'   : {
       'picture': 'avatar_url',
       'name'   : 'name',
-      'link'   : 'link'
+      'family_name': 'family_name',
+      'given_name': 'given_name',
+      'link'   : 'link',
+      'email'  : 'email'
     },
     'windows_live': {
       'avatar_url': 'avatar_url',
@@ -120,12 +123,6 @@ class AuthHandler(WebRequestHandler, SimpleAuthHandler):
         _attrs.update({
           'api_token': str(uuid.uuid4())
         })
-
-        # Default avatar url
-        if ('avatar_url' not in _attrs or _attrs['avatar_url'] == ''):
-          _attrs.update({
-            'avatar_url': models.DEFAULT_AVATAR_URL
-          })
 
         ok, user = self.auth.store.user_model.create_user(auth_id, **_attrs)
         if ok:
