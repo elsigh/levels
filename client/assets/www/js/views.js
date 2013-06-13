@@ -134,7 +134,8 @@ fmb.views.App.prototype.onClickShare_ = function(e) {
     var extras = {};
     extras[WebIntent.EXTRA_TEXT] = fmb.models.SERVER_SHARE + '/profile/' +
         this.model.user.get('key');
-    extras[WebIntent.EXTRA_SUBJECT] = 'Levels - Check my stats!';
+    extras[WebIntent.EXTRA_SUBJECT] =
+        'Levels - Check my stats, and send me yours!';
     window.plugins.webintent.startActivity({
         action: WebIntent.ACTION_SEND,
         type: 'text/plain',
@@ -321,34 +322,33 @@ fmb.views.Account.prototype.onChangeDeviceView_ = function(e) {
  * @private
  */
 fmb.views.Account.prototype.onClickLogin_ = function() {
-  //document.location = fmb.models.SERVER + '/auth/google';
   fmb.log('fmb.views.Account onClickLogin_');
 
   this.model.loginToken_ = fmb.models.getUid();
 
-  this.loginRef_ = window.open(
-      fmb.models.SERVER + '/login?user_token=' +
+  this.inAppBrowser_ = window.open(
+      fmb.models.SERVER_SHARE + '/login?user_token=' +
           window.escape(this.model.loginToken_),
       '_blank',
       'location=yes');
 
   // For Phonegap's InAppBrowser.
-  if (this.loginRef_.addEventListener) {
-    this.loginRef_.addEventListener('loadstart',
-        _.bind(this.onLoginRefLoadStart_, this),
+  if (this.inAppBrowser_.addEventListener) {
+    this.inAppBrowser_.addEventListener('loadstart',
+        _.bind(this.onInAppBrowserLoadStart_, this),
         false);
-    this.loginRef_.addEventListener('loadstop',
-        _.bind(this.onLoginRefLoadStop_, this),
+    this.inAppBrowser_.addEventListener('loadstop',
+        _.bind(this.onInAppBrowserLoadStop_, this),
         false);
-    this.loginRef_.addEventListener('exit',
-        _.bind(this.onLoginRefExit_, this),
+    this.inAppBrowser_.addEventListener('exit',
+        _.bind(this.onInAppBrowserExit_, this),
         false);
   }
 
   // For not-Phonegap.
-  this.loginInterval_ = window.setInterval(_.bind(function() {
-    if (this.loginRef_.closed) {
-      this.onLoginRefExit_();
+  this.inAppBrowserCloseCheckInterval_ = window.setInterval(_.bind(function() {
+    if (this.inAppBrowser_.closed) {
+      this.onInAppBrowserExit_();
     }
   }, this), 500);
 };
@@ -358,8 +358,8 @@ fmb.views.Account.prototype.onClickLogin_ = function() {
  * @param {Event} e An event.
  * @private
  */
-fmb.views.Account.prototype.onLoginRefLoadStart_ = function(e) {
-  fmb.log('fmb.views.Account onLoginRefLoadStart_', e.url);
+fmb.views.Account.prototype.onInAppBrowserLoadStart_ = function(e) {
+  fmb.log('fmb.views.Account onInAppBrowserLoadStart_', e.url);
   navigator.notification &&
       navigator.notification.activityStart('', 'Loading ...');
 };
@@ -369,30 +369,30 @@ fmb.views.Account.prototype.onLoginRefLoadStart_ = function(e) {
  * @param {Event} e An event.
  * @private
  */
-fmb.views.Account.prototype.onLoginRefLoadStop_ = function(e) {
-  fmb.log('fmb.views.Account onLoginRefLoadStop_', e.url);
+fmb.views.Account.prototype.onInAppBrowserLoadStop_ = function(e) {
+  fmb.log('fmb.views.Account onInAppBrowserLoadStop_', e.url);
 
   navigator.notification && navigator.notification.activityStop();
 
   if (e.url.indexOf('/profile') !== -1) {
-    this.loginRef_.close();
-    this.onLoginRefExit_();
+    this.inAppBrowser_.close();
+    this.onInAppBrowserExit_();
   }
 };
 
 
-fmb.views.Account.prototype.onLoginRefExit_ = function(e) {
-  fmb.log('fmb.views.Account onLoginRefExit_');
+fmb.views.Account.prototype.onInAppBrowserExit_ = function(e) {
+  fmb.log('fmb.views.Account onInAppBrowserExit_');
 
   navigator.notification && navigator.notification.activityStop();
 
-  window.clearInterval(this.loginInterval_);
+  window.clearInterval(this.inAppBrowserCloseCheckInterval_);
 
-  if (this.loginRef_.removeEventListener) {
-    this.loginRef_.removeEventListener('loadstop',
-        _.bind(this.onLoginRefLoadStop_, this));
-    this.loginRef_.removeEventListener('exit',
-        _.bind(this.onLoginRefExit_, this));
+  if (this.inAppBrowser_.removeEventListener) {
+    this.inAppBrowser_.removeEventListener('loadstop',
+        _.bind(this.onInAppBrowserLoadStop_, this));
+    this.inAppBrowser_.removeEventListener('exit',
+        _.bind(this.onInAppBrowserExit_, this));
   }
 
   if (this.model.loginToken_) {
@@ -596,7 +596,7 @@ fmb.views.Notifying.prototype.onClickNotifyingAdd_ = function(e) {
     this.model.add({
       'means': means,
       'name': 'Somebody',
-      'type': 'phone'
+      'type': means.match('@') ? 'email' : 'phone'
     });
   }
 };
@@ -651,8 +651,8 @@ fmb.views.Following.prototype.setIsActive = function(isActive) {
   this.user.stopFetchPoll();
   if (isActive) {
     //fmb.log('Set following fetch interval.');
-    this.model.startFetchPoll(30 * 1000);
-    this.user.startFetchPoll(30 * 1000);
+    this.model.startFetchPoll(60 * 1000);
+    this.user.startFetchPoll(60 * 1000);
   }
 };
 

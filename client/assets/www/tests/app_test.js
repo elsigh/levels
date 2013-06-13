@@ -42,7 +42,7 @@ function testApp() {
   var user = app.model.user;
   app.view.currentView.onClickLogin_();    // start oauth.
   assertEquals(1, window.open.callCount);
-  app.view.currentView.onLoginRefExit_();  // oauth done.
+  app.view.currentView.onInAppBrowserExit_();  // oauth done.
 
   serverRequestCountExpected++;
   assertEquals(serverRequestCountExpected, server.requests.length);

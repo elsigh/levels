@@ -63,6 +63,11 @@
 }
 
 /* Notifying table */
+.fmb-notifying .info-headline {
+  font-size: 80%;
+  margin-bottom: 0;
+}
+
 .fmb-notifying .fmb-remove {
   margin-top: -15px;
 }

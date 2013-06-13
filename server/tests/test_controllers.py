@@ -446,6 +446,9 @@ class RequestHandlerTest(unittest.TestCase):
         )
         elsigh_device.put()
 
+        tasks = self.taskqueue_stub.GetTasks('default')
+        self.assertEqual(0, len(tasks))
+
         response = self.testapp.post_json('/api/notifying',
                                           params=dict(api_token=elsigh_user.api_token,
                                                       user_key=elsigh_user.key.urlsafe(),
@@ -462,6 +465,12 @@ class RequestHandlerTest(unittest.TestCase):
         obj = json.loads(body)
         self.assertEquals('test_cid', obj['cid'])
         self.assertEquals('4152223333', obj['means'])
+
+        # notifying notification
+        tasks = self.taskqueue_stub.GetTasks('default')
+        self.assertEqual(1, len(tasks))
+        #task = tasks[0]
+        #logging.info('TASKEROO! %s', base64.b64decode(task["body"]))
 
         # Trying to notify them again should error.
         response = self.testapp.post_json('/api/notifying',
@@ -516,6 +525,33 @@ class RequestHandlerTest(unittest.TestCase):
                                            device_key=elsigh_device.key.urlsafe(),
                                            key=ded_notifying.key.urlsafe()),
                                status=404)
+
+    def test_send_notifying_message_email(self):
+        elsigh_user = models.FMBUser(
+            name='elsighmon'
+        )
+        elsigh_user.put()
+
+        api.send_notifying_message(elsigh_user.key.id(),
+            'email', 'Angela Pater', 'angela@commoner.com', send=False)
+
+        q = models.NotificationSent.query(ancestor=elsigh_user.key)
+        q = q.filter(models.NotificationSent.means == 'angela@commoner.com')
+        self.assertEquals(1, q.count())
+
+    def test_send_notifying_message_phone(self):
+        elsigh_user = models.FMBUser(
+            name='elsighmon'
+        )
+        elsigh_user.put()
+
+        api.send_notifying_message(elsigh_user.key.id(),
+            'phone', 'Angela Pater', '512-736-6633', send=False)
+
+        q = models.NotificationSent.query(ancestor=elsigh_user.key)
+        q = q.filter(models.NotificationSent.means == '512-736-6633')
+        self.assertEquals(1, q.count())
+
 
     def test_send_battery_notifications(self):
         elsigh_user = models.FMBUser(
