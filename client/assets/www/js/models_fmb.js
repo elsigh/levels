@@ -22,17 +22,18 @@ fmb.models.SERVER_PROD = 'https://followmybattery.appspot.com';
 //fmb.models.SERVER_PROD = fmb.models.SERVER_LOCAL;
 //fmb.models.SERVER_LOCAL = fmb.models.SERVER_PROD;
 
-/**
- * @type {string}
- */
-fmb.models.SERVER_SHARE = 'http://www.levelsapp.com';
-
 
 /**
  * @type {string}
  */
 fmb.models.SERVER = fmb.ua.IS_ANDROID && fmb.ua.IS_CORDOVA ?
     fmb.models.SERVER_PROD : fmb.models.SERVER_LOCAL;
+
+/**
+ * @type {string}
+ */
+fmb.models.SERVER_SHARE = fmb.ua.IS_ANDROID && fmb.ua.IS_CORDOVA ?
+    'http://www.levelsapp.com' : fmb.models.SERVER_LOCAL;
 
 
 /**

@@ -688,8 +688,12 @@ fmb.models.User.prototype.setUserKey_ = function() {
  * @private
  */
 fmb.models.User.prototype.registerWithGCM_ = function() {
-  window.plugins.GCM.register('652605517304', 'fmb.models.User.GCMEvent',
-      fmb.App.GCMWin, fmb.App.GCMFail);
+  var gcmPlugin = cordova.require('cordova/plugin/gcm');
+  gcmPlugin && gcmPlugin.register(
+      '652605517304',   // The GCM sender_id from the play store
+      'fmb.models.User.GCMEvent',
+      _.bind(this.GCMWin, this),
+      _.bind(this.GCMFail, this));
 };
 
 
@@ -698,7 +702,7 @@ fmb.models.User.prototype.registerWithGCM_ = function() {
  * @param {Object} e An object.
  */
 fmb.models.User.prototype.GCMWin = function(e) {
-  fmb.log('fmb.App.GCMWin!', e);
+  fmb.log('fmb.models.User GCMWin!', e);
 };
 
 
@@ -707,7 +711,7 @@ fmb.models.User.prototype.GCMWin = function(e) {
  * @param {Object} e An object.
  */
 fmb.models.User.prototype.GCMFail = function(e) {
-  fmb.log('fmb.App.GCMFail =(', e);
+  fmb.log('fmb.models.User GCMFail =(', e);
 };
 
 

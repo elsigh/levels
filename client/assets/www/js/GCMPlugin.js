@@ -1,4 +1,7 @@
-(function () {
+
+cordova.define('cordova/plugin/gcm', function(require, exports, module) {
+
+  var exec = require('cordova/exec');
 
 	var GCM = function() {};
 
@@ -19,7 +22,7 @@
 	    return;
 	  }
 
-	  return Cordova.exec(successCallback,      //Callback which will be called when directory listing is successful
+	  return exec(successCallback,      //Callback which will be called when directory listing is successful
 	              failureCallback,       //Callback which will be called when directory listing encounters an error
 	              'GCMPlugin',        //Telling Cordova that we want to run "DirectoryListing" Plugin
 	              'register',             //Telling the plugin, which action we want to perform
@@ -36,7 +39,7 @@
 	 */
 	GCM.prototype.unregister = function( successCallback, failureCallback ) {
 
-	    return cordova.exec(successCallback,      //Callback which will be called when directory listing is successful
+	    return exec(successCallback,      //Callback which will be called when directory listing is successful
 	              failureCallback,       //Callback which will be called when directory listing encounters an error
 	              'GCMPlugin',        //Telling Cordova that we want to run "DirectoryListing" Plugin
 	              'unregister',             //Telling the plugin, which action we want to perform
@@ -44,21 +47,8 @@
 	};
 
 
-	/*
-	 * register plugin with Phonegap \ Cordova
-	 */
-	if (cordova.addPlugin) {
-	  cordova.addConstructor(function() {
-	    //Register the javascript plugin with Cordova
-	    cordova.addPlugin('GCM', new GCM());
-	  });
-	} else {
-		if (!window.plugins) {
-			window.plugins = {};
-		}
-	  window.plugins.GCM = new GCM();
-	}
 
-	
-})();
+  module.exports = new GCM();
+
+});
 

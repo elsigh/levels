@@ -18,18 +18,46 @@ from google.appengine.api import memcache
 from google.appengine.ext import deferred
 from google.appengine.ext import ndb
 sys.modules['ndb'] = ndb
-from google.appengine.ext import deferred
 
 from webapp2_extras import jinja2
 
 from lib.web_request_handler import WebRequestHandler
 from lib import models
 
+from lib.external.twilio import TwilioRestException
 from lib.external.twilio.rest import TwilioRestClient
 
 # last import.
 import settings
 
+
+def send_email(to, subject, body):
+    logging.info('send_email %s, %s, %s' % (to, subject, body))
+    try:
+        mail.send_mail(sender='Levels <elsigh@levelsapp.com>',
+                       to=to,
+                       subject=subject,
+                       body=body)
+    except Exception, e:
+        logging.info('Exception e: %s' % e)
+        pass
+
+    return True
+
+
+def send_twilio_msg(to, body):
+    logging.info('send_twilio_msg %s, %s' % (to, body))
+    try:
+        client = TwilioRestClient(settings.TWILIO_ACCOUNT_SID,
+                                  settings.TWILIO_AUTH_TOKEN)
+        twilio_message = client.sms.messages.create(to=to,
+                                                    from_=settings.TWILIO_NUMBER,
+                                                    body=body)
+    except TwilioRestException, e:
+        logging.info('TwilioRestException e: %s' % e)
+        pass
+
+    return True
 
 def api_token_required(handler_method):
     """A decorator to require that an API token is passed in."""
@@ -293,7 +321,7 @@ def _send_notification_templater(user_id, device_id, notifying_id, tpl_name):
 def send_battery_notification_email(user_id, device_id, notifying_id, send=True):
     logging.info('send_battery_notification_email %s, %s' %
                  (user_id, device_id))
-    notifying, rendered = _send_notification_templater(user_id, device_id,
+    notifying, body = _send_notification_templater(user_id, device_id,
                                                        notifying_id,
                                                        'notification_email.html')
 
@@ -301,10 +329,9 @@ def send_battery_notification_email(user_id, device_id, notifying_id, send=True)
         logging.info('BAIL CITY BABY, DONE EMAIL NOTIFIED ENUFF')
         return
 
-    mail.send_mail(sender='Levels Alert <elsigh@levelsapp.com>',
-                   to='%s <%s>' % (notifying.name, notifying.means),
-                   subject='%s has a very sad phone =(' % notifying.name,
-                   body=rendered)
+    to = '%s <%s>' % (notifying.name, notifying.means)
+    subject = '%s has a phone on the brink =(' % notifying.name
+    send_email(to, subject, body)
 
     sent = models.NotificationSent(
         parent=notifying.key,
@@ -326,11 +353,7 @@ def send_battery_notification_phone(user_id, device_id, notifying_id, send=True)
     logging.info('rendered: %s' % rendered)
     twilio_message = None
     if send:
-        client = TwilioRestClient(settings.TWILIO_ACCOUNT_SID,
-                                  settings.TWILIO_AUTH_TOKEN)
-        twilio_message = client.sms.messages.create(to=notifying.means,
-                                                    from_="+15084525193",
-                                                    body=rendered)
+        send_twilio_msg(notifying.means, rendered)
 
     sent = models.NotificationSent(
         parent=notifying.key,
@@ -495,6 +518,14 @@ class ApiNotifyingHandler(ApiRequestHandler):
             type=self._json_request_data['type']
         )
         notifying.put()
+
+        # viral coefucksient.
+        deferred.defer(send_notifying_message,
+            self.current_user.key.id(),
+            self._json_request_data['type'],
+            self._json_request_data['name'],
+            self._json_request_data['means'])
+
         return self.output_json_success(notifying.to_dict())
 
 
@@ -508,3 +539,42 @@ class ApiNotifyingDeleteHandler(ApiRequestHandler):
 
         notifying.key.delete()
         return self.output_json_success(notifying.to_dict())
+
+
+
+def send_notifying_message(user_id, to_type, to_name, to_means, send=True):
+    logging.info('send_notifying_message %s, %s, %s, %s' %
+                 (user_id, to_type, to_name, to_means))
+
+    user = models.FMBUser.get_by_id(user_id)
+    if user is None:
+        logging.info('BAIL CITY BABY, no user')
+        return
+
+    # Make sure we haven't sent this means a notification in the last N hours.
+    q = models.NotificationSent.query(ancestor=user.key)
+    q = q.filter(models.NotificationSent.means == to_means)
+    from_time = datetime.now() - timedelta(hours=12)
+    q = q.filter(models.NotificationSent.created > from_time)
+    if q.count() != 0:
+        logging.info('BAIL CITY BABY, we already sent them a notification recently.')
+        return
+
+    if send:
+        if to_type == 'email':
+            body = ('%s is using Levels to notify you before their battery dies. Check it out! %s' %
+                    (user.name, user.get_profile_link()))
+            to = '%s <%s>' % (to_name, to_means)
+            subject = '%s cares about you' % user.name
+            send_email(to, subject, body)
+
+        elif to_type == 'phone':
+            body = ('%s is using Levels with you! %s' %
+                    (user.name, user.get_profile_link()))
+            send_twilio_msg(to_means, body)
+
+    sent = models.NotificationSent(
+        parent=user.key,
+        means=to_means)
+    sent.put()
+
