@@ -142,8 +142,11 @@ fmb.App.onBatteryStatus_ = function(batteryInfo) {
   window.navigator.battery = window.navigator.battery || {};
   window.navigator.battery.level = batteryInfo['level'];
   window.navigator.battery.isPlugged = batteryInfo['isPlugged'];
-  window['app'].model.user.device &&
-      window['app'].model.user.device.trigger('battery_status');
+  if (window['app'].model.user.device) {
+    window['app'].model.user.device.trigger('battery_status');
+  } else {
+    fmb.log('Not triggering device battery_status - no device yet.');
+  }
 };
 
 
@@ -221,7 +224,13 @@ fmb.App.prototype.initHistory_ = function() {
 /**
  * @type {RegExp}
  */
-fmb.App.FOLLOWING_URL_RE = /levelsapp\.com\/profile\/(.*)/;
+fmb.App.FOLLOWING_BY_KEY_URL_RE = /levelsapp\.com\/profile\/(.*)/;
+
+
+/**
+ * @type {RegExp}
+ */
+fmb.App.FOLLOWING_BY_UNIQUE_STR_URL_RE = /levelsapp\.com\/profile\/(.*)/;
 
 
 /**
@@ -235,14 +244,27 @@ fmb.App.prototype.checkIntent_ = function() {
 
   window.plugins.webintent.getUri(
       function(url) {
-        var match = fmb.App.FOLLOWING_URL_RE.exec(url);
-        fmb.log('fmb.App webintent getUri:', url, match);
+        // Try both ways.
+        var match = fmb.App.FOLLOWING_BY_UNIQUE_STR_URL_RE.exec(url);
         if (match && match.length) {
-          var userKey = match[1];
+          fmb.log('fmb.App webintent getUri:', url, match);
+          var userUniqueProfileStr = match[1];
           _.delay(_.bind(function() {
-            app.model.user.get('following').addByKey(userKey);
+            app.model.user.get('following').addByUniqueProfileStr(
+                userUniqueProfileStr);
           }, window['app']), 300);
+
+        } else {
+          match = fmb.App.FOLLOWING_BY_KEY_URL_RE.exec(url);
+          fmb.log('fmb.App webintent getUri:', url, match);
+          if (match && match.length) {
+            var userKey = match[1];
+            _.delay(_.bind(function() {
+              app.model.user.get('following').addByKey(userKey);
+            }, window['app']), 300);
+          }
         }
+
       },
       function() {
         fmb.log('fmb.App webintent getUri NADA');

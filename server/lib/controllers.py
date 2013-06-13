@@ -12,6 +12,7 @@ from webapp2 import Route
 sys.path.append(os.path.join(os.path.dirname(__file__), 'external'))
 
 from lib.models import FMBUser
+from lib.web_request_handler import ErrorNotFoundRequestHandler, ErrorInternalRequestHandler
 
 from google.appengine.ext import deferred
 # Hack to get ndb into the modules list.
@@ -60,9 +61,18 @@ routes = [
     Route('/admin/user_message_test', handler='lib.www.AdminUserMessageTestHandler'),
 
     # WWW
-    Route('/profile/<user_key>', handler='lib.www.ProfileHandler'),
+    Route('/p/<user_identifier>', handler='lib.www.ProfileHandler'),
+    Route('/profile/<user_identifier>', handler='lib.www.ProfileHandler'),
     Route('/profile', handler='lib.www.ProfileHandler'),
     Route('/', handler='lib.www.IndexHandler'),
 ]
 
-app = webapp2.WSGIApplication(routes, config=app_config, debug=True)
+is_debug = False
+if 'SERVER_SOFTWARE' in os.environ:
+    is_debug = 'Development' in os.environ['SERVER_SOFTWARE']
+
+app = webapp2.WSGIApplication(routes, config=app_config,
+    debug=is_debug)
+
+app.error_handlers[404] = ErrorNotFoundRequestHandler
+app.error_handlers[500] = ErrorInternalRequestHandler

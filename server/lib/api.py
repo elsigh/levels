@@ -443,8 +443,16 @@ class ApiFollowingHandler(ApiRequestHandler):
         return self.output_json_success(obj)
 
     def post(self):
-        follow_user = ndb.Key(urlsafe=self._json_request_data['following_user_key']).get()
-        # Makes sure a user with that key exists in our app.
+        """Two ways to add a following user - either by key or unique_profile_str."""
+
+        if 'following_user_key' in self._json_request_data:
+            follow_user = ndb.Key(urlsafe=self._json_request_data['following_user_key']).get()
+
+        elif 'following_user_unique_profile_str':
+            q = models.FMBUser.query().filter(
+                ndb.GenericProperty('unique_profile_str') == self._json_request_data['following_user_unique_profile_str'])
+            follow_user = q.get()
+
         if follow_user is None:
             return self.output_json_error()
 
@@ -561,16 +569,14 @@ def send_notifying_message(user_id, to_type, to_name, to_means, send=True):
         return
 
     if send:
+        body = ('%s is using Levels to notify you before their battery dies. Check it out! %s' %
+                (user.name, user.get_profile_url()))
         if to_type == 'email':
-            body = ('%s is using Levels to notify you before their battery dies. Check it out! %s' %
-                    (user.name, user.get_profile_link()))
             to = '%s <%s>' % (to_name, to_means)
             subject = '%s cares about you' % user.name
             send_email(to, subject, body)
 
         elif to_type == 'phone':
-            body = ('%s is using Levels with you! %s' %
-                    (user.name, user.get_profile_link()))
             send_twilio_msg(to_means, body)
 
     sent = models.NotificationSent(
