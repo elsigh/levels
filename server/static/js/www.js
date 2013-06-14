@@ -98,7 +98,7 @@ fmbProfile.init = function() {
     var level = $el.data('level');
     $el.css('background-image',
             '-webkit-gradient(linear, left top, right top, ' +
-                              'color-stop(' + level + '%, #34b2e0), ' +
+                              'color-stop(' + level + '%, #3b97d1), ' +
                               'color-stop(' + level + '%, #666666))');
   });
 
