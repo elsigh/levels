@@ -61,7 +61,7 @@
     $('textarea').on('input', function() {
       console.log('storing textarea')
       localStorage.setItem('admin-api-request-body', $('textarea').val());
-    })
+    });
     str = '';
     $('form').on('submit', function(e) {
       e.preventDefault();

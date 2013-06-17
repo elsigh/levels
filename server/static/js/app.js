@@ -145,6 +145,18 @@ fmb.App.prototype.checkIntent_ = function(url) {
     return;
   }
 
+  // When invoked via a notification in the systra, we put the
+  // URL into WebIntent.EXTRA_TEXT.
+  window.plugins.webintent.getExtra(WebIntent.EXTRA_TEXT,
+      _.bind(function(url) {
+        fmb.log('fmb.App checkIntent YES WebIntent.EXTRA_TEXT', url);
+        this.checkIntentUrlForUser_(url);
+      }, this),
+      function() {
+        fmb.log('fmb.App checkIntent NO WebIntent.EXTRA_TEXT');
+          // Something really bad happened.
+      });
+
   if (url) {
     this.checkIntentUrlForUser_(url);
   } else {
