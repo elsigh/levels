@@ -92,7 +92,8 @@ class FMBUser(User, FMBModel):
 
     def send_message(self, message, extra={}):
         """Tries a few different means/methods to send a message to a user."""
-        logging.info('FMBUser %s send_message %s' % (self.name, message))
+        logging.info('FMBUser %s send_message %s, extra: %s' %
+                     (self.name, message, extra))
         if hasattr(self, 'gcm_push_token'):
             push_token = self.gcm_push_token
             android_payload = {
@@ -106,7 +107,7 @@ class FMBUser(User, FMBModel):
             gcm_conn.notify_device(gcm_message)
             return True
 
-        elif hasattr(self, 'email'):
+        if attr(self, 'email'):
             mail.send_mail(sender='Levels Alert <elsigh@levelsapp.com>',
                    to='%s <%s>' % (self.name, self.email),
                    subject='A message from Levels',

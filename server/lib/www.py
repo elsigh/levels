@@ -51,12 +51,20 @@ class AdminUserMessageTestHandler(WebRequestHandler):
             self.abort(500)
 
         user_id = self.request.get('user_id')
+        extras = self.request.get('extras')
+        if extras is not None:
+            extras = json.loads(extras)
+        else:
+            extras = {}
+
         message = self.request.get('message', 'Test message')
         result = False
+
         if user_id:
             user = models.FMBUser.get_by_id(int(user_id))
             if user:
-                result = user.send_message(message)
+                result = user.send_message(message, extra=extras)
+
         self.output_response({'result': result}, 'admin_user_message_test.html')
 
 

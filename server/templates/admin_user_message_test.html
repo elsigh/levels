@@ -11,7 +11,13 @@
       background-color: #ccc;
       padding: 0.5em;
     }
+    textarea {
+      width: 500px;
+      height: 100px;
+    }
   </style>
+
+  <script src="/static/js/zepto-1.0rc1.js"></script>
 {% endblock %}
 
 {% block body %}
@@ -29,14 +35,36 @@
 
     <form method="POST" action="/admin/user_message_test">
       <div>
-        <input type="text" name="user_id" placeholder="User ID" value="19001">
+        <input type="text" name="user_id" placeholder="User ID"
+          value="19001">
       </div>
-      <div>
+      <p>
+        <textarea name="extras">{"current_user_profile_url": "http://www.levelsapp.com/p/elsigh"}</textarea>
+      </p>
+      <p>
         <textarea name="message">Test message</textarea>
-      </div>
+      </p>
       <p>
         <input type="submit">
       </p>
     </form>
   </section>
+  <script>
+
+    var prefix = 'admin-user-message';
+    var names = ['user_id', 'message', 'extras'];
+    $(names).each(function(i, name) {
+      var localKey = prefix + '-' + name;
+      var localData = localStorage.getItem(localKey);
+      var selector = '[name="' + name + '"]';
+      var $el = $(selector);
+      if (localData) {
+        $el.val(localData);
+      }
+      $el.on('input', function() {
+        localStorage.setItem(localKey, $el.val());
+      });
+    });
+
+  </script>
 {% endblock %}

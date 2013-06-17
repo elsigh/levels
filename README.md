@@ -13,6 +13,16 @@ https://developers.google.com/appengine/downloads
 Fire that baby up and you've got the website frontend and API backend running.
 
 
+Process
+-----------------------------
+
+Fuck process. Ok, well, at least run the unit tests below before submitting.
+Also, I seem to prefer the idea that you submit code to your own branch and
+then issue a pull request from that branch (which you can self-merge for now).
+I'm open to whatever. And once TravisCI supports running on private repos we'll
+wire up the unit tests.
+
+
 Setup for testing the backend
 -----------------------------
 
@@ -29,10 +39,15 @@ cd nose-gae-read-only
 sudo python setup.py install
 ```
 
-Now you should be able to:
+Now you should be able to run the server and client unit tests:
 
 ```bash
 cd server;
 ./run-tests.sh
+```
+
+```bash
+cd client/assets/www/tests;
+./phantomjs phantomjs_run_closure_test.js
 ```
 

@@ -5,6 +5,7 @@
  */
 
 
+/*
 phantom.injectJs('support/phantomjs_args_parser.js');
 
 var parsedArgs = PhantomArgsParser.parseArgs(phantom.args, {
@@ -17,6 +18,7 @@ var parsedArgs = PhantomArgsParser.parseArgs(phantom.args, {
     phantom.exit(1);
   }
 });
+*/
 
 
 /**
@@ -69,16 +71,18 @@ var page = require('webpage').create();
 var fs = require('fs');
 
 // Opens the test page and executes the tests.
-page.open(parsedArgs.leftoverArgs[0], function(status) {
+page.open('../index.html?test=1', function(status) {
   if (status !== 'success') {
     console.log('Unable to access network, status:' + status);
     phantom.exit(1);
   } else {
+    /*
     if (parsedArgs.outputConsoleLog) {
       page.onConsoleMessage = function(msg, line, file) {
         console.log(msg);
       };
     }
+    */
 
     waitFor(
         function() {
@@ -96,17 +100,21 @@ page.open(parsedArgs.leftoverArgs[0], function(status) {
           var testName = page.evaluate(function() {
             return window.G_testRunner.testCase.name_.replace(/\s/g, '_');
           });
+          /*
           var junitReport = page.evaluate(function() {
             return window.G_testRunner.getJunitReport();
           });
+          */
           var isSuccess = page.evaluate(function() {
             return window.G_testRunner.isSuccess();
           });
+          /*
           if (parsedArgs.outputJunit) {
             var outputFile = fs.workingDirectory + '/TEST-' + testName + '.xml';
             fs.write(outputFile, junitReport, 'w');
             console.log('Outputting JUnit XML to: ' + outputFile);
           }
+          */
           console.log(report);
           var exitCode = isSuccess ? 0 : 1;
           phantom.exit(exitCode);
