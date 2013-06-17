@@ -1,0 +1,61 @@
+{% extends "base.html"%}
+
+{% block head %}
+  <style>
+    th {
+      border-top: 0;
+    }
+    td {
+      border-top: 0;
+      border-bottom: 1px solid #000;
+    }
+    table table {
+      margin-top: 0;
+    }
+  </style>
+{% endblock %}
+
+{% block body %}
+  <section>
+    <header>
+      <h1><span>Levels<span></h1>
+      <h2>Users</h2>
+    </header>
+
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Email</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for user in users %}
+        <tr>
+          <td>
+            <a
+              target="_blank"
+              href="http://www.levelsapp.com/p/{{user.unique_profile_str}}">{{user.unique_profile_str}}</a>
+          </td>
+          <td>{{user.name}}</td>
+          <td>{{user.email}}</td>
+        </tr>
+        <tr>
+          <td colspan="3">
+            <table>
+              {% for device in user.devices %}
+                <tr>
+                  <td>{{device.platform}}</td>
+                  <td>{{device.name}}</td>
+                  <td>{{device.version}}</td>
+                </tr>
+              {% endfor %}
+            </table>
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </section>
+{% endblock %}

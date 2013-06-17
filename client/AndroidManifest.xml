@@ -22,7 +22,7 @@
   android:windowSoftInputMode="adjustResize"
   package="com.elsigh.levels"
   android:versionName="0.7"
-  android:versionCode="20"
+  android:versionCode="23"
   android:hardwareAccelerated="true">
 
   <uses-sdk
@@ -63,7 +63,7 @@
       android:theme="@android:style/Theme.Black.NoTitleBar"
       android:configChanges="orientation|keyboardHidden"
       android:windowSoftInputMode="adjustResize"
-      android:launchMode="standard"
+      android:launchMode="singleInstance"
       android:screenOrientation="portrait">
 
       <intent-filter>
@@ -82,11 +82,14 @@
 
     </activity>
 
-    <service android:name="com.elsigh.levels.LevelsService" />
+    <service
+      android:process=":levels_service"
+      android:name="com.elsigh.levels.LevelsService" />
 
     <receiver android:name=".LevelsAutoStart">
       <intent-filter>
         <action android:name="android.intent.action.BOOT_COMPLETED"></action>
+        <action android:name="android.intent.action.PACKAGE_REPLACED"></action>
       </intent-filter>
     </receiver>
 

@@ -121,11 +121,6 @@ class AuthHandler(WebRequestHandler, SimpleAuthHandler):
       else:
         logging.info('Creating a brand new user')
 
-        # Creates a FMB api_token for this user.
-        #_attrs.update({
-        #  'api_token': str(uuid.uuid4())
-        #})
-
         ok, user = self.auth.store.user_model.create_user(auth_id, **_attrs)
         if ok:
           self.auth.set_session(self.auth.store.user_to_dict(user))

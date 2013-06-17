@@ -167,7 +167,6 @@ def ErrorHandler(request, response, exception, code):
     user_agent_string = request.headers.get('USER_AGENT')
     ua_dict = user_agent_parser.Parse(user_agent_string)
     logging.info('UA: %s' % ua_dict)
-
     tpl_data = {
         'error_code': code,
         'error_code_text': httplib.responses[code],

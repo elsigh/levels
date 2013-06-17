@@ -90,7 +90,7 @@ class FMBUser(User, FMBModel):
     def get_profile_url(self):
         return 'www.levelsapp.com/p/%s' % self.unique_profile_str
 
-    def send_message(self, message):
+    def send_message(self, message, extra={}):
         """Tries a few different means/methods to send a message to a user."""
         logging.info('FMBUser %s send_message %s' % (self.name, message))
         if hasattr(self, 'gcm_push_token'):
@@ -98,6 +98,7 @@ class FMBUser(User, FMBModel):
             android_payload = {
                 'message': message
             }
+            android_payload.update(extra)
             gcm_message = GCMMessage(push_token, android_payload)
             gcm_conn = GCMConnection()
             logging.info('Attempting to send Android push notification %s to push_token %s.' %

@@ -59,6 +59,9 @@ routes = [
 
     # Admin
     Route('/admin/user_message_test', handler='lib.www.AdminUserMessageTestHandler'),
+    Route('/admin/users', handler='lib.www.AdminUsersHandler'),
+    Route('/admin/api_request', handler='lib.www.AdminApiRequestHandler'),
+
 
     # WWW
     Route('/p/<user_identifier>', handler='lib.www.ProfileHandler'),
@@ -75,4 +78,4 @@ app = webapp2.WSGIApplication(routes, config=app_config,
     debug=is_debug)
 
 app.error_handlers[404] = ErrorNotFoundRequestHandler
-app.error_handlers[500] = ErrorInternalRequestHandler
+#app.error_handlers[500] = ErrorInternalRequestHandler
