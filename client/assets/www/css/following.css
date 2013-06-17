@@ -1,5 +1,23 @@
 
-.battery-level-c {
+.fmb-following .info-other-users {
+
+}
+
+.fmb-following .info-other-users .info {
+  background: #3b97d1;
+  -webkit-border-radius: 25px;
+  border-radius: 25px;
+  color: #fff;
+  text-shadow: none;
+  padding: 5px 12px;
+  float: left;
+  margin-right: 0.5em;
+  font-weight: bold;
+  text-shadow: none;
+}
+
+
+.fmb-following .battery-level-c {
   text-align: center;
   white-space: nowrap;
 }

@@ -3,8 +3,10 @@ package com.elsigh.levels;
 
 import android.app.Notification;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -19,6 +21,8 @@ import com.marknutter.GCM.GCMPlugin;
 public class GCMIntentService extends GCMBaseIntentService {
 
   public static final String ME="LevelsGCMReceiver";
+
+  public static final int NOTIFICATION_ID = 1;
 
   public GCMIntentService() {
     super("GCMIntentService");
@@ -67,17 +71,42 @@ public class GCMIntentService extends GCMBaseIntentService {
       String message = extras.getString("message");
       Log.v(ME + "onMessage - message ", message);
 
+      // Check for current_user_profile_url and build an intent based on it
+      // or else open the LevelsActivity
+      Intent notificationIntent = new Intent(this, LevelsActivity.class);
+      if (intent.hasExtra("current_user_profile_url")) {
+        notificationIntent.putExtra();
+      }
+      /*
+      if (intent.hasExtra("current_user_profile_url")) {
+          notificationIntent = new Intent(Intent.ACTION_VIEW,
+              Uri.parse(extras.getString("current_user_profile_url")));
+      } else {
+          notificationIntent = new Intent(this, LevelsActivity.class);
+      }
+      */
+      PendingIntent contentIntent = PendingIntent.getActivity(
+          //LevelsActivity.class,
+          this,
+          0,
+          notificationIntent,
+          Intent.FLAG_ACTIVITY_NEW_TASK);
+
       // Status bar notification.
-      Notification n = new Notification.Builder(this).
+      Notification builder = new Notification.Builder(this).
           setSmallIcon(R.drawable.icon_notification).
           setContentTitle("Levels").
-          setContentText(extras.getString("message")).build();
+          setContentText(extras.getString("message")).
+          setContentIntent(contentIntent).
+          setAutoCancel(true).
+          build();
+
       // Hides the notification after its selected.
-      n.flags |= Notification.FLAG_AUTO_CANCEL;
+      //builder.flags |= Notification.FLAG_AUTO_CANCEL;
 
       NotificationManager notificationManager =
           (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-      notificationManager.notify(1, n);
+      notificationManager.notify(NOTIFICATION_ID, builder);
 
       // Send the message to the JavaScript application.
       try {

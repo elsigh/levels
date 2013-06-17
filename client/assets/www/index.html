@@ -27,7 +27,7 @@
         <div class="tabs">
           <a href="following" class="following">Stats</a><a
             href="account" class="account">Account</a><span
-            class="share">Share!</share>
+            class="share">Share</share>
         </div>
       </section>
       <section class="fmb-tab fmb-tab-account">
@@ -55,6 +55,7 @@
     <script src="js/xcharts.js"></script>
     <script src="js/GCMPlugin.js"></script>
 
+    <script src="js/fmb.js"></script>
     <script src="js/app.js"></script>
     <script src="js/models_fmb.js"></script>
     <script src="js/models.js"></script>
@@ -156,19 +157,22 @@
       {{/notifying.length}}
       {{^notifying.length}}
         <p>
-          Time to configure the sauce!
-        </p>
-        <p>
-          Add someone to be notified *BEFORE* your battery dies.
+          <strong>Add someone from your contact book with the buttons above.</strong>
         </p>
       {{/notifying.length}}
     </script>
 
 
     <script id="tpl_following" type="text/html">
+      <!--
       <div class="fmb-tab-header">
         <button class="share">get more stats</button>
       </div>
+      -->
+      <p class="info-other-users">
+        <span class="info">i</span>
+        If you open someone's Levels link with the app, they'll show up here.
+      </p>
       <table>
         <thead>
           <tr>

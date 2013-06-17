@@ -132,9 +132,9 @@ fmb.views.App.prototype.onClickShare_ = function(e) {
 
   if (fmb.ua.IS_ANDROID && fmb.ua.IS_CORDOVA) {
     var extras = {};
-    extras[WebIntent.EXTRA_TEXT] = this.model.user.getProfileUrl();
-    extras[WebIntent.EXTRA_SUBJECT] =
-        'Check out my Levels, and send me yours!';
+    var text = 'Check out my Levels, and send me yours!';
+    extras[WebIntent.EXTRA_TEXT] = text + ' ' + this.model.user.getProfileUrl();
+    extras[WebIntent.EXTRA_SUBJECT] = text;
     window.plugins.webintent.startActivity({
         action: WebIntent.ACTION_SEND,
         type: 'text/plain',
@@ -146,8 +146,8 @@ fmb.views.App.prototype.onClickShare_ = function(e) {
     });
 
   } else {
-    var userKey = window.prompt('Enter a user key to follow:');
-    this.model.user.get('following').addByKey(userKey);
+    var uniqueProfileStr = window.prompt('Enter a user unique str to follow:');
+    this.model.user.get('following').addByUniqueProfileStr(uniqueProfileStr);
   }
 
 };
@@ -277,24 +277,37 @@ fmb.views.Account.prototype.render = function() {
 
 
 /**
- * @param {Backbone.Model} e A backbone model.
+ * @param {Backbone.Model} e A device model.
  * @private
  */
 fmb.views.Account.prototype.onAddDevice_ = function(model) {
   fmb.log('fmb.views.Account onAddDevice_',
           this.model.get('devices').length);
   this.model.get('devices').each(_.bind(function(model) {
-    if (!this.subViews_[model.cid]) {
-      this.subViews_[model.cid] = new fmb.views.Device({
-        parent: this,
-        model: model
-      });
-      this.subViews_[model.cid].render();
-      this.$devices.append(this.subViews_[model.cid].$el);
-    }
+    this.addDeviceView_(model);
   }, this));
 };
 
+
+/**
+ * @param {Backbone.Model} e A device model.
+ * @private
+ */
+fmb.views.Account.prototype.addDeviceView_ = function(model) {
+  if (!this.subViews_[model.cid]) {
+    this.subViews_[model.cid] = new fmb.views.Device({
+      parent: this,
+      model: model
+    });
+    this.subViews_[model.cid].render();
+    // Make the user device the first one the list.
+    if (model === this.model.device) {
+      this.$devices.prepend(this.subViews_[model.cid].$el);
+    } else {
+      this.$devices.append(this.subViews_[model.cid].$el);
+    }
+  }
+}
 
 /**
  * @param {Backbone.Model} e A backbone model.

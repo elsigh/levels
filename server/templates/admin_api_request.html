@@ -1,0 +1,90 @@
+{% extends "base.html"%}
+
+{% block head %}
+  <style>
+    .result-c {
+      margin: 1em 0;
+    }
+    .result {
+      display: inline-block;
+      border: 1px solid #999;
+      background-color: #ccc;
+      padding: 0.5em;
+    }
+    input[type="text"] {
+      font-size: 1em;
+    }
+    textarea {
+      width: 500px;
+      height: 100px;
+    }
+  </style>
+  <script src="/static/js/zepto-1.0rc1.js"></script>
+  <script src="/static/js/underscore-1.4.4.js"></script>
+  <script src="/static/js/backbone-1.0.js"></script>
+  <script src="/static/js/backbone.localStorage.js"></script>
+  <script src="/static/js/fmb.js"></script>
+  <script src="/static/js/models_fmb.js"></script>
+{% endblock %}
+
+{% block body %}
+  <section>
+    <header>
+      <h1><span>Levels<span></h1>
+      <h2>Admin API Request</h2>
+    </header>
+
+    <div class="result-c">
+      <div class="result">
+        Result: {{result}}
+      </div>
+    </div>
+
+    <form method="POST" action="/admin/api_request">
+      <div>
+        <input type="text" name="uri" placeholder="URI"
+          value="http://localhost:8080/api/device">
+      </div>
+      <div>
+        <textarea name="body"></textarea>
+      </div>
+      <p>
+        <input type="submit">
+      </p>
+    </form>
+  </section>
+  <script>
+    var localBody = localStorage.getItem('admin-api-request-body');
+    if (localBody) {
+      $('textarea').val(localBody);
+    }
+    $('textarea').on('input', function() {
+      console.log('storing textarea')
+      localStorage.setItem('admin-api-request-body', $('textarea').val());
+    })
+    str = '';
+    $('form').on('submit', function(e) {
+      e.preventDefault();
+      var val = $('textarea').val().
+          replace(/\'/g, '"').
+          replace(/u\"/g, '"').
+          replace('None', '""').trim();
+      str = val;
+      var data = JSON.parse(val);
+      console.log('data:', data);
+      var model = new fmb.Model();
+      model.saveToServer(data, {
+        //data: data,
+        url: $('input[name="uri"]').val(),
+        success: function() {
+          console.log('SUCCESS:', arguments);
+          alert('YAY SUCCESS!');
+        },
+        error: function() {
+          console.log('ERROR:', arguments);
+          alert('ERROR!')
+        }
+      });
+    })
+  </script>
+{% endblock %}

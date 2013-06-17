@@ -54,45 +54,6 @@ fmb.models.App.prototype.initialize = function(opt_data, opt_options) {
   } else {
     this.user = new fmb.models.User();
   }
-
-  // Fetch all from the server if the user model has an id
-  // which is only true when the user has previously authenticated
-  // and been fully set up.
-  if (this.user.id) {
-    // Deferred so model references are set on window.app.
-    _.defer(_.bind(function() {
-      this.user.fetch({
-        // Need to fake a battery status after user sync so we don't
-        // show out of date info for the user.
-        success: _.bind(function(model) {
-          fmb.log('User fetch MONEY TRAIN, simulate battery_status');
-          this.user.device && this.user.device.trigger('battery_status');
-          // TODO(elsigh): Should we do a following fetch with remove true
-          // to be sure we are sync'd correctly?
-        }, this)
-      });
-    }, this));
-
-  } else {
-
-    this.user.once('change:key', _.bind(function() {
-      fmb.log('** CREATE USER DEVICE the first time');
-      var device = new fmb.models.Device(null, {
-        isUserDevice: true
-      });
-      device.saveToServer({
-        'uuid': fmb.models.DeviceUnMapped.getUuid(),
-        'name': window.device && window.device.model || navigator.appName,
-        'platform': window.device && window.device.platform || navigator.platform,
-        'version': window.device && window.device.version || navigator.productSub
-      }, {
-        success: _.bind(function() {
-          this.user.get('devices').add(device);
-        }, this)
-      })
-    }, this));
-  }
-
 };
 
 
@@ -511,38 +472,6 @@ fmb.models.FollowingCollection.prototype.addByUniqueProfileStr =
 };
 
 
-/**
- * @param {string} userKey A userKey to follow.
- */
-fmb.models.FollowingCollection.prototype.addByKey = function(userKey) {
-  fmb.log('fmb.models.FollowingCollection addByKey', userKey);
-
-  // Can't follow yerself or no one.
-  if (userKey === '' ||
-      userKey == this.parent.get('key')) {
-    fmb.log('fmb.models.FollowingCollection addByKey cant follow yoself');
-    return;
-  }
-
-  var alreadyFollowing = this.findWhere({
-    'key': userKey
-  });
-  if (alreadyFollowing) {
-    fmb.log('.. bail, already following', userKey);
-    alert('You are already following ' + userKey);
-    return;
-  }
-
-  this.add({
-    'name': 'Adding new friend ...',
-    'following_user_key': userKey
-  });
-
-  var plugin = cordova.require('cordova/plugin/levels');
-  plugin && plugin.showToast('Adding new friend ...');
-};
-
-
 /** @inheritDoc */
 fmb.models.FollowingCollection.prototype.fetch = function(options) {
   options = options || {};
@@ -681,27 +610,11 @@ fmb.models.User.GCMEvent = function(e) {
 fmb.models.User.prototype.initialize = function(opt_data, opt_options) {
   fmb.Model.prototype.initialize.apply(this, arguments);
   if (this.id) {
-    this.setUserKey_();
-    this.registerWithGCM_();
-  } else {
-    this.once('change:key', function() {
-      this.setUserKey_();
-      this.registerWithGCM_();
-    }, this);
+    this.doLaunchSync_ = true;
   }
 
   // API Token will always fire change, even when init'ing from localStorage.
-  this.once('change:api_token', function() {
-    fmb.log('Set API token for fmb.models.sync', this.get('api_token'));
-    fmb.models.sync.apiToken = this.get('api_token');
-
-    // this would not be the first time the user installed.
-    var plugin = cordova.require('cordova/plugin/levels');
-    if (this.device && this.device.id && plugin) {
-      fmb.log('fmb.models.MyDevice got API token, start plugin service!');
-      plugin.startService();
-    }
-  }, this);
+  this.once('change:api_token', this.initialize_, this);
 };
 
 
@@ -715,6 +628,26 @@ fmb.models.User.prototype.getProfileUrl = function() {
 
 
 /**
+ * This method actually does everything to get us set up.
+ */
+fmb.models.User.prototype.initialize_ = function() {
+  fmb.log('fmb.models.User initialize_', this.id, this.get('api_token'));
+  fmb.models.sync.apiToken = this.get('api_token');
+  this.setUserKey_();
+  this.registerWithGCM_();
+
+  // NOT first-timer.
+  if (this.doLaunchSync_) {
+    this.launchSync_();
+
+  // Aka first timer in initialize_ needs to create user device.
+  } else if (!this.device) {
+    this.createUserDevice();
+  }
+};
+
+
+/**
  * @private
  */
 fmb.models.User.prototype.setUserKey_ = function() {
@@ -724,6 +657,69 @@ fmb.models.User.prototype.setUserKey_ = function() {
   fmb.models.sync.userKey = this.id;
 };
 
+
+/**
+ * Get us all set up.
+ */
+fmb.models.User.prototype.createUserDevice = function() {
+  fmb.log('** CREATE USER DEVICE the first time');
+
+  var device = new fmb.models.Device(null, {
+    isUserDevice: true
+  });
+  var platform = window.device && window.device.platform || navigator.platform;
+  var name = window.device && window.device.model || navigator.appName;
+  navigator.notification &&
+      navigator.notification.activityStart('',
+          'Setting up ' + platform + ' ' + name + ' ...');
+  device.saveToServer({
+    'uuid': fmb.models.DeviceUnMapped.getUuid(),
+    'name': name,
+    'platform': platform,
+    'version': window.device && window.device.version || navigator.productSub
+  }, {
+    success: _.bind(function() {
+      fmb.log('SUCCESS creating user device =)', device);
+      navigator.notification &&
+          navigator.notification.activityStop();
+      this.get('devices').add(device);
+    }, this),
+    error: function() {
+      fmb.log('ERROR creating user device =(');
+      navigator.notification &&
+          navigator.notification.activityStop();
+      alert('I am so sorry that failed. Try killing and restarting the app.');
+    }
+  });
+};
+
+
+/**
+ * Fetch all from the server if the user model has an id
+ * which is only true when the user has previously authenticated
+ * and been fully set up.
+ * @private
+ */
+fmb.models.User.prototype.launchSync_ = function() {
+  // Deferred so model references are set on window.app.
+  _.defer(_.bind(function() {
+    this.fetch({
+      // Need to fake a battery status after user sync so we don't
+      // show out of date info for the user.
+      success: _.bind(function(model) {
+        fmb.log('User launch sync fetch MONEY TRAIN');
+        if (this.device) {
+          this.device.trigger('battery_status');
+        } else {
+          fmb.log('FIX-O-LICIOUS - createUserDevice');
+          this.createUserDevice();
+        }
+        // TODO(elsigh): Should we do a following fetch with remove true
+        // to be sure we are sync'd correctly?
+      }, this)
+    });
+  }, this));
+};
 
 
 /**
