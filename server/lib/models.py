@@ -107,7 +107,7 @@ class FMBUser(User, FMBModel):
             gcm_conn.notify_device(gcm_message)
             return True
 
-        if attr(self, 'email'):
+        if hasattr(self, 'email'):
             mail.send_mail(sender='Levels Alert <elsigh@levelsapp.com>',
                    to='%s <%s>' % (self.name, self.email),
                    subject='A message from Levels',
