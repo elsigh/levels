@@ -22,7 +22,7 @@ public class LevelsActivity extends DroidGap {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.d(TAG, "LevelsActivity onCreate w/ " +
+        Log.d(TAG, "onCreate w/ " +
               "Build :: " +
               android.os.Build.BRAND + ", " +
               android.os.Build.DEVICE + ", " +
@@ -38,5 +38,4 @@ public class LevelsActivity extends DroidGap {
         super.loadUrl("file:///android_asset/www/index.html", 10000);
         this.appView.setOverScrollMode(View.OVER_SCROLL_NEVER);
     }
-
 }

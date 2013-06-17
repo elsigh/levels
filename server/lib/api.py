@@ -15,6 +15,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), 'external'))
 
 from google.appengine.api import mail
 from google.appengine.api import memcache
+from google.appengine.api import users
 from google.appengine.ext import deferred
 from google.appengine.ext import ndb
 sys.modules['ndb'] = ndb
@@ -152,11 +153,20 @@ class ApiRequestHandler(WebRequestHandler):
 
     @webapp2.cached_property
     def current_user(self):
+        # Admin USER override by JSON request value.
+        gae_user = users.get_current_user()
+        if gae_user and gae_user.is_current_user_admin():
+            logging.info('ADMIN as CURRENT_USER: %s, %s' % (user.name, user))
+            return self.get_json_request_user()
+
         user = super(ApiRequestHandler, self).current_user
+        if user is None:
+            user = self.get_json_request_user()
         if user is not None:
             logging.info('CURRENT_USER: %s, %s' % (user.name, user))
-            return user
+        return user
 
+    def get_json_request_user(self):
         # For our api_token situation, which is special because we can't go
         # setting a cookie for our domain in both our JS client and Java client.
         if ('user_key' in self._json_request_data and
@@ -164,11 +174,9 @@ class ApiRequestHandler(WebRequestHandler):
             user_key = self._json_request_data['user_key']
             api_token = self._json_request_data['api_token']
             user = ndb.Key(urlsafe=user_key).get()
-            logging.info('CURRENT_USER: %s, %s' % (user.name, user))
             if user.api_token == api_token:
                 return user
-
-        return None
+        return None  # default
 
     # Backbone.js likes to use put for update, we call it POST.
     def put(self, *args):
@@ -239,8 +247,10 @@ class ApiDeviceHandler(ApiRequestHandler):
     def post(self):
         q = models.Device.query(ancestor=self.current_user.key).filter(
             models.Device.uuid == self._json_request_data['uuid'])
+        device_query_count = q.count()
 
-        if q.count() == 0:
+        logging.info('Device query count: %s' % device_query_count)
+        if device_query_count == 0:
             device = models.Device(
                 uuid=self._json_request_data['uuid'],
                 parent=self.current_user.key
@@ -286,15 +296,21 @@ def _send_notification_templater(user_id, device_id, notifying_id, tpl_name):
                  (user_id, device_id, tpl_name))
 
     user = models.FMBUser.get_by_id(user_id)
-    assert user
+    if not user:
+        logging.info('BAIL CITY BABY, no user model')
+        return None, None
 
     device = models.Device.get_by_id(device_id, parent=user.key)
-    assert device
+    if not device:
+        logging.info('BAIL CITY BABY, no device model')
+        return None, None
 
     notifying = models.Notifying.get_by_id(notifying_id, parent=device.key)
-    assert notifying
+    if not notifying:
+        logging.info('BAIL CITY BABY, no notifying model')
+        return None, None
 
-    logging.info('send_battery_notification_phone %s, %s, %s' %
+    logging.info('_send_notification_templater %s, %s, %s' %
                  (user.name, device.uuid, notifying.means))
 
     # Make sure we haven't sent this means a notification in the last N hours.
@@ -322,8 +338,8 @@ def send_battery_notification_email(user_id, device_id, notifying_id, send=True)
     logging.info('send_battery_notification_email %s, %s' %
                  (user_id, device_id))
     notifying, body = _send_notification_templater(user_id, device_id,
-                                                       notifying_id,
-                                                       'notification_email.html')
+                                                   notifying_id,
+                                                   'notification_email.html')
 
     if notifying is None:
         logging.info('BAIL CITY BABY, DONE EMAIL NOTIFIED ENUFF')
@@ -342,7 +358,7 @@ def send_battery_notification_email(user_id, device_id, notifying_id, send=True)
 def send_battery_notification_phone(user_id, device_id, notifying_id, send=True):
     logging.info('send_battery_notification_phone %s, %s' %
                  (user_id, device_id))
-    notifying, rendered = _send_notification_templater(user_id, device_id,
+    notifying, body = _send_notification_templater(user_id, device_id,
                                                        notifying_id,
                                                        'notification_phone.html')
 
@@ -350,10 +366,10 @@ def send_battery_notification_phone(user_id, device_id, notifying_id, send=True)
         logging.info('BAIL CITY BABY, DONE PHONE NOTIFIED ENUFF')
         return
 
-    logging.info('rendered: %s' % rendered)
+    logging.info('body: %s' % body)
     twilio_message = None
     if send:
-        send_twilio_msg(notifying.means, rendered)
+        send_twilio_msg(notifying.means, body)
 
     sent = models.NotificationSent(
         parent=notifying.key,
@@ -363,6 +379,36 @@ def send_battery_notification_phone(user_id, device_id, notifying_id, send=True)
 
     logging.info('twilio twilio_message: %s, sent: %s' %
                  (twilio_message, sent.key.id()))
+
+
+def send_battery_notification_self(user_id, device_id):
+    logging.info('send_battery_notification_self %s, %s' % (user_id, device_id))
+    user = models.FMBUser.get_by_id(user_id)
+    if not user:
+        logging.info('BAIL CITY BABY, no user model')
+        return
+    device = models.Device.get_by_id(device_id, parent=user.key)
+    if not device:
+        logging.info('BAIL CITY BABY, no device model')
+
+    # Make sure we haven't sent this means a notification in the last N hours.
+    means = 'self_battery_message'
+    q = models.NotificationSent.query(ancestor=user.key)
+    q = q.filter(models.NotificationSent.means == means)
+    from_time = datetime.now() - timedelta(hours=12)
+    q = q.filter(models.NotificationSent.created > from_time)
+    if q.count() != 0:
+        logging.info('Nope, we already sent them a notification recently.')
+        return
+
+    sent = models.NotificationSent(
+        parent=user.key,
+        means=means
+    )
+    sent.put()
+
+    message = 'Your %s %s battery is running low at 10%%' % (device.platform, device.name)
+    user.send_message(message)
 
 
 def send_battery_notifications(user_id, device_id):
@@ -389,6 +435,8 @@ def send_battery_notifications(user_id, device_id):
 
         deferred.defer(fn, user_id, device_id, notifying.key.id())
 
+    # Also send the device owner a message.
+    deferred.defer(send_battery_notification_self, user_id, device_id)
 
 class ApiSettingsHandler(ApiRequestHandler):
     def post(self):
@@ -470,7 +518,11 @@ class ApiFollowingHandler(ApiRequestHandler):
         )
         following.put()
 
-        follow_user.send_message('%s is now following your Levels!' % self.current_user.name)
+        follow_user.send_message(
+            '%s is now following your Levels!' % self.current_user.name,
+            extra={
+                'current_user_profile_url': self.current_user.get_profile_url()
+            })
 
         # Includes the cid for this one here so the client can match up
         out_dict = follow_user.to_dict()

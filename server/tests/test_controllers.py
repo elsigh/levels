@@ -37,7 +37,6 @@ class RequestHandlerTest(unittest.TestCase):
 
     def tearDown(self):
         self.testbed.deactivate()
-        WebRequestHandler.unit_test_current_user = None
 
     def test_DeviceModel_to_dict(self):
         device = models.Device(uuid='test_uuid')
@@ -58,7 +57,7 @@ class RequestHandlerTest(unittest.TestCase):
         self.testapp.get('/api/user', status=500)
 
         elsigh_user = models.FMBUser(
-            name='elsighmon'
+            name='elsigh'
         )
         elsigh_user.put()
 
@@ -77,7 +76,7 @@ class RequestHandlerTest(unittest.TestCase):
 
     def test_ApiUserTokenHandler(self):
         elsigh_user = models.FMBUser(
-            name='elsighmon'
+            name='elsigh'
         )
         elsigh_user.put()
 
@@ -99,7 +98,7 @@ class RequestHandlerTest(unittest.TestCase):
 
     def test_ApiDeviceHandler(self):
         elsigh_user = models.FMBUser(
-            name='elsighmon'
+            name='elsigh'
         )
         elsigh_user.put()
 
@@ -162,7 +161,7 @@ class RequestHandlerTest(unittest.TestCase):
 
     def test_ApiDeviceDeleteHandler(self):
         elsigh_user = models.FMBUser(
-            name='elsighmon'
+            name='elsigh'
         )
         elsigh_user.put()
 
@@ -194,7 +193,7 @@ class RequestHandlerTest(unittest.TestCase):
 
     def test_ApiSettingsHandler(self):
         elsigh_user = models.FMBUser(
-            name='elsighmon'
+            name='elsigh'
         )
         elsigh_user.put()
 
@@ -253,7 +252,7 @@ class RequestHandlerTest(unittest.TestCase):
 
     def test_ApiFollowingHandler(self):
         elsigh_user = models.FMBUser(
-            name='elsighmon'
+            name='elsigh'
         )
         elsigh_user.put()
 
@@ -320,7 +319,7 @@ class RequestHandlerTest(unittest.TestCase):
 
     def test_ApiFollowingHandler_add_by_key(self):
         elsigh_user = models.FMBUser(
-            name='elsighmon'
+            name='elsigh'
         )
         elsigh_user.put()
 
@@ -357,7 +356,7 @@ class RequestHandlerTest(unittest.TestCase):
 
     def test_ApiFollowingHandler_add_by_unique_profile_str(self):
         elsigh_user = models.FMBUser(
-            name='elsighmon'
+            name='elsigh'
         )
         elsigh_user.put()
 
@@ -383,7 +382,7 @@ class RequestHandlerTest(unittest.TestCase):
 
     def test_ApiFollowingHandler_delete(self):
         elsigh_user = models.FMBUser(
-            name='elsighmon'
+            name='elsigh'
         )
         elsigh_user.put()
 
@@ -422,7 +421,7 @@ class RequestHandlerTest(unittest.TestCase):
 
     def test_ApiNotifyingRequestHandler_get(self):
         elsigh_user = models.FMBUser(
-            name='elsighmon'
+            name='elsigh'
         )
         elsigh_user.put()
 
@@ -462,7 +461,7 @@ class RequestHandlerTest(unittest.TestCase):
 
     def test_ApiNotifyingRequestHandler_add(self):
         elsigh_user = models.FMBUser(
-            name='elsighmon'
+            name='elsigh'
         )
         elsigh_user.put()
 
@@ -514,7 +513,7 @@ class RequestHandlerTest(unittest.TestCase):
 
     def test_ApiNotifyingRequestHandler_delete(self):
         elsigh_user = models.FMBUser(
-            name='elsighmon'
+            name='elsigh'
         )
         elsigh_user.put()
 
@@ -554,7 +553,7 @@ class RequestHandlerTest(unittest.TestCase):
 
     def test_send_notifying_message_email(self):
         elsigh_user = models.FMBUser(
-            name='elsighmon'
+            name='elsigh'
         )
         elsigh_user.put()
 
@@ -567,7 +566,7 @@ class RequestHandlerTest(unittest.TestCase):
 
     def test_send_notifying_message_phone(self):
         elsigh_user = models.FMBUser(
-            name='elsighmon'
+            name='elsigh'
         )
         elsigh_user.put()
 
@@ -581,7 +580,7 @@ class RequestHandlerTest(unittest.TestCase):
 
     def test_send_battery_notifications(self):
         elsigh_user = models.FMBUser(
-            name='elsighmon'
+            name='elsigh'
         )
         elsigh_user.put()
 
@@ -606,11 +605,12 @@ class RequestHandlerTest(unittest.TestCase):
                                        elsigh_device.key.id())
 
         tasks = self.taskqueue_stub.GetTasks('default')
-        self.assertEqual(1, len(tasks))
+        # other + self
+        self.assertEqual(2, len(tasks))
 
     def test_send_battery_notification_phone(self):
         elsigh_user = models.FMBUser(
-            name='elsighmon'
+            name='elsigh'
         )
         elsigh_user.put()
 
@@ -646,7 +646,7 @@ class RequestHandlerTest(unittest.TestCase):
 
     def test_send_battery_notification_email(self):
         elsigh_user = models.FMBUser(
-            name='elsighmon'
+            name='elsigh'
         )
         elsigh_user.put()
 
@@ -680,3 +680,47 @@ class RequestHandlerTest(unittest.TestCase):
         q = models.NotificationSent.query(ancestor=ded_notifying.key)
         self.assertEquals(1, q.count())
 
+    def test_send_battery_notification_self(self):
+        elsigh_user = models.FMBUser(
+            name='elsigh'
+        )
+        elsigh_user.put()
+
+        elsigh_device = models.Device(
+            uuid='elsigh_uuid',
+            name='foo',
+            platform='bar',
+            parent=elsigh_user.key
+        )
+        elsigh_device.put()
+
+        api.send_battery_notification_self(elsigh_user.key.id(),
+                                           elsigh_device.key.id())
+        #self.assertEquals(True, self_message_sent)
+        q = models.NotificationSent.query(ancestor=elsigh_user.key)
+        q.filter(models.NotificationSent.means == 'self_battery_message')
+        self.assertEquals(1, q.count())
+
+
+    def test_user_send_message(self):
+        elsigh_user = models.FMBUser(
+            name='elsigh',
+            gcm_push_token='elsigh_gcm_push_token'
+        )
+        gcm_msg = None
+        push_token = None
+        android_payload = None
+        class GCMMessage():
+            def __init__(self, push_token, android_payload):
+                self.push_token = push_token
+                self.android_payload = android_payload
+
+        class GCMConnection():
+            def notify_device(self, msg):
+                gcm_msg = msg
+
+        elsigh_user.send_message('hi', extra={
+            'foo': 'bar'
+        })
+        logging.info('FOO: %s' % gcm_msg)
+        self.assertTrue(False)

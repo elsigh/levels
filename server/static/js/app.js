@@ -1,100 +1,4 @@
 
-/**
- * @type {Object}
- */
-var fmb = {};
-
-
-/******************************************************************************/
-
-
-/**
- * @type {Object} UA namespace.
- */
-fmb.ua = {};
-
-
-/**
- * @type {boolean}
- */
-fmb.ua.IS_ANDROID = window.navigator.userAgent.indexOf('Android') !== -1;
-
-
-/**
- * @type {boolean}
- */
-fmb.ua.IS_CORDOVA = typeof cordova !== 'undefined';
-
-
-/******************************************************************************/
-
-
-/**
- * @return {Function} The native console.log implementation.
- * @private
- */
-fmb.getConsoleLogger_ = function() {
-  return _.bind(console.log, console);
-};
-
-
-/**
- * @return {Function} A wrapped up stringifier.
- * @private
- */
-fmb.getWebViewLogger_ = function() {
-  return _.bind(function() {
-      var argumentsArray = _.toArray(arguments);
-      var consoleStrings = [];
-      _.each(argumentsArray, function(logLine) {
-        if (_.isElement(logLine)) {
-          consoleStrings.push('isElement-className: ' + logLine.className);
-        } else if (_.isObject(logLine)) {
-          // Some of our objects have circular references..
-          try {
-            // Wrapped in quotation marks for later parseability.
-            var stringified = '"' + JSON.stringify(logLine) + '"';
-            consoleStrings.push(stringified);
-          } catch (err) {
-            consoleStrings.push(logLine);
-          }
-        } else {
-          consoleStrings.push(logLine);
-        }
-      });
-
-      var consoleString = consoleStrings.join(', ');
-      console.log(consoleString);
-    }, console);
-};
-
-
-fmb.injectScript = function(src) {
-  script = document.createElement('script');
-  script.type = 'text/javascript';
-  script.async = true;
-  script.onload = function(){
-      // remote script has loaded
-  };
-  script.src = src;
-  $('head').get(0).appendChild(script);
-};
-
-
-/**
- * Good times, wrap fmb.log
- */
-fmb.log = fmb.ua.IS_ANDROID && fmb.ua.IS_CORDOVA ?
-    fmb.getWebViewLogger_() : fmb.getConsoleLogger_();
-
-
-/**
- * @param {Object} obj An object to clone.
- * @return {Object} A deep clone of the passed in object.
- */
-fmb.clone = function(obj) {
-  return JSON.parse(JSON.stringify(obj));
-};
 
 
 /**
@@ -208,6 +112,9 @@ fmb.App.prototype.initHistory_ = function() {
   if (!matchedRoute) {
     console.warn('No matchedRoute in initHistory');
 
+    this.navigate(fmb.App.Routes.ACCOUNT.url, {trigger: true});
+
+    /*
     // Only take them to the stats page if they're pretty well set up.
     if (this.model.user && this.model.user.get('api_token') &&
         this.model.user.device &&
@@ -217,6 +124,7 @@ fmb.App.prototype.initHistory_ = function() {
     } else {
       this.navigate(fmb.App.Routes.ACCOUNT.url, {trigger: true});
     }
+    */
   }
 };
 
@@ -224,51 +132,51 @@ fmb.App.prototype.initHistory_ = function() {
 /**
  * @type {RegExp}
  */
-fmb.App.FOLLOWING_BY_KEY_URL_RE = /levelsapp\.com\/profile\/(.*)/;
+fmb.App.FOLLOWING_BY_UNIQUE_STR_URL_RE = /levelsapp\.com\/p\/(.*)/;
 
 
 /**
- * @type {RegExp}
+ * @param {string} url An intent URL.
+ * @private
  */
-fmb.App.FOLLOWING_BY_UNIQUE_STR_URL_RE = /levelsapp\.com\/profile\/(.*)/;
+fmb.App.prototype.checkIntent_ = function(url) {
+  fmb.log('fmb.App checkIntent', url);
+  if (!(window.plugins && window.plugins.webintent)) {
+    return;
+  }
+
+  if (url) {
+    this.checkIntentUrlForUser_(url);
+  } else {
+    window.plugins.webintent.getUri(
+        _.bind(this.checkIntentUrlForUser_, this),
+        function() {
+          fmb.log('fmb.App webintent getUri NADA');
+        });
+  }
+};
 
 
 /**
  * @private
  */
-fmb.App.prototype.checkIntent_ = function() {
-  fmb.log('fmb.App checkIntent');
-  if (!(window.plugins && window.plugins.webintent)) {
+fmb.App.prototype.checkIntentUrlForUser_ = function(url) {
+  fmb.log('fmb.App checkIntentUrlForUser_', url);
+  if (!url) {
+    fmb.log('.. bail, no URL');
     return;
   }
+  var match = fmb.App.FOLLOWING_BY_UNIQUE_STR_URL_RE.exec(url);
+  if (match && match.length) {
+    fmb.log('fmb.App webintent getUri:', url, match);
+    var userUniqueProfileStr = match[1];
+    _.delay(_.bind(function() {
+      this.model.user.get('following').addByUniqueProfileStr(
+          userUniqueProfileStr);
+      this.navigate(fmb.App.Routes.FOLLOWING.url, {trigger: true});
+    }, this), 300);
 
-  window.plugins.webintent.getUri(
-      function(url) {
-        // Try both ways.
-        var match = fmb.App.FOLLOWING_BY_UNIQUE_STR_URL_RE.exec(url);
-        if (match && match.length) {
-          fmb.log('fmb.App webintent getUri:', url, match);
-          var userUniqueProfileStr = match[1];
-          _.delay(_.bind(function() {
-            app.model.user.get('following').addByUniqueProfileStr(
-                userUniqueProfileStr);
-          }, window['app']), 300);
-
-        } else {
-          match = fmb.App.FOLLOWING_BY_KEY_URL_RE.exec(url);
-          fmb.log('fmb.App webintent getUri:', url, match);
-          if (match && match.length) {
-            var userKey = match[1];
-            _.delay(_.bind(function() {
-              app.model.user.get('following').addByKey(userKey);
-            }, window['app']), 300);
-          }
-        }
-
-      },
-      function() {
-        fmb.log('fmb.App webintent getUri NADA');
-      });
+  }
 };
 
 

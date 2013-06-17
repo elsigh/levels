@@ -26,12 +26,30 @@ import settings
 
 
 
+class AdminApiRequestHandler(WebRequestHandler):
+    def get(self):
+        self.output_response({}, 'admin_api_request.html')
+
+class AdminUsersHandler(WebRequestHandler):
+    def get(self):
+        q = models.FMBUser.query().order(-models.FMBUser.created)
+        users = []
+        for user in q.fetch():
+            users.append(user.to_dict())
+        self.output_response({'users': users}, 'admin_users.html')
+
+
 class AdminUserMessageTestHandler(WebRequestHandler):
     @admin_required
     def get(self):
         self.output_response({'result': 'not yet'}, 'admin_user_message_test.html')
 
     def post(self):
+        # only elsigh
+        if (self.current_user.key.id() != 19001 and
+            'Development' not in os.environ['SERVER_SOFTWARE']):
+            self.abort(500)
+
         user_id = self.request.get('user_id')
         message = self.request.get('message', 'Test message')
         result = False

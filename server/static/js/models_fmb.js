@@ -1,6 +1,5 @@
 
 
-
 /**
  * @type {Object} Models namespace.
  */
@@ -149,6 +148,20 @@ fmb.models.sync = function(method, model, options) {
     }
   }
   fmb.log('--------> AJAX SYNC', method, url);
+
+  /*
+  var success = options.success;
+  var error = options.error;
+  options.success = function(model, response, options) {
+    fmb.log('<-------- AJAX SUCCESS', method, url);
+    success.apply(arguments);
+  };
+  options.error = function(model, response, options) {
+    fmb.log('<-------- AJAX ERROR', method, url);
+    error.apply(arguments);
+  };
+  */
+
   Backbone.ajaxSync.call(this, method, model, options);
 };
 
@@ -367,6 +380,8 @@ fmb.Model.prototype.fetchFromStorage = function(opt_options) {
       //fmb.log('fmb.Model fetchFromStorage set', results[results.length - 1]);
       this.set(results[results.length - 1], opt_options);
     }
+    opt_options && opt_options.fetchComplete &&
+        opt_options.fetchComplete();
   }, this));
 };
 
