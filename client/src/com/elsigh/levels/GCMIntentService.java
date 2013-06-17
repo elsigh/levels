@@ -71,22 +71,15 @@ public class GCMIntentService extends GCMBaseIntentService {
       String message = extras.getString("message");
       Log.v(ME + "onMessage - message ", message);
 
-      // Check for current_user_profile_url and build an intent based on it
-      // or else open the LevelsActivity
+      // If an URL was supplied in the push add it as an extra.
       Intent notificationIntent = new Intent(this, LevelsActivity.class);
-      if (intent.hasExtra("current_user_profile_url")) {
-        notificationIntent.putExtra();
+      if (intent.hasExtra("url")) {
+        // This key comes from the WebIntent plugin.
+        notificationIntent.putExtra("android.intent.extra.TEXT",
+                                    extras.getString("url"));
       }
-      /*
-      if (intent.hasExtra("current_user_profile_url")) {
-          notificationIntent = new Intent(Intent.ACTION_VIEW,
-              Uri.parse(extras.getString("current_user_profile_url")));
-      } else {
-          notificationIntent = new Intent(this, LevelsActivity.class);
-      }
-      */
+
       PendingIntent contentIntent = PendingIntent.getActivity(
-          //LevelsActivity.class,
           this,
           0,
           notificationIntent,
@@ -101,25 +94,23 @@ public class GCMIntentService extends GCMBaseIntentService {
           setAutoCancel(true).
           build();
 
-      // Hides the notification after its selected.
-      //builder.flags |= Notification.FLAG_AUTO_CANCEL;
-
       NotificationManager notificationManager =
           (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
       notificationManager.notify(NOTIFICATION_ID, builder);
 
       // Send the message to the JavaScript application.
+      /*
       try {
         JSONObject json;
         json = new JSONObject().put("event", "message");
         json.put("message", extras.getString("message"));
-        json.put("msgcnt", extras.getString("msgcnt"));
         Log.v(ME + ":onMessage ", json.toString());
         GCMPlugin.sendJavascript(json);
 
       } catch( JSONException e) {
         Log.e(ME + ":onMessage", "JSON exception");
       }
+      */
     }
   }
 
