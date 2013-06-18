@@ -1,5 +1,7 @@
 import os
 
+MAIL_FROM = 'Levels <elsigh@levelsapp.com>'
+
 ROOT_PATH = os.path.dirname(__file__)
 
 TEMPLATE_DIRS = (

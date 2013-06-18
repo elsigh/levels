@@ -7,11 +7,14 @@ import json
 import os
 import sys
 
+from mock import patch
+
 # Need the server root dir on the path.
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/..')
 
 import logging
 
+from google.appengine.api import mail
 from google.appengine.api import memcache
 from google.appengine.ext import ndb
 from google.appengine.ext import testbed
@@ -19,10 +22,13 @@ from google.appengine.ext import testbed
 import unittest
 import webtest
 
+from lib.external.gae_python_gcm import gcm
 from lib.web_request_handler import WebRequestHandler
 from lib import api
 from lib import controllers
 from lib import models
+
+import settings
 
 
 class RequestHandlerTest(unittest.TestCase):
@@ -701,8 +707,9 @@ class RequestHandlerTest(unittest.TestCase):
         q.filter(models.NotificationSent.means == 'self_battery_message')
         self.assertEquals(1, q.count())
 
-
-    def NOtest_user_send_message(self):
+    #@patch.object(gcm.GCMConnection, 'notify_device')
+    @patch('lib.external.gae_python_gcm.gcm.GCMMessage')
+    def NOTtest_user_send_message_gcm(self, mock_gcm_message):
         elsigh_user = models.FMBUser(
             name='elsigh',
             gcm_push_token='elsigh_gcm_push_token'
@@ -710,17 +717,33 @@ class RequestHandlerTest(unittest.TestCase):
         gcm_msg = None
         push_token = None
         android_payload = None
-        class GCMMessage():
-            def __init__(self, push_token, android_payload):
-                self.push_token = push_token
-                self.android_payload = android_payload
-
-        class GCMConnection():
-            def notify_device(self, msg):
-                gcm_msg = msg
 
         elsigh_user.send_message('hi', extra={
             'foo': 'bar'
         })
-        logging.info('FOO: %s' % gcm_msg)
-        self.assertTrue(False)
+
+        args = {
+            'push_token': elsigh_user.gcm_push_token,
+            'android_payload': {
+                'message': 'hi',
+                'foo': 'bar'
+            }
+        }
+        mock_gcm_message.assert_called_once_with(**args)
+
+
+    @patch.object(mail, 'send_mail')
+    def test_user_send_message_mail(self, mock_send_mail):
+        elsigh_user = models.FMBUser(
+            name='elsigh',
+            email='elsigh@gmail.com'
+        )
+        elsigh_user.send_message('hi')
+
+        args = {
+            'sender': settings.MAIL_FROM,
+            'to': '%s <%s>' % (elsigh_user.name, elsigh_user.email),
+            'subject': '[Levels] A message for you',
+            'body': 'hi'
+        }
+        mock_send_mail.assert_called_once_with(**args)

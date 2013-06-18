@@ -346,7 +346,7 @@ def send_battery_notification_email(user_id, device_id, notifying_id, send=True)
         return
 
     to = '%s <%s>' % (notifying.name, notifying.means)
-    subject = '%s has a phone on the brink =(' % notifying.name
+    subject = '[Levels Alert] %s - my phone battery is at 10%%' % notifying.name
     send_email(to, subject, body)
 
     sent = models.NotificationSent(
@@ -407,7 +407,7 @@ def send_battery_notification_self(user_id, device_id):
     )
     sent.put()
 
-    message = 'Your %s %s battery is running low at 10%%' % (device.platform, device.name)
+    message = 'Your %s %s battery is low (10%%)' % (device.platform, device.name)
     user.send_message(message)
 
 
@@ -521,7 +521,7 @@ class ApiFollowingHandler(ApiRequestHandler):
         follow_user.send_message(
             '%s is now following your Levels!' % self.current_user.name,
             extra={
-                'current_user_profile_url': self.current_user.get_profile_url()
+                'url': self.current_user.get_profile_url()
             })
 
         # Includes the cid for this one here so the client can match up
