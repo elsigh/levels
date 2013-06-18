@@ -1,4 +1,11 @@
 
+.fmb-app > .fmb-loading {
+  position: fixed;
+  z-index: 2;
+  top: 10px;
+  right: 10px;
+}
+
 .fmb-loading {
   width: 30px;
   height: 30px;
