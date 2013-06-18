@@ -141,14 +141,16 @@
                   {{means}}
                 </td>
                 <td>
-                  {{#key}}
-                    <button type="button" class="fmb-remove notifying-remove"
-                      data-key="{{key}}"
-                      data-means="{{means}}">X</button>
-                  {{/key}}
-                  {{^key}}
-                    <div class="fmb-loading"></div>
-                  {{/key}}
+                  {{^is_user_email}}
+                    {{#key}}
+                      <button type="button" class="fmb-remove notifying-remove"
+                        data-key="{{key}}"
+                        data-means="{{means}}">X</button>
+                    {{/key}}
+                    {{^key}}
+                      <div class="fmb-loading"></div>
+                    {{/key}}
+                  {{/is_user_email}}
                 </td>
               </tr>
             {{/notifying}}

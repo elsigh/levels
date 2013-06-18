@@ -3,6 +3,7 @@ package com.elsigh.levels;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.Uri;
 import android.util.Log;
 
@@ -92,8 +93,14 @@ public class LevelsPlugin extends Plugin {
 
         } else if (action.equals("getVersionName")) {
             final Context context = this.cordova.getActivity().getApplicationContext();
-            String versionName = context.getPackageManager().getPackageInfo(
-                context.getPackageName(), 0).versionName;
+            String versionName = "";
+            try {
+                versionName = context.getPackageManager().getPackageInfo(
+                    context.getPackageName(), 0).versionName;
+            } catch (NameNotFoundException e) {
+                e.printStackTrace();
+                Log.d(TAG, "getVersionName ERROR");
+            }
             return new PluginResult(status, versionName);
 
         } else {

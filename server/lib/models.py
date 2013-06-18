@@ -31,7 +31,7 @@ sys.modules['ndb'] = ndb
 
 from webapp2_extras.appengine.auth.models import User
 
-from lib.external.gae_python_gcm.gcm import GCMMessage, GCMConnection
+from lib.external.gae_python_gcm import gcm
 
 import settings
 
@@ -109,18 +109,6 @@ class FMBUser(User, FMBModel):
         """Tries a few different means/methods to send a message to a user."""
         logging.info('FMBUser %s send_message %s, extra: %s' %
                      (self.name, message, extra))
-        if hasattr(self, 'gcm_push_token'):
-            push_token = self.gcm_push_token
-            android_payload = {
-                'message': message
-            }
-            android_payload.update(extra)
-            gcm_message = GCMMessage(push_token, android_payload)
-            gcm_conn = GCMConnection()
-            logging.info('Attempting to send Android push notification %s to push_token %s.' %
-                         (repr(android_payload), repr(push_token)))
-            gcm_conn.notify_device(gcm_message)
-            return True
 
         if hasattr(self, 'email'):
             mail.send_mail(
@@ -129,11 +117,22 @@ class FMBUser(User, FMBModel):
                 subject='[Levels] A message for you',
                 body=message)
             logging.info('Sending email to user.')
-            return True
 
-        else:
-            logging.info('No means to send message to user.')
-            return False
+        q_device = Device.query(ancestor=self.key)
+        q_device = q_device.order(-Device.created)
+        logging.info('device count: %s' % q_device.count())
+        for device in q_device.fetch():
+            if hasattr(device, 'gcm_push_token'):
+                push_token = device.gcm_push_token
+                android_payload = {
+                    'message': message
+                }
+                android_payload.update(extra)
+                gcm_message = gcm.GCMMessage(push_token, android_payload)
+                gcm_conn = gcm.GCMConnection()
+                logging.info('Send android_payload %s to push_token %s.' %
+                             (repr(android_payload), repr(push_token)))
+                gcm_conn.notify_device(gcm_message)
 
 
 NUM_SETTINGS_TO_FETCH = 10
@@ -150,6 +149,7 @@ class Device(FMBModel):
     name = ndb.StringProperty()
     platform = ndb.StringProperty()
     version = ndb.StringProperty()
+    gcm_push_token = ndb.StringProperty()
 
     def to_dict(self, include_notifying=True):
         obj = super(Device, self).to_dict()
@@ -169,10 +169,11 @@ class Device(FMBModel):
             obj['settings'].append(setting.to_dict())
 
         # notifying
-        logging.info('FMBUser to dict include_notifying: %s' % include_notifying)
+        logging.info('Device %s to dict include_notifying: %s' %
+                     (self.key.id(), include_notifying))
         if include_notifying:
             q_notifying = Notifying.query(ancestor=self.key).order(-Notifying.created)
-            logging.info('FMBUser notifying len: %s' % q_notifying.count())
+            logging.info('.. notifying len: %s' % q_notifying.count())
             obj['notifying'] = []
             for notifying in q_notifying:
                 obj['notifying'].append(notifying.to_dict())

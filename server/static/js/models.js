@@ -588,7 +588,7 @@ fmb.models.User.GCMEvent = function(e) {
   fmb.log('fmb.models.User.GCMEvent', e);
   switch (e.event) {
     case 'registered':
-      window['app'].model.user.save({
+      window['app'].model.user.device.save({
         'gcm_push_token': e.regid
       });
       break;
@@ -636,7 +636,6 @@ fmb.models.User.prototype.initialize_ = function() {
   fmb.log('fmb.models.User initialize_', this.id, this.get('api_token'));
   fmb.models.sync.apiToken = this.get('api_token');
   this.setUserKey_();
-  this.registerWithGCM_();
 
   // NOT first-timer.
   if (this.doLaunchSync_) {
@@ -728,12 +727,19 @@ fmb.models.User.prototype.launchSync_ = function() {
 
 
 /**
+ * The GCM sender_id from the play store.
+ * @type {string}
+ */
+fmb.models.User.GCM_SENDER_ID = '652605517304';
+
+
+/**
  * @private
  */
 fmb.models.User.prototype.registerWithGCM_ = function() {
   var gcmPlugin = cordova.require('cordova/plugin/gcm');
   gcmPlugin && gcmPlugin.register(
-      '652605517304',   // The GCM sender_id from the play store
+      fmb.models.User.GCM_SENDER_ID,
       'fmb.models.User.GCMEvent',
       _.bind(this.GCMWin, this),
       _.bind(this.GCMFail, this));
@@ -770,6 +776,8 @@ fmb.models.User.prototype.setUserDevice = function(model) {
     var plugin = cordova.require('cordova/plugin/levels');
     plugin && plugin.startService();
   }
+
+  this.registerWithGCM_();
 };
 
 

@@ -555,6 +555,15 @@ fmb.views.Notifying.prototype.render = function() {
   var templateData = {
     'notifying': this.model.toJSON()
   };
+
+  // We always notify you via email.
+  templateData['notifying'].unshift({
+    'name': app.model.user.get('name'),
+    'means': app.model.user.get('email'),
+    'type': 'email',
+    'is_user_email': true
+  });
+
   fmb.log('fmb.views.Notifying render w/', this.model.length);
   this.$el.html(fmb.views.getTemplateHtml('notifying', templateData));
   return this;
