@@ -27,6 +27,7 @@ Setup for testing the backend
 -----------------------------
 
 ```bash
+sudo pip install mock
 sudo pip install nose
 sudo pip install webtest
 ```
