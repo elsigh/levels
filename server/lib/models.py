@@ -65,11 +65,25 @@ class FMBUser(User, FMBModel):
         if not hasattr(self, 'api_token'):
             self.api_token = str(uuid.uuid4())
 
+        if not hasattr(self, 'allow_phone_lookup'):
+            self.allow_phone_lookup = False
+
+        if not hasattr(self, 'allow_gmail_lookup'):
+            self.allow_gmail_lookup = True
+
         if not hasattr(self, 'unique_profile_str'):
-            if hasattr(self, 'email') and self.email.find('@gmail.com') != -1:
+            if (hasattr(self, 'email') and self.email.find('@gmail.com') != -1 and
+                self.allow_gmail_lookup):
                 self.unique_profile_str = self.email.replace('@gmail.com', '')
             else:
                 self.unique_profile_str = str(uuid.uuid4())[:8]
+
+        # i.e. user doesn't want people to look them up by gmail name.
+        elif (hasattr(self, 'email') and self.email.find('@gmail.com') != -1 and
+              self.unique_profile_str == self.email.replace('@gmail.com', '')):
+            self.unique_profile_str = str(uuid.uuid4())[:8]
+
+        logging.info('POST _pre_put_hook %s' % self)
 
     def to_dict(self, include_api_token=False, include_device_notifying=False):
         obj = super(FMBUser, self).to_dict(include_api_token=include_api_token)

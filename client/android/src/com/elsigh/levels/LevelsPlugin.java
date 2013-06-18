@@ -90,6 +90,11 @@ public class LevelsPlugin extends Plugin {
         } else if (action.equals("getDeviceModelName")) {
             return new PluginResult(status, android.os.Build.MODEL);
 
+        } else if (action.equals("getVersionName")) {
+            String versionName = activity.getApplicationContext().
+                getPackageManager().getPackageInfo(getPackageName(), 0).versionName
+            return new PluginResult(status, versionName);
+
         } else {
             return new PluginResult(PluginResult.Status.INVALID_ACTION);
         }

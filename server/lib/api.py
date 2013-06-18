@@ -208,6 +208,31 @@ class ApiUserHandler(ApiRequestHandler):
         if not user:
              return self.output_json_error({}, 404)
         return self.output_json_success(
+            user.to_dict(include_api_token=True,
+                         include_device_notifying=True))
+
+    def post(self):
+        user = self.current_user
+        if not user:
+             return self.output_json_error({}, 404)
+
+        # Only allows us to write certain parameters.
+        if 'app_version' in self._json_request_data:
+            user.app_version = self._json_request_data['app_version']
+
+        if 'allow_phone_lookup' in self._json_request_data:
+            user.allow_phone_lookup = self._json_request_data['allow_phone_lookup']
+
+        if 'allow_gmail_lookup' in self._json_request_data:
+            user.allow_gmail_lookup = self._json_request_data['allow_gmail_lookup']
+
+        logging.info('USER PRE_PUT!! %s' % user)
+
+        user.put()
+
+        logging.info('USER POST_PUT!! %s' % user)
+
+        return self.output_json_success(
             user.to_dict(include_api_token=True, include_device_notifying=True))
 
 
@@ -234,6 +259,10 @@ class ApiUserTokenHandler(ApiRequestHandler):
 
         # Ok, now clear the memcache token - it's only good once.
         memcache.delete(memcache_key)
+
+        if 'app_version' in self._json_request_data:
+            user.app_version = self._json_request_data['app_version']
+            user.put()
 
         return self.output_json_success(
             user.to_dict(include_api_token=True, include_device_notifying=True))

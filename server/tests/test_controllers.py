@@ -59,7 +59,7 @@ class RequestHandlerTest(unittest.TestCase):
         assert 'settings' in data
         assert len(data['settings']) == models.NUM_SETTINGS_TO_FETCH
 
-    def test_ApiUserHandler(self):
+    def test_ApiUserHandler_get(self):
         self.testapp.get('/api/user', status=500)
 
         elsigh_user = models.FMBUser(
@@ -80,6 +80,33 @@ class RequestHandlerTest(unittest.TestCase):
         obj = json.loads(body)
         self.assertEquals(elsigh_user.key.urlsafe(), obj['key'])
 
+
+    def test_ApiUserHandler_post(self):
+        elsigh_user = models.FMBUser(
+            name='elsigh',
+            email='elsigh@gmail.com'
+        )
+        elsigh_user.put()
+
+        self.assertEquals(True, elsigh_user.allow_gmail_lookup)
+        self.assertEquals('elsigh', elsigh_user.unique_profile_str)
+
+        response = self.testapp.post_json('/api/user',
+                                          params=dict(api_token=elsigh_user.api_token,
+                                                      user_key=elsigh_user.key.urlsafe(),
+                                                      app_version=30,
+                                                      allow_phone_lookup=True,
+                                                      allow_gmail_lookup=False))
+
+        body = response.normal_body
+        obj = json.loads(body)
+
+        self.assertNotEquals('elsigh', obj['unique_profile_str'])
+        self.assertFalse(obj['allow_gmail_lookup'])
+        self.assertTrue(obj['allow_phone_lookup'])
+        self.assertEquals(30, obj['app_version'])
+
+
     def test_ApiUserTokenHandler(self):
         elsigh_user = models.FMBUser(
             name='elsigh'
@@ -92,10 +119,12 @@ class RequestHandlerTest(unittest.TestCase):
         user_token = 'foobar'
         memcache.add('user_token-%s' % user_token, elsigh_user.key.id())
         response = self.testapp.post_json('/api/user/token',
-                                          params=dict(user_token=user_token))
+                                          params=dict(user_token=user_token,
+                                                      app_version=30))
         body = response.normal_body
         obj = json.loads(body)
         self.assertEquals(elsigh_user.name, obj['name'])
+        self.assertEquals(30, obj['app_version'])
 
         self.assertEquals(elsigh_user.api_token, obj['api_token'])
 
