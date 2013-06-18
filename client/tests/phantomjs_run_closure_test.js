@@ -20,6 +20,26 @@ var parsedArgs = PhantomArgsParser.parseArgs(phantom.args, {
 });
 */
 
+var parsedArgs = {};
+var opt = 0;
+var fileToTest = phantom.args[0];
+
+/*
+try {
+  console.log('ARGS:' + phantom.args);
+  while (opt < phantom.args.length && phantom.args[opt][0] == '-') {
+    var switchKey = phantom.args[opt].replace(/-/g, '');
+    opt++;
+    parsedArgs[switchKey] = phantom.args[opt] == 1;
+    opt++;
+  }
+  fileToTest = phantom.args[opt];  // last item is the filename.
+} catch(e) {
+  console.log('Usage: phantomjs_closure_test_runner.js URL ' +
+              '[--output_junit 1] [--output_console_log 1]');
+}
+console.log('parsedArgs', JSON.stringify(parsedArgs), fileToTest);
+*/
 
 /**
  * @type {number}
@@ -71,7 +91,7 @@ var page = require('webpage').create();
 var fs = require('fs');
 
 // Opens the test page and executes the tests.
-page.open('../index.html?test=1', function(status) {
+page.open(fileToTest, function(status) {
   if (status !== 'success') {
     console.log('Unable to access network, status:' + status);
     phantom.exit(1);

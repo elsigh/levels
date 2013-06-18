@@ -91,8 +91,9 @@ public class LevelsPlugin extends Plugin {
             return new PluginResult(status, android.os.Build.MODEL);
 
         } else if (action.equals("getVersionName")) {
-            String versionName = activity.getApplicationContext().
-                getPackageManager().getPackageInfo(getPackageName(), 0).versionName
+            final Context context = this.cordova.getActivity().getApplicationContext();
+            String versionName = context.getPackageManager().getPackageInfo(
+                context.getPackageName(), 0).versionName;
             return new PluginResult(status, versionName);
 
         } else {

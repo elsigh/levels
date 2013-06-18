@@ -226,17 +226,17 @@ class ApiUserHandler(ApiRequestHandler):
         if 'allow_gmail_lookup' in self._json_request_data:
             user.allow_gmail_lookup = self._json_request_data['allow_gmail_lookup']
 
-        logging.info('USER PRE_PUT!! %s' % user)
+        if 'gcm_push_token' in self._json_request_data:
+            user.gcm_push_token = self._json_request_data['gcm_push_token']
 
         user.put()
-
-        logging.info('USER POST_PUT!! %s' % user)
 
         return self.output_json_success(
             user.to_dict(include_api_token=True, include_device_notifying=True))
 
 
 class ApiUserGCMPushTokenHandler(ApiRequestHandler):
+    """Deprecated - as of client version 24 - use ApiUserHander POST."""
     def post(self):
         self.current_user.gcm_push_token = self._json_request_data['gcm_push_token']
         self.current_user.put()

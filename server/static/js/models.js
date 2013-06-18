@@ -54,7 +54,6 @@ fmb.models.App.prototype.initialize = function(opt_data, opt_options) {
   fmb.log('userKey from localStorage', userKey);
   if (userKey) {
     this.user = new fmb.models.User({
-      'id': userKey,
       'key': userKey
     });
     this.user.fetchFromStorage();
@@ -591,11 +590,6 @@ fmb.models.User.GCMEvent = function(e) {
     case 'registered':
       window['app'].model.user.save({
         'gcm_push_token': e.regid
-      }, {
-        url: fmb.models.getApiUrl('/user/gcm_push_token'),
-        data: {
-          'gcm_push_token': e.regid
-        }
       });
       break;
 

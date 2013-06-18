@@ -555,8 +555,7 @@ fmb.views.Notifying.prototype.render = function() {
   var templateData = {
     'notifying': this.model.toJSON()
   };
-  fmb.log('fmb.views.Notifying render w/',
-          this.model.length, this.model.toJSON());
+  fmb.log('fmb.views.Notifying render w/', this.model.length);
   this.$el.html(fmb.views.getTemplateHtml('notifying', templateData));
   return this;
 };

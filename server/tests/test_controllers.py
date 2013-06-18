@@ -95,6 +95,7 @@ class RequestHandlerTest(unittest.TestCase):
                                           params=dict(api_token=elsigh_user.api_token,
                                                       user_key=elsigh_user.key.urlsafe(),
                                                       app_version=30,
+                                                      gcm_push_token='test_gcm_push_token',
                                                       allow_phone_lookup=True,
                                                       allow_gmail_lookup=False))
 
@@ -105,7 +106,7 @@ class RequestHandlerTest(unittest.TestCase):
         self.assertFalse(obj['allow_gmail_lookup'])
         self.assertTrue(obj['allow_phone_lookup'])
         self.assertEquals(30, obj['app_version'])
-
+        self.assertEquals('test_gcm_push_token', obj['gcm_push_token'])
 
     def test_ApiUserTokenHandler(self):
         elsigh_user = models.FMBUser(
