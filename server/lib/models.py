@@ -33,6 +33,7 @@ from webapp2_extras.appengine.auth.models import User
 
 from lib.external.gae_python_gcm.gcm import GCMMessage, GCMConnection
 
+import settings
 
 class FMBModel(ndb.Model):
 
@@ -108,10 +109,11 @@ class FMBUser(User, FMBModel):
             return True
 
         if hasattr(self, 'email'):
-            mail.send_mail(sender='Levels Alert <elsigh@levelsapp.com>',
-                   to='%s <%s>' % (self.name, self.email),
-                   subject='A message from Levels',
-                   body=message)
+            mail.send_mail(
+                sender=settings.MAIL_FROM,
+                to='%s <%s>' % (self.name, self.email),
+                subject='[Levels] A message for you',
+                body=message)
             logging.info('Sending email to user.')
             return True
 
