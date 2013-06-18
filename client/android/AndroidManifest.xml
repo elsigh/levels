@@ -22,7 +22,7 @@
   android:windowSoftInputMode="adjustResize"
   package="com.elsigh.levels"
   android:versionName="0.7"
-  android:versionCode="23"
+  android:versionCode="24"
   android:hardwareAccelerated="true">
 
   <uses-sdk

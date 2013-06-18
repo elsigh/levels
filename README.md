@@ -40,15 +40,36 @@ cd nose-gae-read-only
 sudo python setup.py install
 ```
 
-Now you should be able to run the server and client unit tests:
+You should be able to run the server tests:
 
 ```bash
 cd server;
 ./run-tests.sh
 ```
 
+
+Frontend - Android
+-----------------------------
+
+You'll need Java + the Android SDK.
+
+Install and run the debug client:
+
+```base
+cd client/android;
+./debug.sh
+```
+
+Run the tests:
+
 ```bash
-cd client/assets/www/tests;
+cd client/android/assets/www/tests;
 ./phantomjs phantomjs_run_closure_test.js
 ```
 
+
+Frontend - iOS
+-----------------------------
+
+brew install ios-sim
+cd client/ios
