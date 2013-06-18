@@ -1,5 +1,5 @@
 #!/bin/bash
 
-adb debug;
-adb installd;
+ant debug;
+ant installd;
 adb -d shell am start -n com.elsigh.levels/.LevelsActivity
