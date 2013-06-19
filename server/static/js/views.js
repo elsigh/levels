@@ -88,6 +88,21 @@ fmb.views.serializeFormToObject = function(form) {
 };
 
 
+/**
+ * @param {string} msg The message to show.
+ */
+fmb.views.showNotification = function(msg) {
+  navigator.notification && navigator.notification.activityStart &&
+      navigator.notification.activityStart('', msg);
+};
+
+
+fmb.views.hideNotification = function() {
+  navigator.notification && navigator.notification.activityStop &&
+      navigator.notification.activityStop();
+};
+
+
 /******************************************************************************/
 
 
@@ -372,8 +387,13 @@ fmb.views.Account.prototype.onClickLogin_ = function() {
  */
 fmb.views.Account.prototype.onInAppBrowserLoadStart_ = function(e) {
   fmb.log('fmb.views.Account onInAppBrowserLoadStart_', e.url);
-  navigator.notification &&
-      navigator.notification.activityStart('', 'Loading ...');
+  fmb.views.showNotification('Loading ...');
+
+  if (e.url.indexOf('close=1') !== -1) {
+    fmb.log('found close=1 in url, nukerooski.');
+    this.inAppBrowser_.close();
+    this.onInAppBrowserExit_();
+  }
 };
 
 
@@ -384,7 +404,7 @@ fmb.views.Account.prototype.onInAppBrowserLoadStart_ = function(e) {
 fmb.views.Account.prototype.onInAppBrowserLoadStop_ = function(e) {
   fmb.log('fmb.views.Account onInAppBrowserLoadStop_', e.url);
 
-  navigator.notification && navigator.notification.activityStop();
+  fmb.views.hideNotification();
 
   if (e.url.indexOf('/profile') !== -1) {
     this.inAppBrowser_.close();
@@ -396,11 +416,13 @@ fmb.views.Account.prototype.onInAppBrowserLoadStop_ = function(e) {
 fmb.views.Account.prototype.onInAppBrowserExit_ = function(e) {
   fmb.log('fmb.views.Account onInAppBrowserExit_');
 
-  navigator.notification && navigator.notification.activityStop();
+  fmb.views.hideNotification();
 
   window.clearInterval(this.inAppBrowserCloseCheckInterval_);
 
   if (this.inAppBrowser_.removeEventListener) {
+    this.inAppBrowser_.removeEventListener('loadstart',
+        _.bind(this.onInAppBrowserLoadStop_, this));
     this.inAppBrowser_.removeEventListener('loadstop',
         _.bind(this.onInAppBrowserLoadStop_, this));
     this.inAppBrowser_.removeEventListener('exit',

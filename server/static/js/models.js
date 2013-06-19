@@ -671,9 +671,7 @@ fmb.models.User.prototype.createUserDevice = function() {
   });
   var platform = window.device && window.device.platform || navigator.platform;
   var name = window.device && window.device.model || navigator.appName;
-  navigator.notification &&
-      navigator.notification.activityStart('',
-          'Setting up ' + platform + ' ' + name + ' ...');
+  fmb.views.showNotification('Setting up ' + platform + ' ' + name + ' ...');
   device.saveToServer({
     'uuid': fmb.models.DeviceUnMapped.getUuid(),
     'name': name,
@@ -683,14 +681,12 @@ fmb.models.User.prototype.createUserDevice = function() {
   }, {
     success: _.bind(function() {
       fmb.log('SUCCESS creating user device =)', device);
-      navigator.notification &&
-          navigator.notification.activityStop();
+      fmb.views.hideNotification();
       this.get('devices').add(device);
     }, this),
     error: function() {
       fmb.log('ERROR creating user device =(');
-      navigator.notification &&
-          navigator.notification.activityStop();
+      fmb.views.hideNotification();
       alert('I am so sorry that failed. Try killing and restarting the app.');
     }
   });
