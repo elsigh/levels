@@ -2,8 +2,10 @@
 # Compiled source #
 ###################
 *.pyc
-client/build/.*
-client/gen/.*
+client/android/bin
+client/android/gen
+server/data.sqlite3
+server/update.sh
 
 # OS generated files #
 ######################

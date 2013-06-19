@@ -141,14 +141,16 @@
                   {{means}}
                 </td>
                 <td>
-                  {{#key}}
-                    <button type="button" class="fmb-remove notifying-remove"
-                      data-key="{{key}}"
-                      data-means="{{means}}">X</button>
-                  {{/key}}
-                  {{^key}}
-                    <div class="fmb-loading"></div>
-                  {{/key}}
+                  {{^is_user_email}}
+                    {{#key}}
+                      <button type="button" class="fmb-remove notifying-remove"
+                        data-key="{{key}}"
+                        data-means="{{means}}">X</button>
+                    {{/key}}
+                    {{^key}}
+                      <div class="fmb-loading"></div>
+                    {{/key}}
+                  {{/is_user_email}}
                 </td>
               </tr>
             {{/notifying}}
@@ -248,18 +250,16 @@
 
     <script>
       // Super-wild-west-runtime-unit-testing.
-      //$(document).ready(function() {
-        if (window.location.search.indexOf('?test=1') !== -1) {
-          var testFiles = [
-            'tests/closure_jsunit.js',
-            'tests/sinon.js',
-            'tests/app_test.js'
-          ];
-          $.each(testFiles, function(i, src) {
-            document.write('<scr'+'ipt src="' + src + '"></sc'+'ript>');
-          })
-        }
-      //})
+      if (window.location.search.indexOf('?test=1') !== -1) {
+        var testFiles = [
+          'closure_jsunit.js',
+          'sinon.js',
+          'app_test.js'
+        ];
+        $.each(testFiles, function(i, src) {
+          document.write('<scr'+'ipt src="' + src + '"></sc'+'ript>');
+        })
+      }
     </script>
   </body>
   </html>

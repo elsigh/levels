@@ -208,13 +208,42 @@ class ApiUserHandler(ApiRequestHandler):
         if not user:
              return self.output_json_error({}, 404)
         return self.output_json_success(
+            user.to_dict(include_api_token=True,
+                         include_device_notifying=True))
+
+    def post(self):
+        user = self.current_user
+        if not user:
+             return self.output_json_error({}, 404)
+
+        # Only allows us to write certain parameters.
+        if 'app_version' in self._json_request_data:
+            user.app_version = self._json_request_data['app_version']
+
+        if 'allow_phone_lookup' in self._json_request_data:
+            user.allow_phone_lookup = self._json_request_data['allow_phone_lookup']
+
+        if 'allow_gmail_lookup' in self._json_request_data:
+            user.allow_gmail_lookup = self._json_request_data['allow_gmail_lookup']
+
+        if 'gcm_push_token' in self._json_request_data:
+            user.gcm_push_token = self._json_request_data['gcm_push_token']
+
+        user.put()
+
+        return self.output_json_success(
             user.to_dict(include_api_token=True, include_device_notifying=True))
 
 
 class ApiUserGCMPushTokenHandler(ApiRequestHandler):
+    """Deprecated - as of client version 24 - use ApiDeviceHander POST."""
     def post(self):
-        self.current_user.gcm_push_token = self._json_request_data['gcm_push_token']
-        self.current_user.put()
+        q_device = models.Device.query(ancestor=self.current_user.key)
+        q_device = q_device.order(-models.Device.created)
+        device = q_device.get()  # Aka most users only have 1 device.
+        if device:
+            device.gcm_push_token = self._json_request_data['gcm_push_token']
+            device.put()
         return self.output_json_success(
             self.current_user.to_dict(include_api_token=True,
                                       include_device_notifying=True))
@@ -234,6 +263,10 @@ class ApiUserTokenHandler(ApiRequestHandler):
 
         # Ok, now clear the memcache token - it's only good once.
         memcache.delete(memcache_key)
+
+        if 'app_version' in self._json_request_data:
+            user.app_version = self._json_request_data['app_version']
+            user.put()
 
         return self.output_json_success(
             user.to_dict(include_api_token=True, include_device_notifying=True))
@@ -258,14 +291,13 @@ class ApiDeviceHandler(ApiRequestHandler):
         elif q.count() == 1:
             device = q.get()
 
-        device.user_agent_string = self._json_request_data['user_agent_string']
-        device.update_enabled = int(self._json_request_data['update_enabled'])
-        device.update_frequency = int(self._json_request_data['update_frequency'])
-        if 'notify_level' in self._json_request_data:
-            device.notify_level = int(self._json_request_data['notify_level'])
-        device.name = self._json_request_data['name']
-        device.platform = self._json_request_data['platform']
-        device.version = self._json_request_data['version']
+        for key in device._properties.keys():
+            if key in self._json_request_data:
+                val = self._json_request_data[key]
+                if key in ['update_enabled', 'update_frequency', 'notify_level']:
+                    val = int(val)
+                setattr(device, key, val)
+
         device.put()
 
         return self.output_json_success(device.to_dict())
