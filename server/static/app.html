@@ -39,18 +39,26 @@
       <div class="fmb-loading"
         style="display:none;"></div>
     </div>
-
-    <script src="js/cordova-2.5.0.js"></script>
+    <script>
+      (function() {
+        var ua = window.navigator.userAgent;
+        var cordovaSrc = 'cordova-android.js';
+        if (ua.match(/iPad/i) || ua.match(/iPhone/i)) {
+           cordovaSrc = 'cordova-ios.js';
+        }
+        document.write('<scr'+'ipt src="js/' + cordovaSrc + '"></sc'+'ript>');
+      })();
+    </script>
     <script src="js/levels_plugin.js"></script>
     <script src="js/webintent.js"></script>
     <script src="js/ContactView.js"></script>
-    <script src="js/zepto-1.0rc1.js"></script>
+    <script src="js/zepto.js"></script>
     <script src="js/touch.js"></script>
-    <script src="js/underscore-1.4.4.js"></script>
-    <script src="js/backbone-1.0.js"></script>
+    <script src="js/underscore.js"></script>
+    <script src="js/backbone.js"></script>
     <script src="js/backbone.localStorage.js"></script>
     <script src="js/backbone-identity-map.js"></script>
-    <script src="js/hogan-2.0.0.js"></script>
+    <script src="js/hogan.js"></script>
     <script src="js/d3.v2.js"></script>
     <script src="js/xcharts.js"></script>
     <script src="js/GCMPlugin.js"></script>
