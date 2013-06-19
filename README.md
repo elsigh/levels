@@ -48,6 +48,20 @@ cd server;
 ```
 
 
+Frontend - testing
+-----------------------------
+
+You should be able to run the client tests:
+
+```bash
+cd client;
+./run_tests.sh
+```
+
+Also, you should be able to load up the test file client/tests/app.html
+in a browser for more debug/testing.
+
+
 Frontend - Android
 -----------------------------
 
@@ -55,21 +69,16 @@ You'll need Java + the Android SDK.
 
 Install and run the debug client:
 
-```base
+```bash
 cd client/android;
 ./debug.sh
-```
-
-Run the tests:
-
-```bash
-cd client/android/assets/www/tests;
-./phantomjs phantomjs_run_closure_test.js
 ```
 
 
 Frontend - iOS
 -----------------------------
 
+```bash
 brew install ios-sim
 cd client/ios
+```

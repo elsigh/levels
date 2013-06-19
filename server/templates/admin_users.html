@@ -2,15 +2,8 @@
 
 {% block head %}
   <style>
-    th {
-      border-top: 0;
-    }
-    td {
-      border-top: 0;
+    .admin-user {
       border-bottom: 1px solid #000;
-    }
-    table table {
-      margin-top: 0;
     }
   </style>
 {% endblock %}
@@ -19,43 +12,33 @@
   <section>
     <header>
       <h1><span>Levels<span></h1>
-      <h2>Users</h2>
+      <h2>Admin: Users</h2>
     </header>
 
-    <table>
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Name</th>
-          <th>Email</th>
-        </tr>
-      </thead>
-      <tbody>
+    <ol>
       {% for user in users %}
-        <tr>
-          <td>
+        <li class="admin-user">
+          <h3>
+            {{user.name}}
             <a
               target="_blank"
               href="http://www.levelsapp.com/p/{{user.unique_profile_str}}">{{user.unique_profile_str}}</a>
-          </td>
-          <td>{{user.name}}</td>
-          <td>{{user.email}}</td>
-        </tr>
-        <tr>
-          <td colspan="3">
-            <table>
-              {% for device in user.devices %}
-                <tr>
-                  <td>{{device.platform}}</td>
-                  <td>{{device.name}}</td>
-                  <td>{{device.version}}</td>
-                </tr>
-              {% endfor %}
-            </table>
-          </td>
-        </tr>
+            {{user.email}}
+          </h3>
+          <ol>
+            {% for device in user.devices %}
+              <li>
+                <h4>
+                  {{device.platform}} {{device.name}} {{device.version}}
+                  app_version: {{device.app_version}}
+                  gcm_push_token: <small>{{device.gcm_push_token}}</small>
+                </h4>
+              </li>
+            {% endfor %}
+          </ol>
+
+        </li>
       {% endfor %}
-      </tbody>
-    </table>
+    </ol>
   </section>
 {% endblock %}

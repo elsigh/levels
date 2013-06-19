@@ -40,14 +40,21 @@ fmb.models.App.prototype.initialize = function(opt_data, opt_options) {
   // not something people will ever understandably recognize. Fix that.
   var plugin = cordova.require('cordova/plugin/levels');
   plugin && plugin.setDeviceModel();
+  plugin && plugin.getVersionCode(
+      function(version) {
+        fmb.log('GOT CLIENT VERSION!', version);
+        fmb.models.App.version = version;
+      },
+      function() {
+        fmb.log('FAIL - CLIENT VERSION :(');
+      });
 
   // id is necessary for localStorage plugin with a model.
   var userKey = localStorage.getItem('user_key');
   fmb.log('userKey from localStorage', userKey);
   if (userKey) {
     this.user = new fmb.models.User({
-      id: userKey,
-      key: userKey
+      'key': userKey
     });
     this.user.fetchFromStorage();
 
@@ -581,13 +588,9 @@ fmb.models.User.GCMEvent = function(e) {
   fmb.log('fmb.models.User.GCMEvent', e);
   switch (e.event) {
     case 'registered':
-      window['app'].model.user.save({
-        'gcm_push_token': e.regid
-      }, {
-        url: fmb.models.getApiUrl('/user/gcm_push_token'),
-        data: {
-          'gcm_push_token': e.regid
-        }
+      window['app'].model.user.device.save({
+        'gcm_push_token': e.regid,
+        'app_version': fmb.models.App.version
       });
       break;
 
@@ -634,7 +637,6 @@ fmb.models.User.prototype.initialize_ = function() {
   fmb.log('fmb.models.User initialize_', this.id, this.get('api_token'));
   fmb.models.sync.apiToken = this.get('api_token');
   this.setUserKey_();
-  this.registerWithGCM_();
 
   // NOT first-timer.
   if (this.doLaunchSync_) {
@@ -676,6 +678,7 @@ fmb.models.User.prototype.createUserDevice = function() {
     'uuid': fmb.models.DeviceUnMapped.getUuid(),
     'name': name,
     'platform': platform,
+    'app_version': fmb.models.App.version,
     'version': window.device && window.device.version || navigator.productSub
   }, {
     success: _.bind(function() {
@@ -710,6 +713,7 @@ fmb.models.User.prototype.launchSync_ = function() {
         fmb.log('User launch sync fetch MONEY TRAIN');
         if (this.device) {
           this.device.trigger('battery_status');
+
         } else {
           fmb.log('FIX-O-LICIOUS - createUserDevice');
           this.createUserDevice();
@@ -723,12 +727,19 @@ fmb.models.User.prototype.launchSync_ = function() {
 
 
 /**
+ * The GCM sender_id from the play store.
+ * @type {string}
+ */
+fmb.models.User.GCM_SENDER_ID = '652605517304';
+
+
+/**
  * @private
  */
 fmb.models.User.prototype.registerWithGCM_ = function() {
   var gcmPlugin = cordova.require('cordova/plugin/gcm');
   gcmPlugin && gcmPlugin.register(
-      '652605517304',   // The GCM sender_id from the play store
+      fmb.models.User.GCM_SENDER_ID,
       'fmb.models.User.GCMEvent',
       _.bind(this.GCMWin, this),
       _.bind(this.GCMFail, this));
@@ -765,6 +776,8 @@ fmb.models.User.prototype.setUserDevice = function(model) {
     var plugin = cordova.require('cordova/plugin/levels');
     plugin && plugin.startService();
   }
+
+  this.registerWithGCM_();
 };
 
 
@@ -786,7 +799,8 @@ fmb.models.User.prototype.syncByToken = function(token) {
   fmb.log('fmb.models.User syncByToken', token);
 
   this.saveToServer({
-    'user_token': token
+    'user_token': token,
+    'app_version': fmb.models.App.version
   }, {
     url: fmb.models.getApiUrl('/user/token'),
     success: _.bind(function(model, response, options) {

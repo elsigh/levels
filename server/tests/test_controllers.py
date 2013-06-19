@@ -8,6 +8,7 @@ import os
 import sys
 
 from mock import patch
+from mock import call
 
 # Need the server root dir on the path.
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/..')
@@ -31,7 +32,7 @@ from lib import models
 import settings
 
 
-class RequestHandlerTest(unittest.TestCase):
+class HandlerTest(unittest.TestCase):
     def setUp(self):
         self.testbed = testbed.Testbed()
         self.testbed.setup_env(app_id='followmybattery')
@@ -59,7 +60,7 @@ class RequestHandlerTest(unittest.TestCase):
         assert 'settings' in data
         assert len(data['settings']) == models.NUM_SETTINGS_TO_FETCH
 
-    def test_ApiUserHandler(self):
+    def test_ApiUserHandler_get(self):
         self.testapp.get('/api/user', status=500)
 
         elsigh_user = models.FMBUser(
@@ -80,6 +81,32 @@ class RequestHandlerTest(unittest.TestCase):
         obj = json.loads(body)
         self.assertEquals(elsigh_user.key.urlsafe(), obj['key'])
 
+
+    def test_ApiUserHandler_post(self):
+        elsigh_user = models.FMBUser(
+            name='elsigh',
+            email='elsigh@gmail.com'
+        )
+        elsigh_user.put()
+
+        self.assertEquals(True, elsigh_user.allow_gmail_lookup)
+        self.assertEquals('elsigh', elsigh_user.unique_profile_str)
+
+        response = self.testapp.post_json('/api/user',
+                                          params=dict(api_token=elsigh_user.api_token,
+                                                      user_key=elsigh_user.key.urlsafe(),
+                                                      app_version=30,
+                                                      allow_phone_lookup=True,
+                                                      allow_gmail_lookup=False))
+
+        body = response.normal_body
+        obj = json.loads(body)
+
+        self.assertNotEquals('elsigh', obj['unique_profile_str'])
+        self.assertFalse(obj['allow_gmail_lookup'])
+        self.assertTrue(obj['allow_phone_lookup'])
+        self.assertEquals(30, obj['app_version'])
+
     def test_ApiUserTokenHandler(self):
         elsigh_user = models.FMBUser(
             name='elsigh'
@@ -92,17 +119,19 @@ class RequestHandlerTest(unittest.TestCase):
         user_token = 'foobar'
         memcache.add('user_token-%s' % user_token, elsigh_user.key.id())
         response = self.testapp.post_json('/api/user/token',
-                                          params=dict(user_token=user_token))
+                                          params=dict(user_token=user_token,
+                                                      app_version=30))
         body = response.normal_body
         obj = json.loads(body)
         self.assertEquals(elsigh_user.name, obj['name'])
+        self.assertEquals(30, obj['app_version'])
 
         self.assertEquals(elsigh_user.api_token, obj['api_token'])
 
         should_be_none = memcache.get('user_token-%s' % user_token)
         assert should_be_none is None
 
-    def test_ApiDeviceHandler(self):
+    def test_ApiDeviceHandler_create(self):
         elsigh_user = models.FMBUser(
             name='elsigh'
         )
@@ -149,21 +178,63 @@ class RequestHandlerTest(unittest.TestCase):
         query_device = q.get()
         self.assertEquals('test_device_uuid', query_device.uuid)
 
+    def test_ApiDeviceHandler_update(self):
+        elsigh_user = models.FMBUser(
+            name='elsigh'
+        )
+        elsigh_user.put()
 
-        # # Tests an update to that device.
-        # response = self.testapp.post_json('/api/device',
-        #                                   params=dict(user_id='test_user_id',
-        #                                               device_uuid='test_device_uuid',
-        #                                               user_agent_string='ua',
-        #                                               update_enabled='0',
-        #                                               update_frequency='20',
-        #                                               name='Samsung',
-        #                                               platform='Android',
-        #                                               version='S3'))
-        # body = response.normal_body
-        # obj = json.loads(body)
-        # self.assertEquals(0, obj['update_enabled'])
+        elsigh_device = models.Device(
+            uuid='test_device_uuid',
+            parent=elsigh_user.key,
+            notify_level=10
+        )
+        elsigh_device.put()
 
+        # Tests an update to that device.
+        response = self.testapp.post_json('/api/device',
+                                          params=dict(api_token=elsigh_user.api_token,
+                                                      user_key=elsigh_user.key.urlsafe(),
+                                                      uuid=elsigh_device.uuid,
+                                                      user_agent_string='ua',
+                                                      name='Samsung',
+                                                      platform='Android',
+                                                      version='S3'))
+        body = response.normal_body
+        obj = json.loads(body)
+        self.assertEquals('Samsung', obj['name'])
+        self.assertEquals('S3', obj['version'])
+
+        # Tests another update to that device.
+        response = self.testapp.post_json('/api/device',
+                                          params=dict(api_token=elsigh_user.api_token,
+                                                      user_key=elsigh_user.key.urlsafe(),
+                                                      uuid=elsigh_device.uuid,
+                                                      gcm_push_token='test_gcm_push_token'))
+        body = response.normal_body
+        obj = json.loads(body)
+        self.assertEquals('test_gcm_push_token', obj['gcm_push_token'])
+
+    def test_ApiUserGCMPushTokenHandler_get(self):
+        elsigh_user = models.FMBUser(
+            name='elsigh'
+        )
+        elsigh_user.put()
+
+        elsigh_device = models.Device(
+            uuid='elsigh_uuid',
+            parent=elsigh_user.key
+        )
+        elsigh_device.put()
+
+        response = self.testapp.post_json('/api/user/gcm_push_token',
+                                          params=dict(api_token=elsigh_user.api_token,
+                                                      user_key=elsigh_user.key.urlsafe(),
+                                                      gcm_push_token='test_gcm_push_token'))
+        q_device = models.Device.query(ancestor=elsigh_user.key)
+        q_device = q_device.order(-models.Device.created)
+        device = q_device.get()  # Aka most users only have 1 device.
+        self.assertEquals('test_gcm_push_token', device.gcm_push_token)
 
     def test_ApiDeviceDeleteHandler(self):
         elsigh_user = models.FMBUser(
@@ -425,7 +496,7 @@ class RequestHandlerTest(unittest.TestCase):
                                            key=ded_user.key.urlsafe()),
                                status=404)
 
-    def test_ApiNotifyingRequestHandler_get(self):
+    def test_ApiNotifyingHandler_get(self):
         elsigh_user = models.FMBUser(
             name='elsigh'
         )
@@ -465,7 +536,7 @@ class RequestHandlerTest(unittest.TestCase):
         obj = json.loads(body)
         self.assertEquals(2, len(obj['notifying']))
 
-    def test_ApiNotifyingRequestHandler_add(self):
+    def test_ApiNotifyingHandler_add(self):
         elsigh_user = models.FMBUser(
             name='elsigh'
         )
@@ -517,7 +588,7 @@ class RequestHandlerTest(unittest.TestCase):
         obj = json.loads(body)
         self.assertEquals('exists', obj['error'])
 
-    def test_ApiNotifyingRequestHandler_delete(self):
+    def test_ApiNotifyingHandler_delete(self):
         elsigh_user = models.FMBUser(
             name='elsigh'
         )
@@ -707,29 +778,54 @@ class RequestHandlerTest(unittest.TestCase):
         q.filter(models.NotificationSent.means == 'self_battery_message')
         self.assertEquals(1, q.count())
 
-    #@patch.object(gcm.GCMConnection, 'notify_device')
+    @patch.object(gcm.GCMConnection, 'notify_device')
     @patch('lib.external.gae_python_gcm.gcm.GCMMessage')
-    def NOTtest_user_send_message_gcm(self, mock_gcm_message):
+    def test_user_send_message_gcm(self, mock_gcm_message, mock_notify_device):
         elsigh_user = models.FMBUser(
-            name='elsigh',
-            gcm_push_token='elsigh_gcm_push_token'
+            name='elsigh'
         )
-        gcm_msg = None
-        push_token = None
-        android_payload = None
+        elsigh_user.put()
 
         elsigh_user.send_message('hi', extra={
             'foo': 'bar'
         })
 
-        args = {
-            'push_token': elsigh_user.gcm_push_token,
-            'android_payload': {
+        self.assertEquals(0, mock_notify_device.call_count)
+
+        elsigh_device = models.Device(
+            uuid='elsigh_uuid1',
+            name='foo1',
+            platform='bar1',
+            parent=elsigh_user.key,
+            gcm_push_token='test_gcm_push_token1'
+        )
+        elsigh_device.put()
+
+        elsigh_device2 = models.Device(
+            uuid='elsigh_uuid2',
+            name='foo2',
+            platform='bar2',
+            parent=elsigh_user.key,
+            gcm_push_token='test_gcm_push_token2'
+        )
+        elsigh_device2.put()
+
+        elsigh_user.send_message('hi', extra={
+            'foo': 'bar'
+        })
+        self.assertEquals(2, mock_notify_device.call_count)
+
+
+        calls = [
+            call(mock_gcm_message('test_gcm_push_token1', {
                 'message': 'hi',
                 'foo': 'bar'
-            }
-        }
-        mock_gcm_message.assert_called_once_with(**args)
+            })),
+            call(mock_gcm_message('test_gcm_push_token2', {
+                'message': 'hi',
+                'foo': 'bar'
+            }))]
+        mock_notify_device.assert_has_calls(calls)
 
 
     @patch.object(mail, 'send_mail')

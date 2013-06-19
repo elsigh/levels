@@ -44,6 +44,7 @@ routes = [
     Route('/api/notifying/delete', handler='lib.api.ApiNotifyingDeleteHandler'),
     Route('/api/notifying', handler='lib.api.ApiNotifyingHandler'),
     Route('/api/settings', handler='lib.api.ApiSettingsHandler'),
+    # Deprecate gcm_push_token
     Route('/api/user/gcm_push_token', handler='lib.api.ApiUserGCMPushTokenHandler'),
     Route('/api/user/token', handler='lib.api.ApiUserTokenHandler'),
     Route('/api/user', handler='lib.api.ApiUserHandler'),

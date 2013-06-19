@@ -42,5 +42,9 @@ cordova.define('cordova/plugin/levels', function(require, exports, module) {
     return exec(null, null, 'LevelsPlugin', 'showToast', [msg]);
   };
 
+  plugin.getVersionCode = function(win, fail) {
+    return exec(win, fail, 'LevelsPlugin', 'getVersionCode', []);
+  };
+
   module.exports = plugin;
 });
