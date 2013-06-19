@@ -428,6 +428,7 @@ fmb.views.Account.prototype.onInAppBrowserExit_ = function(e) {
     this.inAppBrowser_.removeEventListener('exit',
         _.bind(this.onInAppBrowserExit_, this));
   }
+  this.inAppBrowser_ = null;
 
   this.model.syncByLoginToken();
 };
