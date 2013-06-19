@@ -91,17 +91,17 @@ public class LevelsPlugin extends Plugin {
         } else if (action.equals("getDeviceModelName")) {
             return new PluginResult(status, android.os.Build.MODEL);
 
-        } else if (action.equals("getVersionName")) {
+        } else if (action.equals("getVersionCode")) {
             final Context context = this.cordova.getActivity().getApplicationContext();
-            String versionName = "";
+            int versionCode = 1;
             try {
-                versionName = context.getPackageManager().getPackageInfo(
-                    context.getPackageName(), 0).versionName;
+                versionCode = context.getPackageManager().getPackageInfo(
+                    context.getPackageName(), 0).versionCode;
             } catch (NameNotFoundException e) {
                 e.printStackTrace();
-                Log.d(TAG, "getVersionName ERROR");
+                Log.d(TAG, "getVersionCode ERROR");
             }
-            return new PluginResult(status, versionName);
+            return new PluginResult(status, versionCode);
 
         } else {
             return new PluginResult(PluginResult.Status.INVALID_ACTION);

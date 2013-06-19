@@ -169,12 +169,19 @@ function testAppInstalledInitialize() {
   assertEquals('test_user_device_name', app.model.user.device.get('name'));
 
   // First request is a user sync.
+  var userSyncUrl = fmb.models.getApiUrl('/user') +
+      '?api_token=' + app.model.user.get('api_token') + '&' +
+      'user_key=' + app.model.user.id;
+  assertEquals(userSyncUrl,
+               server.requests[serverRequestCountExpected - 1].url);
+  /*
   assertEquals(fmb.models.getApiUrl('/user'),
                server.requests[serverRequestCountExpected - 1].url);
   var requestBody =
       JSON.parse(server.requests[serverRequestCountExpected - 1].requestBody);
   assertEquals(app.model.user.get('api_token'), requestBody['api_token']);
   assertEquals(app.model.user.id, requestBody['user_key']);
+  */
 
   var userSyncResponse = {
     'status': 0,
@@ -530,12 +537,11 @@ function testAppIncompleteInstall() {
 
   // First request is a user sync.
   serverRequestCountExpected++;
-  assertEquals(fmb.models.getApiUrl('/user'),
+  var userSyncUrl = fmb.models.getApiUrl('/user') +
+      '?api_token=' + app.model.user.get('api_token') + '&' +
+      'user_key=' + app.model.user.id;
+  assertEquals(userSyncUrl,
                server.requests[serverRequestCountExpected - 1].url);
-  var requestBody =
-      JSON.parse(server.requests[serverRequestCountExpected - 1].requestBody);
-  assertEquals(app.model.user.get('api_token'), requestBody['api_token']);
-  assertEquals(app.model.user.id, requestBody['user_key']);
 
   server.requests[serverRequestCountExpected - 1].respond(
       200, API_RESPONSE_HEADERS,

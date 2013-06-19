@@ -40,7 +40,7 @@ fmb.models.App.prototype.initialize = function(opt_data, opt_options) {
   // not something people will ever understandably recognize. Fix that.
   var plugin = cordova.require('cordova/plugin/levels');
   plugin && plugin.setDeviceModel();
-  plugin && plugin.getVersionName(
+  plugin && plugin.getVersionCode(
       function(version) {
         fmb.log('GOT CLIENT VERSION!', version);
         fmb.models.App.version = version;
@@ -589,7 +589,8 @@ fmb.models.User.GCMEvent = function(e) {
   switch (e.event) {
     case 'registered':
       window['app'].model.user.device.save({
-        'gcm_push_token': e.regid
+        'gcm_push_token': e.regid,
+        'app_version': fmb.models.App.version
       });
       break;
 
@@ -677,6 +678,7 @@ fmb.models.User.prototype.createUserDevice = function() {
     'uuid': fmb.models.DeviceUnMapped.getUuid(),
     'name': name,
     'platform': platform,
+    'app_version': fmb.models.App.version,
     'version': window.device && window.device.version || navigator.productSub
   }, {
     success: _.bind(function() {
@@ -704,9 +706,7 @@ fmb.models.User.prototype.createUserDevice = function() {
 fmb.models.User.prototype.launchSync_ = function() {
   // Deferred so model references are set on window.app.
   _.defer(_.bind(function() {
-    this.save({
-      'app_version': fmb.models.App.version
-    }, {
+    this.fetch({
       // Need to fake a battery status after user sync so we don't
       // show out of date info for the user.
       success: _.bind(function(model) {
