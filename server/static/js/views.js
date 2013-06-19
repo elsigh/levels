@@ -336,7 +336,7 @@ fmb.views.Account.prototype.onChangeDeviceView_ = function(e) {
 fmb.views.Account.prototype.onClickLogin_ = function() {
   fmb.log('fmb.views.Account onClickLogin_');
 
-  this.model.loginToken_ = fmb.models.getUid();
+  this.model.setLoginToken();
 
   this.inAppBrowser_ = window.open(
       fmb.models.SERVER_SHARE + '/login?user_token=' +
@@ -407,10 +407,7 @@ fmb.views.Account.prototype.onInAppBrowserExit_ = function(e) {
         _.bind(this.onInAppBrowserExit_, this));
   }
 
-  if (this.model.loginToken_) {
-    this.model.syncByToken(this.model.loginToken_);
-    this.model.loginToken_ = null;
-  }
+  this.model.syncByLoginToken();
 };
 
 

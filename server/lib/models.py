@@ -85,11 +85,14 @@ class FMBUser(User, FMBModel):
 
         logging.info('POST _pre_put_hook %s' % self)
 
+    @property
+    def iter_devices(self):
+        q = Device.query(ancestor=self.key).order(-Device.created)
+        return q.fetch()
+
     def to_dict(self, include_api_token=False, include_device_notifying=False):
         obj = super(FMBUser, self).to_dict(include_api_token=include_api_token)
         obj['devices'] = []
-        q_device = Device.query(ancestor=self.key)
-        q_device = q_device.order(-Device.created)
 
         # Default avatar url
         if ('avatar_url' not in obj or obj['avatar_url'] == '' or
@@ -98,7 +101,7 @@ class FMBUser(User, FMBModel):
                 'avatar_url': DEFAULT_AVATAR_URL
             })
 
-        for device in q_device:
+        for device in self.iter_devices:
             obj['devices'].append(device.to_dict(include_notifying=include_device_notifying))
         return obj
 
@@ -118,10 +121,7 @@ class FMBUser(User, FMBModel):
                 body=message)
             logging.info('Sending email to user.')
 
-        q_device = Device.query(ancestor=self.key)
-        q_device = q_device.order(-Device.created)
-        logging.info('device count: %s' % q_device.count())
-        for device in q_device.fetch():
+        for device in self.iter_devices:
             if hasattr(device, 'gcm_push_token'):
                 push_token = device.gcm_push_token
                 android_payload = {

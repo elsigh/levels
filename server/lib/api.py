@@ -226,9 +226,6 @@ class ApiUserHandler(ApiRequestHandler):
         if 'allow_gmail_lookup' in self._json_request_data:
             user.allow_gmail_lookup = self._json_request_data['allow_gmail_lookup']
 
-        if 'gcm_push_token' in self._json_request_data:
-            user.gcm_push_token = self._json_request_data['gcm_push_token']
-
         user.put()
 
         return self.output_json_success(

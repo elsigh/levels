@@ -790,26 +790,41 @@ fmb.models.User.prototype.url = function() {
 
 
 /**
+ * der.
+ */
+fmb.models.User.prototype.setLoginToken = function() {
+  this.loginToken_ = fmb.models.getUid();
+};
+
+
+/**
  * The login flow has us using a string token that gets saved into
  * memcache on the server so we can map the user who opens the popup
  * to this user.
- * @param {string} token A login request token.
  */
-fmb.models.User.prototype.syncByToken = function(token) {
-  fmb.log('fmb.models.User syncByToken', token);
+fmb.models.User.prototype.syncByLoginToken = function() {
+  fmb.log('fmb.models.User syncByLoginToken', this.loginToken_);
+
+  if (!this.loginToken_) {
+    fmb.log('no loginToken_!');
+    return;
+  }
 
   this.saveToServer({
-    'user_token': token,
+    'user_token': this.loginToken_,
     'app_version': fmb.models.App.version
   }, {
     url: fmb.models.getApiUrl('/user/token'),
     success: _.bind(function(model, response, options) {
-      fmb.log('fmb.models.User syncByToken MONEY TRAIN!!');
+      fmb.log('fmb.models.User syncByLoginToken MONEY TRAIN!!');
       this.unset('user_token', {silent: true});
+      // unset - can only use this one time.
+      this.loginToken_ = null;
     }, this),
     error: function(model, xhr, options) {
-      alert('LA BOMBA! in fmb.models.User syncByToken. =(');
+      alert('LA BOMBA! in fmb.models.User syncByLoginToken. =(');
     }
   });
+
 };
 
