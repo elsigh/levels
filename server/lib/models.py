@@ -184,6 +184,12 @@ class Device(FMBModel):
     gcm_push_token = ndb.StringProperty()
 
     @property
+    def immutable_update_properties(self):
+        """Returns a list of properties that POST can't modify."""
+        return ['created', 'modified', 'uuid',
+                'is_last_update_over_notify_level']
+
+    @property
     def counters(self):
         return ['settings_received_count', 'send_battery_notifications_count']
 

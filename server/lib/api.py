@@ -289,7 +289,8 @@ class ApiDeviceHandler(ApiRequestHandler):
             device = q.get()
 
         for key in device._properties.keys():
-            if key in self._json_request_data:
+            if (key not in device.immutable_update_properties and
+                key in self._json_request_data):
                 val = self._json_request_data[key]
                 if key in ['update_enabled', 'update_frequency', 'notify_level']:
                     val = int(val)
