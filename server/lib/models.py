@@ -26,6 +26,7 @@ except:
     import simplejson
 
 from google.appengine.api import mail
+from google.appengine.api import memcache
 from google.appengine.ext import ndb
 sys.modules['ndb'] = ndb
 
@@ -122,7 +123,6 @@ class FMBUser(User, FMBModel):
 
     def to_dict(self, include_api_token=False, include_device_notifying=False):
         obj = super(FMBUser, self).to_dict(include_api_token=include_api_token)
-        obj['devices'] = []
 
         # Default avatar url
         if ('avatar_url' not in obj or obj['avatar_url'] == '' or
@@ -131,8 +131,10 @@ class FMBUser(User, FMBModel):
                 'avatar_url': DEFAULT_AVATAR_URL
             })
 
+        obj['devices'] = []
         for device in self.iter_devices:
             obj['devices'].append(device.to_dict(include_notifying=include_device_notifying))
+
         return obj
 
     def get_profile_url(self):
@@ -188,19 +190,24 @@ class Device(FMBModel):
     def to_dict(self, include_notifying=True):
         obj = super(Device, self).to_dict()
 
-        # settings
-        q_settings = Settings.query(ancestor=self.key).order(-Settings.created)
-        obj['settings'] = []
-        results = q_settings.fetch(NUM_SETTINGS_TO_FETCH * NUM_SETTINGS_MULTIPLIER,
-                                   keys_only=True)
-        list_of_keys = []
-        # prunes the results so we get a longer time-window picture of
-        # the device's battery stats.
-        for i in range(len(results)):
-            if i % NUM_SETTINGS_MULTIPLIER == 0:
-                list_of_keys.append(results[i])
-        for setting in ndb.get_multi(list_of_keys):
-            obj['settings'].append(setting.to_dict())
+        # device settings - cached for 60 seconds.
+        memcache_device_settings_key = 'settings-%s' % self.key.urlsafe()
+        settings = memcache.get(memcache_device_settings_key)
+        if not settings:
+            settings = []
+            q_settings = Settings.query(ancestor=self.key).order(-Settings.created)
+            results = q_settings.fetch(NUM_SETTINGS_TO_FETCH * NUM_SETTINGS_MULTIPLIER,
+                                       keys_only=True)
+            list_of_keys = []
+            # prunes the results so we get a longer time-window picture of
+            # the device's battery stats.
+            for i in range(len(results)):
+                if i % NUM_SETTINGS_MULTIPLIER == 0:
+                    list_of_keys.append(results[i])
+            for setting in ndb.get_multi(list_of_keys):
+                settings.append(setting.to_dict())
+            memcache.set(memcache_device_settings_key, settings)
+        obj['settings'] = settings
 
         # notifying
         logging.info('Device %s to dict include_notifying: %s' %

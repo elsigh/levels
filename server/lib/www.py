@@ -30,6 +30,7 @@ class AdminApiRequestHandler(WebRequestHandler):
     def get(self):
         self.output_response({}, 'admin_api_request.html')
 
+
 class AdminUsersHandler(WebRequestHandler):
     def get(self):
         q = models.FMBUser.query().order(-models.FMBUser.created)
