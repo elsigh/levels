@@ -10,20 +10,19 @@ import sys
 
 sys.path.append(os.path.join(os.path.dirname(__file__), 'external'))
 
-
 from lib.web_request_handler import WebRequestHandler
+
 from google.appengine.ext import ndb
 sys.modules['ndb'] = ndb
+from google.appengine.datastore.datastore_query import Cursor
 
 import webapp2
-
 from webapp2_extras.appengine.users import admin_required
 
 from lib import models
 
 # last import.
 import settings
-
 
 
 class AdminApiRequestHandler(WebRequestHandler):
@@ -33,11 +32,18 @@ class AdminApiRequestHandler(WebRequestHandler):
 
 class AdminUsersHandler(WebRequestHandler):
     def get(self):
-        q = models.FMBUser.query().order(-models.FMBUser.created)
-        users = []
-        for user in q.fetch():
-            users.append(user.to_dict())
-        self.output_response({'users': users}, 'admin_users.html')
+        curs = Cursor(urlsafe=self.request.get('cursor'))
+        users, next_curs, more = models.FMBUser.query().order(
+            -models.FMBUser.created).fetch_page(10, start_cursor=curs)
+        users_output = []
+        for user in users:
+            users_output.append(user.to_dict())
+        tpl_data = {
+            'users': users_output,
+            'next_cursor': next_curs.urlsafe(),
+            'more': more
+        }
+        self.output_response(tpl_data, 'admin_users.html')
 
 
 class AdminUserMessageTestHandler(WebRequestHandler):

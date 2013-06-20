@@ -15,6 +15,10 @@
       <h2>Admin: Users</h2>
     </header>
 
+    {% if more %}
+      <a href="/admin/users?cursor={{next_cursor}}">Next</a>
+    {% endif %}
+
     <ol>
       {% for user in users %}
         <li class="admin-user">
@@ -30,8 +34,14 @@
             {% for device in user.devices %}
               <li>
                 <h4>
-                  {{device.platform}} {{device.name}} {{device.version}} -
+                  {{device.platform}} {{device.name}} {{device.version}}
+                  <br>
                   app_version: {{device.app_version}}
+                  <br>
+                  settings_received_count: {{device.settings_received_count}}
+                  <br>
+                  send_battery_notifications_count: {{device.send_battery_notifications_count}}
+                  <br>
                   modified: {{device.modified.strftime('%b %d %l:%M %p')}}
                 </h4>
               </li>
