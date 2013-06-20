@@ -37,11 +37,19 @@ from lib.external.gae_python_gcm import gcm
 
 import settings
 
+
+NUM_SETTINGS_TO_FETCH = 10
+NUM_SETTINGS_MULTIPLIER = 10
+DEFAULT_AVATAR_URL = ('http://lh3.googleusercontent.com/-XdUIqdMkCWA/'
+                      'AAAAAAAAAAI/AAAAAAAAAAA/4252rscbv5M/s96/photo.jpg')
+
+
 class FMBModel(ndb.Model):
 
     @classmethod
     def json_dump(cls, obj):
-        date_handler = lambda obj: obj.isoformat() if isinstance(obj, datetime.datetime) else None
+        date_handler = lambda obj:
+            obj.isoformat() if isinstance(obj, datetime.datetime) else None
         return json.dumps(obj, default=date_handler)
 
     @property
@@ -79,7 +87,6 @@ class FMBModel(ndb.Model):
         general_counter.increment(counter_name)
 
 
-DEFAULT_AVATAR_URL = 'http://lh3.googleusercontent.com/-XdUIqdMkCWA/AAAAAAAAAAI/AAAAAAAAAAA/4252rscbv5M/s96/photo.jpg'
 class FMBUser(User, FMBModel):
     def _pre_put_hook(self):
         if not hasattr(self, 'api_token'):
@@ -92,29 +99,34 @@ class FMBUser(User, FMBModel):
             self.allow_gmail_lookup = True
 
         if not hasattr(self, 'unique_profile_str'):
-            if (hasattr(self, 'email') and self.email.find('@gmail.com') != -1 and
-                self.allow_gmail_lookup):
-                self.unique_profile_str = self.email.replace('@gmail.com', '')
+            if ((hasattr(self, 'email') and
+                 self.is_gmail_account and
+                 self.allow_gmail_lookup)):
+                self.unique_profile_str = self.gmail_username
             else:
                 self.unique_profile_str = str(uuid.uuid4())[:8]
 
         # i.e. user doesn't want people to look them up by gmail name.
         elif (self.is_gmail_account and
-              self.unique_profile_str == self.email.replace('@gmail.com', '') and
+              self.unique_profile_str == self.gmail_username and
               not self.allow_gmail_lookup):
             self.unique_profile_str = str(uuid.uuid4())[:8]
 
         # i.e. user does want people to look them up by gmail name.
         elif (self.is_gmail_account and
-              self.unique_profile_str != self.email.replace('@gmail.com', '') and
+              self.unique_profile_str != self.gmail_username and
               self.allow_gmail_lookup):
-            self.unique_profile_str = self.email.replace('@gmail.com', '')
+            self.unique_profile_str = self.gmail_username
 
         #logging.info('POST _pre_put_hook %s' % self)
 
     @property
     def is_gmail_account(self):
         return hasattr(self, 'email') and self.email.find('@gmail.com') != -1
+
+    @property
+    def gmail_username(self):
+        return self.email.replace('@gmail.com', '')
 
     @property
     def iter_devices(self):
@@ -125,15 +137,17 @@ class FMBUser(User, FMBModel):
         obj = super(FMBUser, self).to_dict(include_api_token=include_api_token)
 
         # Default avatar url
-        if ('avatar_url' not in obj or obj['avatar_url'] == '' or
-            obj['avatar_url'] is None):
+        if (('avatar_url' not in obj or
+             obj['avatar_url'] == '' or
+             obj['avatar_url'] is None)):
             obj.update({
                 'avatar_url': DEFAULT_AVATAR_URL
             })
 
         obj['devices'] = []
         for device in self.iter_devices:
-            obj['devices'].append(device.to_dict(include_notifying=include_device_notifying))
+            obj['devices'].append(
+                device.to_dict(include_notifying=include_device_notifying))
 
         return obj
 
@@ -167,8 +181,6 @@ class FMBUser(User, FMBModel):
                 gcm_conn.notify_device(gcm_message)
 
 
-NUM_SETTINGS_TO_FETCH = 10
-NUM_SETTINGS_MULTIPLIER = 10
 class Device(FMBModel):
     created = ndb.DateTimeProperty(auto_now_add=True)
     modified = ndb.DateTimeProperty(auto_now=True)
@@ -182,7 +194,7 @@ class Device(FMBModel):
     platform = ndb.StringProperty()
     version = ndb.StringProperty()
     gcm_push_token = ndb.StringProperty()
-    app_version = ndb.StringProperty()
+    app_version = ndb.IntegerProperty()
 
     @property
     def immutable_update_properties(self):
@@ -202,9 +214,11 @@ class Device(FMBModel):
         settings = memcache.get(memcache_device_settings_key)
         if not settings:
             settings = []
-            q_settings = Settings.query(ancestor=self.key).order(-Settings.created)
-            results = q_settings.fetch(NUM_SETTINGS_TO_FETCH * NUM_SETTINGS_MULTIPLIER,
-                                       keys_only=True)
+            q_settings = Settings.query(
+                ancestor=self.key).order(-Settings.created)
+            results = q_settings.fetch(
+                NUM_SETTINGS_TO_FETCH * NUM_SETTINGS_MULTIPLIER,
+                keys_only=True)
             list_of_keys = []
             # prunes the results so we get a longer time-window picture of
             # the device's battery stats.
@@ -219,8 +233,10 @@ class Device(FMBModel):
         # notifying
         logging.info('Device %s to dict include_notifying: %s' %
                      (self.key.id(), include_notifying))
+
         if include_notifying:
-            q_notifying = Notifying.query(ancestor=self.key).order(-Notifying.created)
+            q_notifying = Notifying.query(
+                ancestor=self.key).order(-Notifying.created)
             logging.info('.. notifying len: %s' % q_notifying.count())
             obj['notifying'] = []
             for notifying in q_notifying:
@@ -252,4 +268,3 @@ class Notifying(FMBModel):
 class NotificationSent(FMBModel):
     created = ndb.DateTimeProperty(auto_now_add=True)
     means = ndb.StringProperty(required=True)
-
