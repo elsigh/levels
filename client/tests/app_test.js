@@ -15,6 +15,9 @@ var initialAppHtml;
 sinon.stub(window.history, 'pushState');
 sinon.stub(window, 'open', function() { return {}; });
 sinon.stub(window, 'confirm', function() { return true; });
+
+sinon.stub(cordova, 'addConstructor');
+sinon.stub(cordova, 'define');
 sinon.stub(cordova, 'require');
 
 function setUp() {

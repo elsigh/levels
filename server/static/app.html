@@ -40,14 +40,24 @@
         style="display:none;"></div>
     </div>
     <script>
-      (function() {
-        var ua = window.navigator.userAgent;
-        var cordovaSrc = 'cordova-android.js';
-        if (ua.match(/iPad/i) || ua.match(/iPhone/i)) {
-           cordovaSrc = 'cordova-ios.js';
-        }
-        document.write('<scr'+'ipt src="js/' + cordovaSrc + '"></sc'+'ript>');
-      })();
+      // Super-wild-west-runtime-unit-testing.
+      if (window.location.search.indexOf('?test=1') !== -1) {
+        // Stubs cordova so we can run this webpage in a unit test.
+        cordova = {
+          addConstructor: function() {},
+          require: function() {},
+          define: function() {}
+        };
+      } else {
+        (function() {
+          var ua = window.navigator.userAgent;
+          var cordovaSrc = 'cordova-android.js';
+          if (ua.match(/iPad/i) || ua.match(/iPhone/i)) {
+             cordovaSrc = 'cordova-ios.js';
+          }
+          document.write('<scr'+'ipt src="js/' + cordovaSrc + '"></sc'+'ript>');
+        })();
+      }
     </script>
     <script src="js/levels_plugin.js"></script>
     <script src="js/webintent.js"></script>
@@ -233,15 +243,14 @@
         </div>
       </td>
       <td>
-        <figure
-          class="battery-graph battery-graph-{{key}}"></figure>
+        <figure class="battery-graph battery-graph-{{key}}"></figure>
       </td>
     </script>
 
     <script>
       window.onerror = function(message, url, lineNumber) {
-        console.log('window.onerror GLOBAL FAIL: ' + message + ', ' +
-                    url + ', ' + lineNumber);
+        window.console.log('window.onerror GLOBAL FAIL: ' + message + ', ' +
+            url + ', ' + lineNumber);
       };
       window.templates = {};
       $('script[type="text/html"]').each(function(i, script) {
@@ -250,13 +259,6 @@
         window.templates[name] = Hogan.compile(html);
       });
 
-      document.addEventListener('deviceready', function() {
-        window['app'] = new fmb.App();
-      }, false);
-
-    </script>
-
-    <script>
       // Super-wild-west-runtime-unit-testing.
       if (window.location.search.indexOf('?test=1') !== -1) {
         var testFiles = [
@@ -266,8 +268,15 @@
         ];
         $.each(testFiles, function(i, src) {
           document.write('<scr'+'ipt src="' + src + '"></sc'+'ript>');
-        })
+        });
+
+      // Load the app like a normal person.
+      } else {
+        document.addEventListener('deviceready', function() {
+          window['app'] = new fmb.App();
+        }, false);
       }
+
     </script>
   </body>
   </html>

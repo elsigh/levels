@@ -671,9 +671,7 @@ fmb.models.User.prototype.createUserDevice = function() {
   });
   var platform = window.device && window.device.platform || navigator.platform;
   var name = window.device && window.device.model || navigator.appName;
-  navigator.notification &&
-      navigator.notification.activityStart('',
-          'Setting up ' + platform + ' ' + name + ' ...');
+  fmb.views.showNotification('Setting up ' + platform + ' ' + name + ' ...');
   device.saveToServer({
     'uuid': fmb.models.DeviceUnMapped.getUuid(),
     'name': name,
@@ -683,14 +681,12 @@ fmb.models.User.prototype.createUserDevice = function() {
   }, {
     success: _.bind(function() {
       fmb.log('SUCCESS creating user device =)', device);
-      navigator.notification &&
-          navigator.notification.activityStop();
+      fmb.views.hideNotification();
       this.get('devices').add(device);
     }, this),
     error: function() {
       fmb.log('ERROR creating user device =(');
-      navigator.notification &&
-          navigator.notification.activityStop();
+      fmb.views.hideNotification();
       alert('I am so sorry that failed. Try killing and restarting the app.');
     }
   });
@@ -790,26 +786,41 @@ fmb.models.User.prototype.url = function() {
 
 
 /**
+ * der.
+ */
+fmb.models.User.prototype.setLoginToken = function() {
+  this.loginToken_ = fmb.models.getUid();
+};
+
+
+/**
  * The login flow has us using a string token that gets saved into
  * memcache on the server so we can map the user who opens the popup
  * to this user.
- * @param {string} token A login request token.
  */
-fmb.models.User.prototype.syncByToken = function(token) {
-  fmb.log('fmb.models.User syncByToken', token);
+fmb.models.User.prototype.syncByLoginToken = function() {
+  fmb.log('fmb.models.User syncByLoginToken', this.loginToken_);
+
+  if (!this.loginToken_) {
+    fmb.log('no loginToken_!');
+    return;
+  }
 
   this.saveToServer({
-    'user_token': token,
+    'user_token': this.loginToken_,
     'app_version': fmb.models.App.version
   }, {
     url: fmb.models.getApiUrl('/user/token'),
     success: _.bind(function(model, response, options) {
-      fmb.log('fmb.models.User syncByToken MONEY TRAIN!!');
+      fmb.log('fmb.models.User syncByLoginToken MONEY TRAIN!!');
       this.unset('user_token', {silent: true});
+      // unset - can only use this one time.
+      this.loginToken_ = null;
     }, this),
     error: function(model, xhr, options) {
-      alert('LA BOMBA! in fmb.models.User syncByToken. =(');
+      alert('LA BOMBA! in fmb.models.User syncByLoginToken. =(');
     }
   });
+
 };
 
