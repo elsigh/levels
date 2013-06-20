@@ -3,15 +3,32 @@
 
 // Proxy click as zepto tap so we can bind to "tap"
 (function($) {
+  var shouldPreventDefault = function(el) {
+    var tagName = el.tagName.toLowerCase();
+    switch (tagName) {
+      case 'input':
+      case 'select':
+      case 'textarea':
+      case 'label':
+        return false;
+        break;
+      default:
+        return true;
+    }
+  }
   // only do this if not on a touch device
   if (!('ontouchend' in window)) {
     $(document).delegate('body', 'click', function(e) {
-      e.preventDefault();
-      $(e.target).trigger('tap', e);
+      if (shouldPreventDefault(e.target)) {
+        e.preventDefault();
+        $(e.target).trigger('tap', e);
+      }
     });
   } else {
     $(document).delegate('body', 'click', function(e) {
-      e.preventDefault();
+      if (shouldPreventDefault(e.target)) {
+        e.preventDefault();
+      }
     });
   }
 })(window.Zepto);
@@ -252,7 +269,7 @@ fmb.views.Account = Backbone.View.extend({
   el: '.fmb-account',
   events: {
     'tap .login-google': 'onClickLogin_',
-    'change .device-view': 'onChangeDeviceView_'
+    'change [name="allow_gmail_lookup"]': 'onChangeAllowGmailLookup_'
   }
 });
 
@@ -260,7 +277,7 @@ fmb.views.Account = Backbone.View.extend({
 /** @inheritDoc */
 fmb.views.Account.prototype.initialize = function(options) {
   fmb.log('views.Account initialize');
-  this.model.on('change:key', this.render, this);
+  this.model.on('change', this.render, this);
 
   this.$account = $('<div class="account"></div>');
   this.$devices = $('<div class="devices"></div>');
@@ -281,7 +298,7 @@ fmb.views.Account.prototype.render = function() {
     this.$el.append(this.$devices);
   }
 
-  this.$devices.toggle(this.model.get('id'));
+  this.$devices.toggle(this.model.id);
 
   var templateData = {
     'user': this.model.getTemplateData()
@@ -335,12 +352,32 @@ fmb.views.Account.prototype.onRemoveDevice_ = function(model) {
 
 
 /**
- * Wire up a SELECT to change the visible device one day.
- * @param {Event} e A change event.
+ * @param {Event} e A click event.
  * @private
  */
-fmb.views.Account.prototype.onChangeDeviceView_ = function(e) {
-  //var deviceView = this.subViews_[device.id];
+fmb.views.Account.prototype.onChangeAllowGmailLookup_ = function(e) {
+  fmb.log('fmb.views.Account onChangeAllowGmailLookup_');
+  var $checkbox = $(e.target);
+  var isAllowed = $checkbox.prop('checked');
+  if (!isAllowed) {
+    var confirm = window.confirm(
+        'Ya sure you want to make your profile URL totally random?');
+    if (!confirm) {
+      $checkbox.prop('checked', true);
+      return;
+    }
+  }
+
+  this.model.save({
+    'allow_gmail_lookup': isAllowed
+  }, {
+    success: function() {
+      $checkbox.parent
+    },
+    error: function() {
+      fmb.log('lame-o, failed to set allow_gmail_lookup to', isAllowed);
+    }
+  })
 };
 
 

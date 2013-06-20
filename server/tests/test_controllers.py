@@ -89,6 +89,8 @@ class HandlerTest(unittest.TestCase):
         )
         elsigh_user.put()
 
+        self.assertTrue(elsigh_user.is_gmail_account)
+
         self.assertEquals(True, elsigh_user.allow_gmail_lookup)
         self.assertEquals('elsigh', elsigh_user.unique_profile_str)
 
@@ -106,6 +108,26 @@ class HandlerTest(unittest.TestCase):
         self.assertFalse(obj['allow_gmail_lookup'])
         self.assertTrue(obj['allow_phone_lookup'])
         self.assertEquals(30, obj['app_version'])
+
+        # toggle allow_gmail_lookup
+        response = self.testapp.post_json('/api/user',
+                                          params=dict(api_token=elsigh_user.api_token,
+                                                      user_key=elsigh_user.key.urlsafe(),
+                                                      allow_gmail_lookup=True))
+
+        body = response.normal_body
+        obj = json.loads(body)
+        self.assertEquals('elsigh', obj['unique_profile_str'])
+
+        # toggle allow_gmail_lookup
+        response = self.testapp.post_json('/api/user',
+                                          params=dict(api_token=elsigh_user.api_token,
+                                                      user_key=elsigh_user.key.urlsafe(),
+                                                      allow_gmail_lookup=False))
+        body = response.normal_body
+        obj = json.loads(body)
+        self.assertNotEquals('elsigh', obj['unique_profile_str'])
+
 
     def test_ApiUserTokenHandler(self):
         elsigh_user = models.FMBUser(

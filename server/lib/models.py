@@ -79,11 +79,22 @@ class FMBUser(User, FMBModel):
                 self.unique_profile_str = str(uuid.uuid4())[:8]
 
         # i.e. user doesn't want people to look them up by gmail name.
-        elif (hasattr(self, 'email') and self.email.find('@gmail.com') != -1 and
-              self.unique_profile_str == self.email.replace('@gmail.com', '')):
+        elif (self.is_gmail_account and
+              self.unique_profile_str == self.email.replace('@gmail.com', '') and
+              not self.allow_gmail_lookup):
             self.unique_profile_str = str(uuid.uuid4())[:8]
 
-        logging.info('POST _pre_put_hook %s' % self)
+        # i.e. user does want people to look them up by gmail name.
+        elif (self.is_gmail_account and
+              self.unique_profile_str != self.email.replace('@gmail.com', '') and
+              self.allow_gmail_lookup):
+            self.unique_profile_str = self.email.replace('@gmail.com', '')
+
+        #logging.info('POST _pre_put_hook %s' % self)
+
+    @property
+    def is_gmail_account(self):
+        return hasattr(self, 'email') and self.email.find('@gmail.com') != -1
 
     @property
     def iter_devices(self):

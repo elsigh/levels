@@ -234,7 +234,7 @@ fmb.models.SettingsCollection.prototype.comparator = function(model) {
  * @constructor
  */
 fmb.models.DeviceUnMapped = fmb.Model.extend({
-  localStorage: new Backbone.LocalStorage('Device'),
+  //localStorage: new Backbone.LocalStorage('Device'),
   defaults: {
     'user_agent_string': window.navigator.userAgent,
     'update_enabled': 1,
@@ -630,8 +630,19 @@ fmb.models.User.prototype.getProfileUrl = function() {
 };
 
 
+/** @inheritDoc */
+fmb.models.User.prototype.getTemplateData = function() {
+  var templateData = fmb.Model.prototype.getTemplateData.call(this);
+  if (this.has('email') && this.get('email').match(/gmail\./)) {
+    templateData['is_gmail_account'] = true;
+  }
+  return templateData;
+};
+
+
 /**
  * This method actually does everything to get us set up.
+ * @private
  */
 fmb.models.User.prototype.initialize_ = function() {
   fmb.log('fmb.models.User initialize_', this.id, this.get('api_token'));

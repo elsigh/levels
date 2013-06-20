@@ -155,8 +155,8 @@ class ApiRequestHandler(WebRequestHandler):
     def current_user(self):
         # Admin USER override by JSON request value.
         gae_user = users.get_current_user()
-        if gae_user and gae_user.is_current_user_admin():
-            logging.info('ADMIN as CURRENT_USER: %s, %s' % (user.name, user))
+        if gae_user and users.is_current_user_admin():
+            logging.info('ADMIN as CURRENT_USER: %s' % gae_user)
             return self.get_json_request_user()
 
         user = super(ApiRequestHandler, self).current_user
