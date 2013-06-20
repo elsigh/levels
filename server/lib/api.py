@@ -388,8 +388,8 @@ def send_battery_notification_phone(user_id, device_id, notifying_id, send=True)
     logging.info('send_battery_notification_phone %s, %s' %
                  (user_id, device_id))
     notifying, body = _send_notification_templater(user_id, device_id,
-                                                       notifying_id,
-                                                       'notification_phone.html')
+                                                   notifying_id,
+                                                   'notification_phone.html')
 
     if notifying is None:
         logging.info('BAIL CITY BABY, DONE PHONE NOTIFIED ENUFF')
@@ -467,6 +467,8 @@ def send_battery_notifications(user_id, device_id):
     # Also send the device owner a message.
     deferred.defer(send_battery_notification_self, user_id, device_id)
 
+    device.increment_count('send_battery_notifications_count')
+
 class ApiSettingsHandler(ApiRequestHandler):
     def post(self):
         device = self._get_device_by_device_key()
@@ -494,6 +496,8 @@ class ApiSettingsHandler(ApiRequestHandler):
         if is_this_update_over_notify_level != device.is_last_update_over_notify_level:
             device.is_last_update_over_notify_level = is_this_update_over_notify_level
             device.put()
+
+        device.increment_count('settings_received_count')
 
         # Hack in is_last_update_over_notify_level
         json_output = settings.to_dict()

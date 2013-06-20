@@ -31,6 +31,7 @@ sys.modules['ndb'] = ndb
 
 from webapp2_extras.appengine.auth.models import User
 
+from lib.external import general_counter
 from lib.external.gae_python_gcm import gcm
 
 import settings
@@ -41,6 +42,10 @@ class FMBModel(ndb.Model):
     def json_dump(cls, obj):
         date_handler = lambda obj: obj.isoformat() if isinstance(obj, datetime.datetime) else None
         return json.dumps(obj, default=date_handler)
+
+    @property
+    def counters(self):
+        return []
 
     def to_json(self):
         return FMBModel.json_dump(self.to_dict())
@@ -56,7 +61,21 @@ class FMBModel(ndb.Model):
         if 'password' in obj:
             obj.pop('password')
 
+        for counter in self.counters:
+            obj[counter] = self.get_count(counter)
+
         return obj
+
+    def get_counter_name(self, name):
+        return '%s-%s' % (name, self.key.urlsafe())
+
+    def get_count(self, name):
+        counter_name = self.get_counter_name(name)
+        return general_counter.get_count(counter_name)
+
+    def increment_count(self, name):
+        counter_name = self.get_counter_name(name)
+        general_counter.increment(counter_name)
 
 
 DEFAULT_AVATAR_URL = 'http://lh3.googleusercontent.com/-XdUIqdMkCWA/AAAAAAAAAAI/AAAAAAAAAAA/4252rscbv5M/s96/photo.jpg'
@@ -161,6 +180,10 @@ class Device(FMBModel):
     platform = ndb.StringProperty()
     version = ndb.StringProperty()
     gcm_push_token = ndb.StringProperty()
+
+    @property
+    def counters(self):
+        return ['settings_received_count', 'send_battery_notifications_count']
 
     def to_dict(self, include_notifying=True):
         obj = super(Device, self).to_dict()

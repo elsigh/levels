@@ -319,8 +319,14 @@ class HandlerTest(unittest.TestCase):
         assert not 'api_token' in obj
         self.assertTrue(obj['is_last_update_over_notify_level'])
 
-        # tests that it made it to the datastore
+        # tests that a settings entity made it to the datastore.
+        q_settings = models.Settings.query(ancestor=elsigh_device.key)
+        self.assertEquals(1, q_settings.count())
 
+        # tests that our counter updated
+        self.assertEquals(1, elsigh_device.get_count('settings_received_count'))
+
+        # no tasks because we didn't kick off notifications.
         tasks = self.taskqueue_stub.GetTasks('default')
         self.assertEqual(0, len(tasks))
 
@@ -335,6 +341,10 @@ class HandlerTest(unittest.TestCase):
         self.assertEquals(9, obj['battery_level'])
         self.assertFalse(obj['is_last_update_over_notify_level'])
 
+        # tests that our counter updated
+        self.assertEquals(2, elsigh_device.get_count('settings_received_count'))
+
+        # now we should have kicked off a notification.
         tasks = self.taskqueue_stub.GetTasks('default')
         self.assertEqual(1, len(tasks))
 
@@ -348,6 +358,9 @@ class HandlerTest(unittest.TestCase):
         obj = json.loads(body)
         self.assertEquals(11, obj['battery_level'])
         self.assertTrue(obj['is_last_update_over_notify_level'])
+
+        # tests that our counter updated
+        self.assertEquals(3, elsigh_device.get_count('settings_received_count'))
 
     def test_ApiFollowingHandler(self):
         elsigh_user = models.FMBUser(
