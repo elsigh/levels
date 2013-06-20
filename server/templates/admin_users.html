@@ -1,4 +1,4 @@
-{% extends "base.html"%}
+{% extends "base.html" %}
 
 {% block head %}
   <style>
@@ -24,14 +24,15 @@
               target="_blank"
               href="http://www.levelsapp.com/p/{{user.unique_profile_str}}">{{user.unique_profile_str}}</a>
             {{user.email}}
+            {{user.created.strftime('%b %d %l:%M %p')}}
           </h3>
           <ol>
             {% for device in user.devices %}
               <li>
                 <h4>
-                  {{device.platform}} {{device.name}} {{device.version}}
+                  {{device.platform}} {{device.name}} {{device.version}} -
                   app_version: {{device.app_version}}
-                  gcm_push_token: <small>{{device.gcm_push_token}}</small>
+                  modified: {{device.modified.strftime('%b %d %l:%M %p')}}
                 </h4>
               </li>
             {% endfor %}

@@ -51,7 +51,7 @@
 
                   <div class="battery-created"
                     data-utc-date="{{ device.settings.0.created.isoformat() }}">
-                    {{ device.settings.0.created.isoformat() }}
+                    {{ device.settings.0.created.strftime('%b %d %l:%M %p') }}
                   </div>
                 </div>
               </td>
