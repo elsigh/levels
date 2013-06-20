@@ -31,7 +31,6 @@ from lib.external.twilio.rest import TwilioRestClient
 # last import.
 import settings
 
-
 def send_email(to, subject, body):
     logging.info('send_email %s, %s, %s' % (to, subject, body))
     try:
