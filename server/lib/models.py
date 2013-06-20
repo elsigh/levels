@@ -58,7 +58,7 @@ class FMBModel(ndb.Model):
         obj['key'] = urlsafe_key
 
         if 'api_token' in obj and not include_api_token:
-            obj.property('api_token')
+            obj.pop('api_token')
         if 'password' in obj:
             obj.pop('password')
 
