@@ -58,7 +58,7 @@ class FMBModel(ndb.Model):
         obj['key'] = urlsafe_key
 
         if 'api_token' in obj and not include_api_token:
-            obj.pop('api_token')
+            obj.property('api_token')
         if 'password' in obj:
             obj.pop('password')
 
@@ -182,6 +182,7 @@ class Device(FMBModel):
     platform = ndb.StringProperty()
     version = ndb.StringProperty()
     gcm_push_token = ndb.StringProperty()
+    app_version = ndb.StringProperty()
 
     @property
     def immutable_update_properties(self):
