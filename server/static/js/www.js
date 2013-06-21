@@ -1,41 +1,57 @@
+
+/**
+ * @type {Object}
+ */
 var fmb = {
   models: {}
 };
+
+
 /**
  * @param {number} time An ISO time.
+ * @return {string} A pretty representation of the time.
  */
-fmb.models.prettyDate = function(time){
+fmb.models.prettyDate = function(time) {
   var date = new Date(time),
     diff = (((new Date()).getTime() - date.getTime()) / 1000),
     day_diff = Math.floor(diff / 86400);
 
-  if ( isNaN(day_diff) || day_diff < 0 || day_diff >= 31 )
-    return;
+  if (isNaN(day_diff) || day_diff < 0 || day_diff >= 31) {
+    return 'a bit ago';
+  }
 
   return day_diff === 0 && (
-      diff < 60 && "just now" ||
-      diff < 120 && "1 minute ago" ||
-      diff < 3600 && Math.floor( diff / 60 ) + " minutes ago" ||
-      diff < 7200 && "1 hour ago" ||
-      diff < 86400 && Math.floor( diff / 3600 ) + " hours ago") ||
-    day_diff == 1 && "Yesterday" ||
-    day_diff < 7 && day_diff + " days ago" ||
-    day_diff < 31 && Math.ceil( day_diff / 7 ) + " weeks ago";
+      diff < 60 && 'just now' ||
+      diff < 120 && '1 minute ago' ||
+      diff < 3600 && Math.floor(diff / 60) + ' minutes ago' ||
+      diff < 7200 && '1 hour ago' ||
+      diff < 86400 && Math.floor(diff / 3600) + ' hours ago') ||
+    day_diff == 1 && 'Yesterday' ||
+    day_diff < 7 && day_diff + ' days ago' ||
+    day_diff < 31 && Math.ceil(day_diff / 7) + ' weeks ago';
 };
 
 
-
+/**
+ * @type {Object}
+ */
 var fmbProfile = {};
 
+
+/**
+ * @param {Object} user A user object.
+ */
 fmbProfile.renderChart = function(user) {
   //console.log('fmb.views.Account renderChart_', user['devices']);
-
   $(user['devices']).each(function(i, device) {
     fmbProfile.drawDeviceChart(device);
   });
-
 };
 
+
+/**
+ * @param {Object} device A device object.
+ */
 fmbProfile.drawDeviceChart = function(device) {
   var settingsData = device['settings'];
   if (!settingsData || !settingsData.length) {
@@ -67,8 +83,8 @@ fmbProfile.drawDeviceChart = function(device) {
   };
 
   var opts = {
-    'dataFormatX': function (x) { return new Date(x); },
-    'tickFormatX': function (x) { return d3.time.format('%a %I%p')(x); },
+    'dataFormatX': function(x) { return new Date(x); },
+    'tickFormatX': function(x) { return d3.time.format('%a %I%p')(x); },
     'axisPaddingTop': 20,
     'axisPaddingRight': 10,
     'tickHintX': 4,
@@ -81,11 +97,12 @@ fmbProfile.drawDeviceChart = function(device) {
   var myChart = new xChart('line', data,
       '.fmb-device-' + device['key'] + ' .battery-graph',
       opts);
-
 };
 
 
-
+/**
+ * Let's get this party started.
+ */
 fmbProfile.init = function() {
   $('.battery-created').each(function(i, el) {
     var $el = $(el);

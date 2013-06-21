@@ -99,7 +99,7 @@ fmb.models.NotifyingCollection.prototype.initialize = function() {
   fmb.Collection.prototype.initialize.apply(this, arguments);
   this.on('add', this.onAdd_, this);
   this.on('remove', this.onRemove_, this);
-}
+};
 
 
 /** @inheritDoc */
@@ -257,7 +257,7 @@ fmb.models.DeviceUnMapped.getUuid = function() {
 
 
 /**
- * @private
+ * Callback.
  */
 fmb.models.DeviceUnMapped.prototype.onBatteryStatus = function() {
   fmb.log('fmb.models.Device onBatteryStatus');
@@ -314,7 +314,7 @@ fmb.models.DeviceUnMapped.prototype.url = function() {
 
 
 /**
- * @return {Object} Template data
+ * @return {Object} Template data.
  */
 fmb.models.DeviceUnMapped.prototype.getTemplateData = function() {
   var templateData = fmb.Model.prototype.getTemplateData.call(this);
@@ -331,6 +331,11 @@ fmb.models.DeviceUnMapped.prototype.getTemplateData = function() {
 };
 
 
+
+
+/**
+ * @constructor
+ */
 fmb.models.Device = Backbone.IdentityMap(
     fmb.models.DeviceUnMapped);
 
@@ -604,7 +609,7 @@ fmb.models.User.GCMEvent = function(e) {
 
     default:
       fmb.log('UNKNOWN ERROR');
-      break
+      break;
   }
 };
 

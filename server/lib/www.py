@@ -1,6 +1,6 @@
 #!/usr/bin/python2.7
 #
-#
+
 
 import datetime
 import json
@@ -49,12 +49,13 @@ class AdminUsersHandler(WebRequestHandler):
 class AdminUserMessageTestHandler(WebRequestHandler):
     @admin_required
     def get(self):
-        self.output_response({'result': 'not yet'}, 'admin_user_message_test.html')
+        self.output_response({'result': 'not yet'},
+                             'admin_user_message_test.html')
 
     def post(self):
         # only elsigh
-        if (self.current_user.key.id() != 19001 and
-            'Development' not in os.environ['SERVER_SOFTWARE']):
+        if ((self.current_user.key.id() != 19001 and
+             'Development' not in os.environ['SERVER_SOFTWARE'])):
             self.abort(500)
 
         user_id = self.request.get('user_id')
@@ -72,7 +73,8 @@ class AdminUserMessageTestHandler(WebRequestHandler):
             if user:
                 result = user.send_message(message, extra=extras)
 
-        self.output_response({'result': result}, 'admin_user_message_test.html')
+        self.output_response({'result': result},
+                             'admin_user_message_test.html')
 
 
 class ProfileHandler(WebRequestHandler):
@@ -88,7 +90,8 @@ class ProfileHandler(WebRequestHandler):
             # The URL is /p/unique_profile_str
             if self.request.path.find('/p/') != -1:
                 q = models.FMBUser.query().filter(
-                    ndb.GenericProperty('unique_profile_str') == user_identifier)
+                    ndb.GenericProperty('unique_profile_str') ==
+                    user_identifier)
                 user = q.get()
 
                 if user is None:
@@ -109,15 +112,18 @@ class ProfileHandler(WebRequestHandler):
             'close': close,
         }
 
-        # TODO(elsigh): Allow user to set "default" device or order devices one day.
+        # TODO(elsigh): Allow user to set "default" device or
+        # sort order devices one day.
         template_data['title'] = template_data['user']['name']
-        if 'devices' in template_data['user'] and len(template_data['user']['devices']):
-            if ('settings' in template_data['user']['devices'][0] and
-                len(template_data['user']['devices'][0]['settings'])):
+        if (('devices' in template_data['user'] and
+             len(template_data['user']['devices']))):
+            first_device = template_data['user']['devices'][0]
+            if (('settings' in first_device and
+                 len(first_device['settings']))):
+                most_recent_setting = first_device['settings'][0]
                 template_data['title'] += (
                     ' - ' +
-                    str(template_data['user']['devices'][0]['settings'][0]['battery_level']) +
-                    '%')
+                    str(most_recent_setting['battery_level']) + '%')
 
         template_data['title'] += ' - Levels'
 
@@ -125,5 +131,5 @@ class ProfileHandler(WebRequestHandler):
 
 
 class IndexHandler(WebRequestHandler):
-  def get(self):
-    return self.redirect('/p/elsigh')
+    def get(self):
+        return self.redirect('/p/elsigh')

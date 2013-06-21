@@ -48,8 +48,8 @@ class FMBModel(ndb.Model):
 
     @classmethod
     def json_dump(cls, obj):
-        date_handler = lambda obj:
-            obj.isoformat() if isinstance(obj, datetime.datetime) else None
+        date_handler = (lambda obj: obj.isoformat()
+                        if isinstance(obj, datetime.datetime) else None)
         return json.dumps(obj, default=date_handler)
 
     @property

@@ -96,16 +96,16 @@ class ApiRequestHandler(WebRequestHandler):
         # existence is also pretty ugly and these two fields are pretty key.
         elif self.request.method == 'GET':
             if self.request.get('api_token'):
-                self._json_request_data['api_token'] =
-                self.request.get('api_token')
+                self._json_request_data['api_token'] = \
+                    self.request.get('api_token')
 
             if self.request.get('user_key'):
-                self._json_request_data['user_key'] =
-                self.request.get('user_key')
+                self._json_request_data['user_key'] = \
+                    self.request.get('user_key')
 
             if self.request.get('device_key'):
-                self._json_request_data['device_key'] =
-                self.request.get('device_key')
+                self._json_request_data['device_key'] = \
+                    self.request.get('device_key')
 
         logging.info('JSON REQ DATA: %s' % self._json_request_data)
 

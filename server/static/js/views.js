@@ -15,7 +15,7 @@
       default:
         return true;
     }
-  }
+  };
   // only do this if not on a touch device
   if (!('ontouchend' in window)) {
     $(document).delegate('body', 'click', function(e) {
@@ -114,6 +114,9 @@ fmb.views.showNotification = function(msg) {
 };
 
 
+/**
+ * Hide that notification.
+ */
 fmb.views.hideNotification = function() {
   navigator.notification && navigator.notification.activityStop &&
       navigator.notification.activityStop();
@@ -171,10 +174,12 @@ fmb.views.App.prototype.onClickShare_ = function(e) {
         action: WebIntent.ACTION_SEND,
         type: 'text/plain',
         extras: extras
-    }, function() {
-        fmb.log('Share sent!');
-    }, function () {
-        fmb.log('Share fail!');
+    },
+    function() {
+      fmb.log('Share sent!');
+    },
+    function() {
+      fmb.log('Share fail!');
     });
 
   } else {
@@ -202,7 +207,7 @@ fmb.views.App.prototype.onClickTab_ = function(e) {
 
 
 /**
- * @type {Backbone.View} view A view instance.
+ * @param {Backbone.View} view A view instance.
  */
 fmb.views.App.prototype.setCurrentView = function(view) {
 
@@ -309,7 +314,7 @@ fmb.views.Account.prototype.render = function() {
 
 
 /**
- * @param {Backbone.Model} e A device model.
+ * @param {Backbone.Model} model A device model.
  * @private
  */
 fmb.views.Account.prototype.onAddDevice_ = function(model) {
@@ -322,7 +327,7 @@ fmb.views.Account.prototype.onAddDevice_ = function(model) {
 
 
 /**
- * @param {Backbone.Model} e A device model.
+ * @param {Backbone.Model} model A device model.
  * @private
  */
 fmb.views.Account.prototype.addDeviceView_ = function(model) {
@@ -339,10 +344,11 @@ fmb.views.Account.prototype.addDeviceView_ = function(model) {
       this.$devices.append(this.subViews_[model.cid].$el);
     }
   }
-}
+};
+
 
 /**
- * @param {Backbone.Model} e A backbone model.
+ * @param {Backbone.Model} model A backbone model.
  * @private
  */
 fmb.views.Account.prototype.onRemoveDevice_ = function(model) {
@@ -372,12 +378,12 @@ fmb.views.Account.prototype.onChangeAllowGmailLookup_ = function(e) {
     'allow_gmail_lookup': isAllowed
   }, {
     success: function() {
-      $checkbox.parent
+      fmb.log('woot, changed allow_gmail_lookup');
     },
     error: function() {
       fmb.log('lame-o, failed to set allow_gmail_lookup to', isAllowed);
     }
-  })
+  });
 };
 
 
@@ -385,7 +391,7 @@ fmb.views.Account.prototype.onChangeAllowGmailLookup_ = function(e) {
  * @param {Event} e A click event.
  * @private
  */
-fmb.views.Account.prototype.onClickLogin_ = function() {
+fmb.views.Account.prototype.onClickLogin_ = function(e) {
   fmb.log('fmb.views.Account onClickLogin_');
 
   this.model.setLoginToken();
@@ -450,6 +456,10 @@ fmb.views.Account.prototype.onInAppBrowserLoadStop_ = function(e) {
 };
 
 
+/**
+ * @param {Event} e An event.
+ * @private
+ */
 fmb.views.Account.prototype.onInAppBrowserExit_ = function(e) {
   fmb.log('fmb.views.Account onInAppBrowserExit_');
 
@@ -735,7 +745,7 @@ fmb.views.Following.prototype.setIsActive = function(isActive) {
 
 
 /**
- * @param {Backbone.Model}
+ * @param {Backbone.Model} model A model instance.
  * @private
  */
 fmb.views.Following.prototype.onRemove_ = function(model) {
@@ -767,6 +777,10 @@ fmb.views.Following.prototype.render = function() {
 };
 
 
+/**
+ * @param {Backbone.Model} model A model instance.
+ * @private
+ */
 fmb.views.Following.prototype.addSubview_ = function(model) {
   fmb.log('fmb.views.Following addSubview_', model.id);
   // Don't make views for models without ids.
@@ -822,16 +836,18 @@ fmb.views.FollowingUser.prototype.onClickFollowingUser_ = function(e) {
     action: WebIntent.ACTION_SEND,
     type: 'text/plain',
     extras: extras
-  }, function() {
-      fmb.log('Share sent!');
-  }, function () {
-      fmb.log('Share fail!');
+  },
+  function() {
+    fmb.log('Share sent!');
+  },
+  function() {
+    fmb.log('Share fail!');
   });
 };
 
 
 /**
- * @param {Backbone.Model}
+ * @param {Backbone.Model} model A model instance.
  * @private
  */
 fmb.views.FollowingUser.prototype.onRemoveDevice_ = function(model) {
@@ -946,8 +962,8 @@ fmb.views.FollowingDevice.prototype.render = function() {
 fmb.views.FollowingDevice.prototype.renderGraph_ = function() {
   fmb.log('fmb.views.FollowingDevice renderGraph_', this.model.id);
   if (!this.model.get('settings').length) {
-    fmb.log('No setting data to render chart with.')
-    return this;
+    fmb.log('No setting data to render chart with.');
+    return;
   }
 
   var dataSeries = [];
@@ -977,8 +993,8 @@ fmb.views.FollowingDevice.prototype.renderGraph_ = function() {
   };
 
   var opts = {
-    'dataFormatX': function (x) { return new Date(x); },
-    'tickFormatX': function (x) { return d3.time.format('%a %I%p')(x); },
+    'dataFormatX': function(x) { return new Date(x); },
+    'tickFormatX': function(x) { return d3.time.format('%a %I%p')(x); },
     'axisPaddingTop': 10,
     'axisPaddingBottom': 0,
     'axisPaddingLeft': 0,
