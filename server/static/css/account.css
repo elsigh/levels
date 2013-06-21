@@ -33,20 +33,45 @@
   display: none;
 }
 
-.fmb-account .user-img-name {
+.fmb-account .user-header {
   margin-bottom: 1em;
 }
 
-.fmb-account .user-img-name > img,
-.fmb-account .user-img-name > h2 {
-  display: inline-block;
-  vertical-align: top;
+.fmb-account .user-header > img {
+  float: left;
+  box-shadow: 1px 1px 2px #999;
+  height: 60px;
+  min-width: 60px;
 }
 
-.fmb-account .user-img-name > img {
-  box-shadow: 1px 1px 2px #ccc;
-  height: 75px;
-  min-width: 75px;
+.fmb-account .user-info {
+  margin-left: 70px;
+}
+
+.fmb-account .user-info h2 {
+  padding: 0 0 0.5em;
+}
+
+.fmb-account .user-info .share {
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  display: inline-block;
+  padding: 5px;
+}
+
+.fmb-account .user-info .share::after {
+  background: url(../img/share_this.png);
+  content: "";
+  display: inline-block;
+  width: 1.3em;
+  height: 1.3em;
+  background-repeat: no-repeat;
+  background-size: 1.3em;
+  vertical-align: bottom;
+}
+
+.fmb-account .label-c {
+  margin: 0.7em 0;
 }
 
 /* Device */
@@ -70,6 +95,10 @@
 
 .fmb-notifying .fmb-remove {
   margin-top: -1em;
+}
+
+.fmb-notifying > table {
+  margin-top: 0.2em;
 }
 
 .fmb-notifying th {

@@ -1,6 +1,6 @@
 #!/usr/bin/python2.7
 #
-#
+
 
 import datetime
 import json
@@ -10,13 +10,13 @@ import sys
 
 sys.path.append(os.path.join(os.path.dirname(__file__), 'external'))
 
-
 from lib.web_request_handler import WebRequestHandler
+
 from google.appengine.ext import ndb
 sys.modules['ndb'] = ndb
+from google.appengine.datastore.datastore_query import Cursor
 
 import webapp2
-
 from webapp2_extras.appengine.users import admin_required
 
 from lib import models
@@ -25,29 +25,37 @@ from lib import models
 import settings
 
 
-
 class AdminApiRequestHandler(WebRequestHandler):
     def get(self):
         self.output_response({}, 'admin_api_request.html')
 
+
 class AdminUsersHandler(WebRequestHandler):
     def get(self):
-        q = models.FMBUser.query().order(-models.FMBUser.created)
-        users = []
-        for user in q.fetch():
-            users.append(user.to_dict())
-        self.output_response({'users': users}, 'admin_users.html')
+        curs = Cursor(urlsafe=self.request.get('cursor'))
+        users, next_curs, more = models.FMBUser.query().order(
+            -models.FMBUser.created).fetch_page(10, start_cursor=curs)
+        users_output = []
+        for user in users:
+            users_output.append(user.to_dict())
+        tpl_data = {
+            'users': users_output,
+            'next_cursor': next_curs.urlsafe(),
+            'more': more
+        }
+        self.output_response(tpl_data, 'admin_users.html')
 
 
 class AdminUserMessageTestHandler(WebRequestHandler):
     @admin_required
     def get(self):
-        self.output_response({'result': 'not yet'}, 'admin_user_message_test.html')
+        self.output_response({'result': 'not yet'},
+                             'admin_user_message_test.html')
 
     def post(self):
         # only elsigh
-        if (self.current_user.key.id() != 19001 and
-            'Development' not in os.environ['SERVER_SOFTWARE']):
+        if ((self.current_user.key.id() != 19001 and
+             'Development' not in os.environ['SERVER_SOFTWARE'])):
             self.abort(500)
 
         user_id = self.request.get('user_id')
@@ -65,7 +73,8 @@ class AdminUserMessageTestHandler(WebRequestHandler):
             if user:
                 result = user.send_message(message, extra=extras)
 
-        self.output_response({'result': result}, 'admin_user_message_test.html')
+        self.output_response({'result': result},
+                             'admin_user_message_test.html')
 
 
 class ProfileHandler(WebRequestHandler):
@@ -81,7 +90,8 @@ class ProfileHandler(WebRequestHandler):
             # The URL is /p/unique_profile_str
             if self.request.path.find('/p/') != -1:
                 q = models.FMBUser.query().filter(
-                    ndb.GenericProperty('unique_profile_str') == user_identifier)
+                    ndb.GenericProperty('unique_profile_str') ==
+                    user_identifier)
                 user = q.get()
 
                 if user is None:
@@ -102,15 +112,18 @@ class ProfileHandler(WebRequestHandler):
             'close': close,
         }
 
-        # TODO(elsigh): Allow user to set "default" device or order devices one day.
+        # TODO(elsigh): Allow user to set "default" device or
+        # sort order devices one day.
         template_data['title'] = template_data['user']['name']
-        if 'devices' in template_data['user'] and len(template_data['user']['devices']):
-            if ('settings' in template_data['user']['devices'][0] and
-                len(template_data['user']['devices'][0]['settings'])):
+        if (('devices' in template_data['user'] and
+             len(template_data['user']['devices']))):
+            first_device = template_data['user']['devices'][0]
+            if (('settings' in first_device and
+                 len(first_device['settings']))):
+                most_recent_setting = first_device['settings'][0]
                 template_data['title'] += (
                     ' - ' +
-                    str(template_data['user']['devices'][0]['settings'][0]['battery_level']) +
-                    '%')
+                    str(most_recent_setting['battery_level']) + '%')
 
         template_data['title'] += ' - Levels'
 
@@ -118,5 +131,5 @@ class ProfileHandler(WebRequestHandler):
 
 
 class IndexHandler(WebRequestHandler):
-  def get(self):
-    return self.redirect('/p/elsigh')
+    def get(self):
+        return self.redirect('/p/elsigh')

@@ -1,4 +1,5 @@
-cordova.define('cordova/plugin/contactview', function(require, exports, module) {
+cordova.define('cordova/plugin/contactview',
+    function(require, exports, module) {
   var exec = require('cordova/exec');
 
   var ContactView = {};

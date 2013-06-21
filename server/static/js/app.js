@@ -39,7 +39,8 @@ fmb.App.isPhonePaused_ = false;
 
 
 /**
- * @type {Object} batteryInfo Phonegap battery info.
+ * @param {Object} batteryInfo Phonegap battery info.
+ * @private
  */
 fmb.App.onBatteryStatus_ = function(batteryInfo) {
   fmb.log('fmb.App.onBatteryStatus_', batteryInfo);
@@ -170,6 +171,7 @@ fmb.App.prototype.checkIntent_ = function(url) {
 
 
 /**
+ * @param {string} url
  * @private
  */
 fmb.App.prototype.checkIntentUrlForUser_ = function(url) {

@@ -36,6 +36,7 @@ fmb.models.SERVER_SHARE = fmb.ua.IS_ANDROID && fmb.ua.IS_CORDOVA ?
 
 
 /**
+ * @param {string} endpoint The endpoint of the url.
  * @return {string} An url.
  */
 fmb.models.getApiUrl = function(endpoint) {
@@ -65,7 +66,7 @@ fmb.models.padNum2Chars = function(num) {
 
 
 /**
- * @param {number} time An ISO time.
+ * @param {number} opt_date A date obj.
  * @return {string} A date string ala 2013-05-20T15:40:40.290320.
  */
 fmb.models.getISODate = function(opt_date) {
@@ -81,28 +82,33 @@ fmb.models.getISODate = function(opt_date) {
 
 /**
  * @param {number} time An ISO time.
+ * @return {string} A pretty representation of the time.
  */
 fmb.models.prettyDate = function(time) {
   var date = new Date(time),
     diff = (((new Date()).getTime() - date.getTime()) / 1000),
     day_diff = Math.floor(diff / 86400);
 
-  if ( isNaN(day_diff) || day_diff < 0 || day_diff >= 31 )
+  if (isNaN(day_diff) || day_diff < 0 || day_diff >= 31) {
     return 'a bit ago';
+  }
 
   return day_diff === 0 && (
-      diff < 60 && "just now" ||
-      diff < 120 && "1 minute ago" ||
-      diff < 3600 && Math.floor( diff / 60 ) + " minutes ago" ||
-      diff < 7200 && "1 hour ago" ||
-      diff < 86400 && Math.floor( diff / 3600 ) + " hours ago") ||
-    day_diff == 1 && "Yesterday" ||
-    day_diff < 7 && day_diff + " days ago" ||
-    day_diff < 31 && Math.ceil( day_diff / 7 ) + " weeks ago";
+      diff < 60 && 'just now' ||
+      diff < 120 && '1 minute ago' ||
+      diff < 3600 && Math.floor(diff / 60) + ' minutes ago' ||
+      diff < 7200 && '1 hour ago' ||
+      diff < 86400 && Math.floor(diff / 3600) + ' hours ago') ||
+    day_diff == 1 && 'Yesterday' ||
+    day_diff < 7 && day_diff + ' days ago' ||
+    day_diff < 31 && Math.ceil(day_diff / 7) + ' weeks ago';
 };
 
 
-/** @inheritDoc */
+/**
+ * @inheritDoc
+ * @this {Backbone.Model}
+ */
 fmb.models.sync = function(method, model, options) {
   fmb.log('fmb.models.sync', method, model.id,
           'server_only?', options['server_only'],
@@ -165,7 +171,10 @@ fmb.models.sync = function(method, model, options) {
   Backbone.ajaxSync.call(this, method, model, options);
 };
 
-// Define sync =)
+
+/**
+ * @type {Function}
+ */
 Backbone.sync = fmb.models.sync;
 
 
@@ -195,7 +204,7 @@ fmb.models.sync.deviceId = null;
  * @extends {fmb.Model}
  * @constructor
  */
-fmb.models.AjaxSyncModel= Backbone.Model.extend({
+fmb.models.AjaxSyncModel = Backbone.Model.extend({
   sync: fmb.models.sync
 });
 
@@ -302,7 +311,7 @@ fmb.Model.prototype.toJSON = function() {
   _.each(this.submodels,
       _.bind(function(constructor, submodelName) {
         if (json[submodelName]) {
-          json[submodelName] = this.get(submodelName).toJSON()
+          json[submodelName] = this.get(submodelName).toJSON();
         }
       }, this));
   return json;
@@ -358,7 +367,8 @@ fmb.Model.prototype.getStorageData = function() {
 
 
 /**
- * Save me - to storage..
+ * @param {Object} opt_data A data obj.
+ * @param {Object} opt_options An options config.
  */
 fmb.Model.prototype.saveToStorage = function(opt_data, opt_options) {
   fmb.log('fmb.Model saveToStorage id', this.id);
@@ -471,7 +481,7 @@ fmb.Collection.prototype.fetchFromStorage = function(opt_options) {
 fmb.Collection.prototype.toJSON = function() {
   return this.map(function(model) {
     return model.toJSON();
-  })
+  });
 };
 
 

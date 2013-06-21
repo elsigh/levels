@@ -25,9 +25,7 @@
       </div>
       <section class="tabs-c">
         <div class="tabs">
-          <a href="following" class="following">Stats</a><a
-            href="account" class="account">Account</a><span
-            class="share">Share</share>
+          <a href="account" class="account">Account</a><a href="following" class="following">Stats</a>
         </div>
       </section>
       <section class="fmb-tab fmb-tab-account">
@@ -36,27 +34,26 @@
       <section class="fmb-tab fmb-tab-following">
         <div class="fmb-following"></div>
       </section>
-      <div class="fmb-loading"
-        style="display:none;"></div>
+      <div class="fmb-loading" style="display:none;"></div>
     </div>
     <script>
-      // Super-wild-west-runtime-unit-testing.
-      if (window.location.search.indexOf('?test=1') !== -1) {
-        // Stubs cordova so we can run this webpage in a unit test.
+      var cordovaSrc_;
+      if (window.navigator.userAgent.match(/Android/i)) {
+        cordovaSrc_ = 'cordova-android.js';
+      } else if (window.navigator.userAgent.match(/iPad/i) ||
+                 window.navigator.userAgent.match(/iPhone/i)) {
+        cordovaSrc_ = 'cordova-ios.js';
+      }
+      if (cordovaSrc_) {
+        document.write('<scr'+'ipt src="js/' + cordovaSrc_ + '"></sc'+'ript>');
+      } else {
+        // Stubs cordova so we can run this page on the web not as a
+        // cordova app.
         cordova = {
           addConstructor: function() {},
           require: function() {},
           define: function() {}
         };
-      } else {
-        (function() {
-          var ua = window.navigator.userAgent;
-          var cordovaSrc = 'cordova-android.js';
-          if (ua.match(/iPad/i) || ua.match(/iPhone/i)) {
-             cordovaSrc = 'cordova-ios.js';
-          }
-          document.write('<scr'+'ipt src="js/' + cordovaSrc + '"></sc'+'ript>');
-        })();
       }
     </script>
     <script src="js/levels_plugin.js"></script>
@@ -83,7 +80,7 @@
       {{^user.api_token}}
         <h2>Welcome!</h2>
         <p>
-          Automatically send your family and friends a
+          Levels can automatically send yourself and your friends and family a
           notification *before* your battery dies!
         </p>
         <p>
@@ -98,16 +95,49 @@
         </p>
         <p>
           <em>
-            Fear not - Levels will <strong>never</strong>
+            Levels will <strong>never</strong>
             automatically post anything to any social network on your behalf.
           </em>
         </p>
       {{/user.api_token}}
 
       {{#user.api_token}}
-        <div class="user-img-name">
+        <div class="user-header">
           <img src="{{user.avatar_url}}" alt="">
-          <h2>{{user.name}}</h2>
+          <div class="user-info">
+            <h2>{{user.name}}</h2>
+
+            <div>
+              <div class="share">
+                www.levelsapp.com/p/{{user.unique_profile_str}}
+              </div>
+            </div>
+
+            {{#user.is_gmail_account}}
+              <div class="label-c">
+                <label>
+                  <input
+                    type="checkbox"
+                    name="allow_gmail_lookup"
+                    {{#user.allow_gmail_lookup}}checked{{/user.allow_gmail_lookup}}>
+                  Use my gmail name in my profile.
+                </label>
+              </div>
+            {{/user.is_gmail_account}}
+
+            <!--
+            <div>
+              www.levelsapp.com/n/{{user.unique_profile_str}}
+            </div>
+            <label>
+              <input
+                type="checkbox"
+                name="allow_phone_lookup"
+                {{#user.allow_phone_lookup}}checked{{/user.allow_phone_lookup}}>
+              Others can use my phone number for reverse lookups.
+            </label>
+            -->
+          </div>
         </div>
       {{/user.api_token}}
     </script>
@@ -132,12 +162,12 @@
 
     <script id="tpl_notifying" type="text/html">
       <p class="info-headline">
-        Sends a notification when your battery hits 10%
+        <strong>Send Notifications</strong>: when your battery reaches 10%
       </p>
 
       <div class="fmb-button-c">
-        <button class="notifying-add-phone">+ by phone</button>
-        <button class="notifying-add-email">+ by email</button>
+        <button class="notifying-add-phone">by phone</button>
+        <button class="notifying-add-email">by email</button>
       </div>
 
       {{#notifying.length}}
@@ -248,10 +278,13 @@
     </script>
 
     <script>
+      // Catch-all.
       window.onerror = function(message, url, lineNumber) {
         window.console.log('window.onerror GLOBAL FAIL: ' + message + ', ' +
             url + ', ' + lineNumber);
       };
+
+      // Hogan.
       window.templates = {};
       $('script[type="text/html"]').each(function(i, script) {
         var name = script.id.replace('tpl_', '');
@@ -270,13 +303,27 @@
           document.write('<scr'+'ipt src="' + src + '"></sc'+'ript>');
         });
 
-      // Load the app like a normal person.
-      } else {
+      // Load the app as a cordova app.
+      } else if (cordovaSrc_) {
         document.addEventListener('deviceready', function() {
           window['app'] = new fmb.App();
         }, false);
+
+      // Load the app ala webapp style.
+      } else {
+        $(document).ready(function() {
+          window['app'] = new fmb.App();
+        });
       }
 
+      if (window.location.href.match(/levelsapp.com/i)) {
+        (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+        })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+        ga('create', 'UA-41823667-1', 'levelsapp.com');
+        ga('send', 'pageview');
+      }
     </script>
   </body>
   </html>
