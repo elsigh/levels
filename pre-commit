@@ -109,7 +109,7 @@ def check_javascript():
     for file in modifieds:
         out, err, retcode = call('gjslint --strict %s' % file)
         if out or err:
-            output('gjslint', out, err)
+            output('gjslint %s' % file, out, err)
             rrcode = rrcode | retcode
 
     if rrcode != 0:
