@@ -20,6 +20,7 @@ $.ajaxSettings['error'] = function(xhr, status) {
 */
 
 
+
 /******************************************************************************/
 
 
@@ -154,7 +155,7 @@ fmb.models.NotifyingCollection.prototype.add = function(obj, options) {
  */
 fmb.models.NotifyingCollection.prototype.onAdd_ = function(model) {
   fmb.log('fmb.models.NotifyingCollection onAdd_:',
-           model.id, model.get('means'));
+          model.id, model.get('means'));
 
   // Backing through the model collection / parent chain is also a
   // possibility but this looks cleaner.
@@ -185,7 +186,7 @@ fmb.models.NotifyingCollection.prototype.onAdd_ = function(model) {
  */
 fmb.models.NotifyingCollection.prototype.onRemove_ = function(model) {
   fmb.log('fmb.models.NotifyingCollection onRemove_:',
-           model.id, model.get('means'));
+          model.id, model.get('means'));
 
   // Backing through the model collection / parent chain is also a
   // possibility but this looks cleaner.
@@ -329,7 +330,6 @@ fmb.models.DeviceUnMapped.prototype.getTemplateData = function() {
   }
   return templateData;
 };
-
 
 
 

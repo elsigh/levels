@@ -8,6 +8,9 @@ import subprocess
 
 devnull = open(os.devnull, 'w')
 
+IGNORE_JS_FILES = [
+    'ContactView.js',
+]
 
 def call(cmd):
     p = subprocess.Popen(cmd.split(),
@@ -85,8 +88,16 @@ def check_python():
 
 
 def check_javascript():
-
     modifieds = get_modified('js')
+
+    i = 0
+    for modified in modifieds:
+        for ignore_file in IGNORE_JS_FILES:
+            print 'mod %s, ign: %s' % (modified, ignore_file)
+            if re.search(ignore_file, modified, re.UNICODE):
+                modifieds.pop(i)
+        i += 1
+
     if not modifieds:
         return
 
@@ -96,7 +107,7 @@ def check_javascript():
 
     rrcode = 0
     for file in modifieds:
-        out, err, retcode = call('gjslint --nojsdoc %s' % file)
+        out, err, retcode = call('gjslint --strict %s' % file)
         if out or err:
             output('gjslint', out, err)
             rrcode = rrcode | retcode
