@@ -60,7 +60,12 @@ handlers:
 - url: /favicon.ico
   static_files: static/img/favicon.ico
   upload: static/img/favicon.ico
-  expiration: "0d 1h"
+  expiration: "0d 12h"
+
+- url: /favicon.png
+  static_files: static/img/favicon.png
+  upload: static/img/favicon.png
+  expiration: "0d 12h"
 
 - url: /robots.txt
   static_files: static/robots.txt

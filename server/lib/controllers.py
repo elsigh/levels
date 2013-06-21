@@ -12,7 +12,8 @@ from webapp2 import Route
 sys.path.append(os.path.join(os.path.dirname(__file__), 'external'))
 
 from lib.models import FMBUser
-from lib.web_request_handler import ErrorNotFoundRequestHandler, ErrorInternalRequestHandler
+from lib.web_request_handler import ErrorNotFoundRequestHandler
+from lib.web_request_handler import ErrorInternalRequestHandler
 
 from google.appengine.ext import deferred
 # Hack to get ndb into the modules list.
@@ -25,27 +26,30 @@ import settings
 
 # webapp2 config
 app_config = {
-  'webapp2_extras.sessions': {
-    'cookie_name': '_simpleauth_sess',
-    'secret_key': settings.SESSION_KEY
-  },
-  'webapp2_extras.auth': {
-    'user_attributes': [],
-    'user_model': FMBUser
-  }
+    'webapp2_extras.sessions': {
+        'cookie_name': '_simpleauth_sess',
+        'secret_key': settings.SESSION_KEY
+    },
+    'webapp2_extras.auth': {
+        'user_attributes': [],
+        'user_model': FMBUser
+    }
 }
 
 routes = [
     # API
     Route('/api/device/delete', handler='lib.api.ApiDeviceDeleteHandler'),
     Route('/api/device', handler='lib.api.ApiDeviceHandler'),
-    Route('/api/following/delete', handler='lib.api.ApiFollowingDeleteHandler'),
+    Route('/api/following/delete',
+          handler='lib.api.ApiFollowingDeleteHandler'),
     Route('/api/following', handler='lib.api.ApiFollowingHandler'),
-    Route('/api/notifying/delete', handler='lib.api.ApiNotifyingDeleteHandler'),
+    Route('/api/notifying/delete',
+          handler='lib.api.ApiNotifyingDeleteHandler'),
     Route('/api/notifying', handler='lib.api.ApiNotifyingHandler'),
     Route('/api/settings', handler='lib.api.ApiSettingsHandler'),
     # Deprecate gcm_push_token
-    Route('/api/user/gcm_push_token', handler='lib.api.ApiUserGCMPushTokenHandler'),
+    Route('/api/user/gcm_push_token',
+          handler='lib.api.ApiUserGCMPushTokenHandler'),
     Route('/api/user/token', handler='lib.api.ApiUserTokenHandler'),
     Route('/api/user', handler='lib.api.ApiUserHandler'),
 
@@ -59,7 +63,8 @@ routes = [
           name='auth_callback'),
 
     # Admin
-    Route('/admin/user_message_test', handler='lib.www.AdminUserMessageTestHandler'),
+    Route('/admin/user_message_test',
+          handler='lib.www.AdminUserMessageTestHandler'),
     Route('/admin/users', handler='lib.www.AdminUsersHandler'),
     Route('/admin/api_request', handler='lib.www.AdminApiRequestHandler'),
 
@@ -76,7 +81,7 @@ if 'SERVER_SOFTWARE' in os.environ:
     is_debug = 'Development' in os.environ['SERVER_SOFTWARE']
 
 app = webapp2.WSGIApplication(routes, config=app_config,
-    debug=is_debug)
+                              debug=is_debug)
 
 app.error_handlers[404] = ErrorNotFoundRequestHandler
 #app.error_handlers[500] = ErrorInternalRequestHandler

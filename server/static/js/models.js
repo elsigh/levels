@@ -20,6 +20,7 @@ $.ajaxSettings['error'] = function(xhr, status) {
 */
 
 
+
 /******************************************************************************/
 
 
@@ -99,7 +100,7 @@ fmb.models.NotifyingCollection.prototype.initialize = function() {
   fmb.Collection.prototype.initialize.apply(this, arguments);
   this.on('add', this.onAdd_, this);
   this.on('remove', this.onRemove_, this);
-}
+};
 
 
 /** @inheritDoc */
@@ -154,7 +155,7 @@ fmb.models.NotifyingCollection.prototype.add = function(obj, options) {
  */
 fmb.models.NotifyingCollection.prototype.onAdd_ = function(model) {
   fmb.log('fmb.models.NotifyingCollection onAdd_:',
-           model.id, model.get('means'));
+          model.id, model.get('means'));
 
   // Backing through the model collection / parent chain is also a
   // possibility but this looks cleaner.
@@ -185,7 +186,7 @@ fmb.models.NotifyingCollection.prototype.onAdd_ = function(model) {
  */
 fmb.models.NotifyingCollection.prototype.onRemove_ = function(model) {
   fmb.log('fmb.models.NotifyingCollection onRemove_:',
-           model.id, model.get('means'));
+          model.id, model.get('means'));
 
   // Backing through the model collection / parent chain is also a
   // possibility but this looks cleaner.
@@ -234,7 +235,7 @@ fmb.models.SettingsCollection.prototype.comparator = function(model) {
  * @constructor
  */
 fmb.models.DeviceUnMapped = fmb.Model.extend({
-  localStorage: new Backbone.LocalStorage('Device'),
+  //localStorage: new Backbone.LocalStorage('Device'),
   defaults: {
     'user_agent_string': window.navigator.userAgent,
     'update_enabled': 1,
@@ -257,7 +258,7 @@ fmb.models.DeviceUnMapped.getUuid = function() {
 
 
 /**
- * @private
+ * Callback.
  */
 fmb.models.DeviceUnMapped.prototype.onBatteryStatus = function() {
   fmb.log('fmb.models.Device onBatteryStatus');
@@ -314,7 +315,7 @@ fmb.models.DeviceUnMapped.prototype.url = function() {
 
 
 /**
- * @return {Object} Template data
+ * @return {Object} Template data.
  */
 fmb.models.DeviceUnMapped.prototype.getTemplateData = function() {
   var templateData = fmb.Model.prototype.getTemplateData.call(this);
@@ -331,6 +332,10 @@ fmb.models.DeviceUnMapped.prototype.getTemplateData = function() {
 };
 
 
+
+/**
+ * @constructor
+ */
 fmb.models.Device = Backbone.IdentityMap(
     fmb.models.DeviceUnMapped);
 
@@ -604,7 +609,7 @@ fmb.models.User.GCMEvent = function(e) {
 
     default:
       fmb.log('UNKNOWN ERROR');
-      break
+      break;
   }
 };
 
@@ -630,8 +635,19 @@ fmb.models.User.prototype.getProfileUrl = function() {
 };
 
 
+/** @inheritDoc */
+fmb.models.User.prototype.getTemplateData = function() {
+  var templateData = fmb.Model.prototype.getTemplateData.call(this);
+  if (this.has('email') && this.get('email').match(/gmail\./)) {
+    templateData['is_gmail_account'] = true;
+  }
+  return templateData;
+};
+
+
 /**
  * This method actually does everything to get us set up.
+ * @private
  */
 fmb.models.User.prototype.initialize_ = function() {
   fmb.log('fmb.models.User initialize_', this.id, this.get('api_token'));

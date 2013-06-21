@@ -4,8 +4,14 @@
 *.pyc
 client/android/bin
 client/android/gen
+
+client/ios/CordovaLib/CordovaLib.xcodeproj/xcuserdata
+client/ios/Levels.xcodeproj/project.xcworkspace
+client/ios/Levels.xcodeproj/xcuserdata
+
 server/data.sqlite3
 server/update.sh
+
 
 # OS generated files #
 ######################

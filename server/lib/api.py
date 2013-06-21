@@ -1,7 +1,6 @@
 #!/usr/bin/python2.7
 #
 #
-
 from datetime import datetime, timedelta
 import json
 import logging
@@ -51,14 +50,14 @@ def send_twilio_msg(to, body):
     try:
         client = TwilioRestClient(settings.TWILIO_ACCOUNT_SID,
                                   settings.TWILIO_AUTH_TOKEN)
-        twilio_message = client.sms.messages.create(to=to,
-                                                    from_=settings.TWILIO_NUMBER,
-                                                    body=body)
+        twilio_message = client.sms.messages.create(
+            to=to, from_=settings.TWILIO_NUMBER, body=body)
     except TwilioRestException, e:
         logging.info('TwilioRestException e: %s' % e)
         pass
 
     return True
+
 
 def api_token_required(handler_method):
     """A decorator to require that an API token is passed in."""
@@ -81,7 +80,6 @@ class ApiRequestHandler(WebRequestHandler):
     def _set_json_request_data(self):
         self._json_request_data = {}
         content_type = self.request.headers.get('content-type')
-        #logging.info('_set_json_request_data CONTENT_TYPE:: %s' % self.request.headers)
         if content_type and 'application/json' in content_type:
             json_request = self.request.body
             json_request = urllib2.unquote(json_request).decode('utf-8')
@@ -98,11 +96,16 @@ class ApiRequestHandler(WebRequestHandler):
         # existence is also pretty ugly and these two fields are pretty key.
         elif self.request.method == 'GET':
             if self.request.get('api_token'):
-                self._json_request_data['api_token'] = self.request.get('api_token')
+                self._json_request_data['api_token'] = \
+                    self.request.get('api_token')
+
             if self.request.get('user_key'):
-                self._json_request_data['user_key'] = self.request.get('user_key')
+                self._json_request_data['user_key'] = \
+                    self.request.get('user_key')
+
             if self.request.get('device_key'):
-                self._json_request_data['device_key'] = self.request.get('device_key')
+                self._json_request_data['device_key'] = \
+                    self.request.get('device_key')
 
         logging.info('JSON REQ DATA: %s' % self._json_request_data)
 
@@ -126,9 +129,8 @@ class ApiRequestHandler(WebRequestHandler):
         if 'user_key' not in self._json_request_data:
             return
         assert self.current_user is not None
-        #logging.info('_assert_user_id %s vs %s' %
-        #    (self.current_user.key.urlsafe(), self._json_request_data['user_key']))
-        assert self.current_user.key.urlsafe() == self._json_request_data['user_key']
+        assert (self.current_user.key.urlsafe() ==
+                self._json_request_data['user_key'])
 
     def _get_device_by_device_key(self):
         """Ensures that the passed in device_key is owned by current_user."""
@@ -150,13 +152,12 @@ class ApiRequestHandler(WebRequestHandler):
         if url != '/api/user/token':
             assert 'api_token' in self._json_request_data
 
-
     @webapp2.cached_property
     def current_user(self):
         # Admin USER override by JSON request value.
         gae_user = users.get_current_user()
-        if gae_user and gae_user.is_current_user_admin():
-            logging.info('ADMIN as CURRENT_USER: %s, %s' % (user.name, user))
+        if gae_user and users.is_current_user_admin():
+            logging.info('ADMIN as CURRENT_USER: %s' % gae_user)
             return self.get_json_request_user()
 
         user = super(ApiRequestHandler, self).current_user
@@ -168,9 +169,9 @@ class ApiRequestHandler(WebRequestHandler):
 
     def get_json_request_user(self):
         # For our api_token situation, which is special because we can't go
-        # setting a cookie for our domain in both our JS client and Java client.
-        if ('user_key' in self._json_request_data and
-            'api_token' in self._json_request_data):
+        # setting a cookie in both our JS client and Java client.
+        if (('user_key' in self._json_request_data and
+             'api_token' in self._json_request_data)):
             user_key = self._json_request_data['user_key']
             api_token = self._json_request_data['api_token']
             user = ndb.Key(urlsafe=user_key).get()
@@ -206,7 +207,7 @@ class ApiUserHandler(ApiRequestHandler):
     def get(self):
         user = self.current_user
         if not user:
-             return self.output_json_error({}, 404)
+            return self.output_json_error({}, 404)
         return self.output_json_success(
             user.to_dict(include_api_token=True,
                          include_device_notifying=True))
@@ -214,22 +215,25 @@ class ApiUserHandler(ApiRequestHandler):
     def post(self):
         user = self.current_user
         if not user:
-             return self.output_json_error({}, 404)
+            return self.output_json_error({}, 404)
 
         # Only allows us to write certain parameters.
         if 'app_version' in self._json_request_data:
             user.app_version = self._json_request_data['app_version']
 
         if 'allow_phone_lookup' in self._json_request_data:
-            user.allow_phone_lookup = self._json_request_data['allow_phone_lookup']
+            user.allow_phone_lookup = \
+                self._json_request_data['allow_phone_lookup']
 
         if 'allow_gmail_lookup' in self._json_request_data:
-            user.allow_gmail_lookup = self._json_request_data['allow_gmail_lookup']
+            user.allow_gmail_lookup = \
+                self._json_request_data['allow_gmail_lookup']
 
         user.put()
 
         return self.output_json_success(
-            user.to_dict(include_api_token=True, include_device_notifying=True))
+            user.to_dict(include_api_token=True,
+                         include_device_notifying=True))
 
 
 class ApiUserGCMPushTokenHandler(ApiRequestHandler):
@@ -266,7 +270,8 @@ class ApiUserTokenHandler(ApiRequestHandler):
             user.put()
 
         return self.output_json_success(
-            user.to_dict(include_api_token=True, include_device_notifying=True))
+            user.to_dict(include_api_token=True,
+                         include_device_notifying=True))
 
 
 class ApiDeviceHandler(ApiRequestHandler):
@@ -289,9 +294,11 @@ class ApiDeviceHandler(ApiRequestHandler):
             device = q.get()
 
         for key in device._properties.keys():
-            if key in self._json_request_data:
+            if ((key not in device.immutable_update_properties and
+                 key in self._json_request_data)):
                 val = self._json_request_data[key]
-                if key in ['update_enabled', 'update_frequency', 'notify_level']:
+                if key in ['update_enabled', 'update_frequency',
+                           'notify_level']:
                     val = int(val)
                 setattr(device, key, val)
 
@@ -319,6 +326,7 @@ class ApiDeviceDeleteHandler(ApiRequestHandler):
 
 
 app_for_taskqueue = webapp2.WSGIApplication()
+
 
 def _send_notification_templater(user_id, device_id, notifying_id, tpl_name):
     logging.info('_send_notification_templater %s, %s, %s' %
@@ -359,11 +367,13 @@ def _send_notification_templater(user_id, device_id, notifying_id, tpl_name):
         'notifying': notifying.to_dict()
     }
 
-    rendered = jinja2.get_jinja2(app=app_for_taskqueue).render_template(tpl_name, **tpl_data)
+    rendered = jinja2.get_jinja2(
+        app=app_for_taskqueue).render_template(tpl_name, **tpl_data)
     return notifying, rendered
 
 
-def send_battery_notification_email(user_id, device_id, notifying_id, send=True):
+def send_battery_notification_email(user_id, device_id, notifying_id,
+                                    send=True):
     logging.info('send_battery_notification_email %s, %s' %
                  (user_id, device_id))
     notifying, body = _send_notification_templater(user_id, device_id,
@@ -375,7 +385,8 @@ def send_battery_notification_email(user_id, device_id, notifying_id, send=True)
         return
 
     to = '%s <%s>' % (notifying.name, notifying.means)
-    subject = '[Levels Alert] %s - my phone battery is at 10%%' % notifying.name
+    subject = ('[Levels Alert] %s - my phone battery is at 10%%' %
+               notifying.name)
     send_email(to, subject, body)
 
     sent = models.NotificationSent(
@@ -384,12 +395,13 @@ def send_battery_notification_email(user_id, device_id, notifying_id, send=True)
     sent.put()
 
 
-def send_battery_notification_phone(user_id, device_id, notifying_id, send=True):
+def send_battery_notification_phone(user_id, device_id, notifying_id,
+                                    send=True):
     logging.info('send_battery_notification_phone %s, %s' %
                  (user_id, device_id))
     notifying, body = _send_notification_templater(user_id, device_id,
-                                                       notifying_id,
-                                                       'notification_phone.html')
+                                                   notifying_id,
+                                                   'notification_phone.html')
 
     if notifying is None:
         logging.info('BAIL CITY BABY, DONE PHONE NOTIFIED ENUFF')
@@ -411,7 +423,8 @@ def send_battery_notification_phone(user_id, device_id, notifying_id, send=True)
 
 
 def send_battery_notification_self(user_id, device_id):
-    logging.info('send_battery_notification_self %s, %s' % (user_id, device_id))
+    logging.info('send_battery_notification_self %s, %s' %
+                 (user_id, device_id))
     user = models.FMBUser.get_by_id(user_id)
     if not user:
         logging.info('BAIL CITY BABY, no user model')
@@ -436,7 +449,8 @@ def send_battery_notification_self(user_id, device_id):
     )
     sent.put()
 
-    message = 'Your %s %s battery is low (10%%)' % (device.platform, device.name)
+    message = ('Your %s %s battery is low (10%%)' %
+               (device.platform, device.name))
     user.send_message(message)
 
 
@@ -467,18 +481,22 @@ def send_battery_notifications(user_id, device_id):
     # Also send the device owner a message.
     deferred.defer(send_battery_notification_self, user_id, device_id)
 
+    device.increment_count('send_battery_notifications_count')
+
+
 class ApiSettingsHandler(ApiRequestHandler):
     def post(self):
         device = self._get_device_by_device_key()
         battery_level = self._json_request_data['battery_level']
-        is_this_update_over_notify_level = int(battery_level) > int(device.notify_level)
+        is_this_update_over_notify_level = \
+            int(battery_level) > int(device.notify_level)
 
         logging.info('device.is_last_update_over_notify_level %s, '
                      'is_this_update_over_notify_level %s' %
                      (device.is_last_update_over_notify_level,
                       is_this_update_over_notify_level))
-        if (device.is_last_update_over_notify_level and
-            not is_this_update_over_notify_level):
+        if ((device.is_last_update_over_notify_level and
+             not is_this_update_over_notify_level)):
             logging.info('^^^^ DO NOTIFICATIONS! ^^^^')
             deferred.defer(send_battery_notifications,
                            self.current_user.key.id(),
@@ -491,14 +509,19 @@ class ApiSettingsHandler(ApiRequestHandler):
         settings.populate(**settings_data)
         settings.put()
 
-        if is_this_update_over_notify_level != device.is_last_update_over_notify_level:
-            device.is_last_update_over_notify_level = is_this_update_over_notify_level
+        if ((is_this_update_over_notify_level !=
+             device.is_last_update_over_notify_level)):
+            device.is_last_update_over_notify_level = \
+                is_this_update_over_notify_level
             device.put()
+
+        device.increment_count('settings_received_count')
 
         # Hack in is_last_update_over_notify_level
         json_output = settings.to_dict()
         json_output.update({
-            'is_last_update_over_notify_level': is_this_update_over_notify_level
+            'is_last_update_over_notify_level':
+            is_this_update_over_notify_level
         })
 
         return self.output_json_success(json_output)
@@ -520,14 +543,17 @@ class ApiFollowingHandler(ApiRequestHandler):
         return self.output_json_success(obj)
 
     def post(self):
-        """Two ways to add a following user - either by key or unique_profile_str."""
+        """Two ways to add a following user - by key or unique_profile_str."""
 
         if 'following_user_key' in self._json_request_data:
-            follow_user = ndb.Key(urlsafe=self._json_request_data['following_user_key']).get()
+            follow_user = ndb.Key(
+                urlsafe=self._json_request_data['following_user_key']).get()
 
         elif 'following_user_unique_profile_str':
+            req_val = \
+                self._json_request_data['following_user_unique_profile_str']
             q = models.FMBUser.query().filter(
-                ndb.GenericProperty('unique_profile_str') == self._json_request_data['following_user_unique_profile_str'])
+                ndb.GenericProperty('unique_profile_str') == req_val)
             follow_user = q.get()
 
         if follow_user is None:
@@ -593,7 +619,8 @@ class ApiNotifyingHandler(ApiRequestHandler):
         device = self._get_device_by_device_key()
         # Now make sure they're not already following that user.
         q = models.Notifying.query(ancestor=device.key)
-        q = q.filter(models.Notifying.means == self._json_request_data['means'])
+        q = q.filter(models.Notifying.means ==
+                     self._json_request_data['means'])
         if q.count() > 0:
             logging.info('ALREADY notifying %s!' %
                          self._json_request_data['means'])
@@ -610,10 +637,10 @@ class ApiNotifyingHandler(ApiRequestHandler):
 
         # viral coefucksient.
         deferred.defer(send_notifying_message,
-            self.current_user.key.id(),
-            self._json_request_data['type'],
-            self._json_request_data['name'],
-            self._json_request_data['means'])
+                       self.current_user.key.id(),
+                       self._json_request_data['type'],
+                       self._json_request_data['name'],
+                       self._json_request_data['means'])
 
         return self.output_json_success(notifying.to_dict())
 
@@ -628,7 +655,6 @@ class ApiNotifyingDeleteHandler(ApiRequestHandler):
 
         notifying.key.delete()
         return self.output_json_success(notifying.to_dict())
-
 
 
 def send_notifying_message(user_id, to_type, to_name, to_means, send=True):
@@ -646,11 +672,12 @@ def send_notifying_message(user_id, to_type, to_name, to_means, send=True):
     from_time = datetime.now() - timedelta(hours=12)
     q = q.filter(models.NotificationSent.created > from_time)
     if q.count() != 0:
-        logging.info('BAIL CITY BABY, we already sent them a notification recently.')
+        logging.info('BAIL CITY, we already sent a notification recently.')
         return
 
     if send:
-        body = ('%s is using Levels to notify you before their battery dies. Check it out! %s' %
+        body = ('%s is using Levels to notify you before their battery dies. '
+                'Check it out! %s' %
                 (user.name, user.get_profile_url()))
         if to_type == 'email':
             to = '%s <%s>' % (to_name, to_means)
@@ -664,4 +691,3 @@ def send_notifying_message(user_id, to_type, to_name, to_means, send=True):
         parent=user.key,
         means=to_means)
     sent.put()
-

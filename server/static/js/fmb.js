@@ -69,11 +69,14 @@ fmb.getWebViewLogger_ = function() {
 };
 
 
+/**
+ * @param {string} src The script src.
+ */
 fmb.injectScript = function(src) {
   script = document.createElement('script');
   script.type = 'text/javascript';
   script.async = true;
-  script.onload = function(){
+  script.onload = function() {
       // remote script has loaded
   };
   script.src = src;
