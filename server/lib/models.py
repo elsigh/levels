@@ -121,6 +121,22 @@ class FMBUser(User, FMBModel):
         #logging.info('POST _pre_put_hook %s' % self)
 
     @property
+    def possessive(self):
+        name = ''
+        if hasattr(self, 'given_name'):
+            name = self.given_name
+        else:
+            name = self.name
+
+        last_char = name[-1]
+
+        if last_char.lower() == 's':
+            name += '\''
+        else:
+            name += '\'s'
+        return name
+
+    @property
     def is_gmail_account(self):
         return hasattr(self, 'email') and self.email.find('@gmail.com') != -1
 
@@ -135,6 +151,7 @@ class FMBUser(User, FMBModel):
 
     def to_dict(self, include_api_token=False, include_device_notifying=False):
         obj = super(FMBUser, self).to_dict(include_api_token=include_api_token)
+        obj['possessive'] = self.possessive
 
         # Default avatar url
         if (('avatar_url' not in obj or
