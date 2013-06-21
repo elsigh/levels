@@ -16,15 +16,16 @@ Fire that baby up and you've got the website frontend and API backend running.
 Process
 -----------------------------
 
-Fuck process. Ok, well, at least run the unit tests below before submitting.
+Fuck process. Ok, well, at least try running the unit tests.
 Also, I seem to prefer the idea that you submit code to your own branch and
 then issue a pull request from that branch (which you can self-merge for now).
-I'm open to whatever. And once TravisCI supports running on private repos we'll
-wire up the unit tests.
+I'm open to whatever.
 
-Also do this from the repo root:
+Also do this from the repo root (runs pep8 + gjslint):
+
 ```bash
-ln -s pre-commit .git/hooks/pre-commit
+cd .git/hooks
+ln -s ../../pre-commit .
 ```
 
 Setup for testing the backend
