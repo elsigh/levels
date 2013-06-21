@@ -60,17 +60,22 @@ handlers:
 - url: /favicon.ico
   static_files: static/img/favicon.ico
   upload: static/img/favicon.ico
-  expiration: "0d 12h"
+  expiration: "1d"
 
 - url: /favicon.png
   static_files: static/img/favicon.png
   upload: static/img/favicon.png
-  expiration: "0d 12h"
+  expiration: "1d"
 
 - url: /robots.txt
   static_files: static/robots.txt
   upload: static/robots.txt
   expiration: "0d 1h"
+
+- url: /humans.txt
+  static_files: static/humans.txt
+  upload: static/humans.txt
+  expiration: "1d"
 
 # General static content directory.
 - url: /static
