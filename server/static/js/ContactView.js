@@ -7,7 +7,7 @@ cordova.define('cordova/plugin/contactview',
   ContactView.show = function(win, fail, opt_emailOrPhone) {
     var emailOrPhone = !_.isUndefined(opt_emailOrPhone) ?
         opt_emailOrPhone : 'phone';
-    return exec(win, fail, 'ContactView', '', [emailOrPhone]);
+    return exec(win, fail, 'ContactView', 'show', [emailOrPhone]);
   };
 
   module.exports = ContactView;
