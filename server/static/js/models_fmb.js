@@ -23,17 +23,21 @@ fmb.models.SERVER_PROD = 'https://followmybattery.appspot.com';
 
 
 /**
- * @type {string}
+ * @return {string} The server endpoint.
  */
-fmb.models.SERVER = fmb.ua.IS_APP ?
-    fmb.models.SERVER_PROD : fmb.models.SERVER_LOCAL;
+fmb.models.getServer = function() {
+  return fmb.ua.IS_APP && !fmb.ua.isSimulator() ?
+         fmb.models.SERVER_PROD : fmb.models.SERVER_LOCAL;
+};
 
 
 /**
- * @type {string}
+ * @return {string} The share server/login endpoint.
  */
-fmb.models.SERVER_SHARE = fmb.ua.IS_APP ?
-    'http://www.levelsapp.com' : fmb.models.SERVER_LOCAL;
+fmb.models.getServerShare = function() {
+  return fmb.ua.IS_APP && !fmb.ua.isSimulator() ?
+         'http://www.levelsapp.com' : fmb.models.SERVER_LOCAL;
+};
 
 
 /**
@@ -41,7 +45,8 @@ fmb.models.SERVER_SHARE = fmb.ua.IS_APP ?
  * @return {string} An url.
  */
 fmb.models.getApiUrl = function(endpoint) {
-  return fmb.models.SERVER + '/api' + endpoint;
+  var server = fmb.models.getServer();
+  return server + '/api' + endpoint;
 };
 
 

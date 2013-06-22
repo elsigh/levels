@@ -130,23 +130,29 @@ class FMBUser(User, FMBModel):
 
     @property
     def extra_properties(self):
-        return ['possessive', 'is_gmail_account', 'gmail_username']
+        return ['given_name_possessive', 'name_possessive',
+                'is_gmail_account', 'gmail_username']
 
-    @property
-    def possessive(self):
-        name = ''
-        if hasattr(self, 'given_name'):
-            name = self.given_name
-        else:
-            name = self.name
-
+    def possessive(self, name):
         last_char = name[-1]
-
         if last_char.lower() == 's':
             name += '\''
         else:
             name += '\'s'
         return name
+
+    @property
+    def name_possessive(self):
+        return self.possessive(self.name)
+
+    @property
+    def given_name_possessive(self):
+        name = ''
+        if hasattr(self, 'given_name'):
+            name = self.given_name
+        else:
+            name = self.name
+        return self.possessive(name)
 
     @property
     def is_gmail_account(self):

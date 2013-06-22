@@ -7,8 +7,13 @@ cordova.define('cordova/plugin/levels', function(require, exports, module) {
   plugin.setDeviceModel = function() {
     return exec(
         function(result) {
-          window.device.model = result;
-          fmb.log('Set window.device.model to', result);
+          // Only do this for Android.
+          if (window.device.platform == 'Android') {
+            window.device.model = result;
+            fmb.log('Set window.device.model to', result);
+          } else {
+            fmb.log('Not overloading window.device.model on non-droid');
+          }
         },
         null,
         'LevelsPlugin', 'getDeviceModelName', []);
