@@ -7,6 +7,7 @@ ul {
 
 h3 {
   margin-top: 0;
+  padding-bottom: 0;
 }
 
 th,
@@ -23,14 +24,37 @@ td {
   height: 150px;
 }
 
-.goog-play {
+.download-app {
+  text-align: center;
   position: absolute;
+  top: 50px;
   right: 20%;
   margin: 40px 10px 0 0;
 }
 
-.goog-play img {
+.download-app a {
+  display: block;
+}
+
+.download-app img {
   height: 60px;
+}
+
+.counters {
+  display: inline-block;
+  text-align: left;
+  list-style: none;
+  margin: 0.5em 0;
+  padding: 0;
+}
+
+.counters strong {
+  font-weight: normal;
+  background: #eee;
+  padding: 1px 3px;
+  border-right: 1px solid #aaa;
+  border-bottom: 1px solid #aaa;
+  border-radius: 5px;
 }
 
 .battery-level-c {
@@ -68,6 +92,7 @@ td {
   font-size: 70%;
   font-weight: 300;
 }
+
 .battery-created {
   margin-top: 4px;
   font-size: 85%;
@@ -89,9 +114,13 @@ td {
     height: 100px;
   }
 
-  .goog-play {
+  .download-app {
     margin-top: 20px;
     right: 10px;
+  }
+
+  .download-app img {
+    height: 45px;
   }
 
   thead {

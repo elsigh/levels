@@ -26,11 +26,15 @@ import settings
 
 
 class AdminApiRequestHandler(WebRequestHandler):
+    @admin_required
     def get(self):
-        self.output_response({}, 'admin_api_request.html')
+        self.output_response({
+            'title': 'Levels[Admin]: API Request'
+        }, 'admin_api_request.html')
 
 
 class AdminUsersHandler(WebRequestHandler):
+    @admin_required
     def get(self):
         curs = Cursor(urlsafe=self.request.get('cursor'))
         users, next_curs, more = models.FMBUser.query().order(
@@ -39,6 +43,7 @@ class AdminUsersHandler(WebRequestHandler):
         for user in users:
             users_output.append(user.to_dict())
         tpl_data = {
+            'title': 'Levels[Admin]: Users',
             'users': users_output,
             'next_cursor': next_curs.urlsafe(),
             'more': more
@@ -75,6 +80,12 @@ class AdminUserMessageTestHandler(WebRequestHandler):
 
         self.output_response({'result': result},
                              'admin_user_message_test.html')
+
+
+class AppHandler(WebRequestHandler):
+    """Redirects suck for mobile =/"""
+    def get(self, endpoint=None):
+        self.redirect('/static/app.html')
 
 
 class ProfileHandler(WebRequestHandler):

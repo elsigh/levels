@@ -720,6 +720,49 @@ class HandlerTest(unittest.TestCase):
         # other + self
         self.assertEqual(2, len(tasks))
 
+    def test_send_notification_templater(self):
+        elsigh_user = models.FMBUser(
+            name='Lindsey Simon',
+            given_name='Lindsey',
+            unique_profile_str='elsigh'
+        )
+        elsigh_user.put()
+
+        elsigh_device = models.Device(
+            parent=elsigh_user.key,
+            uuid='elsigh_uuid',
+            platform='Android',
+            name='Nexus 4'
+        )
+        elsigh_device.put()
+
+        ded_notifying = models.Notifying(
+            parent=elsigh_device.key,
+            means='+15126989983',
+            name='Dustin Diaz',
+            type='phone'
+        )
+        ded_notifying.put()
+
+        notifying, rendered = api._send_notification_templater(
+            elsigh_user.key.id(), elsigh_device.key.id(),
+            ded_notifying.key.id(),
+            'notification_battery_email.html')
+        self.assertEquals(
+            ('\nLindsey&#39;s Android Nexus 4 battery is running low '
+             'at 10%.\n\nwww.levelsapp.com/p/elsigh'),
+            rendered)
+
+        notifying, rendered = api._send_notification_templater(
+            elsigh_user.key.id(), elsigh_device.key.id(),
+            ded_notifying.key.id(),
+            'notification_battery_phone.html')
+        self.assertEquals(
+            ('Lindsey&#39;s Android Nexus 4 battery is running low '
+             'at 10%. www.levelsapp.com/p/elsigh'),
+            rendered)
+
+
     def test_send_battery_notification_phone(self):
         elsigh_user = models.FMBUser(
             name='elsigh'
@@ -793,6 +836,7 @@ class HandlerTest(unittest.TestCase):
         self.assertEquals(1, q.count())
 
     def test_send_battery_notification_self(self):
+        """This just tests that a NotificationSent entity gets created."""
         elsigh_user = models.FMBUser(
             name='elsigh'
         )
@@ -808,7 +852,7 @@ class HandlerTest(unittest.TestCase):
 
         api.send_battery_notification_self(elsigh_user.key.id(),
                                            elsigh_device.key.id())
-        #self.assertEquals(True, self_message_sent)
+
         q = models.NotificationSent.query(ancestor=elsigh_user.key)
         q.filter(models.NotificationSent.means == 'self_battery_message')
         self.assertEquals(1, q.count())
@@ -874,7 +918,26 @@ class HandlerTest(unittest.TestCase):
         args = {
             'sender': settings.MAIL_FROM,
             'to': '%s <%s>' % (elsigh_user.name, elsigh_user.email),
-            'subject': '[Levels] A message for you',
-            'body': 'hi'
+            'subject': 'hi',
+            'body': 'End of message. =)'
         }
         mock_send_mail.assert_called_once_with(**args)
+
+
+    def test_user_possessive(self):
+        user = models.FMBUser(
+            name='elsigh moo'
+        )
+        self.assertEquals('elsigh moo\'s', user.possessive)
+
+        user = models.FMBUser(
+            name='elsigh moo',
+            given_name='elsigh'
+        )
+        self.assertEquals('elsigh\'s', user.possessive)
+
+        user = models.FMBUser(
+            name='chris moo',
+            given_name='chris'
+        )
+        self.assertEquals('chris\'', user.possessive)

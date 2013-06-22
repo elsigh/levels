@@ -39,6 +39,7 @@
  */
 fmb.views = {};
 
+
 /**
  * @param {string} name The template name.
  * @param {Object=} opt_data The template data.
@@ -165,15 +166,15 @@ fmb.views.App.prototype.onClickShare_ = function(e) {
   }, this), 500);
 
 
-  if (fmb.ua.IS_ANDROID && fmb.ua.IS_CORDOVA) {
+  if (fmb.ua.IS_APP && fmb.ua.IS_ANDROID) {
     var extras = {};
-    var text = 'Check out my Levels, and send me yours!';
-    extras[WebIntent.EXTRA_TEXT] = text + ' ' + this.model.user.getProfileUrl();
-    extras[WebIntent.EXTRA_SUBJECT] = text;
+    extras[WebIntent.EXTRA_SUBJECT] = 'Check out my Levels!';
+    extras[WebIntent.EXTRA_TEXT] = 'Check out my Levels, and send me yours!' +
+        ' ' + this.model.user.getProfileUrl();
     window.plugins.webintent.startActivity({
-        action: WebIntent.ACTION_SEND,
-        type: 'text/plain',
-        extras: extras
+      action: WebIntent.ACTION_SEND,
+      type: 'text/plain',
+      extras: extras
     },
     function() {
       fmb.log('Share sent!');
@@ -183,8 +184,7 @@ fmb.views.App.prototype.onClickShare_ = function(e) {
     });
 
   } else {
-    var uniqueProfileStr = window.prompt('Enter a user unique str to follow:');
-    this.model.user.get('following').addByUniqueProfileStr(uniqueProfileStr);
+    fmb.log('What should we do on the web in this case?');
   }
 
 };
@@ -620,7 +620,7 @@ fmb.views.Notifying.prototype.initialize = function(options) {
 /** @inheritDoc */
 fmb.views.Notifying.prototype.render = function() {
   var templateData = {
-    'notifying': this.model.toJSON()
+    'notifying': this.model.getTemplateData()
   };
 
   // We always notify you via email.
@@ -807,7 +807,6 @@ fmb.views.FollowingUser = Backbone.View.extend({
   className: 'fmb-following-user',
   tagName: 'tbody',
   events: {
-    //'tap .user-name': 'onClickFollowingUser_',
     'tap .following-user-remove': 'onClickRemove_'
   }
 });
@@ -820,29 +819,6 @@ fmb.views.FollowingUser.prototype.initialize = function(options) {
   this.listenTo(this.model.get('devices'), 'add', _.debounce(this.render));
   this.listenTo(this.model.get('devices'), 'remove', this.onRemoveDevice_);
   this.subViews_ = {};
-};
-
-
-/**
- * @param {Event} e A click event.
- * @private
- */
-fmb.views.FollowingUser.prototype.onClickFollowingUser_ = function(e) {
-  return; // TODO(elsigh): Something fun like this.
-  var extras = {};
-  extras[WebIntent.EXTRA_TEXT] = this.model.user.getProfileUrl();
-  extras[WebIntent.EXTRA_SUBJECT] = 'Dude, charge your battery!';
-  window.plugins.webintent.startActivity({
-    action: WebIntent.ACTION_SEND,
-    type: 'text/plain',
-    extras: extras
-  },
-  function() {
-    fmb.log('Share sent!');
-  },
-  function() {
-    fmb.log('Share fail!');
-  });
 };
 
 
@@ -876,7 +852,7 @@ fmb.views.FollowingUser.prototype.render = function() {
           this.model.id, this.model.get('name'));
 
   this.$el.data('key', this.model.key);
-  var templateData = this.model.toJSON();
+  var templateData = this.model.getTemplateData();
   if (app.model.user.id == this.model.id) {
     templateData['is_current_user'] = true;
   }
@@ -937,10 +913,11 @@ fmb.views.FollowingDevice.prototype.initialize = function(options) {
                 _.debounce(this.render, this));
 };
 
+
 /** @inheritDoc */
 fmb.views.FollowingDevice.prototype.render = function() {
   fmb.log('fmb.views.FollowingDevice render', this.model.id);
-  var templateData = this.model.toJSON();
+  var templateData = this.model.getTemplateData();
   if (app.model.user.device.id == this.model.id) {
     templateData['is_current_user_device'] = true;
   }
