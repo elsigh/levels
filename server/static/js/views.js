@@ -166,22 +166,18 @@ fmb.views.App.prototype.onClickShare_ = function(e) {
   }, this), 500);
 
 
-  if (fmb.ua.IS_APP && fmb.ua.IS_ANDROID) {
-    var extras = {};
-    extras[WebIntent.EXTRA_SUBJECT] = 'Check out my Levels!';
-    extras[WebIntent.EXTRA_TEXT] = 'Check out my Levels, and send me yours!' +
+  if (fmb.ua.IS_APP) {
+    var subject = 'Check out my Levels!';
+    var body = 'Check out my Levels, and send me yours!' +
         ' ' + this.model.user.getProfileUrl();
-    window.plugins.webintent.startActivity({
-      action: WebIntent.ACTION_SEND,
-      type: 'text/plain',
-      extras: extras
-    },
-    function() {
-      fmb.log('Share sent!');
-    },
-    function() {
-      fmb.log('Share fail!');
-    });
+    var plugin = cordova.require('cordova/plugin/levels');
+    plugin && plugin.shareApp(subject, body,
+        function() {
+          fmb.log('Share sent!');
+        },
+        function() {
+          fmb.log('Share fail!');
+        });
 
   } else {
     fmb.log('What should we do on the web in this case?');
@@ -650,7 +646,7 @@ fmb.views.Notifying.prototype.render = function() {
  * @private
  */
 fmb.views.Notifying.prototype.onClickNotifyingAdd_ = function(e) {
-  if (fmb.ua.IS_ANDROID && fmb.ua.IS_CORDOVA) {
+  if (fmb.ua.IS_APP) {
     var emailOrPhone = $(e.currentTarget).hasClass('notifying-add-phone') ?
         'phone' : 'email';
     fmb.log('onClickNotifyingAdd_ emailOrPhone', emailOrPhone);

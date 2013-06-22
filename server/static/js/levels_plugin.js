@@ -19,6 +19,8 @@ cordova.define('cordova/plugin/levels', function(require, exports, module) {
         'LevelsPlugin', 'getDeviceModelName', []);
   };
 
+
+
   plugin.startService = _.debounce(function(win, fail) {
     fmb.log('LevelsServicePlugin - startService');
     if (!app.model.user.get('api_token')) {
@@ -49,6 +51,21 @@ cordova.define('cordova/plugin/levels', function(require, exports, module) {
 
   plugin.getVersionCode = function(win, fail) {
     return exec(win, fail, 'LevelsPlugin', 'getVersionCode', []);
+  };
+
+  plugin.shareApp = function(subject, text, win, fail) {
+    if (fmb.ua.IS_ANDROID) {
+      var extras = {};
+      extras[WebIntent.EXTRA_SUBJECT] = subject;
+      extras[WebIntent.EXTRA_TEXT] = text;
+      window.plugins.webintent.startActivity({
+        action: WebIntent.ACTION_SEND,
+        type: 'text/plain',
+        extras: extras
+      },
+      win,
+      fail);
+    }
   };
 
   module.exports = plugin;
