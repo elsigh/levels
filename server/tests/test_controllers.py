@@ -836,6 +836,7 @@ class HandlerTest(unittest.TestCase):
         self.assertEquals(1, q.count())
 
     def test_send_battery_notification_self(self):
+        """This just tests that a NotificationSent entity gets created."""
         elsigh_user = models.FMBUser(
             name='elsigh'
         )
@@ -851,7 +852,7 @@ class HandlerTest(unittest.TestCase):
 
         api.send_battery_notification_self(elsigh_user.key.id(),
                                            elsigh_device.key.id())
-        #self.assertEquals(True, self_message_sent)
+
         q = models.NotificationSent.query(ancestor=elsigh_user.key)
         q.filter(models.NotificationSent.means == 'self_battery_message')
         self.assertEquals(1, q.count())
@@ -917,8 +918,8 @@ class HandlerTest(unittest.TestCase):
         args = {
             'sender': settings.MAIL_FROM,
             'to': '%s <%s>' % (elsigh_user.name, elsigh_user.email),
-            'subject': '[Levels] A message for you',
-            'body': 'hi'
+            'subject': 'hi',
+            'body': 'End of message. =)'
         }
         mock_send_mail.assert_called_once_with(**args)
 

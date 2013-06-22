@@ -73,6 +73,11 @@ routes = [
     Route('/p/<user_identifier>', handler='lib.www.ProfileHandler'),
     Route('/profile/<user_identifier>', handler='lib.www.ProfileHandler'),
     Route('/profile', handler='lib.www.ProfileHandler'),
+
+
+    # App
+    Route('/app/<endpoint>', handler='lib.www.AppHandler'),
+
     Route('/', handler='lib.www.IndexHandler'),
 ]
 

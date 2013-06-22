@@ -25,13 +25,14 @@ fmb.models.SERVER_PROD = 'https://followmybattery.appspot.com';
 /**
  * @type {string}
  */
-fmb.models.SERVER = fmb.ua.IS_ANDROID && fmb.ua.IS_CORDOVA ?
+fmb.models.SERVER = fmb.ua.IS_APP ?
     fmb.models.SERVER_PROD : fmb.models.SERVER_LOCAL;
+
 
 /**
  * @type {string}
  */
-fmb.models.SERVER_SHARE = fmb.ua.IS_ANDROID && fmb.ua.IS_CORDOVA ?
+fmb.models.SERVER_SHARE = fmb.ua.IS_APP ?
     'http://www.levelsapp.com' : fmb.models.SERVER_LOCAL;
 
 
@@ -66,7 +67,7 @@ fmb.models.padNum2Chars = function(num) {
 
 
 /**
- * @param {number} opt_date A date obj.
+ * @param {number=} opt_date A date obj.
  * @return {string} A date string ala 2013-05-20T15:40:40.290320.
  */
 fmb.models.getISODate = function(opt_date) {
@@ -86,8 +87,8 @@ fmb.models.getISODate = function(opt_date) {
  */
 fmb.models.prettyDate = function(time) {
   var date = new Date(time),
-    diff = (((new Date()).getTime() - date.getTime()) / 1000),
-    day_diff = Math.floor(diff / 86400);
+      diff = (((new Date()).getTime() - date.getTime()) / 1000),
+      day_diff = Math.floor(diff / 86400);
 
   if (isNaN(day_diff) || day_diff < 0 || day_diff >= 31) {
     return 'a bit ago';
@@ -99,9 +100,9 @@ fmb.models.prettyDate = function(time) {
       diff < 3600 && Math.floor(diff / 60) + ' minutes ago' ||
       diff < 7200 && '1 hour ago' ||
       diff < 86400 && Math.floor(diff / 3600) + ' hours ago') ||
-    day_diff == 1 && 'Yesterday' ||
-    day_diff < 7 && day_diff + ' days ago' ||
-    day_diff < 31 && Math.ceil(day_diff / 7) + ' weeks ago';
+      day_diff == 1 && 'Yesterday' ||
+      day_diff < 7 && day_diff + ' days ago' ||
+      day_diff < 31 && Math.ceil(day_diff / 7) + ' weeks ago';
 };
 
 
@@ -222,19 +223,6 @@ fmb.Model = Backbone.Model.extend({
 });
 
 
-/**
- * @return {Object} A template data object.
- */
-fmb.Model.prototype.getTemplateData = function() {
-  var templateData = {};
-  _.each(this.toJSON(), function(val, key) {
-    if (val) {
-      templateData[key] = val;
-    }
-  });
-  return templateData;
-};
-
 /** @inheritDoc */
 fmb.Model.prototype.set = function(key, value, options) {
   //fmb.log('fmb.Model set', this.id, 'is model:',
@@ -264,43 +252,67 @@ fmb.Model.prototype.set = function(key, value, options) {
 
   if (this.submodels) {
     //fmb.log('Iterating through submodels', _.keys(this.submodels).length);
-    _.each(this.submodels,
-      _.bind(function(ctor, submodelName) {
-        /*
-        fmb.log('Looking for submodelName', submodelName,
-                'in data yields:',
-                (data[submodelName] &&
-                 data[submodelName].length || 0),
-                this.id,
-                this.get(submodelName));
-        */
+    _.each(this.submodels, _.bind(function(ctor, submodelName) {
+      /*
+      fmb.log('Looking for submodelName', submodelName,
+              'in data yields:',
+              (data[submodelName] &&
+               data[submodelName].length || 0),
+              this.id,
+              this.get(submodelName));
+      */
 
-        // wait:true can result in this case so we correct for it.
-        if (data[submodelName] instanceof Backbone.Model ||
-            data[submodelName] instanceof Backbone.Collection) {
-          data[submodelName] = data[submodelName].toJSON();
+      // wait:true can result in this case so we correct for it.
+      if (data[submodelName] instanceof Backbone.Model ||
+          data[submodelName] instanceof Backbone.Collection) {
+        data[submodelName] = data[submodelName].toJSON();
+      }
+
+      if (!this.has(submodelName)) {
+        //fmb.log('creating submodel for', submodelName)
+        data[submodelName] = new ctor(data[submodelName], {
+          parent: this
+        });
+
+      } else if (!_.isUndefined(data[submodelName])) {
+        // Allow "null" to pass through.
+        if (!_.isNull(data[submodelName])) {
+          var submodel = this.get(submodelName);
+          submodel.set(data[submodelName], options);
+          delete data[submodelName];
         }
+      }
 
-        if (!this.has(submodelName)) {
-          //fmb.log('creating submodel for', submodelName)
-          data[submodelName] = new ctor(data[submodelName], {
-            parent: this
-          });
-
-        } else if (!_.isUndefined(data[submodelName])) {
-          // Allow "null" to pass through.
-          if (!_.isNull(data[submodelName])) {
-            var submodel = this.get(submodelName);
-            submodel.set(data[submodelName], options);
-            delete data[submodelName];
-          }
-        }
-
-      }, this));
+    }, this));
   }
 
   //fmb.log('Calling Backbone.Model.set()');
   return Backbone.Model.prototype.set.call(this, data, options);
+};
+
+
+/**
+ * @return {Object} A template data object.
+ */
+fmb.Model.prototype.getTemplateData = function() {
+  var templateData = {};
+
+  _.each(this.toJSON(), function(val, key) {
+    if (val) {
+      templateData[key] = val;
+    }
+  });
+
+  _.each(this.submodels,
+      _.bind(function(constructor, submodelName) {
+        if (templateData[submodelName]) {
+          var submodel = this.get(submodelName);
+          templateData[submodelName] = submodel.getTemplateData ?
+              submodel.getTemplateData() : submodel.toJSON();
+        }
+      }, this));
+
+  return templateData;
 };
 
 
@@ -367,8 +379,8 @@ fmb.Model.prototype.getStorageData = function() {
 
 
 /**
- * @param {Object} opt_data A data obj.
- * @param {Object} opt_options An options config.
+ * @param {Object=} opt_data A data obj.
+ * @param {Object=} opt_options An options config.
  */
 fmb.Model.prototype.saveToStorage = function(opt_data, opt_options) {
   fmb.log('fmb.Model saveToStorage id', this.id);
@@ -469,9 +481,9 @@ fmb.Collection.prototype.fetchFromStorage = function(opt_options) {
   // Pretend to be async.
   if (this.localStorage) {
     //_.defer(_.bind(function() {
-      var results = this.localStorage.findAll();
-      fmb.log('fmb.Collection fetchFromStorage:', results.length);
-      this.reset(results, opt_options);
+    var results = this.localStorage.findAll();
+    fmb.log('fmb.Collection fetchFromStorage:', results.length);
+    this.reset(results, opt_options);
     //}, this));
   }
 };

@@ -20,6 +20,14 @@ sinon.stub(cordova, 'addConstructor');
 sinon.stub(cordova, 'define');
 sinon.stub(cordova, 'require');
 
+
+/**
+ * Test as though we're an app not a webpage.
+ * @type {Boolean}
+ */
+fmb.ua.IS_APP = true;
+
+
 function setUp() {
   if (!initialAppHtml) {
     initialAppHtml = $('.fmb-app').html();
@@ -501,7 +509,8 @@ function testFollowingSync() {
   // UI updates
   assertEquals(3, app.view.currentView.$('.fmb-following-user').length);
   assertEquals(3, app.view.currentView.$('.fmb-following-device').length);
-  assertEquals(2, app.view.currentView.$('.fmb-following-user .fmb-remove').length);
+  assertEquals(2, app.view.currentView.$(
+      '.fmb-following-user .fmb-remove').length);
 
   assertEquals('35%', $(app.view.currentView.$(
       '.fmb-following-device .battery-level')[1]).text().trim());

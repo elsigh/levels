@@ -56,6 +56,10 @@ class FMBModel(ndb.Model):
     def counters(self):
         return []
 
+    @property
+    def extra_properties(self):
+        return []
+
     def to_json(self):
         return FMBModel.json_dump(self.to_dict())
 
@@ -71,7 +75,11 @@ class FMBModel(ndb.Model):
             obj.pop('password')
 
         for counter in self.counters:
+            logging.info('counter: %s' % self.get_count(counter))
             obj[counter] = self.get_count(counter)
+
+        for prop in self.extra_properties:
+            obj[prop] = getattr(self, prop)
 
         return obj
 
@@ -121,6 +129,10 @@ class FMBUser(User, FMBModel):
         #logging.info('POST _pre_put_hook %s' % self)
 
     @property
+    def extra_properties(self):
+        return ['possessive', 'is_gmail_account', 'gmail_username']
+
+    @property
     def possessive(self):
         name = ''
         if hasattr(self, 'given_name'):
@@ -142,7 +154,10 @@ class FMBUser(User, FMBModel):
 
     @property
     def gmail_username(self):
-        return self.email.replace('@gmail.com', '')
+        gmail_username = None
+        if hasattr(self, 'email'):
+            gmail_username = self.email.replace('@gmail.com', '')
+        return gmail_username
 
     @property
     def iter_devices(self):
@@ -151,7 +166,6 @@ class FMBUser(User, FMBModel):
 
     def to_dict(self, include_api_token=False, include_device_notifying=False):
         obj = super(FMBUser, self).to_dict(include_api_token=include_api_token)
-        obj['possessive'] = self.possessive
 
         # Default avatar url
         if (('avatar_url' not in obj or
@@ -180,12 +194,13 @@ class FMBUser(User, FMBModel):
             mail.send_mail(
                 sender=settings.MAIL_FROM,
                 to='%s <%s>' % (self.name, self.email),
-                subject='[Levels] A message for you',
-                body=message)
+                subject=message,
+                body='End of message. =)')
             logging.info('Sending email to user.')
 
         for device in self.iter_devices:
-            if hasattr(device, 'gcm_push_token'):
+            if ((hasattr(device, 'gcm_push_token') and
+                 device.gcm_push_token is not None)):
                 push_token = device.gcm_push_token
                 android_payload = {
                     'message': message
