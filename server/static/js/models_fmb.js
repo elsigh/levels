@@ -490,6 +490,14 @@ fmb.Collection.prototype.fetchFromStorage = function(opt_options) {
 
 
 /** @inheritDoc */
+fmb.Collection.prototype.getTemplateData = function() {
+  return this.map(function(model) {
+    return model.getTemplateData();
+  });
+};
+
+
+/** @inheritDoc */
 fmb.Collection.prototype.toJSON = function() {
   return this.map(function(model) {
     return model.toJSON();

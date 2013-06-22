@@ -26,6 +26,7 @@ import settings
 
 
 class AdminApiRequestHandler(WebRequestHandler):
+    @admin_required
     def get(self):
         self.output_response({
             'title': 'Levels[Admin]: API Request'
@@ -33,6 +34,7 @@ class AdminApiRequestHandler(WebRequestHandler):
 
 
 class AdminUsersHandler(WebRequestHandler):
+    @admin_required
     def get(self):
         curs = Cursor(urlsafe=self.request.get('cursor'))
         users, next_curs, more = models.FMBUser.query().order(
@@ -81,7 +83,7 @@ class AdminUserMessageTestHandler(WebRequestHandler):
 
 
 class AppHandler(WebRequestHandler):
-    """Redirects suck for mobile."""
+    """Redirects suck for mobile =/"""
     def get(self, endpoint=None):
         self.redirect('/static/app.html')
 

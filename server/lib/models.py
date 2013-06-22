@@ -75,7 +75,6 @@ class FMBModel(ndb.Model):
             obj.pop('password')
 
         for counter in self.counters:
-            logging.info('counter: %s' % self.get_count(counter))
             obj[counter] = self.get_count(counter)
 
         for prop in self.extra_properties:
@@ -238,12 +237,17 @@ class Device(FMBModel):
     def counters(self):
         return ['settings_received_count', 'send_battery_notifications_count']
 
+    @property
+    def memcache_device_settings_key(self):
+        return 'settings-%s' % self.key.urlsafe()
+
+    def clear_device_settings_memcache(self):
+        memcache.delete(self.memcache_device_settings_key)
+
     def to_dict(self, include_notifying=True):
         obj = super(Device, self).to_dict()
 
-        # device settings - cached for 60 seconds.
-        memcache_device_settings_key = 'settings-%s' % self.key.urlsafe()
-        settings = memcache.get(memcache_device_settings_key)
+        settings = memcache.get(self.memcache_device_settings_key)
         if not settings:
             settings = []
             q_settings = Settings.query(
@@ -259,7 +263,7 @@ class Device(FMBModel):
                     list_of_keys.append(results[i])
             for setting in ndb.get_multi(list_of_keys):
                 settings.append(setting.to_dict())
-            memcache.set(memcache_device_settings_key, settings)
+            memcache.set(self.memcache_device_settings_key, settings)
         obj['settings'] = settings
 
         # notifying

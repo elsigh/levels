@@ -17,11 +17,19 @@
       <img src="{{ user.avatar_url }}">
     </div>
 
-    <a class="goog-play"
-      href="//play.google.com/store/apps/details?id=com.elsigh.levels">
-      <img alt="Android app on Google Play"
-        src="//developer.android.com/images/brand/en_generic_rgb_wo_60.png">
-    </a>
+    <div class="download-app">
+      <a class="goog-play"
+        href="//play.google.com/store/apps/details?id=com.elsigh.levels">
+        <img alt="Android app on Google Play"
+          src="/static/img/google_play_store.png">
+      </a>
+
+      <a
+        href="#coming-soon">
+        <img alt="iOS App"
+          src="/static/img/ios_app_store.png">
+      </a>
+    </div>
 
     <h2>
       {{ user.name }}
@@ -43,6 +51,16 @@
             <tr class="fmb-device-{{ device.key }}">
               <td>
                 <h3>{{ device.platform }} {{ device.name }}</h3>
+                <ul class="counters">
+                  <li>
+                    <strong>{{ device.send_battery_notifications_count}}</strong>
+                    low battery notifications.
+                  </li>
+                  <li>
+                    <strong>{{ device.settings_received_count}}</strong>
+                    levels settings saved.
+                  </li>
+                </ul>
                 <div class="battery-level-c charging-{{ device.settings.0.is_charging }}">
                   <div class="battery-level"
                     data-level="{{ device.settings.0.battery_level }}">

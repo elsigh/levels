@@ -509,6 +509,9 @@ class ApiSettingsHandler(ApiRequestHandler):
         settings.populate(**settings_data)
         settings.put()
 
+        # Nukes our device settings list in memcache.
+        device.clear_device_settings_memcache()
+
         if ((is_this_update_over_notify_level !=
              device.is_last_update_over_notify_level)):
             device.is_last_update_over_notify_level = \
