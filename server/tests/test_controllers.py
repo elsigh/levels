@@ -749,7 +749,7 @@ class HandlerTest(unittest.TestCase):
             ded_notifying.key.id(),
             'notification_battery_email.html')
         self.assertEquals(
-            ('\nLindsey&#39;s Android Nexus 4 battery is running low '
+            ('\nLindsey Simon&#39;s Android Nexus 4 battery is running low '
              'at 10%.\n\nwww.levelsapp.com/p/elsigh'),
             rendered)
 
@@ -758,7 +758,7 @@ class HandlerTest(unittest.TestCase):
             ded_notifying.key.id(),
             'notification_battery_phone.html')
         self.assertEquals(
-            ('Lindsey&#39;s Android Nexus 4 battery is running low '
+            ('Lindsey Simon\'s Android Nexus 4 battery is running low '
              'at 10%. www.levelsapp.com/p/elsigh'),
             rendered)
 
@@ -926,18 +926,15 @@ class HandlerTest(unittest.TestCase):
 
     def test_user_possessive(self):
         user = models.FMBUser(
-            name='elsigh moo'
-        )
-        self.assertEquals('elsigh moo\'s', user.possessive)
-
-        user = models.FMBUser(
             name='elsigh moo',
             given_name='elsigh'
         )
-        self.assertEquals('elsigh\'s', user.possessive)
+        self.assertEquals('elsigh moo\'s', user.name_possessive)
+        self.assertEquals('elsigh\'s', user.given_name_possessive)
 
         user = models.FMBUser(
-            name='chris moo',
+            name='chris moos',
             given_name='chris'
         )
-        self.assertEquals('chris\'', user.possessive)
+        self.assertEquals('chris moos\'', user.name_possessive)
+        self.assertEquals('chris\'', user.given_name_possessive)
