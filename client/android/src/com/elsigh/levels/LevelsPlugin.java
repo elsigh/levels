@@ -69,7 +69,7 @@ public class LevelsPlugin extends Plugin {
 
             return new PluginResult(status, "Stopped service.");
 
-        } else if (action.equals("showToast")) {
+        } else if (action.equals("showMessage")) {
             String textArg = "";
             try {
                 textArg = args.getString(0);

@@ -56,6 +56,10 @@ class FMBModel(ndb.Model):
     def counters(self):
         return []
 
+    @property
+    def extra_properties(self):
+        return []
+
     def to_json(self):
         return FMBModel.json_dump(self.to_dict())
 
@@ -72,6 +76,10 @@ class FMBModel(ndb.Model):
 
         for counter in self.counters:
             obj[counter] = self.get_count(counter)
+            obj['%s_is_plural' % counter] = obj[counter] != 1
+
+        for prop in self.extra_properties:
+            obj[prop] = getattr(self, prop)
 
         return obj
 
@@ -121,12 +129,35 @@ class FMBUser(User, FMBModel):
         #logging.info('POST _pre_put_hook %s' % self)
 
     @property
+    def extra_properties(self):
+        return ['possessive', 'is_gmail_account', 'gmail_username']
+
+    @property
+    def possessive(self):
+        name = ''
+        if hasattr(self, 'given_name'):
+            name = self.given_name
+        else:
+            name = self.name
+
+        last_char = name[-1]
+
+        if last_char.lower() == 's':
+            name += '\''
+        else:
+            name += '\'s'
+        return name
+
+    @property
     def is_gmail_account(self):
         return hasattr(self, 'email') and self.email.find('@gmail.com') != -1
 
     @property
     def gmail_username(self):
-        return self.email.replace('@gmail.com', '')
+        gmail_username = None
+        if hasattr(self, 'email'):
+            gmail_username = self.email.replace('@gmail.com', '')
+        return gmail_username
 
     @property
     def iter_devices(self):
@@ -163,12 +194,13 @@ class FMBUser(User, FMBModel):
             mail.send_mail(
                 sender=settings.MAIL_FROM,
                 to='%s <%s>' % (self.name, self.email),
-                subject='[Levels] A message for you',
-                body=message)
+                subject=message,
+                body='End of message. =)')
             logging.info('Sending email to user.')
 
         for device in self.iter_devices:
-            if hasattr(device, 'gcm_push_token'):
+            if ((hasattr(device, 'gcm_push_token') and
+                 device.gcm_push_token is not None)):
                 push_token = device.gcm_push_token
                 android_payload = {
                     'message': message
@@ -206,12 +238,17 @@ class Device(FMBModel):
     def counters(self):
         return ['settings_received_count', 'send_battery_notifications_count']
 
+    @property
+    def memcache_device_settings_key(self):
+        return 'settings-%s' % self.key.urlsafe()
+
+    def clear_device_settings_memcache(self):
+        memcache.delete(self.memcache_device_settings_key)
+
     def to_dict(self, include_notifying=True):
         obj = super(Device, self).to_dict()
 
-        # device settings - cached for 60 seconds.
-        memcache_device_settings_key = 'settings-%s' % self.key.urlsafe()
-        settings = memcache.get(memcache_device_settings_key)
+        settings = memcache.get(self.memcache_device_settings_key)
         if not settings:
             settings = []
             q_settings = Settings.query(
@@ -227,7 +264,7 @@ class Device(FMBModel):
                     list_of_keys.append(results[i])
             for setting in ndb.get_multi(list_of_keys):
                 settings.append(setting.to_dict())
-            memcache.set(memcache_device_settings_key, settings)
+            memcache.set(self.memcache_device_settings_key, settings)
         obj['settings'] = settings
 
         # notifying

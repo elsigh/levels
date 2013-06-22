@@ -29,7 +29,6 @@ fmb.App.Routes = {
 fmb.App.PAUSE_RESUME_TIMEOUT_MS = 150;
 
 
-
 /**
  * i.e. Are we running in the background in PhoneGap.
  * @type {Boolean}
@@ -72,6 +71,8 @@ fmb.App.prototype.initialize = function(options) {
   document.addEventListener('resume',
       _.bind(this.onPhoneResume, this),
       false);
+
+  // Android intent plugin
   window.plugins && window.plugins.webintent &&
       window.plugins.webintent.onNewIntent(
           _.bind(this.checkIntent_, this));
@@ -155,7 +156,7 @@ fmb.App.prototype.checkIntent_ = function(url) {
       }, this),
       function() {
         fmb.log('fmb.App checkIntent NO WebIntent.EXTRA_TEXT');
-          // Something really bad happened.
+        // Something really bad happened.
       });
 
   if (url) {
@@ -182,7 +183,7 @@ fmb.App.prototype.checkIntentUrlForUser_ = function(url) {
   }
   var match = fmb.App.FOLLOWING_BY_UNIQUE_STR_URL_RE.exec(url);
   if (match && match.length) {
-    fmb.log('fmb.App webintent getUri:', url, match);
+    fmb.log('fmb.App checkIntentUrlForUser_', url, match);
     var userUniqueProfileStr = match[1];
     _.delay(_.bind(function() {
       this.model.user.get('following').addByUniqueProfileStr(

@@ -10,6 +10,7 @@ devnull = open(os.devnull, 'w')
 
 IGNORE_FILES = [
     'ContactView.js',
+    'test_controllers.py',
 ]
 
 def call(cmd):

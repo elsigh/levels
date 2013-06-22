@@ -411,6 +411,15 @@ fmb.models.FollowingUser = fmb.Model.extend({
 });
 
 
+/**
+ * Extended to get the avatar_url img hack in.
+ * @inheritDoc
+ */
+fmb.models.FollowingUser.prototype.getTemplateData = function() {
+  return fmb.models.User.prototype.getTemplateData.call(this);
+};
+
+
 /******************************************************************************/
 
 
@@ -480,7 +489,7 @@ fmb.models.FollowingCollection.prototype.addByUniqueProfileStr =
   });
 
   var plugin = cordova.require('cordova/plugin/levels');
-  plugin && plugin.showToast('Adding ' + uniqueProfileStr);
+  plugin && plugin.showMessage('Adding ' + uniqueProfileStr);
 };
 
 
@@ -517,7 +526,7 @@ fmb.models.FollowingCollection.prototype.onAdd_ = function(model) {
     success: _.bind(function() {
       fmb.log('MONEY TRAIN FollowingCollection onAdd_', model.get('name'));
       var plugin = cordova.require('cordova/plugin/levels');
-      plugin && plugin.showToast('Added ' + model.get('name'));
+      plugin && plugin.showMessage('Added ' + model.get('name'));
       this.parent.saveToStorage();
     }, this),
 
@@ -525,7 +534,7 @@ fmb.models.FollowingCollection.prototype.onAdd_ = function(model) {
       if (xhr.status === 404) {
         var plugin = cordova.require('cordova/plugin/levels');
         if (plugin) {
-          plugin.showToast('Failure adding friend.');
+          plugin.showMessage('Failure adding friend.');
         } else {
           alert('La bomba, seems we could not find a user ' + model.cid);
         }
@@ -557,7 +566,7 @@ fmb.models.FollowingCollection.prototype.onRemove_ = function(model) {
       this.parent.saveToStorage();
 
       var plugin = cordova.require('cordova/plugin/levels');
-      plugin && plugin.showToast('Removed ' + model.get('name'));
+      plugin && plugin.showMessage('Removed ' + model.get('name'));
 
     }, this),
     error: function(model, xhr, options) {
@@ -638,9 +647,13 @@ fmb.models.User.prototype.getProfileUrl = function() {
 /** @inheritDoc */
 fmb.models.User.prototype.getTemplateData = function() {
   var templateData = fmb.Model.prototype.getTemplateData.call(this);
-  if (this.has('email') && this.get('email').match(/gmail\./)) {
-    templateData['is_gmail_account'] = true;
+
+  // Adds size param in google avatar_url so we don't download a huge beast.
+  if (this.has('avatar_url') && this.get('avatar_url')) {
+    templateData['avatar_url'] =
+        templateData['avatar_url'].replace(/\/([^\/]+)$/, '/w100/$1');
   }
+
   return templateData;
 };
 
@@ -681,6 +694,14 @@ fmb.models.User.prototype.setUserKey_ = function() {
  */
 fmb.models.User.prototype.createUserDevice = function() {
   fmb.log('** CREATE USER DEVICE the first time');
+
+  // We only create a user device if running in an "app" context. Otherwise
+  // we might just want to show/run the UI as though we're a client
+  // in a browser with no background services (aka the web).
+  if (!fmb.ua.IS_APP) {
+    fmb.log('**** NOT createUserDevice - is not app.');
+    return;
+  }
 
   var device = new fmb.models.Device(null, {
     isUserDevice: true

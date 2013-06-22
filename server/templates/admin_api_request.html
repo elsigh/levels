@@ -68,8 +68,11 @@
       var val = $('textarea').val().
           replace(/\'/g, '"').
           replace(/u\"/g, '"').
-          replace('None', '""').trim();
+          replace(/None/g, '""').
+          replace(/False/g, 'false').
+          replace(/True/g, 'true').trim();
       str = val;
+
       var data = JSON.parse(val);
       console.log('data:', data);
       var model = new fmb.Model();

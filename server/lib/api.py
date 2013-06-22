@@ -376,9 +376,9 @@ def send_battery_notification_email(user_id, device_id, notifying_id,
                                     send=True):
     logging.info('send_battery_notification_email %s, %s' %
                  (user_id, device_id))
-    notifying, body = _send_notification_templater(user_id, device_id,
-                                                   notifying_id,
-                                                   'notification_email.html')
+    notifying, body = _send_notification_templater(
+        user_id, device_id,
+        notifying_id, 'notification_battery_email.html')
 
     if notifying is None:
         logging.info('BAIL CITY BABY, DONE EMAIL NOTIFIED ENUFF')
@@ -399,9 +399,9 @@ def send_battery_notification_phone(user_id, device_id, notifying_id,
                                     send=True):
     logging.info('send_battery_notification_phone %s, %s' %
                  (user_id, device_id))
-    notifying, body = _send_notification_templater(user_id, device_id,
-                                                   notifying_id,
-                                                   'notification_phone.html')
+    notifying, body = _send_notification_templater(
+        user_id, device_id,
+        notifying_id, 'notification_battery_phone.html')
 
     if notifying is None:
         logging.info('BAIL CITY BABY, DONE PHONE NOTIFIED ENUFF')
@@ -449,7 +449,7 @@ def send_battery_notification_self(user_id, device_id):
     )
     sent.put()
 
-    message = ('Your %s %s battery is low (10%%)' %
+    message = ('Your %s %s battery is running low at 10%%.' %
                (device.platform, device.name))
     user.send_message(message)
 
@@ -508,6 +508,9 @@ class ApiSettingsHandler(ApiRequestHandler):
         settings_data = self.pruned_json_request_data
         settings.populate(**settings_data)
         settings.put()
+
+        # Nukes our device settings list in memcache.
+        device.clear_device_settings_memcache()
 
         if ((is_this_update_over_notify_level !=
              device.is_last_update_over_notify_level)):
