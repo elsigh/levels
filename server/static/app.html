@@ -109,7 +109,7 @@
 
             <div>
               <div class="share">
-                www.levelsapp.com/p/{{user.unique_profile_str}}
+                levelsapp.com/p/{{user.unique_profile_str}}
               </div>
             </div>
 
@@ -120,7 +120,7 @@
                     type="checkbox"
                     name="allow_gmail_lookup"
                     {{#user.allow_gmail_lookup}}checked{{/user.allow_gmail_lookup}}>
-                  Use my gmail name in my profile.
+                  Use gmail name for my profile url.
                 </label>
               </div>
             {{/user.is_gmail_account}}
@@ -263,6 +263,7 @@
     <script id="tpl_following_device" type="text/html">
       <td>
         <h4>{{platform}} {{name}}</h4>
+
         <div class="battery-level-c charging-{{settings.0.is_charging}}">
           <div class="battery-level"
             style="background-image:-webkit-gradient(linear, left top, right top, color-stop({{settings.0.battery_level}}%, #3b97d1), color-stop({{settings.0.battery_level}}%, #666666))">
@@ -272,6 +273,17 @@
             {{settings.0.created_pretty}}
           </div>
         </div>
+
+        <ul class="counters">
+          <li>
+            <strong>{{send_battery_notifications_count}}</strong>
+            notification{{#send_battery_notifications_count_is_plural}}s{{/send_battery_notifications_count_is_plural}}.
+          </li>
+          <li>
+            <strong>{{settings_received_count}}</strong>
+            level{{#settings_received_count_is_plural}}s{{/settings_received_count_is_plural}} saved.
+          </li>
+        </ul>
       </td>
       <td>
         <figure class="battery-graph battery-graph-{{key}}"></figure>

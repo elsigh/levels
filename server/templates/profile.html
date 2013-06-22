@@ -53,12 +53,12 @@
                 <h3>{{ device.platform }} {{ device.name }}</h3>
                 <ul class="counters">
                   <li>
-                    <strong>{{ device.send_battery_notifications_count}}</strong>
-                    low battery notifications.
+                    <strong>{{ device.send_battery_notifications_count }}</strong>
+                    battery notification{% if device.send_battery_notifications_count_is_plural %}s{% endif %}.
                   </li>
                   <li>
                     <strong>{{ device.settings_received_count}}</strong>
-                    levels settings saved.
+                    level{% if device.settings_received_count_is_plural %}s{% endif %} saved.
                   </li>
                 </ul>
                 <div class="battery-level-c charging-{{ device.settings.0.is_charging }}">

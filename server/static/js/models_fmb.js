@@ -298,14 +298,14 @@ fmb.Model.prototype.getTemplateData = function() {
   var templateData = {};
 
   _.each(this.toJSON(), function(val, key) {
-    if (val) {
+    if (!_.isUndefined(val)) {
       templateData[key] = val;
     }
   });
 
   _.each(this.submodels,
       _.bind(function(constructor, submodelName) {
-        if (templateData[submodelName]) {
+        if (!_.isUndefined(templateData[submodelName])) {
           var submodel = this.get(submodelName);
           templateData[submodelName] = submodel.getTemplateData ?
               submodel.getTemplateData() : submodel.toJSON();

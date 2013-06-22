@@ -1,15 +1,18 @@
 
 .fmb-following .info-other-users {
-
+  font-size: 85%;
+  margin-top: 0;
+  padding-top: 0;
 }
 
 .fmb-following .info-other-users .info {
+  font-size: 75%;
   background: #3b97d1;
   -webkit-border-radius: 25px;
   border-radius: 25px;
   color: #fff;
   text-shadow: none;
-  padding: 5px 12px;
+  padding: 5px 10px;
   float: left;
   margin-right: 0.5em;
   font-weight: bold;
@@ -110,6 +113,32 @@
 
 .fmb-following-user .fmb-remove {
   margin-top: 15px;
+}
+
+
+/** Following device */
+
+.fmb-following-device .counters {
+  display: inline-block;
+  font-size: 70%;
+  text-align: left;
+  list-style: none;
+  margin: 1em 0 0;
+  padding: 0;
+}
+
+.fmb-following-device .counters li {
+  margin-bottom: 0.3em;
+}
+
+.fmb-following-device .counters strong {
+  font-weight: normal;
+  background: #eee;
+  padding: 1px 3px;
+  border: 1px solid #bbb;
+  border-right: 1px solid #aaa;
+  border-bottom: 1px solid #aaa;
+  border-radius: 5px;
 }
 
 .fmb-following-device .battery-graph {

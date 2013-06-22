@@ -76,6 +76,7 @@ class FMBModel(ndb.Model):
 
         for counter in self.counters:
             obj[counter] = self.get_count(counter)
+            obj['%s_is_plural' % counter] = obj[counter] != 1
 
         for prop in self.extra_properties:
             obj[prop] = getattr(self, prop)
