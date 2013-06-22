@@ -28,6 +28,12 @@ sinon.stub(cordova, 'require');
 fmb.ua.IS_APP = true;
 
 
+/**
+ * @type {string}
+ */
+fmb.models.SERVER_PROD = 'http://UNIT_TEST';
+
+
 function setUp() {
   if (!initialAppHtml) {
     initialAppHtml = $('.fmb-app').html();

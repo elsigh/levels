@@ -16,6 +16,16 @@ fmb.ua = {};
 
 
 /**
+ * @return {boolean}
+ */
+fmb.ua.isSimulator = function() {
+  return window.device && window.device.model &&
+         (window.device.model == 'x86_64' ||  // ios simulator
+          window.device.model == 'simulator');  // whatever on droid
+};
+
+
+/**
  * @type {boolean}
  */
 fmb.ua.IS_ANDROID =
@@ -37,9 +47,11 @@ fmb.ua.IS_CORDOVA = typeof cordova !== 'undefined';
 
 
 /**
+ * The running app, and not the simulator.
  * @type {boolean}
  */
-fmb.ua.IS_APP = (fmb.ua.IS_ANDROID || fmb.ua.IS_IOS) && fmb.ua.IS_CORDOVA;
+fmb.ua.IS_APP = fmb.ua.IS_CORDOVA &&
+                (fmb.ua.IS_ANDROID || fmb.ua.IS_IOS);
 
 
 /******************************************************************************/
