@@ -397,7 +397,7 @@ fmb.views.Account.prototype.onClickLogin_ = function(e) {
   this.model.setLoginToken();
 
   this.inAppBrowser_ = window.open(
-      fmb.models.SERVER_SHARE + '/login?user_token=' +
+      fmb.models.getServerShare() + '/login?user_token=' +
           window.escape(this.model.loginToken_),
       '_blank',
       'location=yes');
@@ -465,7 +465,15 @@ fmb.views.Account.prototype.onInAppBrowserExit_ = function(e) {
 
   fmb.views.hideNotification();
 
-  window.clearInterval(this.inAppBrowserCloseCheckInterval_);
+  if (!this.inAppBrowserCloseCheckInterval_ == null) {
+    window.clearInterval(this.inAppBrowserCloseCheckInterval_);
+    this.inAppBrowserCloseCheckInterval_ = null;
+  }
+
+  if (!this.inAppBrowser_) {
+    fmb.log('.. already exited, wtf.');
+    return;
+  }
 
   if (this.inAppBrowser_.removeEventListener) {
     this.inAppBrowser_.removeEventListener('loadstart',

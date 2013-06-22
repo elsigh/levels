@@ -639,8 +639,8 @@ fmb.models.User.prototype.initialize = function(opt_data, opt_options) {
  * @return {string} The user's profile link.
  */
 fmb.models.User.prototype.getProfileUrl = function() {
-  return fmb.models.SERVER_SHARE.replace('http://', '') + '/p/' +
-      this.get('unique_profile_str');
+  return fmb.models.getServerShare().
+      replace('http://', '') + '/p/' + this.get('unique_profile_str');
 };
 
 
@@ -698,8 +698,8 @@ fmb.models.User.prototype.createUserDevice = function() {
   // We only create a user device if running in an "app" context. Otherwise
   // we might just want to show/run the UI as though we're a client
   // in a browser with no background services (aka the web).
-  if (!fmb.ua.IS_APP) {
-    fmb.log('**** NOT createUserDevice - is not app.');
+  if (!(fmb.ua.IS_APP || fmb.ua.isSimulator())) {
+    fmb.log('**** NOT createUserDevice - is not app or sim.');
     return;
   }
 
