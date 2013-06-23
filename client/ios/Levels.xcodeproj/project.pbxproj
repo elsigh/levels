@@ -333,10 +333,10 @@
 		308D052D1370CCF300D202BF /* icons */ = {
 			isa = PBXGroup;
 			children = (
-				30FC414816E50CA1004E6F35 /* icon-72@2x.png */,
-				308D052E1370CCF300D202BF /* icon-72.png */,
 				308D052F1370CCF300D202BF /* icon.png */,
 				308D05301370CCF300D202BF /* icon@2x.png */,
+				308D052E1370CCF300D202BF /* icon-72.png */,
+				30FC414816E50CA1004E6F35 /* icon-72@2x.png */,
 			);
 			path = icons;
 			sourceTree = "<group>";
