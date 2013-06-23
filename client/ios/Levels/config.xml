@@ -61,6 +61,13 @@
     <feature name="NetworkStatus">
         <param name="ios-package" value="CDVConnection"/>
     </feature>
+    <feature name="LevelsPlugin">
+        <param name="ios-package" value="LevelsPlugin"/>
+    </feature>
+    <feature name="ContactView">
+        <param name="ios-package" value="ContactView"/>
+    </feature>
+
     <!--
     <feature name="Geolocation">
         <param name="ios-package" value="CDVLocation"/>
