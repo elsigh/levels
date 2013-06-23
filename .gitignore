@@ -4,6 +4,7 @@
 *.pyc
 client/android/bin
 client/android/gen
+client/android/local.properties
 
 client/ios/CordovaLib/CordovaLib.xcodeproj/xcuserdata
 client/ios/Levels.xcodeproj/project.xcworkspace

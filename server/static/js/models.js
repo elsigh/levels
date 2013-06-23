@@ -651,7 +651,7 @@ fmb.models.User.prototype.getTemplateData = function() {
   // Adds size param in google avatar_url so we don't download a huge beast.
   if (this.has('avatar_url') && this.get('avatar_url')) {
     templateData['avatar_url'] =
-        templateData['avatar_url'].replace(/\/([^\/]+)$/, '/w100/$1');
+        templateData['avatar_url'].replace(/\/([^\/]+)$/, '/s100/$1');
   }
 
   return templateData;

@@ -41,7 +41,7 @@ import settings
 NUM_SETTINGS_TO_FETCH = 10
 NUM_SETTINGS_MULTIPLIER = 10
 DEFAULT_AVATAR_URL = ('http://lh3.googleusercontent.com/-XdUIqdMkCWA/'
-                      'AAAAAAAAAAI/AAAAAAAAAAA/4252rscbv5M/s96/photo.jpg')
+                      'AAAAAAAAAAI/AAAAAAAAAAA/4252rscbv5M/photo.jpg')
 
 
 class FMBModel(ndb.Model):
