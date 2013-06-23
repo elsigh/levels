@@ -167,8 +167,13 @@
       </p>
 
       <div class="fmb-button-c">
-        <button class="notifying-add-phone">by phone</button>
-        <button class="notifying-add-email">by email</button>
+        {{#is_ios}}
+          <button class="notifying-add-phone">add contact</button>
+        {{/is_ios}}
+        {{^is_ios}}
+          <button class="notifying-add-phone">by phone</button>
+          <button class="notifying-add-email">by email</button>
+        {{/is_ios}}
       </div>
 
       {{#notifying.length}}
