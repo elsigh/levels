@@ -65,6 +65,8 @@ cordova.define('cordova/plugin/levels', function(require, exports, module) {
       },
       win,
       fail);
+    } else {
+      return exec(win, fail, 'LevelsPlugin', 'shareApp', [subject, text]);
     }
   };
 
