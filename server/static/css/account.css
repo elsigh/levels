@@ -78,10 +78,13 @@
 /* Device */
 .fmb-device {
   margin-bottom: 2em;
+  margin: 0 10px;
+  padding: 0 10px;
+  border: 1px solid #666;
 }
 
 .fmb-device h3 {
-  border-bottom: 2px solid #666;
+  border-bottom: 1px solid #999;
 }
 
 .fmb-device .device > .fmb-remove {
@@ -92,6 +95,11 @@
 .fmb-notifying .info-headline {
   font-size: 80%;
   margin-bottom: 0;
+  padding: 0;
+}
+
+.fmb-notifying .fmb-button-c {
+  padding: 10px 0;
 }
 
 .fmb-notifying .fmb-remove {
@@ -108,4 +116,5 @@
 
 .fmb-notifying td {
   padding: 1em 0.5em;
+  border-color: #999;
 }
