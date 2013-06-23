@@ -51,7 +51,9 @@ fmb.views.getTemplateHtml = function(name, opt_data, opt_partials) {
   _.extend(data, {
     'global_external_protocol': window.location.protocol == 'file:' ?
         'http' : window.location.protocol,
-    'api_server': fmb.models.SERVER
+    'api_server': fmb.models.SERVER,
+    'is_android': fmb.ua.IS_ANDROID,
+    'is_ios': fmb.ua.IS_IOS
   });
   var html = window['templates'][name].render(data, opt_partials);
   return html;
