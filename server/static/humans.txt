@@ -1,0 +1,10 @@
+/* TEAM */
+
+  Chef: Lindsey Simon
+  Contact: elsigh [at] gmail.com
+  Twitter: @elsigh
+  From: San Francisco, CA
+
+/* THANKS */
+
+Everyone for feedback while building this sucker!
