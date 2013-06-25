@@ -144,7 +144,7 @@ class ProfileHandler(WebRequestHandler):
 
 class SupportHandler(WebRequestHandler):
     def get(self):
-        return self.redirect('/p/elsigh')
+        self.output_response({}, 'support.html')
 
 
 class IndexHandler(WebRequestHandler):
