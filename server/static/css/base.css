@@ -29,6 +29,7 @@ footer {
 
 h1 {
   position: fixed;
+  box-sizing: border-box;
   top: 0;
   z-index: 2;
   width: 100%;
@@ -51,13 +52,13 @@ h1 > span {
 h2 {
   font-size: 1.2em;
   margin: 0;
-  padding: 20px 10px 10px;
+  padding-bottom: 10px;
   font-weight: 300;
 }
 
 h3,
 h4 {
-  padding: 10px 10px 10px;
+  padding: 10px 0 10px;
   margin: 0;
   font-weight: 300;
 }
@@ -70,10 +71,6 @@ a {
 figure {
   margin: 0;
   padding: 0;
-}
-
-p {
-  padding: 0 10px;
 }
 
 table {
@@ -103,6 +100,7 @@ input[type="text"] {
   width: 60%;
 }
 
+.fmb-btn,
 input[type="submit"],
 button {
   background: #3b97d1;
@@ -120,6 +118,7 @@ button {
 
 }
 
+.fmb-btn:active,
 input[type="submit"]:active,
 button:active {
   -webkit-box-shadow: inset 0 0 0.6em rgba(0, 0, 0, 0.2);
@@ -166,15 +165,11 @@ input[type="range"] {
 .fmb-tab {
   position: absolute;
   top: -9999px;
-  padding: 20px 0 0 0;
+  padding: 20px 10px 0;
 }
 
 .fmb-tab.fmb-active {
   position: static;
-}
-
-.fmb-tab-header {
-  padding: 0 10px;
 }
 
 .fmb-tab-header h2 {
@@ -184,7 +179,12 @@ input[type="range"] {
   vertical-align: bottom;
 }
 
+.fmb-signed-in .tabs-c {
+  display: block;
+}
+
 .tabs-c {
+  display: none;
   height: 55px;
 }
 

@@ -18,6 +18,14 @@ fmb.ua = {};
 /**
  * @return {boolean}
  */
+fmb.ua.getPlatform = function() {
+  return window.device ? window.device.platform.toLowerCase() : 'desktop';
+};
+
+
+/**
+ * @return {boolean}
+ */
 fmb.ua.isSimulator = function() {
   return window.device && window.device.model &&
          (window.device.model == 'x86_64' ||  // ios simulator
