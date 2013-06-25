@@ -5,36 +5,45 @@
 {% endblock %}
 
 {% block body %}
-  <section>
+  <section class="fmb-index">
     <header>
-      <h1>Follow My Battery</h1>
+      <h1><span>Follow My Battery</span></h1>
     </header>
     <div class="content">
-      <p>
-        <a href="http://play.google.com/store/apps/details?id=com.elsigh.levels">
+
+      <div class="download-app">
+        <a class="goog-play"
+          href="//play.google.com/store/apps/details?id=com.elsigh.levels">
           <img alt="Android app on Google Play"
-            src="http://developer.android.com/images/brand/en_generic_rgb_wo_60.png" />
+            src="/static/img/google_play_store.png">
         </a>
-      </p>
+
+        <a
+          href=" http://itunes.com/apps/LevelsApp">
+          <img alt="iOS App"
+            src="/static/img/ios_app_store.png"
+            title="pending review">
+        </a>
+      </div>
+
+      <h2>The New Battery Social Network ;0</h2>
+      <div class="screenshot">
+        <img src="/static/img/screenshot.png" alt="" title="screenshot">
+      </div>
+
+      <h3>Features</h3>
       <ul>
         <li>
-          Automatically lets your friends or family know when you're battery's dying.
+          Automatically lets your friends or family know BEFORE your battery dies!
         </li>
         <li>
-          Instant view of loved ones battery status if they don't answer the phone.
+          Instant view of loved ones' battery status if they don't answer the phone.
         </li>
         <li>
-          More device support coming soon (maybe you need new batteries =)
+          Battery history / recommendations based on power drain.
         </li>
       </ul>
 
-      <p>
-        <a href="mailto:elsigh@gmail.com?Subject=Levels">Talk to Us!</a>
-      </p>
     </div>
-
-    <footer>
-      © 2013 - Levels
-    </footer>
   </section>
 {% endblock %}

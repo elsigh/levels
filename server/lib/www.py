@@ -149,4 +149,4 @@ class SupportHandler(WebRequestHandler):
 
 class IndexHandler(WebRequestHandler):
     def get(self):
-        return self.redirect('/p/elsigh')
+        self.output_response({}, 'index.html')
