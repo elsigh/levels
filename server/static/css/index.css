@@ -29,8 +29,8 @@
 
 @media only screen and (max-width: 480px) {
   .fmb-index .download-app {
-    margin-top: 20px;
-    right: 10px;
+    position: static;
+    margin: 1em 0;
   }
 
   .fmb-index .download-app img {
