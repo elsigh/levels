@@ -3,18 +3,12 @@
   font-size: 120%;
 }
 
-.fmb-account .username-taken-err {
-  display: none;
-  font-size: 90%;
-  color: red;
+.fmb-account .account > p:first-child {
+  padding-top: 0;
+  margin-top: 0;
 }
 
-.fmb-account .username-taken-err.fmb-active {
-  display: block;
-}
-
-
-.fmb-account .how-it-works {
+.fmb-account .how-it-works-c {
   display: block;
   margin-top: 0.5em;
 }
