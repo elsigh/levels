@@ -5,7 +5,7 @@
     <meta name="format-detection"
       content="telephone=no,email=no,address=no">
     <meta name="viewport"
-      content="user-scalable=no,initial-scale=1,maximum-scale=1,minimum-scale=1,width=device-width,height=device-height">
+      content="user-scalable=no,initial-scale=1,maximum-scale=1,minimum-scale=1,width=device-width">
 
     <!-- target-densitydpi=device-dpi -->
     <link rel="stylesheet" href="css/base.css">
@@ -27,6 +27,9 @@
         <div class="tabs">
           <a href="account" class="account">Account</a><a href="following" class="following">Stats</a>
         </div>
+      </section>
+      <section class="fmb-tab fmb-tab-how-it-works">
+        <div class="fmb-how-it-works"></div>
       </section>
       <section class="fmb-tab fmb-tab-account">
         <div class="fmb-account"></div>
@@ -76,24 +79,45 @@
     <script src="js/models.js"></script>
     <script src="js/views.js"></script>
 
+    <script id="tpl_how_it_works" type="text/html">
+      <h2>How Levels Works</h2>
+      <p>
+        Levels sends your battery level to our servers every
+        10 minutes.
+      </p>
+      <p>
+        When your battery crosses the 10% threshold going down,
+        we'll send you, and anyone you'd like, a notification.
+      </p>
+      <p>
+        You can install Levels on your phones, tablets, remote controls,
+        etc ... and then manage all your notification settings in the App.
+      </p>
+      <p>
+        <a href="account" class="fmb-app-link fmb-btn"
+          >Let's get this party started!</a>
+      </p>
+    </script>
+
     <script id="tpl_account" type="text/html">
       {{^user.api_token}}
-        <h2>Welcome!</h2>
+        <h2>Thanks for trying the App!</h2>
+
         <p>
-          Levels can automatically send yourself and your friends and family a
-          notification *before* your battery dies!
+          Levels sends you, and anyone you configure, a
+          notification <strong>before</strong> your battery dies!
+          <a href="how_it_works" class="fmb-app-link">Read more about how it works.</a>
         </p>
-        <p>
-          Step 1:
-        </p>
+
         <div class="login-google"><span>Sign in with Google</span></div>
-        <p>
+
+        <p class="signin-info">
           <em>
             This will open a new window for you to sign in and
             then bring you back to the app.
           </em>
         </p>
-        <p>
+        <p class="signin-info">
           <em>
             Levels will <strong>never</strong>
             automatically post anything to any social network on your behalf.
@@ -163,12 +187,13 @@
 
     <script id="tpl_notifying" type="text/html">
       <p class="info-headline">
-        <strong>Send Notifications</strong>: when your battery reaches 10%
+        <strong>Send Notifications</strong>: at 10% battery.
       </p>
 
       <div class="fmb-button-c">
         {{#is_ios}}
-          <button class="notifying-add-phone">add contact</button>
+          <button class="notifying-add-phone"
+            >add notification contact</button>
         {{/is_ios}}
         {{^is_ios}}
           <button class="notifying-add-phone">by phone</button>
@@ -282,15 +307,15 @@
         <ul class="counters">
           <li>
             <strong>{{send_battery_notifications_count}}</strong>
-            notification{{#send_battery_notifications_count_is_plural}}s{{/send_battery_notifications_count_is_plural}}.
+            notification{{#send_battery_notifications_count_is_plural}}s{{/send_battery_notifications_count_is_plural}}
           </li>
           <li>
             <strong>{{settings_received_count}}</strong>
-            level{{#settings_received_count_is_plural}}s{{/settings_received_count_is_plural}} saved.
+            level{{#settings_received_count_is_plural}}s{{/settings_received_count_is_plural}} saved
           </li>
         </ul>
       </td>
-      <td>
+      <td class="battery-graph-td">
         <figure class="battery-graph battery-graph-{{key}}"></figure>
       </td>
     </script>

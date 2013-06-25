@@ -1,8 +1,13 @@
 
 .fmb-following .info-other-users {
   font-size: 85%;
-  margin-top: 0;
-  padding-top: 0;
+  margin: 0;
+  padding: 0;
+}
+
+/* Disabled on iOS until we implment the "levels://" protocol. */
+.fmb-platform-ios .fmb-following .info-other-users {
+  display: none;
 }
 
 .fmb-following .info-other-users .info {
@@ -19,53 +24,10 @@
   text-shadow: none;
 }
 
-
-.fmb-following .battery-level-c {
-  text-align: center;
-  white-space: nowrap;
+.fmb-following > table {
+  margin-top: 0; /* We'll take care of margin another way. */
 }
 
-.fmb-following .battery-level {
-  font-size: 1.5em;
-  color: #fff;
-  text-shadow: 0 1px 1px #111;
-  display: inline-block;
-  border: 2px solid #666;
-  border-radius: 5px;
-  padding-left: 10px;
-}
-
-.fmb-following .battery-level:after {
-  content: "";
-  left: 5px;
-  position: relative;
-  display: inline-block;
-  line-height: 1;
-  top: -2px;
-  width: 4px;
-  height: 13px;
-  background: #666;
-  border-top-right-radius: 10px;
-  border-bottom-right-radius: 10px;
-}
-
-.fmb-following .charging-1:before {
-  content: "charging";
-  display: block;
-  font-size: 70%;
-  font-weight: 300;
-}
-
-.fmb-following .battery-created {
-  margin-top: 4px;
-  font-size: 85%;
-  font-weight: 500;
-}
-
-.fmb-following tr:first-child td {
-  border-top: 0;
-  border-bottom: 2px solid #666;
-}
 
 .fmb-following td {
   text-align: center;
@@ -84,39 +46,90 @@
 }
 
 .fmb-following h4 {
-  margin: 0 0 0.2em;
-  padding-top: 0;
+  margin: 0 0 0.5em;
+  padding: 0;
 }
 
+/** Following user */
 
 .fmb-following-user h2 {
   display: inline-block;
   vertical-align: bottom;
-  padding-left: 50px;
+  padding-left: 40px;
   background-size: 30px 30px;
-  background-position: 10px 10px;
+  background-position: 0 0;
   background-repeat: no-repeat;
 }
 
-.fmb-following-user tr:first-child td {
+.fmb-following-user .following-user td {
   text-align: left;
-}
-
-.fmb-following-user tr:first-child td:last-child {
-  padding: 0;
-  margin: 0;
+  padding: 1em 5px 0;  /* Effectively, this is user separation. */
+  border: 0;
+  border-bottom: 1px solid #999;
 }
 
 .fmb-following-user .fmb-loading {
   display: inline-block;
 }
 
-.fmb-following-user .fmb-remove {
-  margin-top: 15px;
+
+/** Following device */
+
+.fmb-following-device td:first-child {
+  border: 0;
+  border-left: 1px solid #999;
+  border-bottom: 1px solid #999;
+}
+
+.fmb-following-device td:last-child {
+  border: 0;
+  border-right: 1px solid #999;
+  border-bottom: 1px solid #999;
 }
 
 
-/** Following device */
+.fmb-following-device .battery-level-c {
+  text-align: center;
+  white-space: nowrap;
+}
+
+.fmb-following-device .battery-level {
+  font-size: 1.5em;
+  color: #fff;
+  text-shadow: 0 1px 1px #111;
+  display: inline-block;
+  border: 2px solid #666;
+  border-radius: 5px;
+  padding-left: 10px;
+}
+
+.fmb-following-device .battery-level:after {
+  content: "";
+  left: 5px;
+  position: relative;
+  display: inline-block;
+  line-height: 1;
+  top: -2px;
+  width: 4px;
+  height: 13px;
+  background: #666;
+  border-top-right-radius: 10px;
+  border-bottom-right-radius: 10px;
+}
+
+.fmb-following-device .charging-1:before {
+  content: "charging";
+  display: block;
+  font-size: 70%;
+  font-weight: 300;
+}
+
+.fmb-following-device .battery-created {
+  margin-top: 4px;
+  font-size: 85%;
+  font-weight: 500;
+}
+
 
 .fmb-following-device .counters {
   display: inline-block;
@@ -141,11 +154,15 @@
   border-radius: 5px;
 }
 
+.fmb-following-device .battery-graph-td {
+  padding-left: 0;
+  padding-right: 10px;
+}
+
 .fmb-following-device .battery-graph {
   height: 150px;
-  width: 250px;
+  min-width: 175px;
   margin: 0 auto;
   position: relative;
-  left: -20px;
 }
 

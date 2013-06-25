@@ -19,7 +19,26 @@ fmb.App.Routes = {
   FOLLOWING: {
     url: 'following',
     handler: 'routeFollowing_'
+  },
+  HOW_IT_WORKS: {
+    url: 'how_it_works',
+    handler: 'routeHowItWorks_'
   }
+};
+
+
+/**
+ * @param {string} url An url to look for.
+ * @return {Object} One of fmb.App.Routes or undefined.
+ */
+fmb.App.getRouteByUrl = function(url) {
+  var matchingRoute;
+  _.each(fmb.App.Routes, function(route) {
+    if (route.url == url) {
+      matchingRoute = route;
+    }
+  });
+  return matchingRoute;
 };
 
 
@@ -210,6 +229,15 @@ fmb.App.prototype.routeAccount_ = function() {
 fmb.App.prototype.routeFollowing_ = function() {
   fmb.log('fmb.App routeFollowing_');
   this.view.transitionPage(fmb.App.Routes.FOLLOWING);
+};
+
+
+/**
+ * @private
+ */
+fmb.App.prototype.routeHowItWorks_ = function() {
+  fmb.log('fmb.App routeHowItWorks_');
+  this.view.transitionPage(fmb.App.Routes.HOW_IT_WORKS);
 };
 
 

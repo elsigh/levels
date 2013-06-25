@@ -1,7 +1,6 @@
 
-
-.fmb-account .account {
-  padding: 0 10px;
+.fmb-how-it-works .fmb-app-link {
+  font-size: 120%;
 }
 
 .fmb-account .username-taken-err {
@@ -14,7 +13,7 @@
   display: block;
 }
 
-.fmb-account .username code{
+.fmb-account .username code {
   font-size: 3em;
 }
 
@@ -33,15 +32,20 @@
   display: none;
 }
 
+.fmb-account .signin-info {
+  font-size: 85%;
+}
+
 .fmb-account .user-header {
   margin-bottom: 1em;
 }
 
 .fmb-account .user-header > img {
   float: left;
-  box-shadow: 1px 1px 2px #999;
   height: 60px;
   min-width: 60px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
 }
 
 .fmb-account .user-info {
@@ -57,17 +61,18 @@
   border-radius: 4px;
   display: inline-block;
   padding: 5px;
+  vertical-align: middle;
 }
 
 .fmb-account .user-info .share::after {
   background: url(../img/share_this.png);
   content: "";
   display: inline-block;
-  width: 1.3em;
-  height: 1.3em;
+  width: 1.5em;
+  height: 1.6em;
   background-repeat: no-repeat;
-  background-size: 1.3em;
-  vertical-align: bottom;
+  background-size: 1.5em;
+  vertical-align: middle;
 }
 
 .fmb-account .label-c {
@@ -77,24 +82,21 @@
 
 /* Device */
 .fmb-device {
-  margin-bottom: 2em;
-  margin: 0 10px;
+  margin-bottom: 1.5em;
   padding: 0 10px;
-  border: 1px solid #666;
-}
-
-.fmb-device h3 {
-  border-bottom: 1px solid #999;
+  border: 1px solid #999;
+  -webkit-border-radius: 2px;
+  border-radius: 2px;
 }
 
 .fmb-device .device > .fmb-remove {
-  margin-top: 5px;
+  margin: 5px 10px 0 0;
 }
 
 /* Notifying table */
 .fmb-notifying .info-headline {
   font-size: 80%;
-  margin-bottom: 0;
+  margin: 0;
   padding: 0;
 }
 
@@ -103,11 +105,11 @@
 }
 
 .fmb-notifying .fmb-remove {
-  margin-top: -1em;
+  margin: -1em 10px 0 0;
 }
 
 .fmb-notifying > table {
-  margin-top: 0.2em;
+  margin: 0.2em 0 0;
 }
 
 .fmb-notifying th {
