@@ -12,6 +12,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), 'external'))
 
 from lib.web_request_handler import WebRequestHandler
 
+from google.appengine.api import users
 from google.appengine.ext import ndb
 sys.modules['ndb'] = ndb
 from google.appengine.datastore.datastore_query import Cursor
@@ -58,10 +59,10 @@ class AdminUserMessageTestHandler(WebRequestHandler):
                              'admin_user_message_test.html')
 
     def post(self):
-        # only elsigh
-        if ((self.current_user.key.id() != 19001 and
-             'Development' not in os.environ['SERVER_SOFTWARE'])):
-            self.abort(500)
+        # Admin USER override by JSON request value.
+        gae_user = users.get_current_user()
+        if gae_user is None or not users.is_current_user_admin():
+            self.abort(403)
 
         user_id = self.request.get('user_id')
         extras = self.request.get('extras')
@@ -139,6 +140,11 @@ class ProfileHandler(WebRequestHandler):
         template_data['title'] += ' - Levels'
 
         self.output_response(template_data, 'profile.html')
+
+
+class SupportHandler(WebRequestHandler):
+    def get(self):
+        return self.redirect('/p/elsigh')
 
 
 class IndexHandler(WebRequestHandler):

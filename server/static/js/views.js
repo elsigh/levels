@@ -24,6 +24,8 @@
         $(e.target).trigger('tap', e);
       }
     });
+
+  // Nuke ghost clicks on touch devices.
   } else {
     $(document).delegate('body', 'click', function(e) {
       if (shouldPreventDefault(e.target)) {
@@ -111,7 +113,7 @@ fmb.views.serializeFormToObject = function(form) {
 /**
  * @param {string} msg The message to show.
  */
-fmb.views.showNotification = function(msg) {
+fmb.views.showSpinner = function(msg) {
   navigator.notification && navigator.notification.activityStart &&
       navigator.notification.activityStart('', msg);
 };
@@ -120,9 +122,18 @@ fmb.views.showNotification = function(msg) {
 /**
  * Hide that notification.
  */
-fmb.views.hideNotification = function() {
+fmb.views.hideSpinner = function() {
   navigator.notification && navigator.notification.activityStop &&
       navigator.notification.activityStop();
+};
+
+
+/**
+ * @param {string} msg The message to show.
+ */
+fmb.views.showMessage = function(msg) {
+  var plugin = cordova.require('cordova/plugin/levels');
+  plugin && plugin.showMessage('Adding ' + uniqueProfileStr);
 };
 
 
@@ -138,7 +149,8 @@ fmb.views.App = Backbone.View.extend({
   el: '.fmb-app',
   events: {
     'tap .tabs a': 'onClickTab_',
-    'tap .share': 'onClickShare_'
+    'tap .share': 'onClickShare_',
+    'tap .fmb-app-link': 'onClickAppLink_'
     //'tap .tabs a': 'onClickTab_'
   }
 });
@@ -148,6 +160,19 @@ fmb.views.App = Backbone.View.extend({
 fmb.views.App.prototype.initialize = function(options) {
   fmb.log('fmb.views.App.initialize', this.model);
 
+  $('body').addClass('fmb-platform-' + fmb.ua.getPlatform());
+};
+
+
+/**
+ * @param {Event} e A click event.
+ * @private
+ */
+fmb.views.App.prototype.onClickAppLink_ = function(e) {
+  fmb.log('fmb.views.App.onClickAppLink_', e);
+  e.preventDefault();
+  window['app'].navigate($(e.currentTarget).attr('href'),
+                         {trigger: true});
 };
 
 
@@ -208,7 +233,6 @@ fmb.views.App.prototype.onClickTab_ = function(e) {
  * @param {Backbone.View} view A view instance.
  */
 fmb.views.App.prototype.setCurrentView = function(view) {
-
   if (this.currentView) {
     this.currentView.setIsActive &&
         this.currentView.setIsActive(false);
@@ -216,6 +240,8 @@ fmb.views.App.prototype.setCurrentView = function(view) {
   this.currentView = view;
   this.currentView.setIsActive &&
       this.currentView.setIsActive(true);
+
+  _.defer(function() { window.scrollTo(0, 0); });
 };
 
 
@@ -241,8 +267,6 @@ fmb.views.App.prototype.transitionPage = function(route) {
     newTab = 'account';
     newView = this.viewAccount;
 
-    this.$('.tabs .account').addClass('selected');
-
   } else if (_.isEqual(fmb.App.Routes.FOLLOWING, route)) {
     if (!this.viewFollowing) {
       this.viewFollowing = new fmb.views.Following({
@@ -253,7 +277,18 @@ fmb.views.App.prototype.transitionPage = function(route) {
     }
     newTab = 'following';
     newView = this.viewFollowing;
+
+  } else if (_.isEqual(fmb.App.Routes.HOW_IT_WORKS, route)) {
+    if (!this.viewHowItWorks) {
+      this.viewHowItWorks = new fmb.views.HowItWorks({
+        model: this.model.user
+      });
+      this.viewHowItWorks.render();
+    }
+    newTab = 'how-it-works';
+    newView = this.viewHowItWorks;
   }
+
   this.$('.tabs .' + newTab).addClass('selected');
   this.$('.fmb-tab.fmb-tab-' + newTab).addClass('fmb-active');
   this.setCurrentView(newView);
@@ -302,6 +337,7 @@ fmb.views.Account.prototype.render = function() {
   }
 
   this.$devices.toggle(this.model.id);
+  $('body').toggleClass('fmb-signed-in', !!this.model.id);
 
   var templateData = {
     'user': this.model.getTemplateData()
@@ -398,7 +434,7 @@ fmb.views.Account.prototype.onClickLogin_ = function(e) {
       fmb.models.getServerShare() + '/login?user_token=' +
           window.escape(this.model.loginToken_),
       '_blank',
-      'location=yes');
+      'location=yes,toolbar=no');
 
   // For Phonegap's InAppBrowser.
   if (this.inAppBrowser_.addEventListener) {
@@ -415,7 +451,7 @@ fmb.views.Account.prototype.onClickLogin_ = function(e) {
 
   // For not-Phonegap.
   this.inAppBrowserCloseCheckInterval_ = window.setInterval(_.bind(function() {
-    if (this.inAppBrowser_.closed) {
+    if (!this.inAppBrowser_ || this.inAppBrowser_.closed) {
       this.onInAppBrowserExit_();
     }
   }, this), 500);
@@ -428,7 +464,7 @@ fmb.views.Account.prototype.onClickLogin_ = function(e) {
  */
 fmb.views.Account.prototype.onInAppBrowserLoadStart_ = function(e) {
   fmb.log('fmb.views.Account onInAppBrowserLoadStart_', e.url);
-  fmb.views.showNotification('Loading ...');
+  fmb.views.showSpinner('Loading ...');
 
   if (e.url.indexOf('close=1') !== -1) {
     fmb.log('found close=1 in url, nukerooski.');
@@ -445,7 +481,7 @@ fmb.views.Account.prototype.onInAppBrowserLoadStart_ = function(e) {
 fmb.views.Account.prototype.onInAppBrowserLoadStop_ = function(e) {
   fmb.log('fmb.views.Account onInAppBrowserLoadStop_', e.url);
 
-  fmb.views.hideNotification();
+  fmb.views.hideSpinner();
 
   if (e.url.indexOf('/profile') !== -1) {
     this.inAppBrowser_.close();
@@ -461,7 +497,7 @@ fmb.views.Account.prototype.onInAppBrowserLoadStop_ = function(e) {
 fmb.views.Account.prototype.onInAppBrowserExit_ = function(e) {
   fmb.log('fmb.views.Account onInAppBrowserExit_');
 
-  fmb.views.hideNotification();
+  fmb.views.hideSpinner();
 
   if (!this.inAppBrowserCloseCheckInterval_ == null) {
     window.clearInterval(this.inAppBrowserCloseCheckInterval_);
@@ -484,6 +520,29 @@ fmb.views.Account.prototype.onInAppBrowserExit_ = function(e) {
   this.inAppBrowser_ = null;
 
   this.model.syncByLoginToken();
+};
+
+
+/******************************************************************************/
+
+
+
+/**
+ * @extends {Backbone.View}
+ * @constructor
+ */
+fmb.views.HowItWorks = Backbone.View.extend({
+  el: '.fmb-how-it-works',
+  events: {
+  }
+});
+
+
+/** @inheritDoc */
+fmb.views.HowItWorks.prototype.render = function() {
+  fmb.log('fmb.views.HowItWorks render');
+  this.$el.html(fmb.views.getTemplateHtml('how_it_works', {}));
+  return this;
 };
 
 
@@ -917,6 +976,9 @@ fmb.views.FollowingDevice.prototype.initialize = function(options) {
   this.listenTo(this.model, 'change', _.debounce(this.render, this));
   this.listenTo(this.model.get('settings'), 'add change remove',
                 _.debounce(this.render, this));
+  $(window).on('orientationchange',
+      _.debounce(_.bind(this.renderGraph_, this), 1000));
+  $(window).on('resize', _.debounce(_.bind(this.renderGraph_, this), 1000));
 };
 
 
@@ -949,6 +1011,11 @@ fmb.views.FollowingDevice.prototype.renderGraph_ = function() {
     return;
   }
 
+  // Sets the battery-graph el width dynamically since our chart
+  // lib wants a px value.
+  this.$('.battery-graph').css('width',
+      this.$('.battery-graph').parent().width() - 10 + 'px');
+
   var dataSeries = [];
   this.model.get('settings').each(function(model, i) {
     var xDate = new Date(model.get('created'));
@@ -979,8 +1046,9 @@ fmb.views.FollowingDevice.prototype.renderGraph_ = function() {
     'dataFormatX': function(x) { return new Date(x); },
     'tickFormatX': function(x) { return d3.time.format('%a %I%p')(x); },
     'axisPaddingTop': 10,
-    'axisPaddingBottom': 0,
-    'axisPaddingLeft': 0,
+    'axisPaddingBottom': 10,
+    'axisPaddingLeft': 10,
+    'axisPaddingRight': 10,
     'tickHintX': 4,
     'tickHintY': 2,
     'interpolation': 'basis',

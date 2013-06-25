@@ -488,8 +488,7 @@ fmb.models.FollowingCollection.prototype.addByUniqueProfileStr =
     'following_user_unique_profile_str': uniqueProfileStr
   });
 
-  var plugin = cordova.require('cordova/plugin/levels');
-  plugin && plugin.showMessage('Adding ' + uniqueProfileStr);
+  fmb.views.showMessage('Adding ' + uniqueProfileStr);
 };
 
 
@@ -525,21 +524,17 @@ fmb.models.FollowingCollection.prototype.onAdd_ = function(model) {
 
     success: _.bind(function() {
       fmb.log('MONEY TRAIN FollowingCollection onAdd_', model.get('name'));
-      var plugin = cordova.require('cordova/plugin/levels');
-      plugin && plugin.showMessage('Added ' + model.get('name'));
+      fmb.views.showMessage('Added ' + model.get('name'));
       this.parent.saveToStorage();
     }, this),
 
     error: function(model, xhr, options) {
       if (xhr.status === 404) {
-        var plugin = cordova.require('cordova/plugin/levels');
-        if (plugin) {
-          plugin.showMessage('Failure adding friend.');
-        } else {
-          alert('La bomba, seems we could not find a user ' + model.cid);
-        }
+        fmb.views.showMessage('Failure adding friend.');
+
       } else if (xhr.status === 409) {
         //alert('already following');
+        fmb.log('.. fail, already following this user.');
       }
     }
   });
@@ -565,8 +560,7 @@ fmb.models.FollowingCollection.prototype.onRemove_ = function(model) {
               model.id);
       this.parent.saveToStorage();
 
-      var plugin = cordova.require('cordova/plugin/levels');
-      plugin && plugin.showMessage('Removed ' + model.get('name'));
+      fmb.views.showMessage('Removed ' + model.get('name'));
 
     }, this),
     error: function(model, xhr, options) {
@@ -708,7 +702,7 @@ fmb.models.User.prototype.createUserDevice = function() {
   });
   var platform = window.device && window.device.platform || navigator.platform;
   var name = window.device && window.device.model || navigator.appName;
-  fmb.views.showNotification('Setting up ' + platform + ' ' + name + ' ...');
+  fmb.views.showSpinner('Setting up ' + platform + ' ' + name + ' ...');
   device.saveToServer({
     'uuid': fmb.models.DeviceUnMapped.getUuid(),
     'name': name,
@@ -718,12 +712,12 @@ fmb.models.User.prototype.createUserDevice = function() {
   }, {
     success: _.bind(function() {
       fmb.log('SUCCESS creating user device =)', device);
-      fmb.views.hideNotification();
+      fmb.views.hideSpinner();
       this.get('devices').add(device);
     }, this),
     error: function() {
       fmb.log('ERROR creating user device =(');
-      fmb.views.hideNotification();
+      fmb.views.hideSpinner();
       alert('I am so sorry that failed. Try killing and restarting the app.');
     }
   });
