@@ -142,6 +142,11 @@ class ProfileHandler(WebRequestHandler):
         self.output_response(template_data, 'profile.html')
 
 
+class SupportHandler(WebRequestHandler):
+    def get(self):
+        return self.redirect('/p/elsigh')
+
+
 class IndexHandler(WebRequestHandler):
     def get(self):
         return self.redirect('/p/elsigh')
