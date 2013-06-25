@@ -13,8 +13,10 @@
   display: block;
 }
 
-.fmb-account .username code {
-  font-size: 3em;
+
+.fmb-account .how-it-works {
+  display: block;
+  margin-top: 0.5em;
 }
 
 .fmb-account .login-google {
@@ -42,14 +44,14 @@
 
 .fmb-account .user-header > img {
   float: left;
-  height: 60px;
-  min-width: 60px;
+  height: 40px;
+  min-width: 40px;
   -webkit-border-radius: 3px;
   border-radius: 3px;
 }
 
 .fmb-account .user-info {
-  margin-left: 70px;
+  margin-left: 50px;
 }
 
 .fmb-account .user-info h2 {
