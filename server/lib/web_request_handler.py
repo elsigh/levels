@@ -89,8 +89,6 @@ class WebRequestHandler(webapp2.RequestHandler):
     def apply_cors_headers(self):
         self.response.headers['Access-Control-Allow-Origin'] = \
             self.request.headers.get('Origin', '*')
-        logging.info('Access-Control-Allow-Origin: %s' %
-                     self.request.headers.get('Origin', '*'))
         self.response.headers['Access-Control-Allow-Methods'] = \
             'GET, POST, OPTIONS, PUT, DELETE'
         self.response.headers['Access-Control-Allow-Credentials'] = 'true'
@@ -99,7 +97,11 @@ class WebRequestHandler(webapp2.RequestHandler):
 
     def browser_detect(self):
         """Tests the UA string for compatibility."""
-        user_agent_string = self.request.headers.get('USER_AGENT')
+        # Default UA string is for unit tests.
+        user_agent_string = self.request.headers.get(
+            'USER_AGENT',
+            ('Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 '
+             '(KHTML, like Gecko) Chrome/28.0.1468.0 Safari/537.36'))
 
         # aka unittests
         if not user_agent_string:

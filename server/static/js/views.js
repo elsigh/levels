@@ -986,7 +986,8 @@ fmb.views.FollowingDevice.prototype.initialize = function(options) {
 fmb.views.FollowingDevice.prototype.render = function() {
   fmb.log('fmb.views.FollowingDevice render', this.model.id);
   var templateData = this.model.getTemplateData();
-  if (app.model.user.device.id == this.model.id) {
+  if (app.model.user.device &&
+      app.model.user.device.id == this.model.id) {
     templateData['is_current_user_device'] = true;
   }
   this.$el.data('key', this.model.id);

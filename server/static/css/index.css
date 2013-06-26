@@ -1,9 +1,13 @@
 
+.fmb-index {
+  max-width: 900px;
+  position: relative;
+}
 
 .fmb-index .download-app {
   text-align: center;
   position: absolute;
-  top: 50px;
+  top: 150px;
   right: 10%;
   margin: 40px 10px 0 0;
 }
@@ -14,6 +18,14 @@
 
 .fmb-index .download-app img {
   height: 60px;
+}
+
+.ios .ios-store,
+.android .goog-play {
+  position: fixed;
+  z-index: 2;
+  top: 5px;
+  right: 10px;
 }
 
 .fmb-index .screenshot img {
@@ -27,7 +39,7 @@
   margin-top: 2em;
 }
 
-@media only screen and (max-width: 480px) {
+@media only screen and (max-width: 550px) {
 
   .fmb-index {
     text-align: center;
@@ -44,7 +56,7 @@
 
   .fmb-index .download-app {
     position: static;
-    margin: 1em 0;
+    margin: 1.5em 0;
   }
 
   .fmb-index .download-app img {
