@@ -429,9 +429,11 @@ fmb.views.Account.prototype.onClickLogin_ = function(e) {
 
   this.model.setLoginToken();
 
+  var loginUrl = fmb.models.getServerShare() + '/login?user_token=' +
+      window.escape(this.model.loginToken_);
+  fmb.log('.. loginUrl:', loginUrl);
   this.inAppBrowser_ = window.open(
-      fmb.models.getServerShare() + '/login?user_token=' +
-          window.escape(this.model.loginToken_),
+      loginUrl,
       '_blank',
       'location=yes,toolbar=no');
 

@@ -88,7 +88,9 @@ class WebRequestHandler(webapp2.RequestHandler):
 
     def apply_cors_headers(self):
         self.response.headers['Access-Control-Allow-Origin'] = \
-            self.request.get('Origin', '*')
+            self.request.headers.get('Origin', '*')
+        logging.info('Access-Control-Allow-Origin: %s' %
+                     self.request.headers.get('Origin', '*'))
         self.response.headers['Access-Control-Allow-Methods'] = \
             'GET, POST, OPTIONS, PUT, DELETE'
         self.response.headers['Access-Control-Allow-Credentials'] = 'true'
