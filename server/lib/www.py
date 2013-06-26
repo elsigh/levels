@@ -144,9 +144,13 @@ class ProfileHandler(WebRequestHandler):
 
 class SupportHandler(WebRequestHandler):
     def get(self):
-        self.output_response({}, 'support.html')
+        self.output_response({
+            'title': 'Levels - Support'
+        }, 'support.html')
 
 
 class IndexHandler(WebRequestHandler):
     def get(self):
-        self.output_response({}, 'index.html')
+        self.output_response({
+            'title': 'Levels App'
+        }, 'index.html')

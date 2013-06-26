@@ -54,10 +54,18 @@
     <footer>
       <div class="fmb-footer">
         © Copyright 2013 - Levels App -
-
-        <a href="/support">Support</a>
+        <a href="/support">Support</a> -
+        <a href="/app">Web App</a>
       </div>
     </footer>
+
+    <script>
+      if (window.addEventListener) {
+        window.addEventListener('load', function() {
+          window.scrollTo(0, 0);
+        }, false);
+      }
+    </script>
 
     {% if is_production %}
       <script>

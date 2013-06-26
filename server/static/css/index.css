@@ -28,6 +28,20 @@
 }
 
 @media only screen and (max-width: 480px) {
+
+  .fmb-index {
+    text-align: center;
+  }
+
+  .fmb-index ul {
+    text-align: left;
+  }
+
+  .fmb-index .screenshot img {
+    width: 150px;
+    margin: 0 auto;
+  }
+
   .fmb-index .download-app {
     position: static;
     margin: 1em 0;

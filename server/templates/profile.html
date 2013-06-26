@@ -4,11 +4,6 @@
 {% block head %}
   <link rel="stylesheet" href="/static/css/profile.css">
   <link rel="stylesheet" href="/static/css/xcharts.css">
-
-  <script src="/static/js/zepto.js"></script>
-  <script src="/static/js/d3.v2.js"></script>
-  <script src="/static/js/xcharts.js"></script>
-
 {% endblock %}
 
 {% block body %}
@@ -121,6 +116,10 @@
     #}
   </section>
 
+
+  <script src="/static/js/zepto.js"></script>
+  <script src="/static/js/d3.v2.js"></script>
+  <script src="/static/js/xcharts.js"></script>
   <script>
     window.fmbUser = {{user_json|safe}};
   </script>
@@ -128,7 +127,6 @@
   <script>
     fmbProfile.init();
   </script>
-
 
   {% if close %}
     <script>
