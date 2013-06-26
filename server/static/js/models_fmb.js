@@ -26,8 +26,8 @@ fmb.models.SERVER_PROD = 'https://followmybattery.appspot.com';
  * @return {string} The server endpoint.
  */
 fmb.models.getServer = function() {
-  return fmb.ua.IS_APP && !fmb.ua.isSimulator() ?
-         fmb.models.SERVER_PROD : fmb.models.SERVER_LOCAL;
+  return (fmb.ua.IS_APP || fmb.ua.IS_WEB_APP) && !fmb.ua.isSimulator() ?
+      fmb.models.SERVER_PROD : fmb.models.SERVER_LOCAL;
 };
 
 

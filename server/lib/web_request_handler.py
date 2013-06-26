@@ -87,10 +87,13 @@ class WebRequestHandler(webapp2.RequestHandler):
         pass
 
     def apply_cors_headers(self):
-        self.response.headers['Access-Control-Allow-Origin'] = '*'
-        self.response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS, PUT, DELETE'
+        self.response.headers['Access-Control-Allow-Origin'] = \
+            self.request.get('Origin', '*')
+        self.response.headers['Access-Control-Allow-Methods'] = \
+            'GET, POST, OPTIONS, PUT, DELETE'
         self.response.headers['Access-Control-Allow-Credentials'] = 'true'
-        self.response.headers['Access-Control-Allow-Headers'] = 'Content-Type,X-Requested-With'
+        self.response.headers['Access-Control-Allow-Headers'] = \
+            'Content-Type,X-Requested-With'
 
     def browser_detect(self):
         """Tests the UA string for compatibility."""
@@ -159,10 +162,13 @@ def ErrorHandler(request, response, exception, code):
     logging.info('Exception: %s' % exception)
 
     response.set_status(code)
-    response.headers['Access-Control-Allow-Origin'] = '*'
-    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS, PUT'
+    response.headers['Access-Control-Allow-Origin'] = \
+        request.headers.get('Origin', '*')
+    response.headers['Access-Control-Allow-Methods'] = \
+        'GET, POST, OPTIONS, PUT'
     response.headers['Access-Control-Allow-Credentials'] = 'true'
-    response.headers['Access-Control-Allow-Headers'] = 'Content-Type,X-Requested-With'
+    response.headers['Access-Control-Allow-Headers'] = \
+        'Content-Type,X-Requested-With'
 
     user_agent_string = request.headers.get('USER_AGENT')
     ua_dict = user_agent_parser.Parse(user_agent_string)
