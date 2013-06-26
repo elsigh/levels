@@ -26,14 +26,7 @@
     {% block head %}{% endblock %}
 
   </head>
-  <body
-    class="
-      {% if user_agent.device.family %} {{user_agent.device.family}} {{user_agent.device.family}}-{{user_agent.device.major}}{% endif %}
-
-      {% if user_agent.user_agent.family %} {{user_agent.user_agent.family}} {{user_agent.user_agent.family}}-{{user_agent.user_agent.major}} {{user_agent.user_agent.family}}-{{user_agent.user_agent.major}}-{{user_agent.user_agent.minor}}{% endif %}
-
-      {% if user_agent.os.family %} {{user_agent.os.family}} {{user_agent.os.family}}-{{user_agent.os.major}} {{user_agent.os.family}}-{{user_agent.os.major}}-{{user_agent.os.minor}}{% endif %}
-      ">
+  <body>
 
     <div class="nav">
       <!--
