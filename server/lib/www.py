@@ -84,9 +84,9 @@ class AdminUserMessageTestHandler(WebRequestHandler):
 
 
 class AppHandler(WebRequestHandler):
-    """Redirects suck for mobile =/"""
     def get(self, endpoint=None):
-        self.redirect('/static/app.html')
+        app_html = open('templates/app.html', 'r').read()
+        self.response.out.write(app_html)
 
 
 class ProfileHandler(WebRequestHandler):
@@ -144,9 +144,13 @@ class ProfileHandler(WebRequestHandler):
 
 class SupportHandler(WebRequestHandler):
     def get(self):
-        return self.redirect('/p/elsigh')
+        self.output_response({
+            'title': 'Levels - Support'
+        }, 'support.html')
 
 
 class IndexHandler(WebRequestHandler):
     def get(self):
-        return self.redirect('/p/elsigh')
+        self.output_response({
+            'title': 'Levels App'
+        }, 'index.html')

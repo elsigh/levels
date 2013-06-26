@@ -4,11 +4,6 @@
 {% block head %}
   <link rel="stylesheet" href="/static/css/profile.css">
   <link rel="stylesheet" href="/static/css/xcharts.css">
-
-  <script src="/static/js/zepto.js"></script>
-  <script src="/static/js/d3.v2.js"></script>
-  <script src="/static/js/xcharts.js"></script>
-
 {% endblock %}
 
 {% block body %}
@@ -25,9 +20,10 @@
       </a>
 
       <a
-        href="#coming-soon">
+        href=" http://itunes.com/apps/LevelsApp">
         <img alt="iOS App"
-          src="/static/img/ios_app_store.png">
+          src="/static/img/ios_app_store.png"
+          title="pending review">
       </a>
     </div>
 
@@ -120,6 +116,10 @@
     #}
   </section>
 
+
+  <script src="/static/js/zepto.js"></script>
+  <script src="/static/js/d3.v2.js"></script>
+  <script src="/static/js/xcharts.js"></script>
   <script>
     window.fmbUser = {{user_json|safe}};
   </script>
@@ -127,7 +127,6 @@
   <script>
     fmbProfile.init();
   </script>
-
 
   {% if close %}
     <script>

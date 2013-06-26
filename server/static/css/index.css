@@ -1,15 +1,54 @@
 
-.content {
-  padding-bottom: 50px;
+
+.fmb-index .download-app {
+  text-align: center;
+  position: absolute;
+  top: 50px;
+  right: 10%;
+  margin: 40px 10px 0 0;
 }
 
-footer {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  color: #fff;
-  padding: 15px;
-  background: #aaa;
-  text-align: center;
+.fmb-index .download-app a {
+  display: block;
+}
+
+.fmb-index .download-app img {
+  height: 60px;
+}
+
+.fmb-index .screenshot img {
+  width: 250px;
+  border: 1px solid #999;
+  -webkit-border-radius: 10px;
+  border-radius: 10px;
+}
+
+.fmb-index h3 {
+  margin-top: 2em;
+}
+
+@media only screen and (max-width: 480px) {
+
+  .fmb-index {
+    text-align: center;
+  }
+
+  .fmb-index ul {
+    text-align: left;
+  }
+
+  .fmb-index .screenshot img {
+    width: 150px;
+    margin: 0 auto;
+  }
+
+  .fmb-index .download-app {
+    position: static;
+    margin: 1em 0;
+  }
+
+  .fmb-index .download-app img {
+    height: 45px;
+  }
+
 }

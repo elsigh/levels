@@ -82,12 +82,13 @@
     <script id="tpl_how_it_works" type="text/html">
       <h2>How Levels Works</h2>
       <p>
-        Levels sends your battery level to our servers every
+        Levels sends your battery status to our server every
         10 minutes.
       </p>
       <p>
-        When your battery crosses the 10% threshold going down,
+        When your battery goes down below 10%
         we'll send you, and anyone you'd like, a notification.
+        Levels sends, at most, one message every 12 hours.
       </p>
       <p>
         You can install Levels on your phones, tablets, remote controls,
@@ -107,9 +108,11 @@
           Levels will send you, and anyone you configure, a
           notification <strong>before</strong> your battery dies!
 
-          <a
-            class="how-it-works"
-            href="how_it_works" class="fmb-app-link">Read more about how it works.</a>
+          <span class="how-it-works-c">
+            <a
+              href="how_it_works" class="fmb-app-link"
+              >Read more about how it works</a>
+          </span>
         </p>
 
 
@@ -179,14 +182,10 @@
         {{/key}}
       {{/is_user_device}}
 
-      <form method="post"
-        class="device-update"
-        action="{{api_server}}/api/device">
-        <h3>
-          {{platform}}
-          {{name}}
-        </h3>
-      </form>
+      <h3>
+        {{platform}}
+        {{name}}
+      </h3>
     </script>
 
     <script id="tpl_notifying" type="text/html">
