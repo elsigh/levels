@@ -159,7 +159,6 @@ fmb.views.App = Backbone.View.extend({
 /** @inheritDoc */
 fmb.views.App.prototype.initialize = function(options) {
   fmb.log('fmb.views.App.initialize', this.model);
-
   $('body').addClass('fmb-platform-' + fmb.ua.getPlatform());
 };
 
@@ -430,9 +429,11 @@ fmb.views.Account.prototype.onClickLogin_ = function(e) {
 
   this.model.setLoginToken();
 
+  var loginUrl = fmb.models.getServerShare() + '/login?user_token=' +
+      window.escape(this.model.loginToken_);
+  fmb.log('.. loginUrl:', loginUrl);
   this.inAppBrowser_ = window.open(
-      fmb.models.getServerShare() + '/login?user_token=' +
-          window.escape(this.model.loginToken_),
+      loginUrl,
       '_blank',
       'location=yes,toolbar=no');
 
@@ -499,7 +500,7 @@ fmb.views.Account.prototype.onInAppBrowserExit_ = function(e) {
 
   fmb.views.hideSpinner();
 
-  if (!this.inAppBrowserCloseCheckInterval_ == null) {
+  if (this.inAppBrowserCloseCheckInterval_ !== null) {
     window.clearInterval(this.inAppBrowserCloseCheckInterval_);
     this.inAppBrowserCloseCheckInterval_ = null;
   }
@@ -532,9 +533,7 @@ fmb.views.Account.prototype.onInAppBrowserExit_ = function(e) {
  * @constructor
  */
 fmb.views.HowItWorks = Backbone.View.extend({
-  el: '.fmb-how-it-works',
-  events: {
-  }
+  el: '.fmb-how-it-works'
 });
 
 
@@ -567,6 +566,7 @@ fmb.views.Device = Backbone.View.extend({
 
 /** @inheritDoc */
 fmb.views.Device.prototype.initialize = function(options) {
+  this.listenTo(this.model, 'change', _.debounce(this.render, this));
   this.$device = $('<div class="device"></div>');
   this.viewNotifying = new fmb.views.Notifying({
     model: this.model.get('notifying'),

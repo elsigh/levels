@@ -273,6 +273,51 @@ function testNotifyingDelete() {
 
 /******************************************************************************/
 
+function testLaunchSync() {
+  setUpAppInstalled();
+
+  assertEquals(app.model.user.get('name'),
+      app.view.currentView.$('.user-info > h2').text().trim());
+
+  // First request is a user launchSync.
+  var userSyncUrl = fmb.models.getApiUrl('/user') +
+      '?api_token=' + app.model.user.get('api_token') + '&' +
+      'user_key=' + app.model.user.id;
+  assertEquals(userSyncUrl,
+               server.requests[serverRequestCountExpected - 1].url);
+
+  var userSyncResponse = {
+    'status': 0,
+    'name': app.model.user.get('name') + '-changed',
+    'devices': [
+      {
+        'key': app.model.user.device.id,
+        'name': app.model.user.device.get('name') + '-changed'
+      }
+    ]
+  };
+  server.requests[serverRequestCountExpected - 1].respond(
+      200, API_RESPONSE_HEADERS,
+      JSON.stringify(userSyncResponse));
+
+  // Models updated.
+  assertEquals(userSyncResponse['name'],
+               app.model.user.get('name'));
+  assertEquals(userSyncResponse['devices'][0]['name'],
+               app.model.user.device.get('name'));
+
+  // UI updated.
+  assertEquals(userSyncResponse['name'],
+      app.view.currentView.$('.user-info > h2').text().trim());
+
+  clock.tick(1);  // device render on change is debounced.
+  assertTrue(
+      app.view.currentView.$('.fmb-device h3').text().indexOf(
+          userSyncResponse['devices'][0]['name']) !== -1);
+}
+
+/******************************************************************************/
+
 function testMultipleDevices() {
   setUpAppInstalled();
   app.model.user.fetch();

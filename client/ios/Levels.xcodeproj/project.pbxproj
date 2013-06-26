@@ -558,6 +558,8 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ENABLE_OBJC_ARC = YES;
+				CODE_SIGN_IDENTITY = "iPhone Distribution: Lindsey Simon (NSRMKCKSG9)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Lindsey Simon (NSRMKCKSG9)";
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -568,6 +570,8 @@
 				INFOPLIST_FILE = "Levels/Levels-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
 				PRODUCT_NAME = Levels;
+				PROVISIONING_PROFILE = "139595BF-9D88-400C-8494-6686E695F054";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "139595BF-9D88-400C-8494-6686E695F054";
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -577,6 +581,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ENABLE_OBJC_ARC = YES;
+				CODE_SIGN_IDENTITY = "iPhone Distribution: Lindsey Simon (NSRMKCKSG9)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Lindsey Simon (NSRMKCKSG9)";
 				COPY_PHASE_STRIP = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -586,6 +591,7 @@
 				INFOPLIST_FILE = "Levels/Levels-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
 				PRODUCT_NAME = Levels;
+				PROVISIONING_PROFILE = "139595BF-9D88-400C-8494-6686E695F054";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "139595BF-9D88-400C-8494-6686E695F054";
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};

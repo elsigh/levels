@@ -26,14 +26,7 @@
     {% block head %}{% endblock %}
 
   </head>
-  <body
-    class="
-      {% if user_agent.device.family %} {{user_agent.device.family}} {{user_agent.device.family}}-{{user_agent.device.major}}{% endif %}
-
-      {% if user_agent.user_agent.family %} {{user_agent.user_agent.family}} {{user_agent.user_agent.family}}-{{user_agent.user_agent.major}} {{user_agent.user_agent.family}}-{{user_agent.user_agent.major}}-{{user_agent.user_agent.minor}}{% endif %}
-
-      {% if user_agent.os.family %} {{user_agent.os.family}} {{user_agent.os.family}}-{{user_agent.os.major}} {{user_agent.os.family}}-{{user_agent.os.major}}-{{user_agent.os.minor}}{% endif %}
-      ">
+  <body>
 
     <div class="nav">
       <!--
@@ -43,7 +36,7 @@
         <a href="/login">sign in</a>
       {% endif %}
       -->
-      <h1><span>Levels</span></h1>
+      <h1><a href="/"><span>Levels</span></a></h1>
     </div>
 
     <div class="content">
@@ -53,9 +46,19 @@
 
     <footer>
       <div class="fmb-footer">
-        © Copyright 2013 - Levels
+        © Copyright 2013 - Levels App -
+        <a href="/support">Support</a> -
+        <a href="/app">Web App</a>
       </div>
     </footer>
+
+    <script>
+      if (window.addEventListener) {
+        window.addEventListener('load', function() {
+          window.scrollTo(0, 0);
+        }, false);
+      }
+    </script>
 
     {% if is_production %}
       <script>

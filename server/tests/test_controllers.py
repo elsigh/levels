@@ -45,6 +45,18 @@ class HandlerTest(unittest.TestCase):
     def tearDown(self):
         self.testbed.deactivate()
 
+    def test_WWW(self):
+        response = self.testapp.get('/', status=200)
+        response = self.testapp.get('/support', status=200)
+        response = self.testapp.get('/app', status=200)
+
+        elsigh_user = models.FMBUser(
+            name='elsigh'
+        )
+        elsigh_user.put()
+        response = self.testapp.get(
+            '/p/%s' % elsigh_user.unique_profile_str, status=200)
+
     def test_DeviceModel_to_dict(self):
         device = models.Device(uuid='test_uuid')
         device.put()
@@ -75,8 +87,23 @@ class HandlerTest(unittest.TestCase):
 
         response = self.testapp.get('/api/user',
                                     params=dict(api_token=elsigh_user.api_token,
-                                                user_key=elsigh_user.key.urlsafe()))
+                                                user_key=elsigh_user.key.urlsafe()),
+                                    headers={'Origin': 'foo'})
 
+        # Test CORS origin header.
+        cors_headers = [
+            'Access-Control-Allow-Origin',
+            'Access-Control-Allow-Methods',
+            'Access-Control-Allow-Credentials',
+            'Access-Control-Allow-Headers'
+        ]
+        for header in cors_headers:
+          self.assertTrue(header in response.headers.keys())
+
+        self.assertEquals('foo',
+            response.headers.get('Access-Control-Allow-Origin'))
+
+        # Basic user response.
         body = response.normal_body
         obj = json.loads(body)
         self.assertEquals(elsigh_user.key.urlsafe(), obj['key'])

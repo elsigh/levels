@@ -62,6 +62,13 @@ fmb.ua.IS_APP = fmb.ua.IS_CORDOVA &&
                 (fmb.ua.IS_ANDROID || fmb.ua.IS_IOS);
 
 
+/**
+ * The hosted web app.
+ * @type {boolean}
+ */
+fmb.ua.IS_WEB_APP = window.location.hostname == 'www.levelsapp.com';
+
+
 /******************************************************************************/
 
 

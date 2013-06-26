@@ -15,6 +15,7 @@
 # limitations under the License.
 
 import datetime
+from datetime import tzinfo
 import logging
 import sys
 import time
@@ -57,8 +58,12 @@ class FMBModel(ndb.Model):
         return []
 
     @property
+    def created_pst(self):
+        return self.created.replace(tzinfo=UtcTzinfo()).astimezone(PstTzinfo())
+
+    @property
     def extra_properties(self):
-        return []
+        return ['created_pst']
 
     def to_json(self):
         return FMBModel.json_dump(self.to_dict())
@@ -130,7 +135,8 @@ class FMBUser(User, FMBModel):
 
     @property
     def extra_properties(self):
-        return ['given_name_possessive', 'name_possessive',
+        return ['created_pst',
+                'given_name_possessive', 'name_possessive',
                 'is_gmail_account', 'gmail_username']
 
     def possessive(self, name):
@@ -311,3 +317,39 @@ class Notifying(FMBModel):
 class NotificationSent(FMBModel):
     created = ndb.DateTimeProperty(auto_now_add=True)
     means = ndb.StringProperty(required=True)
+
+
+class UtcTzinfo(datetime.tzinfo):
+    def utcoffset(self, dt):
+        return datetime.timedelta(0)
+
+    def dst(self, dt):
+        return datetime.timedelta(0)
+
+    def tzname(self, dt):
+        return 'UTC'
+
+    def olsen_name(self):
+        return 'UTC'
+
+
+class PstTzinfo(datetime.tzinfo):
+    def utcoffset(self, dt):
+        return datetime.timedelta(hours=-8) + self.dst(dt)
+
+    def _FirstSunday(self, dt):
+        return dt + datetime.timedelta(days=(6-dt.weekday()))
+
+    def dst(self, dt):
+        dst_start = self._FirstSunday(datetime.datetime(dt.year, 3, 8, 2))
+        dst_end = self._FirstSunday(datetime.datetime(dt.year, 11, 1, 1))
+        if dst_start <= dt.replace(tzinfo=None) < dst_end:
+            return datetime.timedelta(hours=1)
+        else:
+            return datetime.timedelta(hours=0)
+
+    def tzname(self, dt):
+        if self.dst(dt) == datetime.timedelta(hours=0):
+            return 'PST'
+        else:
+            return 'PDT'
