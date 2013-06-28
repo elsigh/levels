@@ -1,25 +1,5 @@
 
 
-// Yep, we need zepto to work with CORS and cookies.
-$.ajaxSettings['beforeSend'] = function(xhr, settings) {
-  xhr.withCredentials = true;
-  $('.fmb-app > .fmb-loading').show();
-};
-
-$.ajaxSettings['complete'] = function(xhr, status) {
-  $('.fmb-app > .fmb-loading').hide();
-};
-
-/*
-$.ajaxSettings['success'] = function(xhr, status) {
-  // noop
-};
-$.ajaxSettings['error'] = function(xhr, status) {
-  // noop
-};
-*/
-
-
 
 /******************************************************************************/
 
