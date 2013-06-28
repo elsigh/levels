@@ -11,6 +11,7 @@ devnull = open(os.devnull, 'w')
 IGNORE_FILES = [
     'ContactView.js',
     'test_controllers.py',
+    'auth.py',
     'lib/external',
 ]
 

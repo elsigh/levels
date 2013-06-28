@@ -167,7 +167,8 @@ function setUpAppInstalled() {
   app = new fmb.App();
   clock.tick(5000);  // init
 
-  serverRequestCountExpected++;  // First request is a user fetch / sync.
+  serverRequestCountExpected++;  // First request is user fetch / sync.
+  serverRequestCountExpected++;  // Second request is following fetch / sync.
 
 }
 
@@ -190,23 +191,28 @@ function testAppInstalledInitialize() {
       '?api_token=' + app.model.user.get('api_token') + '&' +
       'user_key=' + app.model.user.id;
   assertEquals(userSyncUrl,
-               server.requests[serverRequestCountExpected - 1].url);
-  /*
-  assertEquals(fmb.models.getApiUrl('/user'),
-               server.requests[serverRequestCountExpected - 1].url);
-  var requestBody =
-      JSON.parse(server.requests[serverRequestCountExpected - 1].requestBody);
-  assertEquals(app.model.user.get('api_token'), requestBody['api_token']);
-  assertEquals(app.model.user.id, requestBody['user_key']);
-  */
-
+               server.requests[0].url);
   var userSyncResponse = {
     'status': 0,
     'name': 'Lindsey Simon'
   };
-  server.requests[serverRequestCountExpected - 1].respond(
+  server.requests[0].respond(
       200, API_RESPONSE_HEADERS,
       JSON.stringify(userSyncResponse));
+
+  // Second request is a following sync.
+  var followingSyncUrl = fmb.models.getApiUrl('/following') +
+      '?api_token=' + app.model.user.get('api_token') + '&' +
+      'user_key=' + app.model.user.id;
+  assertEquals(followingSyncUrl,
+               server.requests[1].url);
+  var followingSyncResponse = {
+    'status': 0,
+    'following': []
+  };
+  server.requests[1].respond(
+      200, API_RESPONSE_HEADERS,
+      JSON.stringify(followingSyncResponse));
 }
 
 /******************************************************************************/
@@ -273,7 +279,7 @@ function testNotifyingDelete() {
 
 /******************************************************************************/
 
-function testLaunchSync() {
+function testLaunchSyncDoesResettery() {
   setUpAppInstalled();
 
   assertEquals(app.model.user.get('name'),
@@ -284,7 +290,7 @@ function testLaunchSync() {
       '?api_token=' + app.model.user.get('api_token') + '&' +
       'user_key=' + app.model.user.id;
   assertEquals(userSyncUrl,
-               server.requests[serverRequestCountExpected - 1].url);
+               server.requests[0].url);
 
   var userSyncResponse = {
     'status': 0,
@@ -296,7 +302,7 @@ function testLaunchSync() {
       }
     ]
   };
-  server.requests[serverRequestCountExpected - 1].respond(
+  server.requests[0].respond(
       200, API_RESPONSE_HEADERS,
       JSON.stringify(userSyncResponse));
 
@@ -314,6 +320,8 @@ function testLaunchSync() {
   assertTrue(
       app.view.currentView.$('.fmb-device h3').text().indexOf(
           userSyncResponse['devices'][0]['name']) !== -1);
+
+  // TODO(elsigh): Test following sync hard reset works
 }
 
 /******************************************************************************/
@@ -604,13 +612,17 @@ function testAppIncompleteInstall() {
       '?api_token=' + app.model.user.get('api_token') + '&' +
       'user_key=' + app.model.user.id;
   assertEquals(userSyncUrl,
-               server.requests[serverRequestCountExpected - 1].url);
+               server.requests[0].url);
 
-  server.requests[serverRequestCountExpected - 1].respond(
+  server.requests[0].respond(
       200, API_RESPONSE_HEADERS,
       JSON.stringify({'status': 0}));
 
-  serverRequestCountExpected++;  // Retry createUserDevice
+  // next request is following sync..
+  serverRequestCountExpected++;
+
+  // Now, we do a retry createUserDevice because no devices still.
+  serverRequestCountExpected++;
   assertEquals(fmb.models.getApiUrl('/device'),
                server.requests[serverRequestCountExpected - 1].url);
 

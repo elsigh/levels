@@ -175,7 +175,7 @@ def ErrorHandler(request, response, exception, code):
         'Content-Type,X-Requested-With'
 
     # Default UA string is for unit tests.
-    user_agent_string = self.request.headers.get(
+    user_agent_string = request.headers.get(
         'USER_AGENT',
         ('Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 '
          '(KHTML, like Gecko) Chrome/28.0.1468.0 Safari/537.36'))

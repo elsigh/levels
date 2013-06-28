@@ -23,9 +23,15 @@
 .ios .ios-store,
 .android .goog-play {
   position: fixed;
-  z-index: 2;
+  z-index: 3;
   top: 5px;
   right: 10px;
+  width: 150px;
+}
+
+.ios .ios-store img,
+.android .goog-play img {
+  height: 45px;
 }
 
 .fmb-index .screenshot img {

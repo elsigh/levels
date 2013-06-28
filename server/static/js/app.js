@@ -16,7 +16,7 @@ fmb.App.Routes = {
     url: 'account',
     handler: 'routeAccount_'
   },
-  FOLLOWING: {
+  FOLLOW: {
     url: 'follow/:userUniqueProfileStr',
     handler: 'routeFollow_'
   },
@@ -134,22 +134,10 @@ fmb.App.prototype.initHistory_ = function() {
     root: root,
     silent: silent
   });
+
   if (!matchedRoute) {
     console.warn('No matchedRoute in initHistory');
-
     this.navigate(fmb.App.Routes.ACCOUNT.url, {trigger: true});
-
-    /*
-    // Only take them to the stats page if they're pretty well set up.
-    if (this.model.user && this.model.user.get('api_token') &&
-        this.model.user.device &&
-        this.model.user.device.get('notifying').length) {
-      this.navigate(fmb.App.Routes.FOLLOWING.url, {trigger: true});
-
-    } else {
-      this.navigate(fmb.App.Routes.ACCOUNT.url, {trigger: true});
-    }
-    */
   }
 };
 
@@ -210,7 +198,7 @@ fmb.App.prototype.checkIntentUrlForUser_ = function(url) {
     var userUniqueProfileStr = match[1];
     _.delay(_.bind(function() {
       this.navigate(
-          fmb.App.Routes.FOLLOWING.url.
+          fmb.App.Routes.FOLLOW.url.
               replace(':userUniqueProfileStr', userUniqueProfileStr),
           {trigger: true});
     }, this), 300);
@@ -234,9 +222,16 @@ fmb.App.prototype.routeAccount_ = function() {
  */
 fmb.App.prototype.routeFollow_ = function(userUniqueProfileStr) {
   fmb.log('fmb.App routeFollow_', userUniqueProfileStr);
+
+  if (!this.model.user.id) {
+    fmb.log('.. no user id, gotta login');
+    this.navigate(fmb.App.Routes.ACCOUNT.url, {trigger: true});
+    return;
+  }
+
   this.model.user.get('following').addByUniqueProfileStr(
       userUniqueProfileStr);
-  this.view.transitionPage(fmb.App.Routes.FOLLOWING);
+  this.navigate(fmb.App.Routes.FOLLOWING.url, {trigger: true});
 };
 
 
@@ -245,6 +240,13 @@ fmb.App.prototype.routeFollow_ = function(userUniqueProfileStr) {
  */
 fmb.App.prototype.routeFollowing_ = function() {
   fmb.log('fmb.App routeFollowing_');
+
+  if (!this.model.user.id) {
+    fmb.log('.. no user id, gotta login');
+    this.navigate(fmb.App.Routes.ACCOUNT.url, {trigger: true});
+    return;
+  }
+
   this.view.transitionPage(fmb.App.Routes.FOLLOWING);
 };
 
