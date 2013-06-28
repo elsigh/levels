@@ -17,6 +17,10 @@ fmb.App.Routes = {
     handler: 'routeAccount_'
   },
   FOLLOWING: {
+    url: 'follow/:userUniqueProfileStr',
+    handler: 'routeFollow_'
+  },
+  FOLLOWING: {
     url: 'following',
     handler: 'routeFollowing_'
   },
@@ -205,9 +209,10 @@ fmb.App.prototype.checkIntentUrlForUser_ = function(url) {
     fmb.log('fmb.App checkIntentUrlForUser_', url, match);
     var userUniqueProfileStr = match[1];
     _.delay(_.bind(function() {
-      this.model.user.get('following').addByUniqueProfileStr(
-          userUniqueProfileStr);
-      this.navigate(fmb.App.Routes.FOLLOWING.url, {trigger: true});
+      this.navigate(
+          fmb.App.Routes.FOLLOWING.url.
+              replace(':userUniqueProfileStr', userUniqueProfileStr),
+          {trigger: true});
     }, this), 300);
 
   }
@@ -220,6 +225,18 @@ fmb.App.prototype.checkIntentUrlForUser_ = function(url) {
 fmb.App.prototype.routeAccount_ = function() {
   fmb.log('fmb.App routeAccount_');
   this.view.transitionPage(fmb.App.Routes.ACCOUNT);
+};
+
+
+/**
+ * @param {string} userUniqueProfileStr The user's unique_profile_str.
+ * @private
+ */
+fmb.App.prototype.routeFollow_ = function(userUniqueProfileStr) {
+  fmb.log('fmb.App routeFollow_', userUniqueProfileStr);
+  this.model.user.get('following').addByUniqueProfileStr(
+      userUniqueProfileStr);
+  this.view.transitionPage(fmb.App.Routes.FOLLOWING);
 };
 
 

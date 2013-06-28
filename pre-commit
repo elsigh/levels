@@ -11,6 +11,7 @@ devnull = open(os.devnull, 'w')
 IGNORE_FILES = [
     'ContactView.js',
     'test_controllers.py',
+    'lib/external',
 ]
 
 def call(cmd):
@@ -47,12 +48,11 @@ def get_modified(ext):
         if (match):
             modifieds.append(match.group('name'))
 
-    i = 0
-    for modified in modifieds:
+    for i, modified in reversed(list(enumerate(modifieds))):
         for ignore_file in IGNORE_FILES:
             if re.search(ignore_file, modified, re.UNICODE):
                 modifieds.pop(i)
-        i += 1
+
     return modifieds
 
 
