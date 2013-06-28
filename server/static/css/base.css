@@ -24,7 +24,7 @@ body.android {
 }
 
 footer {
-  margin-top: 7em;
+  margin-top: 2em;
   font-size: 90%;
   padding: 10px;
   text-align: center;
@@ -178,14 +178,14 @@ button:active {
   height: 55px;
 }
 
-/*
-.nav a {
+.nav .sign-in-out {
   position: fixed;
+  display: inline-block;
   right: 10px;
   z-index: 3;
   margin-top: 0.8em;
 }
-*/
+
 
 .range {
   text-align: center;

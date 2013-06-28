@@ -97,6 +97,13 @@ handlers:
 - url: /app/img
   static_dir: static/img
 
+- url: /app/.*/css
+  static_dir: static/css
+- url: /app/.*/js
+  static_dir: static/js
+- url: /app/.*/img
+  static_dir: static/img
+
 # Serve the tests for automation.
 - url: /tests
   static_dir: tests

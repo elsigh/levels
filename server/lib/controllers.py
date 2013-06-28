@@ -78,6 +78,7 @@ routes = [
     # App
     Route('/app', handler='lib.www.AppHandler'),
     Route('/app/<endpoint>', handler='lib.www.AppHandler'),
+    Route('/app/<endpoint>/<more_endpoint>', handler='lib.www.AppHandler'),
 
     Route('/', handler='lib.www.IndexHandler'),
 ]

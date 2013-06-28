@@ -135,7 +135,7 @@ class AuthHandler(WebRequestHandler, SimpleAuthHandler):
                    (user_token, user.key.id()))
 
     # Go to the profile page
-    self.redirect('/profile/%s?close=1' % user.key.urlsafe())
+    self.redirect('/p/%s?close=1' % user.unique_profile_str)
 
   def logout(self):
     self.auth.unset_session()
