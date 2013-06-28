@@ -90,31 +90,41 @@ class AppHandler(WebRequestHandler):
 
 
 class ProfileHandler(WebRequestHandler):
-    def get(self, user_identifier=None):
+    def get(self, unique_profile_str=None):
         """Handles GET /profile"""
 
+        if unique_profile_str is None:
+            self.abort(404)
+
+        # "close" will be set when a user is logging in through the
+        # installed Android or iOS app.
         close = self.request.get('close')
 
-        if self.current_user and user_identifier is None:
-            user = self.current_user
+        user = None
 
-        elif user_identifier is not None:
-            # The URL is /p/unique_profile_str
-            if self.request.path.find('/p/') != -1:
-                q = models.FMBUser.query().filter(
-                    ndb.GenericProperty('unique_profile_str') ==
-                    user_identifier)
-                user = q.get()
+        # If you're logged in ...
+        if self.current_user:
+            # Maybe it's all about you.
+            if ((self.current_user.unique_profile_str ==
+                 unique_profile_str)):
+                user = self.current_user
 
-                if user is None:
-                    self.abort(404)
+            # If you're not in the OAuth2 login flow in via the mobile app,
+            # let's take ya to the web app.
+            if close is None:
+                if user:
+                    return self.redirect('/app')
+                else:
+                    return self.redirect('/app/follow/%s' % unique_profile_str)
 
-            # The URL is /profile/user_identifier
-            else:
-                try:
-                    user = ndb.Key(urlsafe=user_identifier).get()
-                except:
-                    self.abort(404)
+        if user is None:
+            q = models.FMBUser.query().filter(
+                ndb.GenericProperty('unique_profile_str') ==
+                unique_profile_str)
+            user = q.get()
+
+            if user is None:
+                self.abort(404)
 
         logging.info('Profile user!: %s', user.to_dict())
         template_data = {

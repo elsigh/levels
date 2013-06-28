@@ -26,7 +26,7 @@
     {% block head %}{% endblock %}
 
   </head>
-  <body>
+  <body class="{{user_agent.os.family.replace(' ', '')|lower}}">
 
     <div class="nav">
       <!--
@@ -46,7 +46,6 @@
 
     <footer>
       <div class="fmb-footer">
-        © Copyright 2013 - Levels App -
         <a href="/support">Support</a> -
         <a href="/app">Web App</a>
       </div>

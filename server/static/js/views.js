@@ -1,5 +1,28 @@
 
+$.ajaxSettings['xhrCount'] = 0;
 
+// Yep, we need zepto to work with CORS and cookies.
+$.ajaxSettings['beforeSend'] = function(xhr, settings) {
+  xhr.withCredentials = true;
+  $.ajaxSettings['xhrCount']++;
+  $('.fmb-app > .fmb-loading').show();
+};
+
+$.ajaxSettings['complete'] = function(xhr, status) {
+  $.ajaxSettings['xhrCount']--;
+  if ($.ajaxSettings['xhrCount'] === 0) {
+    $('.fmb-app > .fmb-loading').hide();
+  }
+};
+
+/*
+$.ajaxSettings['success'] = function(xhr, status) {
+  // noop
+};
+$.ajaxSettings['error'] = function(xhr, status) {
+  // noop
+};
+*/
 
 // Proxy click as zepto tap so we can bind to "tap"
 (function($) {
@@ -132,8 +155,46 @@ fmb.views.hideSpinner = function() {
  * @param {string} msg The message to show.
  */
 fmb.views.showMessage = function(msg) {
-  var plugin = cordova.require('cordova/plugin/levels');
-  plugin && plugin.showMessage('Adding ' + uniqueProfileStr);
+  if (fmb.ua.IS_APP && fmb.ua.IS_ANDROID) {
+    var plugin = cordova.require('cordova/plugin/levels');
+    plugin && plugin.showMessage('Adding ' + uniqueProfileStr);
+  } else {
+    fmb.views.clearHideMessageTimeout_();
+    $('.fmb-msg').text(msg);
+    $('.fmb-msg-c').css('opacity', '0').show().animate({
+      opacity: 1
+    }, 250, 'linear', fmb.views.hideMessage_);
+  }
+};
+
+
+/**
+ * @private {number}
+ */
+fmb.views.hideMessageTimeout_ = null;
+
+
+/**
+ * @private
+ */
+fmb.views.clearHideMessageTimeout_ = function() {
+  if (fmb.views.hideMessageTimeout_ !== null) {
+    window.clearTimeout(fmb.views.hideMessageTimeout_);
+    fmb.views.hideMessageTimeout_ = null;
+  }
+};
+
+
+/**
+ * @private
+ */
+fmb.views.hideMessage_ = function() {
+  fmb.views.clearHideMessageTimeout_();
+  fmb.views.hideMessageTimeout_ = _.delay(function() {
+    $('.fmb-msg-c').animate({
+      opacity: 0
+    }, 1000, 'linear', function() { $('.fmb-msg-c').hide(); });
+  }, 2000);
 };
 
 
@@ -986,7 +1047,8 @@ fmb.views.FollowingDevice.prototype.initialize = function(options) {
 fmb.views.FollowingDevice.prototype.render = function() {
   fmb.log('fmb.views.FollowingDevice render', this.model.id);
   var templateData = this.model.getTemplateData();
-  if (app.model.user.device.id == this.model.id) {
+  if (app.model.user.device &&
+      app.model.user.device.id == this.model.id) {
     templateData['is_current_user_device'] = true;
   }
   this.$el.data('key', this.model.id);

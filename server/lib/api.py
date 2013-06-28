@@ -94,7 +94,7 @@ class ApiRequestHandler(WebRequestHandler):
         # THIS IS GHETTO dumping this data into the _json_request_data
         # Did this b/c the syntax to check _json_request_data for key
         # existence is also pretty ugly and these two fields are pretty key.
-        elif self.request.method == 'GET':
+        elif self.request.method == 'GET' or self.request.method == 'OPTIONS':
             if self.request.get('api_token'):
                 self._json_request_data['api_token'] = \
                     self.request.get('api_token')
