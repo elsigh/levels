@@ -84,7 +84,8 @@ class AdminUserMessageTestHandler(WebRequestHandler):
 
 
 class AppHandler(WebRequestHandler):
-    def get(self, endpoint=None):
+    def get(self, endpoint=None, more_endpoint=None):
+        # TODO(elsigh): cache this baby in memory.
         app_html = open('templates/app.html', 'r').read()
         self.response.out.write(app_html)
 
@@ -98,13 +99,13 @@ class ProfileHandler(WebRequestHandler):
 
         # "close" will be set when a user is logging in through the
         # installed Android or iOS app.
-        close = self.request.get('close')
-
+        close = self.request.get('close', None)
         user = None
 
         # If you're logged in ...
         if self.current_user:
             # Maybe it's all about you.
+            logging.info('signed in! close: %s' % close)
             if ((self.current_user.unique_profile_str ==
                  unique_profile_str)):
                 user = self.current_user
@@ -112,9 +113,11 @@ class ProfileHandler(WebRequestHandler):
             # If you're not in the OAuth2 login flow in via the mobile app,
             # let's take ya to the web app.
             if close is None:
-                if user:
+                if user is not None:
+                    logging.info('Looking at yerself.')
                     return self.redirect('/app')
                 else:
+                    logging.info('Redirect to follow %s' % unique_profile_str)
                     return self.redirect('/app/follow/%s' % unique_profile_str)
 
         if user is None:

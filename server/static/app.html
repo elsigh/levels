@@ -43,14 +43,18 @@
 
     <script>
       var cordovaSrc_;
-      if (window.navigator.userAgent.match(/Android/i)) {
-        cordovaSrc_ = 'cordova-android.js';
-      } else if (window.navigator.userAgent.match(/iPad/i) ||
-                 window.navigator.userAgent.match(/iPhone/i)) {
-        cordovaSrc_ = 'cordova-ios.js';
+      if (window.location.protocol === 'file:') {
+        if (window.navigator.userAgent.match(/Android/i)) {
+          cordovaSrc_ = 'cordova-android.js';
+        } else if (window.navigator.userAgent.match(/iPad/i) ||
+                   window.navigator.userAgent.match(/iPhone/i)) {
+          cordovaSrc_ = 'cordova-ios.js';
+        }
       }
+
       if (cordovaSrc_) {
         document.write('<scr'+'ipt src="js/' + cordovaSrc_ + '"></sc'+'ript>');
+
       } else {
         // Stubs cordova so we can run this page on the web not as a
         // cordova app.

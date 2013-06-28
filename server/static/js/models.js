@@ -508,15 +508,16 @@ fmb.models.FollowingCollection.prototype.onAdd_ = function(model) {
       this.parent.saveToStorage();
     }, this),
 
-    error: function(model, xhr, options) {
+    error: _.bind(function(model, xhr, options) {
       if (xhr.status === 404) {
         fmb.views.showMessage('Failure adding friend.');
+        this.remove(model);
 
       } else if (xhr.status === 409) {
         //alert('already following');
         fmb.log('.. fail, already following this user.');
       }
-    }
+    }, this)
   });
 };
 
@@ -713,7 +714,9 @@ fmb.models.User.prototype.createUserDevice = function() {
 fmb.models.User.prototype.launchSync_ = function() {
   // Deferred so model references are set on window.app.
   _.defer(_.bind(function() {
+    fmb.log('fmb.models.User launchSync');
     this.fetch({
+      remove: true,  // --hard RESET sync to server.
       // Need to fake a battery status after user sync so we don't
       // show out of date info for the user.
       success: _.bind(function(model) {
@@ -725,10 +728,15 @@ fmb.models.User.prototype.launchSync_ = function() {
           fmb.log('FIX-O-LICIOUS - createUserDevice');
           this.createUserDevice();
         }
-        // TODO(elsigh): Should we do a following fetch with remove true
-        // to be sure we are sync'd correctly?
+
       }, this)
     });
+
+    // Our user API doesn't return following data.
+    this.get('following').fetch({
+      remove: true  // --hard RESET sync to server.
+    });
+
   }, this));
 };
 

@@ -58,7 +58,8 @@ fmb.ua.IS_CORDOVA = typeof cordova !== 'undefined';
  * The running app, and not the simulator.
  * @type {boolean}
  */
-fmb.ua.IS_APP = fmb.ua.IS_CORDOVA &&
+fmb.ua.IS_APP = window.location.protocol === 'file:' &&
+                fmb.ua.IS_CORDOVA &&
                 (fmb.ua.IS_ANDROID || fmb.ua.IS_IOS);
 
 
@@ -66,7 +67,7 @@ fmb.ua.IS_APP = fmb.ua.IS_CORDOVA &&
  * The hosted web app.
  * @type {boolean}
  */
-fmb.ua.IS_WEB_APP = window.location.hostname == 'www.levelsapp.com';
+fmb.ua.IS_PROD_WEB_APP = window.location.hostname == 'www.levelsapp.com';
 
 
 /******************************************************************************/

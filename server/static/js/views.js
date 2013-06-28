@@ -221,6 +221,9 @@ fmb.views.App = Backbone.View.extend({
 fmb.views.App.prototype.initialize = function(options) {
   fmb.log('fmb.views.App.initialize', this.model);
   $('body').addClass('fmb-platform-' + fmb.ua.getPlatform());
+
+  this.listenTo(this.model.user, 'change:key', this.setUserSignedInClass_);
+  this.setUserSignedInClass_();
 };
 
 
@@ -233,6 +236,14 @@ fmb.views.App.prototype.onClickAppLink_ = function(e) {
   e.preventDefault();
   window['app'].navigate($(e.currentTarget).attr('href'),
                          {trigger: true});
+};
+
+
+/**
+ * @private
+ */
+fmb.views.App.prototype.setUserSignedInClass_ = function() {
+  $('body').toggleClass('fmb-signed-in', !!this.model.user.id);
 };
 
 
@@ -375,7 +386,7 @@ fmb.views.Account = Backbone.View.extend({
 /** @inheritDoc */
 fmb.views.Account.prototype.initialize = function(options) {
   fmb.log('views.Account initialize');
-  this.model.on('change', this.render, this);
+  this.listenTo(this.model, 'change', this.render);
 
   this.$account = $('<div class="account"></div>');
   this.$devices = $('<div class="devices"></div>');
@@ -396,8 +407,8 @@ fmb.views.Account.prototype.render = function() {
     this.$el.append(this.$devices);
   }
 
+  // Make sure we're rendering devices for logged in users.
   this.$devices.toggle(this.model.id);
-  $('body').toggleClass('fmb-signed-in', !!this.model.id);
 
   var templateData = {
     'user': this.model.getTemplateData()

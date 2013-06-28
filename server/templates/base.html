@@ -29,13 +29,14 @@
   <body class="{{user_agent.os.family.replace(' ', '')|lower}}">
 
     <div class="nav">
-      <!--
-      {% if current_user %}
-        <a href="/logout?continue={{url_path}}">sign out</a>
-      {% else %}
-        <a href="/login">sign in</a>
-      {% endif %}
-      -->
+      <div class="sign-in-out">
+        {% if current_user %}
+          <a href="/logout?continue={{url_path}}">sign out</a>
+        {% else %}
+          <a href="/login">sign in</a>
+        {% endif %}
+      </div>
+
       <h1><a href="/"><span>Levels</span></a></h1>
     </div>
 
