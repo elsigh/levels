@@ -1,0 +1,8 @@
+# Packages needed.
+# The rest is in GAE SDK for Python.
+#
+# Use it with "pip install -r requirements.txt"
+mock
+nose
+webtest
+pep8

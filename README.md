@@ -32,10 +32,7 @@ Setup for testing the backend
 -----------------------------
 
 ```bash
-sudo pip install mock
-sudo pip install nose
-sudo pip install webtest
-sudo pip install pep8
+sudo pip install -r server/requirements.txt
 ```
 
 Now to install the GAE nose plugin:
