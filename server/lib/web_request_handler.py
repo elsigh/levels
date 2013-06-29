@@ -99,9 +99,7 @@ class WebRequestHandler(webapp2.RequestHandler):
         """Tests the UA string for compatibility."""
         # Default UA string is for unit tests.
         user_agent_string = self.request.headers.get(
-            'USER_AGENT',
-            ('Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 '
-             '(KHTML, like Gecko) Chrome/28.0.1468.0 Safari/537.36'))
+            'USER_AGENT', settings.USER_AGENT)
 
         # aka unittests
         if not user_agent_string:
@@ -176,9 +174,7 @@ def ErrorHandler(request, response, exception, code):
 
     # Default UA string is for unit tests.
     user_agent_string = request.headers.get(
-        'USER_AGENT',
-        ('Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 '
-         '(KHTML, like Gecko) Chrome/28.0.1468.0 Safari/537.36'))
+        'USER_AGENT', settings.USER_AGENT)
 
     ua_dict = user_agent_parser.Parse(user_agent_string)
     logging.info('UA: %s' % ua_dict)

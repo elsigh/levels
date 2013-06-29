@@ -32,6 +32,7 @@ from google.appengine.ext import ndb
 sys.modules['ndb'] = ndb
 
 from webapp2_extras.appengine.auth.models import User
+from webapp2_extras.appengine.auth.models import UserToken
 
 from lib.external import general_counter
 from lib.external.gae_python_gcm import gcm
@@ -64,6 +65,10 @@ class FMBModel(ndb.Model):
     @property
     def extra_properties(self):
         return ['created_pst']
+
+    @property
+    def oauth2_token(self):
+        return UserToken.query(UserToken.user == self.key.id()).get().token
 
     def to_json(self):
         return FMBModel.json_dump(self.to_dict())
