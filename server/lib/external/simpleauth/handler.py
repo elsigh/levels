@@ -81,6 +81,9 @@ class SimpleAuthHandler(object):
     'facebook'    : ('oauth2',
       'https://www.facebook.com/dialog/oauth?{0}',
       'https://graph.facebook.com/oauth/access_token'),
+    'linkedin2'   : ('oauth2',
+      'https://www.linkedin.com/uas/oauth2/authorization?{0}',
+      'https://www.linkedin.com/uas/oauth2/accessToken'),
     'linkedin'    : ('oauth1', {
       'request': 'https://api.linkedin.com/uas/oauth/requestToken',
       'auth'   : 'https://www.linkedin.com/uas/oauth/authenticate?{0}'
@@ -102,6 +105,7 @@ class SimpleAuthHandler(object):
     'foursquare'  : '_json_parser',
     'facebook'    : '_query_string_parser',
     'linkedin'    : '_query_string_parser',
+    'linkedin2'    : '_json_parser',
     'twitter'     : '_query_string_parser'
   }
 
@@ -169,7 +173,13 @@ class SimpleAuthHandler(object):
 
   def _oauth2_init(self, provider, auth_url):
     """Initiates OAuth 2.0 web flow"""
-    key, secret, scope = self._get_consumer_info_for(provider)
+    info = self._get_consumer_info_for(provider)
+    if len(info) == 4:
+      key, secret, scope, extra = info
+    else:
+      key, secret, scope = info
+      extra = None
+
     callback_url = self._callback_uri_for(provider)
 
     params = {
@@ -181,13 +191,17 @@ class SimpleAuthHandler(object):
     if scope:
       params.update(scope=scope)
 
+    if extra is not None:
+      params.update(extra)
+
     if self.OAUTH2_CSRF_STATE:
       state = self._generate_csrf_token()
       params.update(state=state)
       self.session[self.OAUTH2_CSRF_SESSION_PARAM] = state
 
+
     target_url = auth_url.format(urlencode(params))
-    logging.debug('Redirecting user to %s', target_url)
+    logging.info('Redirecting user to %s', target_url)
 
     self.redirect(target_url)
 
@@ -199,7 +213,13 @@ class SimpleAuthHandler(object):
 
     code = self.request.get('code')
     callback_url = self._callback_uri_for(provider)
-    client_id, client_secret, scope = self._get_consumer_info_for(provider)
+
+    info = self._get_consumer_info_for(provider)
+    if len(info) == 4:
+      client_id, client_secret, scope, extra = info
+    else:
+      client_id, client_secret, scope = info
+      extra = None
 
     if self.OAUTH2_CSRF_STATE:
       _expected = self.session.pop(self.OAUTH2_CSRF_SESSION_PARAM, '')
@@ -217,13 +237,10 @@ class SimpleAuthHandler(object):
       'grant_type': 'authorization_code'
     }
 
-    logging.info('SimpleAuthHandler access_token_url: %s, payload: %s' %
-                 (access_token_url, payload))
     resp = urlfetch.fetch(
       url=access_token_url,
       payload=urlencode(payload),
       method=urlfetch.POST,
-      deadline=30,
       headers={'Content-Type': 'application/x-www-form-urlencoded'}
     )
 
@@ -231,6 +248,7 @@ class SimpleAuthHandler(object):
     _fetcher = getattr(self, '_get_%s_user_info' % provider)
 
     auth_info = _parser(resp.content)
+    logging.info('GOT AUTH INFO: %s' % auth_info)
     user_data = _fetcher(auth_info, key=client_id, secret=client_secret)
     return (user_data, auth_info)
 
@@ -359,13 +377,16 @@ class SimpleAuthHandler(object):
   def _get_google_user_info(self, auth_info, key=None, secret=None):
     """Returns a dict of currenly logging in user.
     Google API endpoint:
-    https://www.googleapis.com/oauth2/v1/userinfo
+    https://www.googleapis.com/oauth2/v3/userinfo
     """
     resp = self._oauth2_request(
-      'https://www.googleapis.com/oauth2/v1/userinfo?{0}',
+      'https://www.googleapis.com/oauth2/v3/userinfo?{0}',
       auth_info['access_token']
     )
-    return json.loads(resp)
+    data = json.loads(resp)
+    if 'id' not in data and 'sub' in data:
+      data['id'] = data['sub']
+    return data
 
   def _get_windows_live_user_info(self, auth_info, key=None, secret=None):
     """Windows Live API user profile endpoint.
@@ -412,16 +433,13 @@ class SimpleAuthHandler(object):
     http://api.linkedin.com/v1/people/~:<fields>
     where <fields> is something like
     (id,first-name,last-name,picture-url,public-profile-url,headline)
-    """
-    try:
-        # already in the App Engine libs, see app.yaml on how to specify
-        # libraries need this for providers like LinkedIn
-        from lxml import etree
-    except ImportError:
-        logging.error('requirement `lxml.etree` was not provided. please '
-                      'make sure you have enabled it in app.yaml')
-        raise
 
+    LinkedIn OAuth 1.0a is deprecated. Use LinkedIn with OAuth 2.0
+    """
+    # TODO: remove LinkedIn OAuth 1.0a in the next release.
+    logging.warn('LinkedIn OAuth 1.0a is deprecated. '
+                  'Use LinkedIn with OAuth 2.0: '
+                  'https://developer.linkedin.com/documents/authentication')
     token = oauth1.Token(key=auth_info['oauth_token'],
                          secret=auth_info['oauth_token_secret'])
     client = self._oauth1_client(token, key, secret)
@@ -429,24 +447,47 @@ class SimpleAuthHandler(object):
     fields = 'id,first-name,last-name,picture-url,public-profile-url,headline'
     url = 'http://api.linkedin.com/v1/people/~:(%s)' % fields
     resp, content = client.request(url)
+    return self._parse_xml_user_info(content)
 
+  def _get_linkedin2_user_info(self, auth_info, key=None, secret=None):
+    """Returns a dict of currently logging in linkedin user.
+
+    LinkedIn user profile API endpoint:
+    http://api.linkedin.com/v1/people/~
+    or
+    http://api.linkedin.com/v1/people/~:<fields>
+    where <fields> is something like
+    (id,first-name,last-name,picture-url,public-profile-url,headline)
+    """
+    fields = 'id,first-name,last-name,picture-url,public-profile-url,headline'
+    url = 'https://api.linkedin.com/v1/people/~:(%s)?{0}' % fields
+    resp = self._oauth2_request(url, auth_info['access_token'],
+                                token_param='oauth2_access_token')
+    return self._parse_xml_user_info(resp)
+
+  def _parse_xml_user_info(self, content):
+    try:
+      # lxml is one of the third party libs available on App Engine out of the
+      # box. See example/app.yaml for more info.
+      from lxml import etree
+    except ImportError:
+      import xml.etree.ElementTree as etree
     person = etree.fromstring(content)
     uinfo = {}
     for e in person:
       uinfo.setdefault(e.tag, e.text)
-
     return uinfo
 
   def _get_twitter_user_info(self, auth_info, key=None, secret=None):
     """Returns a dict of twitter user using
-    https://api.twitter.com/1/account/verify_credentials.json
+    https://api.twitter.com/1.1/account/verify_credentials.json
     """
     token = oauth1.Token(key=auth_info['oauth_token'],
                          secret=auth_info['oauth_token_secret'])
     client = self._oauth1_client(token, key, secret)
 
     resp, content = client.request(
-      'https://api.twitter.com/1/account/verify_credentials.json'
+      'https://api.twitter.com/1.1/account/verify_credentials.json'
     )
     uinfo = json.loads(content)
     uinfo.setdefault('link', 'http://twitter.com/%s' % uinfo['screen_name'])

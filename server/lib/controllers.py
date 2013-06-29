@@ -64,10 +64,14 @@ routes = [
 
     # Admin
     Route('/admin/user_message_test',
-          handler='lib.www.AdminUserMessageTestHandler'),
-    Route('/admin/users', handler='lib.www.AdminUsersHandler'),
-    Route('/admin/api_request', handler='lib.www.AdminApiRequestHandler'),
+          handler='lib.admin.AdminUserMessageTestHandler'),
+    Route('/admin/users', handler='lib.admin.AdminUsersHandler'),
+    Route('/admin/api_request', handler='lib.admin.AdminApiHandler'),
+    Route('/admin/tinker', handler='lib.admin.AdminTinkerHandler'),
 
+
+    # Glassware
+    Route('/glassware', handler='lib.glassware.GlasswareHandler'),
 
     # WWW
     Route('/p/<unique_profile_str>', handler='lib.www.ProfileHandler'),
