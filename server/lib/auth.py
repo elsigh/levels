@@ -142,6 +142,7 @@ class AuthHandler(WebRequestHandler, SimpleAuthHandler):
                 if ok:
                     self.auth.set_session(self.auth.store.user_to_dict(user))
 
+        logging.info('USER AFTER create_user: %s' % user.to_dict())
         profile_url = '/p/%s' % user.unique_profile_str
 
         # Stores a key / val pair in memcache for the client to query on

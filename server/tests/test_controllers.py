@@ -965,3 +965,14 @@ class HandlerTest(unittest.TestCase):
         )
         self.assertEquals('chris moos\'', user.name_possessive)
         self.assertEquals('chris\'', user.given_name_possessive)
+
+
+    def test_user_google_oauth2_auth_ids(self):
+        user = models.FMBUser(
+            name='elsigh moo',
+            auth_ids=['foo', 'google:bar', 'baz', 'google:bat']
+        )
+        user.put()
+        self.assertEquals(['bar', 'bat'],
+                          user.google_auth_ids)
+

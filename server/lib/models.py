@@ -139,6 +139,16 @@ class FMBUser(User, FMBModel):
         #logging.info('POST _pre_put_hook %s' % self)
 
     @property
+    def google_auth_ids(self):
+        """OAuth2 user ids."""
+        google_auth_ids = []
+        for auth_id in self.auth_ids:
+            logging.info('AUTHID: %s' % auth_id)
+            if 'google' in auth_id:
+                google_auth_ids.append(auth_id.replace('google:', ''))
+        return google_auth_ids
+
+    @property
     def extra_properties(self):
         return ['created_pst',
                 'given_name_possessive', 'name_possessive',

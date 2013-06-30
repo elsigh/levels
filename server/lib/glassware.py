@@ -29,13 +29,37 @@ from lib.external.oauth2client.client import OAuth2Credentials
 import settings
 
 
-class GlasswareHandler(WebRequestHandler):
+class GlasswareWebRequestHandler(WebRequestHandler):
 
-    @property
+    def _insert_subscription(self):
+        """Subscribe the app."""
+        for userid in self.current_user.google_auth_ids:
+            body = {
+                'collection': 'timeline',
+                'userToken': userid,
+                'callbackUrl': self.get_full_url('/glassware/notify')
+            }
+            result = None
+            try:
+                logging.info('GLASSWARE SUBSCRIBE user: %s, body: %s' %
+                             (userid, body))
+                result = self.mirror_service.subscriptions().insert(
+                    body=body).execute()
+            except Exception, err:
+                logging.info('GLASSWARE SUBSCRIBE EXCEPTION: %s' % err)
+
+            logging.info('GLASSWARE SUBSCRIBE RESULT: %s' % result)
+
+        return result
+
+    @webapp2.cached_property
     def mirror_service(self):
+        """Will bomb if the credentials don't work."""
         http = httplib2.Http()
         self.credentials.authorize(http)
-        return build('mirror', 'v1', http=http)
+        mirror_service build('mirror', 'v1', http=http)
+        assert mirror_service
+        return mirror_service
 
     @property
     def credentials(self):
@@ -49,12 +73,29 @@ class GlasswareHandler(WebRequestHandler):
             token_uri='https://accounts.google.com/o/oauth2/token',
             user_agent=settings.USER_AGENT)
 
+
+class GlasswareHandler(GlasswareWebRequestHandler):
     @admin_required
     @login_required
+    @glass_auth_required
     def get(self):
-        mirror_service = self.mirror_service
-
+        result_subscribe = self._insert_subscription()
         self.output_response({
             'title': 'Levels Admin: Tinker',
-            'mirror_service': mirror_service
+            'mirror_service': self.mirror_service,
+            'result': result_subscribe
         }, 'glassware.html')
+
+
+class GlasswareNotifyHandler(GlasswareWebRequestHandler):
+    def post(self):
+        logging.info('GlasswareNotifyHandler with payload %s',
+                     self.request.body)
+        for user_action in data.get('userActions', []):
+            if user_action.get('type') == 'BATTERY':
+                logging.info('SWEET, got a battery type timeline')
+                # Only handle the first successful action.
+                break
+            else:
+                logging.info('Me no know what to do with this action: %s',
+                             user_action)
