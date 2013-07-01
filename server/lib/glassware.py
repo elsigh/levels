@@ -37,7 +37,9 @@ class GlasswareWebRequestHandler(WebRequestHandler):
             body = {
                 'collection': 'timeline',
                 'userToken': userid,
-                'callbackUrl': self.get_full_url('/glassware/notify')
+                # Has to be a fully qualified HTTPS resource.
+                'callbackUrl': ('https://followmybattery.appspot.com/'
+                                'glassware/notify')
             }
             result = None
             try:
@@ -58,6 +60,8 @@ class GlasswareWebRequestHandler(WebRequestHandler):
         http = httplib2.Http()
         self.credentials.authorize(http)
         mirror_service = build('mirror', 'v1', http=http)
+        # TODO(elsigh): Figure out incremental scopes and re-auth here if
+        # necessary.
         assert mirror_service
         return mirror_service
 
@@ -75,12 +79,11 @@ class GlasswareWebRequestHandler(WebRequestHandler):
 
 
 class GlasswareHandler(GlasswareWebRequestHandler):
-    @admin_required
     @login_required
     def get(self):
         result_subscribe = self._insert_subscription()
         self.output_response({
-            'title': 'Levels Admin: Tinker',
+            'title': 'Levels: Glassware',
             'mirror_service': self.mirror_service,
             'result': result_subscribe
         }, 'glassware.html')

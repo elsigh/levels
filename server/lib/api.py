@@ -148,8 +148,7 @@ class ApiRequestHandler(WebRequestHandler):
 
     def _assert_api_token(self):
         """Ensures an API token is passed for all but /api/user/token."""
-        url = self.request.path
-        if url != '/api/user/token':
+        if self.request.path != '/api/user/token':
             assert 'api_token' in self._json_request_data
 
     @webapp2.cached_property
