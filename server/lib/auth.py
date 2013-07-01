@@ -48,7 +48,7 @@ class LoginHandler(WebRequestHandler):
             # See the simpleauth_login_required decorator for original_url
             original_url = self.session.get('original_url', None)
             if original_url is not None:
-                delattr(self.session, 'original_url')
+                self.session['original_url'] = None
                 self.redirect(original_url)
 
             uri = '/p/%s' % self.current_user.unique_profile_str
@@ -142,7 +142,7 @@ class AuthHandler(WebRequestHandler, SimpleAuthHandler):
                 if ok:
                     self.auth.set_session(self.auth.store.user_to_dict(user))
 
-        logging.info('USER AFTER create_user: %s' % user.to_dict())
+        logging.info('USER to_dict AFTER create_user: %s' % user.to_dict())
         profile_url = '/p/%s' % user.unique_profile_str
 
         # Stores a key / val pair in memcache for the client to query on
@@ -153,7 +153,7 @@ class AuthHandler(WebRequestHandler, SimpleAuthHandler):
             memcache.add('user_token-%s' % user_token, user.key.id(), 60)
             logging.info('Added user_token<->id match - %s, %s' %
                          (user_token, user.key.id()))
-            delattr(self.session, 'user_token')
+            self.session['user_token'] = None
             profile_url += '?close=1'
 
         # Go to the profile page.
@@ -162,10 +162,6 @@ class AuthHandler(WebRequestHandler, SimpleAuthHandler):
     def logout(self):
         self.auth.unset_session()
         self.redirect(self.request.get('continue', '/login?r=0'))
-
-    #def handle_exception(self, exception, debug):
-    #    logging.error(exception)
-    #    self.output_response({'exception': exception}, 'auth_error.html')
 
     def _callback_uri_for(self, provider):
         return self.uri_for('auth_callback', provider=provider, _full=True)
