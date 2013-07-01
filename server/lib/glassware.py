@@ -57,7 +57,7 @@ class GlasswareWebRequestHandler(WebRequestHandler):
         """Will bomb if the credentials don't work."""
         http = httplib2.Http()
         self.credentials.authorize(http)
-        mirror_service build('mirror', 'v1', http=http)
+        mirror_service = build('mirror', 'v1', http=http)
         assert mirror_service
         return mirror_service
 
@@ -77,7 +77,6 @@ class GlasswareWebRequestHandler(WebRequestHandler):
 class GlasswareHandler(GlasswareWebRequestHandler):
     @admin_required
     @login_required
-    @glass_auth_required
     def get(self):
         result_subscribe = self._insert_subscription()
         self.output_response({

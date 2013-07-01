@@ -967,7 +967,7 @@ class HandlerTest(unittest.TestCase):
         self.assertEquals('chris\'', user.given_name_possessive)
 
 
-    def test_user_google_oauth2_auth_ids(self):
+    def test_user_google_auth_ids(self):
         user = models.FMBUser(
             name='elsigh moo',
             auth_ids=['foo', 'google:bar', 'baz', 'google:bat']
@@ -975,4 +975,24 @@ class HandlerTest(unittest.TestCase):
         user.put()
         self.assertEquals(['bar', 'bat'],
                           user.google_auth_ids)
+
+
+
+class GlasswareHandlerTest(unittest.TestCase):
+    def setUp(self):
+        self.testbed = testbed.Testbed()
+        self.testbed.setup_env(app_id='followmybattery')
+        self.testbed.activate()
+        self.testbed.init_datastore_v3_stub()
+        self.testbed.init_taskqueue_stub()
+        self.taskqueue_stub = self.testbed.get_stub(testbed.TASKQUEUE_SERVICE_NAME)
+        self.testapp = webtest.TestApp(controllers.app)
+
+    def tearDown(self):
+        self.testbed.deactivate()
+
+
+    def test_glassware(self):
+        response = self.testapp.get('/glassware', status=302)
+
 
