@@ -22,7 +22,7 @@
   android:windowSoftInputMode="adjustResize"
   package="com.elsigh.levels"
   android:versionName="0.7"
-  android:versionCode="27"
+  android:versionCode="28"
   android:hardwareAccelerated="true">
 
   <uses-sdk
@@ -89,7 +89,10 @@
     <receiver android:name=".LevelsAutoStart">
       <intent-filter>
         <action android:name="android.intent.action.BOOT_COMPLETED"></action>
+      </intent-filter>
+      <intent-filter>
         <action android:name="android.intent.action.PACKAGE_REPLACED"></action>
+        <data android:scheme="package" android:path="com.elsigh.levels" />
       </intent-filter>
     </receiver>
 

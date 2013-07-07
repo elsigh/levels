@@ -269,30 +269,40 @@ class Device(FMBModel):
     def memcache_device_settings_key(self):
         return 'settings-%s' % self.key.urlsafe()
 
+    @property
+    def settings(self):
+        """Returns an array of settings as dicts."""
+        settings = memcache.get(self.memcache_device_settings_key)
+        if not settings:
+            settings = []
+            q_settings = Settings.query(
+                ancestor=self.key).order(-Settings.created)
+
+            if q_settings.count() > NUM_SETTINGS_TO_FETCH:
+                results = q_settings.fetch(
+                    NUM_SETTINGS_TO_FETCH * NUM_SETTINGS_MULTIPLIER,
+                    keys_only=True)
+                list_of_keys = []
+                # prunes the results so we get a longer time-window picture of
+                # the device's battery stats.
+                for i in range(len(results)):
+                    if i % NUM_SETTINGS_MULTIPLIER == 0:
+                        list_of_keys.append(results[i])
+                for setting in ndb.get_multi(list_of_keys):
+                    settings.append(setting.to_dict())
+            else:
+                for setting in q_settings.fetch():
+                    settings.append(setting.to_dict())
+            memcache.set(self.memcache_device_settings_key, settings)
+        return settings
+
     def clear_device_settings_memcache(self):
         memcache.delete(self.memcache_device_settings_key)
 
     def to_dict(self, include_notifying=True):
         obj = super(Device, self).to_dict()
 
-        settings = memcache.get(self.memcache_device_settings_key)
-        if not settings:
-            settings = []
-            q_settings = Settings.query(
-                ancestor=self.key).order(-Settings.created)
-            results = q_settings.fetch(
-                NUM_SETTINGS_TO_FETCH * NUM_SETTINGS_MULTIPLIER,
-                keys_only=True)
-            list_of_keys = []
-            # prunes the results so we get a longer time-window picture of
-            # the device's battery stats.
-            for i in range(len(results)):
-                if i % NUM_SETTINGS_MULTIPLIER == 0:
-                    list_of_keys.append(results[i])
-            for setting in ndb.get_multi(list_of_keys):
-                settings.append(setting.to_dict())
-            memcache.set(self.memcache_device_settings_key, settings)
-        obj['settings'] = settings
+        obj['settings'] = self.settings
 
         # notifying
         logging.info('Device %s to dict include_notifying: %s' %
@@ -313,6 +323,11 @@ class Settings(FMBModel, ndb.Expando):
     created = ndb.DateTimeProperty(auto_now_add=True)
     battery_level = ndb.IntegerProperty(required=True)
     is_charging = ndb.IntegerProperty()
+
+    def _post_put_hook(self, future):
+        # Nukes our device settings list in memcache.
+        device = self.key.parent().get()
+        device.clear_device_settings_memcache()
 
 
 class Following(FMBModel):

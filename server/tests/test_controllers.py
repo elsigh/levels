@@ -3,6 +3,7 @@
 #
 
 import base64
+import datetime
 import json
 import os
 import sys
@@ -23,6 +24,8 @@ from google.appengine.ext import testbed
 import unittest
 import webtest
 
+from lib.external.apiclient import discovery
+#from lib.external.apiclient.discovery import build
 from lib.external.gae_python_gcm import gcm
 from lib.web_request_handler import WebRequestHandler
 from lib import api
@@ -995,4 +998,70 @@ class GlasswareHandlerTest(unittest.TestCase):
     def test_glassware(self):
         response = self.testapp.get('/glassware', status=302)
 
+
+    @patch.object(discovery, 'build')
+    def test_notify(self, mock_build=None):
+        user = models.FMBUser(
+            name='elsigh moo',
+            auth_ids=['google:abc'],
+            oauth2_access_token='test_oauth2_access_token',
+            oauth2_refresh_token='test_oauth2_refresh_token',
+            oauth2_expires_datetime='test_oauth2_expires_datetime'
+        )
+        user.put()
+
+        item_id = 'item_id'
+
+        # Sets up our mock to return a timeline item
+        execute_mock = mock_build().timeline().get(id=item_id).execute
+        datetime_not_now = datetime.datetime(2013, 7, 1, 22, 51, 51)
+        timeline_item = {
+            'created': datetime_not_now,
+            'text': '{"capacity": 57, "is_charging": true}'
+        }
+        execute_mock.return_value = timeline_item
+
+        payload = {
+            'collection': 'timeline',
+            'itemId': item_id,
+            'operation': 'INSERT',
+            'userToken': 'abc',
+            'userActions': [{'type': 'SHARE'}]
+        }
+        response = self.testapp.post('/glassware/notify', json.dumps(payload))
+
+        # Created a glass device for this user with one setting value.
+        glass_device_query = models.Device.query(
+            ancestor=user.key).filter(
+                models.Device.uuid == 'glass')
+        self.assertEquals(1, glass_device_query.count())
+        glass_device = glass_device_query.get()
+        self.assertEquals(1, len(glass_device.settings))
+        stored_setting = glass_device.settings[0]
+        self.assertEquals(datetime_not_now, stored_setting['created'])
+        self.assertEquals(57, stored_setting['battery_level'])
+        self.assertEquals(True, stored_setting['is_charging'])
+
+        ########
+        # A second call should tack-on a setting to the existing-made
+        # glass device.
+        item_id = 'item_id_2'
+        execute_mock = mock_build().timeline().get(id=item_id).execute
+        datetime_not_now = datetime.datetime(2013, 7, 1, 23, 01, 51)
+        timeline_item = {
+            'created': datetime_not_now,
+            'text': '{"capacity": 47, "is_charging": false}'
+        }
+        execute_mock.return_value = timeline_item
+
+        payload = {
+            'collection': 'timeline',
+            'itemId': item_id,
+            'operation': 'INSERT',
+            'userToken': 'abc',
+            'userActions': [{'type': 'SHARE'}]
+        }
+        response = self.testapp.post('/glassware/notify', json.dumps(payload))
+        self.assertEquals(2, models.Settings.query().count())
+        self.assertEquals(2, len(glass_device.settings))
 

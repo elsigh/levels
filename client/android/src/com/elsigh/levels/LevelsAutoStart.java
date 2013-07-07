@@ -15,8 +15,8 @@ public class LevelsAutoStart extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         Log.d(TAG, "onReceive w/ intent action: " + intent.getAction());
-        if (intent.getAction().equals("android.intent.action.BOOT_COMPLETED") ||
-            intent.getAction().equals("android.intent.action.PACKAGE_REPLACED")) {
+        if (Intent.ACTION_BOOT_COMPLETED.equals(intent.getAction()) ||
+            Intent.ACTION_PACKAGE_REPLACED.equals(intent.getAction())) {
             Intent service = new Intent(context, LevelsService.class);
             context.startService(service);
         }
