@@ -27,10 +27,14 @@ def login_required(handler_method):
             self.abort(400, detail='The login_required decorator '
                 'can only be used for GET requests.')
 
-        if self.current_user:
+        # Makes sure the user is signed in and that we have an
+        # oauth2_refresh_token.
+        if ((self.current_user and
+             hasattr(self.current_user, 'oauth2_refresh_token') and
+             self.current_user.oauth2_refresh_token)):
             handler_method(self, *args, **kwargs)
         else:
-            self.session['original_url'] = self.request.url
+            self.session['continue_path'] = self.request.path
             self.redirect('/auth/google')
 
     return check_login
@@ -38,36 +42,17 @@ def login_required(handler_method):
 
 class LoginHandler(WebRequestHandler):
     def get(self):
-        """Handles default landing page"""
+        """Handles default landing page."""
 
         user_token = self.request.get('user_token', None)
         if user_token is not None:
             self.session['user_token'] = user_token
 
-        if self.current_user:
-            # See the simpleauth_login_required decorator for original_url
-            original_url = self.session.get('original_url', None)
-            if original_url is not None:
-                delattr(self.session, 'original_url')
-                self.redirect(original_url)
+        continue_path = self.request.get('continue_path', None)
+        self.session['continue_path'] = continue_path
 
-            uri = '/p/%s' % self.current_user.unique_profile_str
-
-            if user_token is not None:
-                memcache.set('user_token-%s' % user_token,
-                             self.current_user.key.id(), 60)
-                logging.info('Set user_token<->id match - %s, %s' %
-                             (user_token, self.current_user.key.id()))
-                uri = uri + '?close=1'
-
-            self.redirect(uri)
-
-        # aka no redirect, let the user choose a login provider.
-        elif self.request.get('r') == '0':
-            self.output_response({}, 'login.html')
-
-        else:
-            self.redirect('/auth/google')
+        # Only Google for now, otherwise, one day, checkout login.html
+        self.redirect('/auth/google')
 
 
 class AuthHandler(WebRequestHandler, SimpleAuthHandler):
@@ -77,13 +62,13 @@ class AuthHandler(WebRequestHandler, SimpleAuthHandler):
     OAUTH2_CSRF_STATE = True
 
     USER_ATTRS = {
-        'google'   : {
+        'google': {
             'picture': 'avatar_url',
-            'name'   : 'name',
+            'name': 'name',
             'family_name': 'family_name',
             'given_name': 'given_name',
-            'link'   : 'link',
-            'email'  : 'email'
+            'link': 'link',
+            'email': 'email'
         }
     }
 
@@ -124,7 +109,7 @@ class AuthHandler(WebRequestHandler, SimpleAuthHandler):
           # otherwise add this auth_id to currently logged in user.
 
             if self.current_user:
-                logging.info('Updating currently logged in user')
+                logging.info('Updating a currently logged in user!')
 
                 u = self.current_user
                 u.populate(**_attrs)
@@ -135,42 +120,47 @@ class AuthHandler(WebRequestHandler, SimpleAuthHandler):
                 u.add_auth_id(auth_id)
 
             else:
-                logging.info('Creating a brand new user')
+                logging.info('Creating a brand new user!')
 
                 ok, user = self.auth.store.user_model.create_user(auth_id,
                                                                   **_attrs)
                 if ok:
                     self.auth.set_session(self.auth.store.user_to_dict(user))
 
-        profile_url = '/p/%s' % user.unique_profile_str
+        # Ok, time to move on.
+        # If login was invoked via our login_required decorator we will have
+        # continue_path set to something.
+        # If login was invoked directly via "/login" we won't in which case
+        # we will just go to the user's profile.
+        # Lastly we might have called via "/login?continue_path=something"
+        # in which case we'll redirect to something.
+        redirect_url = self.session.get('continue_path', None)
+        self.session['continue_path'] = None  # unset for the future
 
-        # Stores a key / val pair in memcache for the client to query on
-        # to match up the user id to the user_token.
-        user_token = self.session.get('user_token')
-        logging.info('_on_signin session user_token: %s' % user_token)
-        if user_token:
-            memcache.add('user_token-%s' % user_token, user.key.id(), 60)
-            logging.info('Added user_token<->id match - %s, %s' %
-                         (user_token, user.key.id()))
-            delattr(self.session, 'user_token')
-            profile_url += '?close=1'
+        if redirect_url is None:
+            redirect_url = '/p/%s' % user.unique_profile_str
+            # Stores a key / val pair in memcache for the client to query on
+            # to match up the user id to the user_token.
+            user_token = self.session.get('user_token', None)
+            logging.info('_on_signin session user_token: %s' % user_token)
+            if user_token is not None:
+                self.session['user_token'] = None  # unset for the future
+                memcache.add('user_token-%s' % user_token, user.key.id(), 60)
+                logging.info('Added user_token<->id match - %s, %s' %
+                             (user_token, user.key.id()))
+                redirect_url += '?close=1'
 
-        # Go to the profile page.
-        self.redirect(profile_url)
+        logging.info('OK, we are logged in, redirect_url: %s' % redirect_url)
+        self.redirect(redirect_url)
 
     def logout(self):
         self.auth.unset_session()
         self.redirect(self.request.get('continue', '/login?r=0'))
 
-    #def handle_exception(self, exception, debug):
-    #    logging.error(exception)
-    #    self.output_response({'exception': exception}, 'auth_error.html')
-
     def _callback_uri_for(self, provider):
         return self.uri_for('auth_callback', provider=provider, _full=True)
 
     def _get_consumer_info_for(self, provider):
-        """Returns a tuple (key, secret) for auth init requests."""
         return settings.AUTH_CONFIG[provider]
 
     def _to_user_model_attrs(self, data, attrs_map):

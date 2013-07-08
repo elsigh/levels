@@ -37,7 +37,7 @@ AUTH_CONFIG = {
          'https://www.googleapis.com/auth/userinfo.email '
          'https://www.googleapis.com/auth/glass.timeline'
          ),
-        {'access_type': 'offline'},
+        {'access_type': 'offline', 'approval_prompt': 'force'},
     ),
     'facebook': (
         FACEBOOK_APP_ID,

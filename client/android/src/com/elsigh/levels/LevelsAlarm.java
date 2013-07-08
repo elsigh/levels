@@ -10,9 +10,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+//import android.hardware.Sensor;
+//import android.hardware.SensorManager;
 import android.media.AudioManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.TrafficStats;
 import android.os.AsyncTask;
 import android.os.BatteryManager;
 import android.os.PowerManager;
@@ -124,6 +127,8 @@ public class LevelsAlarm extends BroadcastReceiver {
 
         AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         ConnectivityManager connManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        //SensorManager sensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
+        //Sensor sensorTemp = sensorManager.getDefaultSensor(Sensor.TYPE_AMBIENT_TEMPERATURE);
 
         IntentFilter batIntentFilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
         Intent batteryIntent = context.getApplicationContext().
@@ -138,13 +143,14 @@ public class LevelsAlarm extends BroadcastReceiver {
         //boolean usbCharge = chargePlug == BatteryManager.BATTERY_PLUGGED_USB;
         //boolean acCharge = chargePlug == BatteryManager.BATTERY_PLUGGED_AC;
 
+        int batteryTemperature = batteryIntent.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, 0);
         int batteryLevel = batteryIntent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0);
         int batteryScale = batteryIntent.getIntExtra(BatteryManager.EXTRA_SCALE, 100);
         int batteryPercent = (batteryLevel * 100) / batteryScale;
 
         final ContentResolver contentResolver = context.getContentResolver();
 
-        boolean airplaneModeOnBool = isAirplaneModeOn(contentResolver);
+        //boolean airplaneModeOnBool = isAirplaneModeOn(contentResolver);
 
         boolean bluetoothOnBool = isBluetoothOn(contentResolver);
 
@@ -169,23 +175,34 @@ public class LevelsAlarm extends BroadcastReceiver {
         NetworkInfo wifi = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
         boolean wifiOnBool = wifi.isAvailable();
 
+        long net_traffic_rx = TrafficStats.getTotalRxBytes();
+        long net_traffic_tx = TrafficStats.getTotalTxBytes();
+        if (net_traffic_rx == TrafficStats.UNSUPPORTED ||
+            net_traffic_tx == TrafficStats.UNSUPPORTED) {
+            net_traffic_rx = 0;
+            net_traffic_tx = 0;
+        }
+
         JSONObject json = new JSONObject();
         try {
             json.put("api_token", apiToken);
             json.put("user_key", userKey);
             json.put("device_key", deviceKey);
             json.put("is_charging", isChargingInt);
+            //json.put("airplane_mode_on", airplaneModeOnBool);
             json.put("battery_level", batteryPercent);
-            json.put("airplane_mode_on", airplaneModeOnBool);
+            json.put("battery_temperature", batteryTemperature);
             json.put("bluetooth_on", bluetoothOnBool);
-            json.put("wifi_on", wifiOnBool);
             json.put("ringer_mode", ringerMode);
+            json.put("net_traffic_rx", net_traffic_rx);
+            json.put("net_traffic_tx", net_traffic_tx);
             json.put("ringer_mode_int", ringerModeInt);
             json.put("volume_alarm", volumeAlarm);
             json.put("volume_call", volumeCall);
             json.put("volume_music", volumeMusic);
             json.put("volume_ring", volumeRing);
             json.put("volume_system", volumeSystem);
+            json.put("wifi_on", wifiOnBool);
 
         } catch (JSONException e) {
             throw new RuntimeException(e);

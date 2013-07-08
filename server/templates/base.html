@@ -26,7 +26,8 @@
     {% block head %}{% endblock %}
 
   </head>
-  <body class="{{user_agent.os.family.replace(' ', '')|lower}}">
+  <body
+    class="{% if user_agent.os %}{{user_agent.os.family.replace(' ', '')|lower}}{% endif %}">
 
     <div class="nav">
       <div class="sign-in-out">
