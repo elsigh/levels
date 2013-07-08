@@ -49,6 +49,10 @@ DEFAULT_AVATAR_URL = ('http://lh3.googleusercontent.com/-XdUIqdMkCWA/'
 class FMBModel(ndb.Model):
 
     @classmethod
+    def iso_str_to_datetime(cls, str):
+        return datetime.datetime.strptime(str, '%Y-%m-%dT%H:%M:%S.%fZ')
+
+    @classmethod
     def json_dump(cls, obj):
         date_handler = (lambda obj: obj.isoformat()
                         if isinstance(obj, datetime.datetime) else None)
@@ -271,7 +275,7 @@ class Device(FMBModel):
 
     @property
     def settings(self):
-        """Returns an array of settings as dicts."""
+        """Returns an array of settings models."""
         settings = memcache.get(self.memcache_device_settings_key)
         if not settings:
             settings = []
@@ -289,10 +293,10 @@ class Device(FMBModel):
                     if i % NUM_SETTINGS_MULTIPLIER == 0:
                         list_of_keys.append(results[i])
                 for setting in ndb.get_multi(list_of_keys):
-                    settings.append(setting.to_dict())
+                    settings.append(setting)
             else:
                 for setting in q_settings.fetch():
-                    settings.append(setting.to_dict())
+                    settings.append(setting)
             memcache.set(self.memcache_device_settings_key, settings)
         return settings
 
@@ -302,7 +306,9 @@ class Device(FMBModel):
     def to_dict(self, include_notifying=True):
         obj = super(Device, self).to_dict()
 
-        obj['settings'] = self.settings
+        obj['settings'] = []
+        for setting in self.settings:
+            obj['settings'].append(setting.to_dict())
 
         # notifying
         logging.info('Device %s to dict include_notifying: %s' %
