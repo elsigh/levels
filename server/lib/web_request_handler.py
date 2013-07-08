@@ -9,6 +9,7 @@ import logging
 import os
 import sys
 import time
+from urlparse import urlparse
 import webapp2
 from webapp2_extras import auth, sessions, jinja2
 from jinja2.runtime import TemplateNotFound
@@ -75,6 +76,11 @@ class WebRequestHandler(webapp2.RequestHandler):
         else:
             version = time.strftime('%H_%M_%S', time.gmtime())
         return version
+
+    def get_full_url(self, path):
+        """Return the full url from the provided request handler and path."""
+        pr = urlparse(self.request.url)
+        return '%s://%s%s' % (pr.scheme, pr.netloc, path)
 
     def initialize(self, request, response):
         #logging.info('WebRequestHandler initialize.')

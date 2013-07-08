@@ -148,8 +148,7 @@ class ApiRequestHandler(WebRequestHandler):
 
     def _assert_api_token(self):
         """Ensures an API token is passed for all but /api/user/token."""
-        url = self.request.path
-        if url != '/api/user/token':
+        if self.request.path != '/api/user/token':
             assert 'api_token' in self._json_request_data
 
     @webapp2.cached_property
@@ -508,9 +507,6 @@ class ApiSettingsHandler(ApiRequestHandler):
         settings_data = self.pruned_json_request_data
         settings.populate(**settings_data)
         settings.put()
-
-        # Nukes our device settings list in memcache.
-        device.clear_device_settings_memcache()
 
         if ((is_this_update_over_notify_level !=
              device.is_last_update_over_notify_level)):

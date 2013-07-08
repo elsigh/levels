@@ -72,6 +72,7 @@ routes = [
 
     # Glassware
     Route('/glassware', handler='lib.glassware.GlasswareHandler'),
+    Route('/glassware/notify', handler='lib.glassware.GlasswareNotifyHandler'),
 
     # WWW
     Route('/p/<unique_profile_str>', handler='lib.www.ProfileHandler'),
