@@ -79,6 +79,7 @@
   border: 0;
   border-left: 1px solid #999;
   border-bottom: 1px solid #999;
+  width: 1%;
 }
 
 .fmb-following-device td:last-child {

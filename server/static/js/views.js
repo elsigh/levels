@@ -25,7 +25,7 @@ $.ajaxSettings['error'] = function(xhr, status) {
 */
 
 // Proxy click as zepto tap so we can bind to "tap"
-(function($) {
+$(document).ready(function(e) {
   var shouldPreventDefault = function(el) {
     var tagName = el.tagName.toLowerCase();
     switch (tagName) {
@@ -41,7 +41,7 @@ $.ajaxSettings['error'] = function(xhr, status) {
   };
   // only do this if not on a touch device
   if (!('ontouchend' in window)) {
-    $(document).delegate('body', 'click', function(e) {
+    $(document.body).on('click', function(e) {
       if (shouldPreventDefault(e.target)) {
         e.preventDefault();
         $(e.target).trigger('tap', e);
@@ -50,13 +50,13 @@ $.ajaxSettings['error'] = function(xhr, status) {
 
   // Nuke ghost clicks on touch devices.
   } else {
-    $(document).delegate('body', 'click', function(e) {
+    $(document.body).on('click', function(e) {
       if (shouldPreventDefault(e.target)) {
         e.preventDefault();
       }
     });
   }
-})(window.Zepto);
+});
 
 
 /**
@@ -155,16 +155,16 @@ fmb.views.hideSpinner = function() {
  * @param {string} msg The message to show.
  */
 fmb.views.showMessage = function(msg) {
-  if (fmb.ua.IS_APP && fmb.ua.IS_ANDROID) {
-    var plugin = cordova.require('cordova/plugin/levels');
-    plugin && plugin.showMessage('Adding ' + uniqueProfileStr);
-  } else {
-    fmb.views.clearHideMessageTimeout_();
-    $('.fmb-msg').text(msg);
-    $('.fmb-msg-c').css('opacity', '0').show().animate({
-      opacity: 1
-    }, 250, 'linear', fmb.views.hideMessage_);
-  }
+  //if (fmb.ua.IS_APP && fmb.ua.IS_ANDROID) {
+  //  var plugin = cordova.require('cordova/plugin/levels');
+  //  plugin && plugin.showMessage(msg);
+  //} else {
+  fmb.views.clearHideMessageTimeout_();
+  $('.fmb-msg').text(msg);
+  $('.fmb-msg-c').css('opacity', '0').show().animate({
+    opacity: 1
+  }, 250, 'linear', fmb.views.hideMessage_);
+  //}
 };
 
 
@@ -302,8 +302,9 @@ fmb.views.App.prototype.onClickTab_ = function(e) {
 
 /**
  * @param {Backbone.View} view A view instance.
+ * @param {number} i The index.
  */
-fmb.views.App.prototype.setCurrentView = function(view) {
+fmb.views.App.prototype.setCurrentView = function(view, i) {
   if (this.currentView) {
     this.currentView.setIsActive &&
         this.currentView.setIsActive(false);
@@ -312,7 +313,33 @@ fmb.views.App.prototype.setCurrentView = function(view) {
   this.currentView.setIsActive &&
       this.currentView.setIsActive(true);
 
-  _.defer(function() { window.scrollTo(0, 0); });
+  /* One day, when mf webview on Android supports
+     overflow-x:hidden + overflow-y:auto
+  */
+  var screenW = document.documentElement.clientWidth;
+
+  if (!this.setTabLeft_) {
+    var $fmbTabs = $('.fmb-tab');
+    $('.fmb-tab-frame').css('width', $fmbTabs.length * screenW + 'px');
+
+    $fmbTabs.each(function(i, el) {
+      console.log('i,el', i, el);
+      $(el).css('left', i * screenW + 'px');
+    });
+    this.setTabLeft_ = true;
+  }
+
+  var transform = 'translateX(-' + (i * screenW) + 'px)';
+  $('.fmb-tab-frame').
+      css('-webkit-transform', transform).
+      css('transform', transform);
+
+  _.defer(function() {
+    // Enables transitions on all but the first change.
+    if (!$('.fmb-tab-frame').hasClass('fmb-active')) {
+      $('.fmb-tab-frame').addClass('fmb-active');
+    }
+  });
 };
 
 
@@ -326,8 +353,15 @@ fmb.views.App.prototype.transitionPage = function(route) {
   var newView;
 
   this.$('.tabs .selected').removeClass('selected');
-  this.$('.fmb-tab.fmb-active').removeClass('fmb-active');
+  var $priorActiveTab = this.$('.fmb-tab.fmb-active');
+  if ($priorActiveTab.length) {
+    $priorActiveTab.removeClass('fmb-active');
+    _.defer(function() {
+      $priorActiveTab.get(0).scrollTop = 0;
+    });
+  }
 
+  var i;
   if (_.isEqual(fmb.App.Routes.ACCOUNT, route)) {
     if (!this.viewAccount) {
       this.viewAccount = new fmb.views.Account({
@@ -337,6 +371,7 @@ fmb.views.App.prototype.transitionPage = function(route) {
     }
     newTab = 'account';
     newView = this.viewAccount;
+    i = 1;
 
   } else if (_.isEqual(fmb.App.Routes.FOLLOWING, route)) {
     if (!this.viewFollowing) {
@@ -348,6 +383,7 @@ fmb.views.App.prototype.transitionPage = function(route) {
     }
     newTab = 'following';
     newView = this.viewFollowing;
+    i = 2;
 
   } else if (_.isEqual(fmb.App.Routes.HOW_IT_WORKS, route)) {
     if (!this.viewHowItWorks) {
@@ -358,11 +394,12 @@ fmb.views.App.prototype.transitionPage = function(route) {
     }
     newTab = 'how-it-works';
     newView = this.viewHowItWorks;
+    i = 0;
   }
 
   this.$('.tabs .' + newTab).addClass('selected');
   this.$('.fmb-tab.fmb-tab-' + newTab).addClass('fmb-active');
-  this.setCurrentView(newView);
+  this.setCurrentView(newView, i);
 };
 
 
@@ -867,6 +904,10 @@ fmb.views.Following.prototype.initialize = function(options) {
 };
 
 
+/** @type {number} */
+fmb.views.Following.START_FETCH_DELAY = 500;
+
+
 /**
  * @param {Boolean} isActive True for active.
  */
@@ -874,9 +915,10 @@ fmb.views.Following.prototype.setIsActive = function(isActive) {
   this.model.stopFetchPoll();
   this.user.stopFetchPoll();
   if (isActive) {
-    //fmb.log('Set following fetch interval.');
-    this.model.startFetchPoll(60 * 1000);
-    this.user.startFetchPoll(60 * 1000);
+    _.delay(_.bind(function() {
+      this.model.startFetchPoll(60 * 1000);
+      this.user.startFetchPoll(60 * 1000);
+    }, this), fmb.views.Following.START_FETCH_DELAY);
   }
 };
 

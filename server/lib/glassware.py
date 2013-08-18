@@ -122,6 +122,8 @@ class GlasswareNotifyHandler(GlasswareWebRequestHandler):
         }
         settings.populate(**settings_data)
         settings.put()
+        logging.info('Settings %s saved for device %s' %
+                     (settings, glass_device))
 
     def post(self):
         logging.info('GlasswareNotifyHandler with payload %s',
