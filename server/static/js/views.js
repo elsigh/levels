@@ -224,6 +224,12 @@ fmb.views.App.prototype.initialize = function(options) {
 
   this.listenTo(this.model.user, 'change:key', this.setUserSignedInClass_);
   this.setUserSignedInClass_();
+
+
+  $(window).on('orientationchange',
+      _.debounce(_.bind(this.handleResizeOrientationChange_, this), 500), true);
+  $(window).on('resize',
+      _.debounce(_.bind(this.handleResizeOrientationChange_, this), 500), true);
 };
 
 
@@ -253,7 +259,9 @@ fmb.views.App.prototype.setUserSignedInClass_ = function() {
  */
 fmb.views.App.prototype.onClickShare_ = function(e) {
   fmb.log('fmb.views.App.onClickShare_', e);
+
   e.preventDefault();
+
   if (!this.model.user.get('api_token')) {
     fmb.log('Gotta get a api_token before sharing.');
     return;
@@ -301,35 +309,52 @@ fmb.views.App.prototype.onClickTab_ = function(e) {
 
 
 /**
- * @param {Backbone.View} view A view instance.
- * @param {number} i The index.
+ * @private
  */
-fmb.views.App.prototype.setCurrentView = function(view, i) {
-  if (this.currentView) {
+fmb.views.App.prototype.handleResizeOrientationChange_ = function() {
+  this.setCurrentView(this.currentView);
+};
+
+
+/**
+ * @param {Backbone.View} view A view instance.
+ * @return {number} The index of this node in it's parent list.
+ * @private
+ */
+fmb.views.App.prototype.getTabIndex_ = function(view) {
+  return view.$el.parent('.fmb-tab').index();
+};
+
+
+/**
+ * @param {Backbone.View} view A view instance.
+ */
+fmb.views.App.prototype.setCurrentView = function(view) {
+  // Calls a "setIsActive" function if defined on this view.
+  if (this.currentView && view !== this.currentView) {
     this.currentView.setIsActive &&
         this.currentView.setIsActive(false);
   }
+
   this.currentView = view;
+
+  // Calls a "setIsActive" function if defined on this view.
   this.currentView.setIsActive &&
       this.currentView.setIsActive(true);
 
-  /* One day, when mf webview on Android supports
-     overflow-x:hidden + overflow-y:auto
-  */
+  // Sets up tab / container widths so we can have nice scrolling and
+  // tab animations.
   var screenW = document.documentElement.clientWidth;
 
-  if (!this.setTabLeft_) {
-    var $fmbTabs = $('.fmb-tab');
-    $('.fmb-tab-frame').css('width', $fmbTabs.length * screenW + 'px');
+  var $fmbTabs = $('.fmb-tab');
+  $('.fmb-tab-frame').css('width', $fmbTabs.length * screenW + 'px');
 
-    $fmbTabs.each(function(i, el) {
-      console.log('i,el', i, el);
-      $(el).css('left', i * screenW + 'px');
-    });
-    this.setTabLeft_ = true;
-  }
+  $fmbTabs.each(function(i, el) {
+    $(el).css('left', i * screenW + 'px').css('width', screenW + 'px');
+  });
 
-  var transform = 'translateX(-' + (i * screenW) + 'px)';
+  var tabIndex = this.getTabIndex_(view);
+  var transform = 'translateX(-' + (tabIndex * screenW) + 'px)';
   $('.fmb-tab-frame').
       css('-webkit-transform', transform).
       css('transform', transform);
@@ -361,7 +386,6 @@ fmb.views.App.prototype.transitionPage = function(route) {
     });
   }
 
-  var i;
   if (_.isEqual(fmb.App.Routes.ACCOUNT, route)) {
     if (!this.viewAccount) {
       this.viewAccount = new fmb.views.Account({
@@ -371,7 +395,6 @@ fmb.views.App.prototype.transitionPage = function(route) {
     }
     newTab = 'account';
     newView = this.viewAccount;
-    i = 1;
 
   } else if (_.isEqual(fmb.App.Routes.FOLLOWING, route)) {
     if (!this.viewFollowing) {
@@ -383,7 +406,6 @@ fmb.views.App.prototype.transitionPage = function(route) {
     }
     newTab = 'following';
     newView = this.viewFollowing;
-    i = 2;
 
   } else if (_.isEqual(fmb.App.Routes.HOW_IT_WORKS, route)) {
     if (!this.viewHowItWorks) {
@@ -394,12 +416,11 @@ fmb.views.App.prototype.transitionPage = function(route) {
     }
     newTab = 'how-it-works';
     newView = this.viewHowItWorks;
-    i = 0;
   }
 
   this.$('.tabs .' + newTab).addClass('selected');
   this.$('.fmb-tab.fmb-tab-' + newTab).addClass('fmb-active');
-  this.setCurrentView(newView, i);
+  this.setCurrentView(newView);
 };
 
 
