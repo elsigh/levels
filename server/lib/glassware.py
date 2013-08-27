@@ -104,20 +104,26 @@ class GlasswareNotifyHandler(GlasswareWebRequestHandler):
         if glass_device is None:
             glass_device = models.Device(
                 uuid=glass_uuid,
-                parent=self._current_user.key)
+                parent=self._current_user.key,
+                platform='Google',
+                name='Glass')
             glass_device.put()
 
         settings = models.Settings(
             parent=glass_device.key
         )
 
+        created_datetime = models.FMBModel.iso_str_to_datetime(
+            battery_status['created'])
         settings_data = {
-            'created': battery_status['created'],
+            'created': created_datetime,
             'battery_level': int(battery_status['capacity']),
             'is_charging': battery_status['is_charging']
         }
         settings.populate(**settings_data)
         settings.put()
+        logging.info('Settings %s saved for device %s' %
+                     (settings, glass_device))
 
     def post(self):
         logging.info('GlasswareNotifyHandler with payload %s',

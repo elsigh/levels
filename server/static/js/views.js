@@ -25,7 +25,7 @@ $.ajaxSettings['error'] = function(xhr, status) {
 */
 
 // Proxy click as zepto tap so we can bind to "tap"
-(function($) {
+$(document).ready(function(e) {
   var shouldPreventDefault = function(el) {
     var tagName = el.tagName.toLowerCase();
     switch (tagName) {
@@ -41,7 +41,7 @@ $.ajaxSettings['error'] = function(xhr, status) {
   };
   // only do this if not on a touch device
   if (!('ontouchend' in window)) {
-    $(document).delegate('body', 'click', function(e) {
+    $(document.body).on('click', function(e) {
       if (shouldPreventDefault(e.target)) {
         e.preventDefault();
         $(e.target).trigger('tap', e);
@@ -50,13 +50,13 @@ $.ajaxSettings['error'] = function(xhr, status) {
 
   // Nuke ghost clicks on touch devices.
   } else {
-    $(document).delegate('body', 'click', function(e) {
+    $(document.body).on('click', function(e) {
       if (shouldPreventDefault(e.target)) {
         e.preventDefault();
       }
     });
   }
-})(window.Zepto);
+});
 
 
 /**
@@ -155,16 +155,16 @@ fmb.views.hideSpinner = function() {
  * @param {string} msg The message to show.
  */
 fmb.views.showMessage = function(msg) {
-  if (fmb.ua.IS_APP && fmb.ua.IS_ANDROID) {
-    var plugin = cordova.require('cordova/plugin/levels');
-    plugin && plugin.showMessage('Adding ' + uniqueProfileStr);
-  } else {
-    fmb.views.clearHideMessageTimeout_();
-    $('.fmb-msg').text(msg);
-    $('.fmb-msg-c').css('opacity', '0').show().animate({
-      opacity: 1
-    }, 250, 'linear', fmb.views.hideMessage_);
-  }
+  //if (fmb.ua.IS_APP && fmb.ua.IS_ANDROID) {
+  //  var plugin = cordova.require('cordova/plugin/levels');
+  //  plugin && plugin.showMessage(msg);
+  //} else {
+  fmb.views.clearHideMessageTimeout_();
+  $('.fmb-msg').text(msg);
+  $('.fmb-msg-c').css('opacity', '0').show().animate({
+    opacity: 1
+  }, 250, 'linear', fmb.views.hideMessage_);
+  //}
 };
 
 
@@ -224,6 +224,12 @@ fmb.views.App.prototype.initialize = function(options) {
 
   this.listenTo(this.model.user, 'change:key', this.setUserSignedInClass_);
   this.setUserSignedInClass_();
+
+
+  $(window).on('orientationchange',
+      _.debounce(_.bind(this.handleResizeOrientationChange_, this), 500), true);
+  $(window).on('resize',
+      _.debounce(_.bind(this.handleResizeOrientationChange_, this), 500), true);
 };
 
 
@@ -253,7 +259,9 @@ fmb.views.App.prototype.setUserSignedInClass_ = function() {
  */
 fmb.views.App.prototype.onClickShare_ = function(e) {
   fmb.log('fmb.views.App.onClickShare_', e);
+
   e.preventDefault();
+
   if (!this.model.user.get('api_token')) {
     fmb.log('Gotta get a api_token before sharing.');
     return;
@@ -301,18 +309,62 @@ fmb.views.App.prototype.onClickTab_ = function(e) {
 
 
 /**
+ * @private
+ */
+fmb.views.App.prototype.handleResizeOrientationChange_ = function() {
+  this.setCurrentView(this.currentView);
+};
+
+
+/**
+ * @param {Backbone.View} view A view instance.
+ * @return {number} The index of this node in it's parent list.
+ * @private
+ */
+fmb.views.App.prototype.getTabIndex_ = function(view) {
+  return view.$el.parent('.fmb-tab').index();
+};
+
+
+/**
  * @param {Backbone.View} view A view instance.
  */
 fmb.views.App.prototype.setCurrentView = function(view) {
-  if (this.currentView) {
+  // Calls a "setIsActive" function if defined on this view.
+  if (this.currentView && view !== this.currentView) {
     this.currentView.setIsActive &&
         this.currentView.setIsActive(false);
   }
+
   this.currentView = view;
+
+  // Calls a "setIsActive" function if defined on this view.
   this.currentView.setIsActive &&
       this.currentView.setIsActive(true);
 
-  _.defer(function() { window.scrollTo(0, 0); });
+  // Sets up tab / container widths so we can have nice scrolling and
+  // tab animations.
+  var screenW = document.documentElement.clientWidth;
+
+  var $fmbTabs = $('.fmb-tab');
+  $('.fmb-tab-frame').css('width', $fmbTabs.length * screenW + 'px');
+
+  $fmbTabs.each(function(i, el) {
+    $(el).css('left', i * screenW + 'px').css('width', screenW + 'px');
+  });
+
+  var tabIndex = this.getTabIndex_(view);
+  var transform = 'translateX(-' + (tabIndex * screenW) + 'px)';
+  $('.fmb-tab-frame').
+      css('-webkit-transform', transform).
+      css('transform', transform);
+
+  _.defer(function() {
+    // Enables transitions on all but the first change.
+    if (!$('.fmb-tab-frame').hasClass('fmb-active')) {
+      $('.fmb-tab-frame').addClass('fmb-active');
+    }
+  });
 };
 
 
@@ -326,7 +378,13 @@ fmb.views.App.prototype.transitionPage = function(route) {
   var newView;
 
   this.$('.tabs .selected').removeClass('selected');
-  this.$('.fmb-tab.fmb-active').removeClass('fmb-active');
+  var $priorActiveTab = this.$('.fmb-tab.fmb-active');
+  if ($priorActiveTab.length) {
+    $priorActiveTab.removeClass('fmb-active');
+    _.defer(function() {
+      $priorActiveTab.get(0).scrollTop = 0;
+    });
+  }
 
   if (_.isEqual(fmb.App.Routes.ACCOUNT, route)) {
     if (!this.viewAccount) {
@@ -867,6 +925,10 @@ fmb.views.Following.prototype.initialize = function(options) {
 };
 
 
+/** @type {number} */
+fmb.views.Following.START_FETCH_DELAY = 500;
+
+
 /**
  * @param {Boolean} isActive True for active.
  */
@@ -874,9 +936,10 @@ fmb.views.Following.prototype.setIsActive = function(isActive) {
   this.model.stopFetchPoll();
   this.user.stopFetchPoll();
   if (isActive) {
-    //fmb.log('Set following fetch interval.');
-    this.model.startFetchPoll(60 * 1000);
-    this.user.startFetchPoll(60 * 1000);
+    _.delay(_.bind(function() {
+      this.model.startFetchPoll(60 * 1000);
+      this.user.startFetchPoll(60 * 1000);
+    }, this), fmb.views.Following.START_FETCH_DELAY);
   }
 };
 

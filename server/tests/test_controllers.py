@@ -1014,7 +1014,7 @@ class GlasswareHandlerTest(unittest.TestCase):
 
         # Sets up our mock to return a timeline item
         execute_mock = mock_build().timeline().get(id=item_id).execute
-        datetime_not_now = datetime.datetime(2013, 7, 1, 22, 51, 51)
+        datetime_not_now = '2013-07-08T15:54:12.865Z'
         timeline_item = {
             'created': datetime_not_now,
             'text': '{"capacity": 57, "is_charging": true}'
@@ -1038,16 +1038,17 @@ class GlasswareHandlerTest(unittest.TestCase):
         glass_device = glass_device_query.get()
         self.assertEquals(1, len(glass_device.settings))
         stored_setting = glass_device.settings[0]
-        self.assertEquals(datetime_not_now, stored_setting['created'])
-        self.assertEquals(57, stored_setting['battery_level'])
-        self.assertEquals(True, stored_setting['is_charging'])
+        self.assertEquals(models.FMBModel.iso_str_to_datetime(datetime_not_now),
+                          stored_setting.created)
+        self.assertEquals(57, stored_setting.battery_level)
+        self.assertEquals(True, stored_setting.is_charging)
 
         ########
         # A second call should tack-on a setting to the existing-made
         # glass device.
         item_id = 'item_id_2'
         execute_mock = mock_build().timeline().get(id=item_id).execute
-        datetime_not_now = datetime.datetime(2013, 7, 1, 23, 01, 51)
+        datetime_not_now = '2013-07-08T16:04:12.865Z'
         timeline_item = {
             'created': datetime_not_now,
             'text': '{"capacity": 47, "is_charging": false}'

@@ -46,6 +46,9 @@ h1 {
   background-size: 100px auto;
   font-weight: 400;
   border-bottom: 2px solid #3b97d1;
+
+  /* otherwise it disappears . */
+  -webkit-transform: translateZ(0);
 }
 
 h1 > a {
@@ -194,14 +197,40 @@ input[type="range"] {
   width: 85%;
 }
 
-.fmb-tab {
+.fmb-tab-frame {
   position: absolute;
-  top: -9999px;
-  padding: 20px 10px 0;
+  top: 55px;
+  right: 0;
+  bottom: 0;
+  left: 0;
+
+  /* errybody gets their own layer or shit goes crazy */
+  -webkit-transform: translateZ(0);
 }
 
-.fmb-tab.fmb-active {
-  position: static;
+.fmb-signed-in .fmb-tab-frame {
+  top: 110px;
+}
+
+.fmb-tab-frame.fmb-active {
+  -webkit-transition: all 0.5s ease-in-out;
+  transition: all 0.5s ease-in-out;
+}
+
+.fmb-tab {
+  box-sizing: border-box;
+  padding: 20px 10px 0;
+  height: 100%;
+  width: 100%;
+  vertical-align: top;
+  white-space: normal;  /* counteracts nowrap on tab-c */
+
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  overflow: scroll;
 }
 
 .fmb-tab-header h2 {
@@ -217,14 +246,10 @@ input[type="range"] {
 
 .tabs-c {
   display: none;
-  height: 55px;
 }
 
 .tabs {
-  position: fixed;
-  top: 55px;
   background: #ccc;
-  z-index: 2;
   width: 100%;
   -webkit-box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
   -moz-box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
@@ -250,8 +275,8 @@ input[type="range"] {
   border-right: 0;
 }
 
-.tabs a:active,
-.tabs span:active,
+.Xtabs a:active,
+.Xtabs span:active,
 .tabs a.selected,
 .tabs span.selected {
   -moz-box-shadow: inset 0 0 1em rgba(0, 0, 0, 0.2);

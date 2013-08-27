@@ -265,6 +265,10 @@ public class LevelsAlarm extends BroadcastReceiver {
         SharedPreferences settings = context.getApplicationContext().
                 getSharedPreferences(PREFS_NAME, 0);
         String updateFrequency = settings.getString(LevelsService.EXTRAS_UPDATE_FREQUENCY, "");
+        if (updateFrequency.equals("")) {
+            Log.d(TAG, "SetAlarm TOO SOON - no pref info yet.");
+            return;
+        }
 
         Log.d(TAG, "SetAlarm! w/ updateFrequency:" + updateFrequency);
         int alarmIntervalMs = 1000 * 60 * Integer.parseInt(updateFrequency);  // Millisec * Second * Minute

@@ -714,9 +714,12 @@ fmb.models.User.prototype.createUserDevice = function() {
 fmb.models.User.prototype.launchSync_ = function() {
   // Deferred so model references are set on window.app.
   _.defer(_.bind(function() {
-    fmb.log('fmb.models.User launchSync');
+    fmb.log('fmb.models.User launchSync fmb.App.launchedWithAddUserBit?',
+            fmb.App.launchedWithAddUserBit);
     this.fetch({
-      remove: true,  // --hard RESET sync to server.
+      // --hard RESET sync to server.
+      remove: fmb.App.launchedWithAddUserBit ? false : true,
+
       // Need to fake a battery status after user sync so we don't
       // show out of date info for the user.
       success: _.bind(function(model) {

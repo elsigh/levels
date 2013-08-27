@@ -87,6 +87,8 @@ fmb.App.prototype.initialize = function(options) {
     this.route(route.url, route.handler);
   }, this));
 
+  //this.tryWorkers();
+
   // Bound cordova events.
   document.addEventListener('pause',
       _.bind(this.onPhonePause, this),
@@ -114,6 +116,29 @@ fmb.App.prototype.initialize = function(options) {
     }, this));
   }, this));
 
+};
+
+
+/**
+ * Yeah, it's worth a try.
+ */
+fmb.App.prototype.tryWorkers = function() {
+
+  // Test for webWorkers
+  if (_.isUndefined(Worker)) {
+    fmb.log('######### No WebWorkers here, move along now.');
+    return;
+  }
+
+  fmb.log('######## We got WebWorkers!');
+
+  var worker = new Worker('js/worker.js');
+
+  worker.addEventListener('message', function(e) {
+    console.log('######## Worker said: ', e.data);
+  }, false);
+
+  worker.postMessage({'cmd': 'start'});
 };
 
 
@@ -183,6 +208,12 @@ fmb.App.prototype.checkIntent_ = function(url) {
 
 
 /**
+ * @type {Boolean}
+ */
+fmb.App.launchedWithAddUserBit = false;
+
+
+/**
  * @param {string} url
  * @private
  */
@@ -195,6 +226,7 @@ fmb.App.prototype.checkIntentUrlForUser_ = function(url) {
   var match = fmb.App.FOLLOWING_BY_UNIQUE_STR_URL_RE.exec(url);
   if (match && match.length) {
     fmb.log('fmb.App checkIntentUrlForUser_', url, match);
+    fmb.App.launchedWithAddUserBit = true;
     var userUniqueProfileStr = match[1];
     _.delay(_.bind(function() {
       this.navigate(

@@ -376,6 +376,7 @@ function testInitialFollowingView() {
   assertTrue(app.view.currentView instanceof fmb.views.Following);
 
   // Starts a fetch on both following and user.
+  clock.tick(fmb.views.Following.START_FETCH_DELAY);
   serverRequestCountExpected += 2;
 
   // It's our own device.
