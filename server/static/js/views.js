@@ -347,11 +347,11 @@ fmb.views.App.prototype.setCurrentView = function(view) {
   var screenW = document.documentElement.clientWidth;
 
   var $fmbTabs = $('.fmb-tab');
-  $('.fmb-tab-frame').css('width', $fmbTabs.length * screenW + 'px');
+  //$('.fmb-tab-frame').css('width', $fmbTabs.length * screenW + 'px');
 
-  $fmbTabs.each(function(i, el) {
-    $(el).css('left', i * screenW + 'px').css('width', screenW + 'px');
-  });
+  //$fmbTabs.each(function(i, el) {
+  //  $(el).css('left', i * screenW + 'px').css('width', screenW + 'px');
+  //});
 
   var tabIndex = this.getTabIndex_(view);
   var transform = 'translateX(-' + (tabIndex * screenW) + 'px)';

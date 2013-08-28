@@ -197,19 +197,18 @@ input[type="range"] {
   width: 85%;
 }
 
+html,
+body,
+.fmb-app {
+  overflow: hidden;
+}
+
 .fmb-tab-frame {
-  position: absolute;
-  top: 55px;
-  right: 0;
-  bottom: 0;
-  left: 0;
+  white-space: nowrap;
+  height: 400px;
 
   /* errybody gets their own layer or shit goes crazy */
   -webkit-transform: translateZ(0);
-}
-
-.fmb-signed-in .fmb-tab-frame {
-  top: 110px;
 }
 
 .fmb-tab-frame.fmb-active {
@@ -225,12 +224,11 @@ input[type="range"] {
   vertical-align: top;
   white-space: normal;  /* counteracts nowrap on tab-c */
 
-  position: absolute;
-  top: 0;
-  right: 0;
-  left: 0;
-  bottom: 0;
+  display: inline-block;
+
   overflow: scroll;
+  overflow-y: scroll;
+  overflow-x: hidden;
 }
 
 .fmb-tab-header h2 {
