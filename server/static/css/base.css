@@ -179,6 +179,8 @@ button:active {
 
 .nav {
   height: 55px;
+  /* otherwise it disappears . */
+  -webkit-transform: translateZ(0);
 }
 
 .nav .sign-in-out {
@@ -203,9 +205,22 @@ body,
   overflow: hidden;
 }
 
+.fmb-tab-frame-c {
+  position: absolute;
+  top: 55px;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  overflow: hidden;
+}
+
+.fmb-signed-in .fmb-tab-frame-c {
+  top: 110px;
+}
+
 .fmb-tab-frame {
   white-space: nowrap;
-  height: 400px;
+  height: 100%;
 
   /* errybody gets their own layer or shit goes crazy */
   -webkit-transform: translateZ(0);
@@ -238,12 +253,12 @@ body,
   vertical-align: bottom;
 }
 
-.fmb-signed-in .tabs-c {
-  display: block;
-}
-
 .tabs-c {
   display: none;
+}
+
+.fmb-signed-in .tabs-c {
+  display: block;
 }
 
 .tabs {
