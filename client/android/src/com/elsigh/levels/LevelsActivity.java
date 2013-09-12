@@ -9,10 +9,8 @@ import android.view.View;
 
 import org.apache.cordova.*;
 
-//import com.google.android.gms.auth.GoogleAuthUtil;
-//import com.google.android.gms.common.GooglePlayServicesUtil;
-
-import com.elsigh.levels.LevelsService;
+//import com.elsigh.levels.LevelsService;
+//import com.elsigh.levels.LevelsAuthActivity;
 
 
 public class LevelsActivity extends DroidGap {
@@ -21,7 +19,6 @@ public class LevelsActivity extends DroidGap {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
         Log.d(TAG, "onCreate w/ " +
               "Build :: " +
               android.os.Build.BRAND + ", " +
@@ -33,6 +30,7 @@ public class LevelsActivity extends DroidGap {
               android.os.Build.DISPLAY + ", " +
               "Build.VERSION.SDK_INT: " + android.os.Build.VERSION.SDK_INT
               );
+        super.onCreate(savedInstanceState);
         super.setIntegerProperty("splashscreen", R.drawable.splash);
         super.setBooleanProperty("keepRunning", false);
         super.loadUrl("file:///android_asset/www/index.html", 10000);
