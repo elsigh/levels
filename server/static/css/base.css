@@ -3,7 +3,7 @@
   -webkit-tap-highlight-color: rgba(0,0,0,0); /* make transparent link selection, adjust last value opacity 0 to 1.0 */
 }
 
-body {
+html, body {
   background-color: #ccc;
   color: #111;
   font-family: 'HelveticaNeue-Light', 'HelveticaNeue', Helvetica, Arial, sans-serif;
@@ -179,6 +179,8 @@ button:active {
 
 .nav {
   height: 55px;
+  /* otherwise it disappears . */
+  -webkit-transform: translateZ(0);
 }
 
 .nav .sign-in-out {
@@ -197,19 +199,31 @@ input[type="range"] {
   width: 85%;
 }
 
-.fmb-tab-frame {
+html,
+body,
+.fmb-app {
+  overflow: hidden;
+}
+
+.fmb-tab-frame-c {
   position: absolute;
   top: 55px;
   right: 0;
-  bottom: 0;
   left: 0;
+  bottom: 0;
+  overflow: hidden;
+}
+
+.fmb-signed-in .fmb-tab-frame-c {
+  top: 110px;
+}
+
+.fmb-tab-frame {
+  white-space: nowrap;
+  height: 100%;
 
   /* errybody gets their own layer or shit goes crazy */
   -webkit-transform: translateZ(0);
-}
-
-.fmb-signed-in .fmb-tab-frame {
-  top: 110px;
 }
 
 .fmb-tab-frame.fmb-active {
@@ -225,12 +239,11 @@ input[type="range"] {
   vertical-align: top;
   white-space: normal;  /* counteracts nowrap on tab-c */
 
-  position: absolute;
-  top: 0;
-  right: 0;
-  left: 0;
-  bottom: 0;
+  display: inline-block;
+
   overflow: scroll;
+  overflow-y: scroll;
+  overflow-x: hidden;
 }
 
 .fmb-tab-header h2 {
@@ -240,12 +253,12 @@ input[type="range"] {
   vertical-align: bottom;
 }
 
-.fmb-signed-in .tabs-c {
-  display: block;
-}
-
 .tabs-c {
   display: none;
+}
+
+.fmb-signed-in .tabs-c {
+  display: block;
 }
 
 .tabs {
