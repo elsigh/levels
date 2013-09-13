@@ -6,18 +6,19 @@ import android.content.Intent;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.Uri;
 import android.util.Log;
+import android.widget.Toast;
 
-import org.apache.cordova.api.Plugin;
-import org.apache.cordova.api.PluginResult;
+import org.apache.cordova.api.CallbackContext;
+import org.apache.cordova.api.CordovaPlugin;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import android.widget.Toast;
 
 import com.elsigh.levels.LevelsService;
 
-public class LevelsPlugin extends Plugin {
-    private static final String TAG = LevelsActivity.class.getSimpleName();
+public class LevelsPlugin extends CordovaPlugin {
+    private static final String TAG = LevelsPlugin.class.getSimpleName();
 
     /**
      * @param action Contains the action sent by the javascript. This can be used
@@ -27,9 +28,10 @@ public class LevelsPlugin extends Plugin {
      *               JSON Object. e.g for File Plugin are filename,path,etc
      */
     @Override
-    public PluginResult execute(String action, JSONArray args, String callbackId) {
-        PluginResult.Status status = PluginResult.Status.OK;
+    public boolean execute(String action, JSONArray args, CallbackContext callbackContext) {
         Log.d(TAG, "action:" + action + ", args:" + args);
+
+        String successResponse = "";
 
         if (action.equals("startService")) {
             Intent intent = new Intent(this.cordova.getActivity(),
@@ -47,8 +49,10 @@ public class LevelsPlugin extends Plugin {
                 updateFrequency = args.getString(3);
                 updatePath = args.getString(4);
             } catch(JSONException e) {
-              e.printStackTrace();
-              return new PluginResult(PluginResult.Status.JSON_EXCEPTION);
+                e.printStackTrace();
+                callbackContext.error(Log.getStackTraceString(e));
+                return false;
+
             }
 
             intent.putExtra(LevelsService.EXTRAS_API_TOKEN, apiToken);
@@ -59,15 +63,13 @@ public class LevelsPlugin extends Plugin {
 
             this.cordova.getActivity().startService(intent);
 
-            return new PluginResult(status, "Started service.");
-
+            successResponse = "Started service.";
 
         } else if (action.equals("stopService")) {
             Intent intent = new Intent(this.cordova.getActivity(),
                 LevelsService.class);
             this.cordova.getActivity().stopService(intent);
-
-            return new PluginResult(status, "Stopped service.");
+            successResponse = "Stopped service.";
 
         } else if (action.equals("showMessage")) {
             String textArg = "";
@@ -85,11 +87,9 @@ public class LevelsPlugin extends Plugin {
                                text, Toast.LENGTH_SHORT).show();
               }
             });
-            return new PluginResult(status, "");
-
 
         } else if (action.equals("getDeviceModelName")) {
-            return new PluginResult(status, android.os.Build.MODEL);
+            successResponse = android.os.Build.MODEL;
 
         } else if (action.equals("getVersionCode")) {
             final Context context = this.cordova.getActivity().getApplicationContext();
@@ -101,11 +101,15 @@ public class LevelsPlugin extends Plugin {
                 e.printStackTrace();
                 Log.d(TAG, "getVersionCode ERROR");
             }
-            return new PluginResult(status, versionCode);
+            successResponse = versionCode + "";  // cast to string
 
         } else {
-            return new PluginResult(PluginResult.Status.INVALID_ACTION);
+            callbackContext.error("Invalid action: " + action);
+            return false;
         }
+
+        callbackContext.success(successResponse);
+        return true;
     }
 }
 

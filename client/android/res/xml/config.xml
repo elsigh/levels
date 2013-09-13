@@ -33,7 +33,7 @@
         <plugin name="App" value="org.apache.cordova.App" />
         <plugin name="Battery" value="org.apache.cordova.BatteryListener" />
         <plugin name="Device" value="org.apache.cordova.Device" />
-        <plugin name="InAppBrowser" value="org.apache.cordova.InAppBrowser" />
+        <plugin name="InAppBrowser" value="com.elsigh.levels.InAppBrowser" />
         <plugin name="NetworkStatus" value="org.apache.cordova.NetworkManager" />
         <plugin name="Notification" value="org.apache.cordova.Notification" />
         <plugin name="SplashScreen" value="org.apache.cordova.SplashScreen" />
