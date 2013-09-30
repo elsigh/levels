@@ -1,27 +1,33 @@
 # -*- coding: utf-8 -*-
 import datetime
+import httplib2
+import json
 import logging
 import settings
 import time
 import uuid
 
 from google.appengine.api import memcache
+from google.appengine.api import urlfetch
 from google.appengine.ext import deferred
 
 from lib.web_request_handler import WebRequestHandler
+
 from lib.external.simpleauth import SimpleAuthHandler
+from lib.external.apiclient import discovery
+from lib.external.oauth2client.client import credentials_from_code
 
 from lib import models
 
 
 def login_required(handler_method):
-    """A decorator to require that a user be logged in to access a handler.
+    '''A decorator to require that a user be logged in to access a handler.
     To use it, decorate your get() method like this:
         @login_required
         def get(self):
             user = self.current_user
             self.response.out.write('Hello, ' + user.name())
-    """
+    '''
     def check_login(self, *args, **kwargs):
         if self.request.method != 'GET':
             self.abort(400, detail='The login_required decorator '
@@ -42,7 +48,7 @@ def login_required(handler_method):
 
 class LoginHandler(WebRequestHandler):
     def get(self):
-        """Handles default landing page."""
+        '''Handles default landing page.'''
 
         user_token = self.request.get('user_token', None)
         if user_token is not None:
@@ -56,7 +62,7 @@ class LoginHandler(WebRequestHandler):
 
 
 class AuthHandler(WebRequestHandler, SimpleAuthHandler):
-    """Authentication handler for OAuth 2.0, 1.0(a) and OpenID."""
+    '''Authentication handler for OAuth 2.0, 1.0(a) and OpenID.'''
 
     # Enable optional OAuth 2.0 CSRF guard
     OAUTH2_CSRF_STATE = True
@@ -72,11 +78,60 @@ class AuthHandler(WebRequestHandler, SimpleAuthHandler):
         }
     }
 
-    def _on_signin(self, data, auth_info, provider):
-        """Callback whenever a new or existing user is logging in.
+    def _google_code_exchange(self):
+        code = self.request.get('code', None)
+        logging.info('_google_code_exchange CODE: %s' % code)
+        assert code
+
+        # Sets our identifying bit for the client to do it's subsequent
+        # fetch flow with - It was called back with this code.
+        self.session['user_token'] = code
+
+        # Turn access code into Credentials.
+        credentials = credentials_from_code(
+            client_id=settings.GOOGLE_APP_ID,
+            client_secret=settings.GOOGLE_APP_SECRET,
+            scope='',
+            code=code,
+            redirect_uri='')
+        logging.info('GOT credentials.id_token: %s' % credentials.id_token)
+
+        # And now make a request to get the user's name info.
+        http = httplib2.Http()
+        credentials.authorize(http)
+        service = discovery.build('plus', 'v1', http=http)
+        me = service.people().get(userId='me').execute()
+        logging.info('GOT me: %s' % me)
+
+        family_name = ''
+        given_name = ''
+        if 'name' in me:
+            family_name = me['name']['familyName']
+            given_name = me['name']['givenName']
+
+        user_data = {
+            'id': credentials.id_token['id'],
+            'picture': me['image']['url'],
+            'name': me['displayName'],
+            'family_name': family_name,
+            'given_name': given_name,
+            'link': me['url'],
+            'email': credentials.id_token['email']
+        }
+
+        auth_info = {
+            'access_token': credentials.access_token,
+            'refresh_token': credentials.refresh_token,
+            'expires_datetime': credentials.token_expiry
+        }
+
+        self._on_signin(user_data, auth_info, 'google', redirect=False)
+
+    def _on_signin(self, data, auth_info, provider, redirect=True):
+        '''Callback whenever a new or existing user is logging in.
          data is a user info dictionary.
          auth_info contains access token or oauth token and secret.
-        """
+        '''
         logging.info('_on_signin callback w/ %s, %s, %s' %
                      (data, auth_info, provider))
 
@@ -87,9 +142,13 @@ class AuthHandler(WebRequestHandler, SimpleAuthHandler):
         _attrs = self._to_user_model_attrs(data, self.USER_ATTRS[provider])
 
         # Update _attrs to include oauth2 token / info.
-        oauth2_token_expires_in = auth_info['expires_in']
-        time_expires = int(time.time()) + oauth2_token_expires_in
-        expires_datetime = datetime.datetime.utcfromtimestamp(time_expires)
+        expires_datetime = None
+        if 'expires_in' in auth_info:
+            oauth2_token_expires_in = auth_info['expires_in']
+            time_expires = int(time.time()) + oauth2_token_expires_in
+            expires_datetime = datetime.datetime.utcfromtimestamp(time_expires)
+        elif 'expires_datetime' in auth_info:
+            expires_datetime = auth_info['expires_datetime']
         _attrs.update({
             'oauth2_access_token': auth_info['access_token'],
             'oauth2_refresh_token': auth_info.get('refresh_token', None),
@@ -130,24 +189,31 @@ class AuthHandler(WebRequestHandler, SimpleAuthHandler):
         # Ok, time to move on.
         # If login was invoked via our login_required decorator we will have
         # continue_path set to something.
-        # If login was invoked directly via "/login" we won't in which case
+        # If login was invoked directly via '/login' we won't in which case
         # we will just go to the user's profile.
-        # Lastly we might have called via "/login?continue_path=something"
+        # Lastly we might have called via '/login?continue_path=something'
         # in which case we'll redirect to something.
         redirect_url = self.session.get('continue_path', None)
         self.session['continue_path'] = None  # unset for the future
 
+        # Stores a key / val pair in memcache for the client to query on
+        # to match up the user id to the user_token.
+        user_token = self.session.get('user_token', None)
+        logging.info('_on_signin session user_token: %s' % user_token)
+        if user_token is not None:
+            self.session['user_token'] = None  # unset for the future
+            memcache.add('user_token-%s' % user_token, user.key.id(), 60)
+            logging.info('Added user_token<->user.key.id match - %s, %s' %
+                         (user_token, user.key.id()))
+
+        # For the native app auth flow we don't want to redirect, just return.
+        if not redirect:
+            logging.info('OK, no redirect needed, just return 200')
+            return self.response.write('')
+
         if redirect_url is None:
             redirect_url = '/p/%s' % user.unique_profile_str
-            # Stores a key / val pair in memcache for the client to query on
-            # to match up the user id to the user_token.
-            user_token = self.session.get('user_token', None)
-            logging.info('_on_signin session user_token: %s' % user_token)
             if user_token is not None:
-                self.session['user_token'] = None  # unset for the future
-                memcache.add('user_token-%s' % user_token, user.key.id(), 60)
-                logging.info('Added user_token<->id match - %s, %s' %
-                             (user_token, user.key.id()))
                 redirect_url += '?close=1'
 
         logging.info('OK, we are logged in, redirect_url: %s' % redirect_url)
@@ -164,7 +230,7 @@ class AuthHandler(WebRequestHandler, SimpleAuthHandler):
         return settings.AUTH_CONFIG[provider]
 
     def _to_user_model_attrs(self, data, attrs_map):
-        """Get the needed information from the provider dataset."""
+        '''Get the needed information from the provider dataset.'''
         user_attrs = {}
         for k, v in attrs_map.iteritems():
             attr = (v, data.get(k)) if isinstance(v, str) else v(data.get(k))

@@ -52,19 +52,19 @@
     <script>
       var cordovaSrc_;
       if (window.location.protocol === 'file:') {
-        //cordovaSrc_ = 'phonegap.js';
 
         if (window.navigator.userAgent.match(/Android/i)) {
-          cordovaSrc_ = 'cordova-android.js';
+          cordovaSrc_ = 'js/cordova-android.js';
         } else if (window.navigator.userAgent.match(/iPad/i) ||
                    window.navigator.userAgent.match(/iPhone/i)) {
-          cordovaSrc_ = 'cordova-ios.js';
+          cordovaSrc_ = 'js/cordova-ios.js';
         }
 
+        cordovaSrc_ = 'cordova.js';
       }
 
       if (cordovaSrc_) {
-        document.write('<scr'+'ipt src="js/' + cordovaSrc_ + '"></sc'+'ript>');
+        document.write('<scr'+'ipt src="' + cordovaSrc_ + '"></sc'+'ript>');
 
       } else {
         // Stubs cordova so we can run this page on the web not as a
@@ -76,9 +76,9 @@
         };
       }
     </script>
-    <script src="js/levels_plugin.js"></script>
+    <!--<script src="js/levels_plugin.js"></script>
     <script src="js/webintent.js"></script>
-    <script src="js/ContactView.js"></script>
+    <script src="js/ContactView.js"></script>-->
     <script src="js/zepto.js"></script>
     <script src="js/touch.js"></script>
     <script src="js/underscore.js"></script>
@@ -332,10 +332,12 @@
             <strong>{{send_battery_notifications_count}}</strong>
             notification{{#send_battery_notifications_count_is_plural}}s{{/send_battery_notifications_count_is_plural}}
           </li>
+          <!--
           <li>
             <strong>{{settings_received_count}}</strong>
             level{{#settings_received_count_is_plural}}s{{/settings_received_count_is_plural}} saved
           </li>
+          -->
         </ul>
       </td>
       <td class="battery-graph-td">

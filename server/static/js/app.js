@@ -32,6 +32,12 @@ fmb.App.Routes = {
 
 
 /**
+ * previously cordova/plugin/levels.
+ * @type {string} */
+fmb.App.LEVELS_PLUGIN_ID = 'com.elsigh.levels.LevelsPlugin';
+
+
+/**
  * @param {string} url An url to look for.
  * @return {Object} One of fmb.App.Routes or undefined.
  */
@@ -111,8 +117,8 @@ fmb.App.prototype.initialize = function(options) {
       this.onPhoneResume_();
       this.initHistory_();
       this.checkIntent_();
-      window.navigator.splashscreen &&
-          _.delay(window.navigator.splashscreen.hide, 2000);
+      //window.navigator.splashscreen &&
+      //    _.delay(window.navigator.splashscreen.hide, 2000);
     }, this));
   }, this));
 

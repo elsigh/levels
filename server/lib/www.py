@@ -82,7 +82,11 @@ class ProfileHandler(WebRequestHandler):
 
         # TODO(elsigh): Allow user to set "default" device or
         # sort order devices one day.
-        template_data['title'] = template_data['user']['name']
+        template_data['title'] = ''
+
+        if template_data['user']['name']:
+            template_data['title'] += template_data['user']['name']
+
         if (('devices' in template_data['user'] and
              len(template_data['user']['devices']))):
             first_device = template_data['user']['devices'][0]

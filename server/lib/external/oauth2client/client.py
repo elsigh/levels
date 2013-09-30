@@ -1279,6 +1279,7 @@ class OAuth2WebServerFlow(Flow):
     if http is None:
       http = httplib2.Http()
 
+    logging.info('Sending body: %s' % body)
     resp, content = http.request(self.token_uri, method='POST', body=body,
                                  headers=headers)
     d = _parse_exchange_token_response(content)

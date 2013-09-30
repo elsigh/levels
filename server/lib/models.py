@@ -120,6 +120,13 @@ class FMBUser(User, FMBModel):
         if not hasattr(self, 'allow_gmail_lookup'):
             self.allow_gmail_lookup = True
 
+        if not hasattr(self, 'name') or self.name is None:
+            self.name = ''
+        if not hasattr(self, 'given_name') or self.given_name is None:
+            self.given_name = ''
+        if not hasattr(self, 'family_name') or self.family_name is None:
+            self.family_name = ''
+
         if not hasattr(self, 'unique_profile_str'):
             if ((hasattr(self, 'email') and
                  self.is_gmail_account and
@@ -159,6 +166,9 @@ class FMBUser(User, FMBModel):
                 'is_gmail_account', 'gmail_username']
 
     def possessive(self, name):
+        if name == '' or name is None:
+            return ''
+
         last_char = name[-1]
         if last_char.lower() == 's':
             name += '\''

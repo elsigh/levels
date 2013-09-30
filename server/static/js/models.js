@@ -19,7 +19,7 @@ fmb.models.App.prototype.initialize = function(opt_data, opt_options) {
 
   // Phonegap's Android implementation of device.name is the product name
   // not something people will ever understandably recognize. Fix that.
-  var plugin = cordova.require('cordova/plugin/levels');
+  var plugin = cordova.require(fmb.App.LEVELS_PLUGIN_ID);
   plugin && plugin.setDeviceModel();
   plugin && plugin.getVersionCode(
       function(version) {
@@ -243,7 +243,7 @@ fmb.models.DeviceUnMapped.getUuid = function() {
 fmb.models.DeviceUnMapped.prototype.onBatteryStatus = function() {
   fmb.log('fmb.models.Device onBatteryStatus');
   // This should result in a settings beacon via our already-running service.
-  var plugin = cordova.require('cordova/plugin/levels');
+  var plugin = cordova.require(fmb.App.LEVELS_PLUGIN_ID);
   plugin && plugin.startService();
 
   if (!window.navigator.battery) {
@@ -791,7 +791,7 @@ fmb.models.User.prototype.setUserDevice = function(model) {
 
   if (this.get('api_token')) {
     fmb.log('START levelsplugin!');
-    var plugin = cordova.require('cordova/plugin/levels');
+    var plugin = cordova.require(fmb.App.LEVELS_PLUGIN_ID);
     plugin && plugin.startService();
   }
 
@@ -808,10 +808,10 @@ fmb.models.User.prototype.url = function() {
 
 
 /**
- * der.
+ * @param {string=} opt_token A token.
  */
-fmb.models.User.prototype.setLoginToken = function() {
-  this.loginToken_ = fmb.models.getUid();
+fmb.models.User.prototype.setLoginToken = function(opt_token) {
+  this.loginToken_ = opt_token || fmb.models.getUid();
 };
 
 
@@ -828,6 +828,7 @@ fmb.models.User.prototype.syncByLoginToken = function() {
     return;
   }
 
+  fmb.views.showSpinner('Synchronizing [step 2 of 2]...');
   this.saveToServer({
     'user_token': this.loginToken_,
     'app_version': fmb.models.App.version
@@ -835,14 +836,39 @@ fmb.models.User.prototype.syncByLoginToken = function() {
     url: fmb.models.getApiUrl('/user/token'),
     success: _.bind(function(model, response, options) {
       fmb.log('fmb.models.User syncByLoginToken MONEY TRAIN!!');
+      fmb.views.hideSpinner();
       this.unset('user_token', {silent: true});
       // unset - can only use this one time.
       this.loginToken_ = null;
     }, this),
     error: function(model, xhr, options) {
+      fmb.views.hideSpinner();
       alert('LA BOMBA! in fmb.models.User syncByLoginToken. =(');
     }
   });
 
 };
 
+
+/**
+ * Post in-app-auth we receive a callback from chrome.identity with a
+ * one-time-use code to obtain auth credentials with on our server.
+ * @param {string} code The one-time-use token exchange code.
+ */
+fmb.models.User.prototype.exchangeGoogleOneTimeAuthCode = function(code) {
+  fmb.views.showSpinner('Synchronizing [step 1 of 2]...');
+  this.model.setLoginToken(code);
+  this.saveToServer({
+    'code': code
+  }, {
+    url: fmb.models.getApiUrl('/auth/google/code_exchange'),
+    success: _.bind(function(model, response, options) {
+      fmb.log('fmb.models.User exchangeGoogleOneTimeAuthCode MONEY TRAIN!!');
+      this.syncByLoginToken();
+    }, this),
+    error: function(model, xhr, options) {
+      fmb.views.hideSpinner();
+      alert('LA BOMBA! in fmb.models.User exchangeGoogleOneTimeAuthCode. =(');
+    }
+  });
+};

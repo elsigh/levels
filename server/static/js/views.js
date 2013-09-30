@@ -156,7 +156,7 @@ fmb.views.hideSpinner = function() {
  */
 fmb.views.showMessage = function(msg) {
   //if (fmb.ua.IS_APP && fmb.ua.IS_ANDROID) {
-  //  var plugin = cordova.require('cordova/plugin/levels');
+  //  var plugin = cordova.require(fmb.App.LEVELS_PLUGIN_ID);
   //  plugin && plugin.showMessage(msg);
   //} else {
   fmb.views.clearHideMessageTimeout_();
@@ -276,7 +276,7 @@ fmb.views.App.prototype.onClickShare_ = function(e) {
     var subject = 'Check out my Levels!';
     var body = 'Check out my Levels, and send me yours!' +
         ' ' + this.model.user.getProfileUrl();
-    var plugin = cordova.require('cordova/plugin/levels');
+    var plugin = cordova.require(fmb.App.LEVELS_PLUGIN_ID);
     plugin && plugin.shareApp(subject, body,
         function() {
           fmb.log('Share sent!');
@@ -556,6 +556,26 @@ fmb.views.Account.prototype.onChangeAllowGmailLookup_ = function(e) {
  */
 fmb.views.Account.prototype.onClickLogin_ = function(e) {
   fmb.log('fmb.views.Account onClickLogin_');
+
+  // Use the chrome identity plugin if it's available.
+  if (chrome && chrome.identity) {
+    chrome.identity.getAuthToken(
+        {
+          oauth2: {
+            client_id: '652605517304.apps.googleusercontent.com',
+            scopes: [
+              'server:client_id:652605517304.apps.googleusercontent.com:' +
+                  'api_scope:https://www.googleapis.com/auth/userinfo.email',
+              'https://www.googleapis.com/auth/plus.login'
+            ]
+          },
+          interactive: true
+        },
+        _.bind(this.model.exchangeGoogleOneTimeAuthCode, this));
+    return;
+
+  }
+
 
   this.model.setLoginToken();
 
