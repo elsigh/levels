@@ -218,7 +218,7 @@ class ApiUserHandler(ApiRequestHandler):
 
         # Only allows us to write certain parameters.
         if 'app_version' in self._json_request_data:
-            user.app_version = self._json_request_data['app_version']
+            user.app_version = int(self._json_request_data['app_version'])
 
         if 'allow_phone_lookup' in self._json_request_data:
             user.allow_phone_lookup = \
@@ -265,7 +265,7 @@ class ApiUserTokenHandler(ApiRequestHandler):
         memcache.delete(memcache_key)
 
         if 'app_version' in self._json_request_data:
-            user.app_version = self._json_request_data['app_version']
+            user.app_version = int(self._json_request_data['app_version'])
             user.put()
 
         return self.output_json_success(

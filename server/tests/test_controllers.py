@@ -181,9 +181,11 @@ class HandlerTest(unittest.TestCase):
 
         user_token = 'foobar'
         memcache.add('user_token-%s' % user_token, elsigh_user.key.id())
+        # Additionally here, testing that a string for app_version gets
+        # converted by our server to an integer.
         response = self.testapp.post_json('/api/user/token',
                                           params=dict(user_token=user_token,
-                                                      app_version=30))
+                                                      app_version='30'))
         body = response.normal_body
         obj = json.loads(body)
         self.assertEquals(elsigh_user.name, obj['name'])

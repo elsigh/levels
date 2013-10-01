@@ -15,6 +15,7 @@ from lib.web_request_handler import WebRequestHandler
 
 from lib.external.simpleauth import SimpleAuthHandler
 from lib.external.apiclient import discovery
+from lib.external.oauth2client.client import OAuth2Credentials
 from lib.external.oauth2client.client import credentials_from_code
 
 from lib import models
@@ -78,6 +79,59 @@ class AuthHandler(WebRequestHandler, SimpleAuthHandler):
         }
     }
 
+    # This is to override the implemnentation of plus.login's me scope.
+    def _get_google_user_info(self, auth_info, key=None, secret=None):
+        """Returns a dict of currenly logging in user using discovery svc."""
+
+        logging.info('_get_google_user_info auth_info: %s' % auth_info)
+
+        expires_datetime = None
+        if 'expires_in' in auth_info:
+            oauth2_token_expires_in = auth_info['expires_in']
+            time_expires = int(time.time()) + oauth2_token_expires_in
+            expires_datetime = datetime.datetime.utcfromtimestamp(time_expires)
+
+        credentials = OAuth2Credentials(
+            auth_info['access_token'],
+            settings.GOOGLE_APP_ID,
+            settings.GOOGLE_APP_SECRET,
+            auth_info['refresh_token'],
+            expires_datetime,
+            token_uri='https://accounts.google.com/o/oauth2/token',
+            user_agent=settings.USER_AGENT)
+
+        # And now make a request to get the user's name info.
+        http = httplib2.Http()
+        credentials.authorize(http)
+        service = discovery.build('plus', 'v1', http=http)
+        me = service.people().get(userId='me').execute()
+        logging.info('GOT me: %s' % me)
+
+        # Now get userinfo, so we can email - so sad.
+        resp = self._oauth2_request(
+            'https://www.googleapis.com/oauth2/v3/userinfo?{0}',
+            auth_info['access_token']
+        )
+        userinfo = json.loads(resp)
+        logging.info('GOT userinfo: %s' % userinfo)
+
+        family_name = ''
+        given_name = ''
+        if 'name' in me:
+            family_name = me['name']['familyName']
+            given_name = me['name']['givenName']
+
+        user_data = {
+            'id': me['id'],
+            'picture': me['image']['url'],
+            'name': me['displayName'],
+            'family_name': family_name,
+            'given_name': given_name,
+            'link': me['url'],
+            'email': userinfo['email']
+        }
+        return user_data
+
     def _google_code_exchange(self):
         code = self.request.get('code', None)
         logging.info('_google_code_exchange CODE: %s' % code)
@@ -110,7 +164,7 @@ class AuthHandler(WebRequestHandler, SimpleAuthHandler):
             given_name = me['name']['givenName']
 
         user_data = {
-            'id': credentials.id_token['id'],
+            'id': me['id'],
             'picture': me['image']['url'],
             'name': me['displayName'],
             'family_name': family_name,
