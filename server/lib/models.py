@@ -15,10 +15,8 @@
 # limitations under the License.
 
 import datetime
-from datetime import tzinfo
 import logging
 import sys
-import time
 import uuid
 
 try:
@@ -26,7 +24,6 @@ try:
 except:
     import simplejson
 
-from google.appengine.api import mail
 from google.appengine.api import memcache
 from google.appengine.ext import ndb
 sys.modules['ndb'] = ndb
@@ -37,6 +34,7 @@ from webapp2_extras.appengine.auth.models import UserToken
 from lib.external import general_counter
 from lib.external.gae_python_gcm import gcm
 
+import utils
 import settings
 
 
@@ -52,6 +50,8 @@ class FMBModel(ndb.Model):
     def iso_str_to_datetime(cls, str):
         return datetime.datetime.strptime(str, '%Y-%m-%dT%H:%M:%S.%fZ')
 
+    # This is a weird and crappy way to deal with datetime - surely someone
+    # knows a better one. Also it's duplicated in web_request_handler.py.
     @classmethod
     def json_dump(cls, obj):
         date_handler = (lambda obj: obj.isoformat()
@@ -120,6 +120,13 @@ class FMBUser(User, FMBModel):
         if not hasattr(self, 'allow_gmail_lookup'):
             self.allow_gmail_lookup = True
 
+        if not hasattr(self, 'name') or self.name is None:
+            self.name = ''
+        if not hasattr(self, 'given_name') or self.given_name is None:
+            self.given_name = ''
+        if not hasattr(self, 'family_name') or self.family_name is None:
+            self.family_name = ''
+
         if not hasattr(self, 'unique_profile_str'):
             if ((hasattr(self, 'email') and
                  self.is_gmail_account and
@@ -159,6 +166,9 @@ class FMBUser(User, FMBModel):
                 'is_gmail_account', 'gmail_username']
 
     def possessive(self, name):
+        if name == '' or name is None:
+            return ''
+
         last_char = name[-1]
         if last_char.lower() == 's':
             name += '\''
@@ -222,8 +232,7 @@ class FMBUser(User, FMBModel):
                      (self.name, message, extra))
 
         if hasattr(self, 'email'):
-            mail.send_mail(
-                sender=settings.MAIL_FROM,
+            utils.send_email(
                 to='%s <%s>' % (self.name, self.email),
                 subject=message,
                 body='End of message. =)')

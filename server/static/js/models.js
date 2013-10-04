@@ -19,7 +19,7 @@ fmb.models.App.prototype.initialize = function(opt_data, opt_options) {
 
   // Phonegap's Android implementation of device.name is the product name
   // not something people will ever understandably recognize. Fix that.
-  var plugin = cordova.require('cordova/plugin/levels');
+  var plugin = cordova.require(fmb.App.LEVELS_PLUGIN_ID);
   plugin && plugin.setDeviceModel();
   plugin && plugin.getVersionCode(
       function(version) {
@@ -243,7 +243,7 @@ fmb.models.DeviceUnMapped.getUuid = function() {
 fmb.models.DeviceUnMapped.prototype.onBatteryStatus = function() {
   fmb.log('fmb.models.Device onBatteryStatus');
   // This should result in a settings beacon via our already-running service.
-  var plugin = cordova.require('cordova/plugin/levels');
+  var plugin = cordova.require(fmb.App.LEVELS_PLUGIN_ID);
   plugin && plugin.startService();
 
   if (!window.navigator.battery) {
@@ -573,9 +573,12 @@ fmb.models.User = fmb.Model.extend({
  * string.
  * @param {Object} e An object.
  */
-fmb.models.User.GCMEvent = function(e) {
-  fmb.log('fmb.models.User.GCMEvent', e);
+fmb.models.User.onPushNotificationGCM = function(e) {
+  fmb.log('-------- GCM NOTIFICATION START ----------');
+  fmb.log('fmb.models.User.onNotificationGCM', e.event);
+
   switch (e.event) {
+
     case 'registered':
       window['app'].model.user.device.save({
         'gcm_push_token': e.regid,
@@ -584,7 +587,29 @@ fmb.models.User.GCMEvent = function(e) {
       break;
 
     case 'message':
-      fmb.log('message not yet implemented');
+      // if this flag is set, this notification happened while we were
+      // in the foreground.
+      // you might want to play a sound to get the user's attention,
+      // throw up a dialog, etc.
+      if (e.foreground) {
+        fmb.log('FOREGROUND NOTIFICATION');
+        // if the notification contains a soundname, play it.
+        //var my_media = new Media("/android_asset/www/"+e.soundname);
+        //my_media.play();
+
+      // otherwise we were launched because the user touched a
+      // notification in the notification tray.
+      } else if (e.coldstart) {
+        fmb.log('COLDSTART NOTIFICATION');
+      } else {
+        fmb.log('BACKGROUND NOTIFICATION');
+      }
+
+      fmb.log('PAYLOAD', e.payload);
+      if (e.payload.url) {
+        window['app'].checkIntentUrlForUser(e.payload.url);
+      }
+
       break;
 
     case 'error':
@@ -595,6 +620,7 @@ fmb.models.User.GCMEvent = function(e) {
       fmb.log('UNKNOWN ERROR');
       break;
   }
+  fmb.log('-------- GCM NOTIFICATION END ----------');
 };
 
 
@@ -737,7 +763,7 @@ fmb.models.User.prototype.launchSync_ = function() {
 
     // Our user API doesn't return following data.
     this.get('following').fetch({
-      remove: true  // --hard RESET sync to server.
+      remove: fmb.App.launchedWithAddUserBit ? false : true
     });
 
   }, this));
@@ -745,7 +771,7 @@ fmb.models.User.prototype.launchSync_ = function() {
 
 
 /**
- * The GCM sender_id from the play store.
+ * The GCM sender_id from the Google Play store.
  * @type {string}
  */
 fmb.models.User.GCM_SENDER_ID = '652605517304';
@@ -755,12 +781,34 @@ fmb.models.User.GCM_SENDER_ID = '652605517304';
  * @private
  */
 fmb.models.User.prototype.registerWithGCM_ = function() {
-  var gcmPlugin = cordova.require('cordova/plugin/gcm');
-  gcmPlugin && gcmPlugin.register(
-      fmb.models.User.GCM_SENDER_ID,
-      'fmb.models.User.GCMEvent',
-      _.bind(this.GCMWin, this),
-      _.bind(this.GCMFail, this));
+  var pushPlugin = cordova.require(
+      'com.phonegap.plugins.PushPlugin.PushNotification');
+  if (!pushPlugin || !window.device.platform) {
+    fmb.log('No push plugin available.');
+    return;
+  }
+
+  // Android GCM register.
+  if (window.device.platform.toLowerCase() == 'android') {
+    pushPlugin.register(
+        _.bind(this.GCMWin, this),
+        _.bind(this.GCMFail, this),
+        {
+          'senderID': fmb.models.User.GCM_SENDER_ID,
+          'ecb': 'fmb.models.User.onPushNotificationGCM'
+        });
+
+  // iOS style
+  } else {
+    /*
+    pushPlugin.register(tokenHandler, errorHandler, {
+      "badge":"true",
+      "sound":"true",
+      "alert":"true",
+      "ecb":"onNotificationAPN"
+    });
+    */
+  }
 };
 
 
@@ -791,7 +839,7 @@ fmb.models.User.prototype.setUserDevice = function(model) {
 
   if (this.get('api_token')) {
     fmb.log('START levelsplugin!');
-    var plugin = cordova.require('cordova/plugin/levels');
+    var plugin = cordova.require(fmb.App.LEVELS_PLUGIN_ID);
     plugin && plugin.startService();
   }
 
@@ -808,10 +856,10 @@ fmb.models.User.prototype.url = function() {
 
 
 /**
- * der.
+ * @param {string=} opt_token A token.
  */
-fmb.models.User.prototype.setLoginToken = function() {
-  this.loginToken_ = fmb.models.getUid();
+fmb.models.User.prototype.setLoginToken = function(opt_token) {
+  this.loginToken_ = opt_token || fmb.models.getUid();
 };
 
 
@@ -828,6 +876,7 @@ fmb.models.User.prototype.syncByLoginToken = function() {
     return;
   }
 
+  fmb.views.showSpinner('Synchronizing ...');
   this.saveToServer({
     'user_token': this.loginToken_,
     'app_version': fmb.models.App.version
@@ -835,14 +884,64 @@ fmb.models.User.prototype.syncByLoginToken = function() {
     url: fmb.models.getApiUrl('/user/token'),
     success: _.bind(function(model, response, options) {
       fmb.log('fmb.models.User syncByLoginToken MONEY TRAIN!!');
+      fmb.views.hideSpinner();
       this.unset('user_token', {silent: true});
       // unset - can only use this one time.
       this.loginToken_ = null;
     }, this),
     error: function(model, xhr, options) {
-      alert('LA BOMBA! in fmb.models.User syncByLoginToken. =(');
+      fmb.views.hideSpinner();
+      alert('LA BOMBA in syncByLoginToken. =( ' +
+            'Try killing the app and starting again. Sorry.');
     }
   });
 
 };
 
+
+/**
+ * Post in-app-auth we receive a callback from chrome.identity with a
+ * one-time-use code to obtain auth credentials with on our server.
+ * @param {string} code The one-time-use token exchange code.
+ */
+fmb.models.User.prototype.exchangeGoogleOneTimeAuthCode = function(code) {
+  fmb.log('fmb.models.User exchangeGoogleOneTimeAuthCode', code);
+  fmb.views.showSpinner('Synchronizing ...');
+  this.setLoginToken(code);
+  this.saveToServer({
+    'code': code
+  }, {
+    // Note - this is not an API endpoint.
+    url: fmb.models.getServer() + '/auth/google/code_exchange',
+    success: _.bind(function(model, response, options) {
+      fmb.log('fmb.models.User exchangeGoogleOneTimeAuthCode MONEY TRAIN!!');
+      this.invalidateGoogleOneTimeAuthCode(code);
+      fmb.views.hideSpinner();
+    }, this),
+    error: _.bind(function(model, xhr, options) {
+      fmb.log('LA BOMBA in exchangeGoogleOneTimeAuthCode =(');
+      this.invalidateGoogleOneTimeAuthCode(code);
+      fmb.views.hideSpinner();
+    }, this)
+  });
+};
+
+
+/**
+ * Post in-app-auth we receive a callback from chrome.identity with a
+ * one-time-use code to obtain auth credentials with on our server.
+ * @param {string} code The one-time-use token exchange code.
+ */
+fmb.models.User.prototype.invalidateGoogleOneTimeAuthCode = function(code) {
+  fmb.log('invalidateGoogleOneTimeAuthCode', code);
+  if (chrome && chrome.identity && code) {
+    chrome.identity.removeCachedAuthToken(
+        { 'token': code },
+        function() {
+          fmb.log('Success invalidating Google one-time token', code);
+        },
+        function() {
+          fmb.log('ERROR invalidating Google one-time token', code);
+        });
+  }
+};

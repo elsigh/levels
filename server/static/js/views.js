@@ -66,6 +66,20 @@ fmb.views = {};
 
 
 /**
+ * Injects <wbr> tags into the string.
+ * @param {string} str The string to mutate.
+ * @param {nunmber} num The interval to inject.
+ * @return {string} The string with wbrs.
+ */
+fmb.views.wbr = function(str, num) {
+  return str.replace(RegExp('(\\w{' + num + '})(\\w)', 'g'),
+      function(all, text, char) {
+        return text + '<wbr>' + char;
+      });
+};
+
+
+/**
  * @param {string} name The template name.
  * @param {Object=} opt_data The template data.
  * @param {Object=} opt_partials Template partials.
@@ -137,8 +151,12 @@ fmb.views.serializeFormToObject = function(form) {
  * @param {string} msg The message to show.
  */
 fmb.views.showSpinner = function(msg) {
-  navigator.notification && navigator.notification.activityStart &&
-      navigator.notification.activityStart('', msg);
+  if (navigator.notification && navigator.notification.activityStart) {
+    navigator.notification.activityStart('', msg);
+  } else {
+    fmb.log('GAH!!!! No activityStart available.');
+    fmb.views.showMessage(msg);
+  }
 };
 
 
@@ -146,8 +164,9 @@ fmb.views.showSpinner = function(msg) {
  * Hide that notification.
  */
 fmb.views.hideSpinner = function() {
-  navigator.notification && navigator.notification.activityStop &&
-      navigator.notification.activityStop();
+  if (navigator.notification && navigator.notification.activityStop) {
+    navigator.notification.activityStop();
+  }
 };
 
 
@@ -155,16 +174,11 @@ fmb.views.hideSpinner = function() {
  * @param {string} msg The message to show.
  */
 fmb.views.showMessage = function(msg) {
-  //if (fmb.ua.IS_APP && fmb.ua.IS_ANDROID) {
-  //  var plugin = cordova.require('cordova/plugin/levels');
-  //  plugin && plugin.showMessage(msg);
-  //} else {
   fmb.views.clearHideMessageTimeout_();
   $('.fmb-msg').text(msg);
   $('.fmb-msg-c').css('opacity', '0').show().animate({
     opacity: 1
   }, 250, 'linear', fmb.views.hideMessage_);
-  //}
 };
 
 
@@ -190,11 +204,18 @@ fmb.views.clearHideMessageTimeout_ = function() {
  */
 fmb.views.hideMessage_ = function() {
   fmb.views.clearHideMessageTimeout_();
-  fmb.views.hideMessageTimeout_ = _.delay(function() {
-    $('.fmb-msg-c').animate({
-      opacity: 0
-    }, 1000, 'linear', function() { $('.fmb-msg-c').hide(); });
-  }, 2000);
+  fmb.views.hideMessageTimeout_ = _.delay(
+      function() {
+        $('.fmb-msg-c').animate(
+            {
+              opacity: 0
+            },
+            1000,
+            'linear',
+            function() {
+              $('.fmb-msg-c').hide();
+            });
+      }, 2000);
 };
 
 
@@ -220,6 +241,10 @@ fmb.views.App = Backbone.View.extend({
 /** @inheritDoc */
 fmb.views.App.prototype.initialize = function(options) {
   fmb.log('fmb.views.App.initialize', this.model);
+
+  // For some special scroll/overflow control.
+  $('html,body').addClass('fmb-app-container');
+
   $('body').addClass('fmb-platform-' + fmb.ua.getPlatform());
 
   this.listenTo(this.model.user, 'change:key', this.setUserSignedInClass_);
@@ -276,7 +301,7 @@ fmb.views.App.prototype.onClickShare_ = function(e) {
     var subject = 'Check out my Levels!';
     var body = 'Check out my Levels, and send me yours!' +
         ' ' + this.model.user.getProfileUrl();
-    var plugin = cordova.require('cordova/plugin/levels');
+    var plugin = cordova.require(fmb.App.LEVELS_PLUGIN_ID);
     plugin && plugin.shareApp(subject, body,
         function() {
           fmb.log('Share sent!');
@@ -557,6 +582,25 @@ fmb.views.Account.prototype.onChangeAllowGmailLookup_ = function(e) {
 fmb.views.Account.prototype.onClickLogin_ = function(e) {
   fmb.log('fmb.views.Account onClickLogin_');
 
+  // Use the chrome identity plugin if it's available.
+  if (chrome && chrome.identity) {
+    chrome.identity.getAuthToken(
+        {
+          oauth2: {
+            client_id: '652605517304.apps.googleusercontent.com',
+            scopes: [
+              'server:client_id:652605517304.apps.googleusercontent.com:' +
+                  'api_scope:https://www.googleapis.com/auth/userinfo.email',
+              'https://www.googleapis.com/auth/plus.login'
+            ]
+          },
+          interactive: true
+        },
+        _.bind(this.model.exchangeGoogleOneTimeAuthCode, this.model));
+    return;
+  }
+
+
   this.model.setLoginToken();
 
   var loginUrl = fmb.models.getServerShare() + '/login?user_token=' +
@@ -820,12 +864,14 @@ fmb.views.Notifying.prototype.render = function() {
   };
 
   // We always notify you via email.
-  templateData['notifying'].unshift({
-    'name': app.model.user.get('name'),
-    'means': app.model.user.get('email'),
-    'type': 'email',
-    'is_user_email': true
-  });
+  if (app.model.user.get('name')) {
+    templateData['notifying'].unshift({
+      'name': app.model.user.get('name'),
+      'means': app.model.user.get('email'),
+      'type': 'email',
+      'is_user_email': true
+    });
+  }
 
   fmb.log('fmb.views.Notifying render w/', this.model.length);
   this.$el.html(fmb.views.getTemplateHtml('notifying', templateData));
@@ -843,7 +889,7 @@ fmb.views.Notifying.prototype.onClickNotifyingAdd_ = function(e) {
         'phone' : 'email';
     fmb.log('onClickNotifyingAdd_ emailOrPhone', emailOrPhone);
 
-    cordova.require('cordova/plugin/contactview').show(
+    cordova.require('com.elsigh.contacts.ContactsPlugin').show(
         _.bind(function(contact) {
           fmb.log('GOT CONTACT!' + JSON.stringify(contact));
 
@@ -1186,6 +1232,8 @@ fmb.views.FollowingDevice.prototype.renderGraph_ = function() {
     'axisPaddingBottom': 10,
     'axisPaddingLeft': 10,
     'axisPaddingRight': 10,
+    'paddingLeft': 20,
+    'paddingRight': 15,
     'tickHintX': 4,
     'tickHintY': 2,
     'interpolation': 'basis',

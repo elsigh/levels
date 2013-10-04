@@ -33,7 +33,7 @@ AUTH_CONFIG = {
     'google': (
         GOOGLE_APP_ID,
         GOOGLE_APP_SECRET,
-        ('https://www.googleapis.com/auth/userinfo.profile '
+        ('https://www.googleapis.com/auth/plus.login '
          'https://www.googleapis.com/auth/userinfo.email'
          ),
         {'access_type': 'offline', 'approval_prompt': 'force'},

@@ -32,7 +32,20 @@ from lib import api
 from lib import controllers
 from lib import models
 
+import utils
 import settings
+
+
+class FMBUserTest(unittest.TestCase):
+    def testPrePutHook(self):
+        user = models.FMBUser()
+        user.put()
+        print user
+        assert user.api_token
+        assert user.unique_profile_str
+        assert user.name is not None
+        assert user.given_name is not None
+        assert user.family_name is not None
 
 
 class HandlerTest(unittest.TestCase):
@@ -59,6 +72,7 @@ class HandlerTest(unittest.TestCase):
         elsigh_user.put()
         response = self.testapp.get(
             '/p/%s' % elsigh_user.unique_profile_str, status=200)
+        assert response.normal_body
 
     def test_DeviceModel_to_dict(self):
         device = models.Device(uuid='test_uuid')
@@ -66,11 +80,11 @@ class HandlerTest(unittest.TestCase):
 
         for i in range(models.NUM_SETTINGS_TO_FETCH * models.NUM_SETTINGS_MULTIPLIER):
             battery_level = 50 + i
-            settings = models.Settings(
+            settings_model = models.Settings(
                 parent=device.key,
                 battery_level=battery_level
             )
-            settings.put()
+            settings_model.put()
         data = device.to_dict()
         assert 'settings' in data
         assert len(data['settings']) == models.NUM_SETTINGS_TO_FETCH
@@ -101,16 +115,15 @@ class HandlerTest(unittest.TestCase):
             'Access-Control-Allow-Headers'
         ]
         for header in cors_headers:
-          self.assertTrue(header in response.headers.keys())
+            self.assertTrue(header in response.headers.keys())
 
         self.assertEquals('foo',
-            response.headers.get('Access-Control-Allow-Origin'))
+                          response.headers.get('Access-Control-Allow-Origin'))
 
         # Basic user response.
         body = response.normal_body
         obj = json.loads(body)
         self.assertEquals(elsigh_user.key.urlsafe(), obj['key'])
-
 
     def test_ApiUserHandler_post(self):
         elsigh_user = models.FMBUser(
@@ -158,7 +171,6 @@ class HandlerTest(unittest.TestCase):
         obj = json.loads(body)
         self.assertNotEquals('elsigh', obj['unique_profile_str'])
 
-
     def test_ApiUserTokenHandler(self):
         elsigh_user = models.FMBUser(
             name='elsigh'
@@ -170,9 +182,11 @@ class HandlerTest(unittest.TestCase):
 
         user_token = 'foobar'
         memcache.add('user_token-%s' % user_token, elsigh_user.key.id())
+        # Additionally here, testing that a string for app_version gets
+        # converted by our server to an integer.
         response = self.testapp.post_json('/api/user/token',
                                           params=dict(user_token=user_token,
-                                                      app_version=30))
+                                                      app_version='30'))
         body = response.normal_body
         obj = json.loads(body)
         self.assertEquals(elsigh_user.name, obj['name'])
@@ -219,10 +233,12 @@ class HandlerTest(unittest.TestCase):
                                                       update_frequency='20',
                                                       name='Samsung',
                                                       platform='Android',
-                                                      version='S3'))
+                                                      version='S3',
+                                                      app_version='29'))
         body = response.normal_body
         obj = json.loads(body)
         self.assertEquals(1, obj['update_enabled'])
+        self.assertEquals(29, obj['app_version'])
 
         # Test an ancestor query to ensure all our relationships are setup.
         q = models.Device.query(ancestor=elsigh_user.key)
@@ -341,7 +357,6 @@ class HandlerTest(unittest.TestCase):
                                                       is_charging=0,
                                                       expando_test=1))
 
-
         body = response.normal_body
         obj = json.loads(body)
         self.assertEquals(82, obj['battery_level'])
@@ -411,9 +426,9 @@ class HandlerTest(unittest.TestCase):
         jr_device.put()
 
         jr_settings = models.Settings(
-           parent=jr_device.key,
-           battery_level=75,
-           is_charging=1
+            parent=jr_device.key,
+            battery_level=75,
+            is_charging=1
         )
         jr_settings.put()
 
@@ -436,9 +451,9 @@ class HandlerTest(unittest.TestCase):
         ded_device.put()
 
         ded_settings = models.Settings(
-           parent=ded_device.key,
-           battery_level=35,
-           is_charging=0
+            parent=ded_device.key,
+            battery_level=35,
+            is_charging=0
         )
         ded_settings.put()
 
@@ -475,7 +490,6 @@ class HandlerTest(unittest.TestCase):
                                                       following_user_key=ded_user.key.urlsafe(),
                                                       cid='test_cid'))
 
-
         body = response.normal_body
         obj = json.loads(body)
         self.assertEquals('ded', obj['name'])
@@ -511,7 +525,6 @@ class HandlerTest(unittest.TestCase):
                                                       user_key=elsigh_user.key.urlsafe(),
                                                       following_user_unique_profile_str=ded_user.unique_profile_str,
                                                       cid='test_cid'))
-
 
         body = response.normal_body
         obj = json.loads(body)
@@ -699,7 +712,8 @@ class HandlerTest(unittest.TestCase):
         )
         elsigh_user.put()
 
-        api.send_notifying_message(elsigh_user.key.id(),
+        api.send_notifying_message(
+            elsigh_user.key.id(),
             'email', 'Angela Pater', 'angela@commoner.com', send=False)
 
         q = models.NotificationSent.query(ancestor=elsigh_user.key)
@@ -712,13 +726,13 @@ class HandlerTest(unittest.TestCase):
         )
         elsigh_user.put()
 
-        api.send_notifying_message(elsigh_user.key.id(),
+        api.send_notifying_message(
+            elsigh_user.key.id(),
             'phone', 'Angela Pater', '512-736-6633', send=False)
 
         q = models.NotificationSent.query(ancestor=elsigh_user.key)
         q = q.filter(models.NotificationSent.means == '512-736-6633')
         self.assertEquals(1, q.count())
-
 
     def test_send_battery_notifications(self):
         elsigh_user = models.FMBUser(
@@ -791,7 +805,6 @@ class HandlerTest(unittest.TestCase):
             ('Lindsey Simon\'s Android Nexus 4 battery is running low '
              'at 10%. www.levelsapp.com/p/elsigh'),
             rendered)
-
 
     def test_send_battery_notification_phone(self):
         elsigh_user = models.FMBUser(
@@ -924,7 +937,6 @@ class HandlerTest(unittest.TestCase):
         })
         self.assertEquals(2, mock_notify_device.call_count)
 
-
         calls = [
             call(mock_gcm_message('test_gcm_push_token1', {
                 'message': 'hi',
@@ -936,7 +948,6 @@ class HandlerTest(unittest.TestCase):
             }))]
         mock_notify_device.assert_has_calls(calls)
 
-
     @patch.object(mail, 'send_mail')
     def test_user_send_message_mail(self, mock_send_mail):
         elsigh_user = models.FMBUser(
@@ -945,14 +956,15 @@ class HandlerTest(unittest.TestCase):
         )
         elsigh_user.send_message('hi')
 
+        body = 'End of message. =)'
         args = {
             'sender': settings.MAIL_FROM,
             'to': '%s <%s>' % (elsigh_user.name, elsigh_user.email),
             'subject': 'hi',
-            'body': 'End of message. =)'
+            'body': body,
+            'html': utils.render_template('email_base.html', {'body': body})
         }
         mock_send_mail.assert_called_once_with(**args)
-
 
     def test_user_possessive(self):
         user = models.FMBUser(
@@ -969,7 +981,6 @@ class HandlerTest(unittest.TestCase):
         self.assertEquals('chris moos\'', user.name_possessive)
         self.assertEquals('chris\'', user.given_name_possessive)
 
-
     def test_user_google_auth_ids(self):
         user = models.FMBUser(
             name='elsigh moo',
@@ -978,7 +989,6 @@ class HandlerTest(unittest.TestCase):
         user.put()
         self.assertEquals(['bar', 'bat'],
                           user.google_auth_ids)
-
 
 
 class GlasswareHandlerTest(unittest.TestCase):
@@ -994,10 +1004,9 @@ class GlasswareHandlerTest(unittest.TestCase):
     def tearDown(self):
         self.testbed.deactivate()
 
-
     def test_glassware(self):
         response = self.testapp.get('/glassware', status=302)
-
+        assert response
 
     @patch.object(discovery, 'build')
     def test_notify(self, mock_build=None):
@@ -1063,6 +1072,6 @@ class GlasswareHandlerTest(unittest.TestCase):
             'userActions': [{'type': 'SHARE'}]
         }
         response = self.testapp.post('/glassware/notify', json.dumps(payload))
+        assert response
         self.assertEquals(2, models.Settings.query().count())
         self.assertEquals(2, len(glass_device.settings))
-

@@ -64,12 +64,17 @@
 .fmb-following-user .following-user td {
   text-align: left;
   padding: 1em 5px 0;  /* Effectively, this is user separation. */
+  position: relative;  /* For the remove button. */
   border: 0;
   border-bottom: 1px solid #999;
 }
 
 .fmb-following-user .fmb-loading {
   display: inline-block;
+}
+
+.fmb-following-user .following-user .fmb-remove {
+  bottom: 2px;
 }
 
 
@@ -157,7 +162,7 @@
 
 .fmb-following-device .battery-graph-td {
   padding-left: 0;
-  padding-right: 10px;
+  padding-right: 0;
 }
 
 .fmb-following-device .battery-graph {

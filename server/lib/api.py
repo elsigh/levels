@@ -8,11 +8,9 @@ import os
 import sys
 import webapp2
 import urllib2
-import uuid
 
 sys.path.append(os.path.join(os.path.dirname(__file__), 'external'))
 
-from google.appengine.api import mail
 from google.appengine.api import memcache
 from google.appengine.api import users
 from google.appengine.ext import deferred
@@ -27,22 +25,13 @@ from lib import models
 from lib.external.twilio import TwilioRestException
 from lib.external.twilio.rest import TwilioRestClient
 
+import utils
 # last import.
 import settings
 
 
-def send_email(to, subject, body):
-    logging.info('send_email %s, %s, %s' % (to, subject, body))
-    try:
-        mail.send_mail(sender='Levels <elsigh@levelsapp.com>',
-                       to=to,
-                       subject=subject,
-                       body=body)
-    except Exception, e:
-        logging.info('Exception e: %s' % e)
-        pass
-
-    return True
+# Needed for the taskqueue among other things.
+app_instance_static = webapp2.WSGIApplication()
 
 
 def send_twilio_msg(to, body):
@@ -74,8 +63,10 @@ class ApiRequestHandler(WebRequestHandler):
         #             (request.method, request.path))
         super(ApiRequestHandler, self).initialize(request, response)
         self._set_json_request_data()
-        self._assert_user_key()
-        self._assert_api_token()
+
+        if self.request.method != 'OPTIONS':
+            self._assert_user_key()
+            self._assert_api_token()
 
     def _set_json_request_data(self):
         self._json_request_data = {}
@@ -94,7 +85,7 @@ class ApiRequestHandler(WebRequestHandler):
         # THIS IS GHETTO dumping this data into the _json_request_data
         # Did this b/c the syntax to check _json_request_data for key
         # existence is also pretty ugly and these two fields are pretty key.
-        elif self.request.method == 'GET' or self.request.method == 'OPTIONS':
+        elif self.request.method == 'GET':
             if self.request.get('api_token'):
                 self._json_request_data['api_token'] = \
                     self.request.get('api_token')
@@ -185,22 +176,6 @@ class ApiRequestHandler(WebRequestHandler):
     def options(self, *args):
         self.output_json_success()
 
-    def output_json(self, obj):
-        self.apply_cors_headers()
-        self.response.headers['Content-Type'] = 'application/json'
-        json_out = models.FMBModel.json_dump(obj)
-        logging.info('output_json: %s' % json_out)
-        self.response.out.write(json_out)
-
-    def output_json_success(self, obj={}):
-        obj['status'] = 0
-        self.output_json(obj)
-
-    def output_json_error(self, obj={}, error_code=404):
-        obj['status'] = 1
-        self.response.set_status(error_code)
-        self.output_json(obj)
-
 
 class ApiUserHandler(ApiRequestHandler):
     def get(self):
@@ -218,7 +193,7 @@ class ApiUserHandler(ApiRequestHandler):
 
         # Only allows us to write certain parameters.
         if 'app_version' in self._json_request_data:
-            user.app_version = self._json_request_data['app_version']
+            user.app_version = int(self._json_request_data['app_version'])
 
         if 'allow_phone_lookup' in self._json_request_data:
             user.allow_phone_lookup = \
@@ -265,7 +240,7 @@ class ApiUserTokenHandler(ApiRequestHandler):
         memcache.delete(memcache_key)
 
         if 'app_version' in self._json_request_data:
-            user.app_version = self._json_request_data['app_version']
+            user.app_version = int(self._json_request_data['app_version'])
             user.put()
 
         return self.output_json_success(
@@ -297,7 +272,7 @@ class ApiDeviceHandler(ApiRequestHandler):
                  key in self._json_request_data)):
                 val = self._json_request_data[key]
                 if key in ['update_enabled', 'update_frequency',
-                           'notify_level']:
+                           'notify_level', 'app_version']:
                     val = int(val)
                 setattr(device, key, val)
 
@@ -322,9 +297,6 @@ class ApiDeviceDeleteHandler(ApiRequestHandler):
         logging.info('Removing current_user from device %s' % device)
         device.key.delete()
         return self.output_json_success()
-
-
-app_for_taskqueue = webapp2.WSGIApplication()
 
 
 def _send_notification_templater(user_id, device_id, notifying_id, tpl_name):
@@ -367,7 +339,7 @@ def _send_notification_templater(user_id, device_id, notifying_id, tpl_name):
     }
 
     rendered = jinja2.get_jinja2(
-        app=app_for_taskqueue).render_template(tpl_name, **tpl_data)
+        app=app_instance_static).render_template(tpl_name, **tpl_data)
     return notifying, rendered
 
 
@@ -386,7 +358,7 @@ def send_battery_notification_email(user_id, device_id, notifying_id,
     to = '%s <%s>' % (notifying.name, notifying.means)
     subject = ('[Levels Alert] %s - my phone battery is at 10%%' %
                notifying.name)
-    send_email(to, subject, body)
+    utils.send_email(to, subject, body)
 
     sent = models.NotificationSent(
         parent=notifying.key,
@@ -681,7 +653,7 @@ def send_notifying_message(user_id, to_type, to_name, to_means, send=True):
         if to_type == 'email':
             to = '%s <%s>' % (to_name, to_means)
             subject = '%s cares about you' % user.name
-            send_email(to, subject, body)
+            utils.send_email(to, subject, body)
 
         elif to_type == 'phone':
             send_twilio_msg(to_means, body)
