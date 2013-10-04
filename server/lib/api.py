@@ -8,11 +8,9 @@ import os
 import sys
 import webapp2
 import urllib2
-import uuid
 
 sys.path.append(os.path.join(os.path.dirname(__file__), 'external'))
 
-from google.appengine.api import mail
 from google.appengine.api import memcache
 from google.appengine.api import users
 from google.appengine.ext import deferred
@@ -27,22 +25,13 @@ from lib import models
 from lib.external.twilio import TwilioRestException
 from lib.external.twilio.rest import TwilioRestClient
 
+import utils
 # last import.
 import settings
 
 
-def send_email(to, subject, body):
-    logging.info('send_email %s, %s, %s' % (to, subject, body))
-    try:
-        mail.send_mail(sender='Levels <elsigh@levelsapp.com>',
-                       to=to,
-                       subject=subject,
-                       body=body)
-    except Exception, e:
-        logging.info('Exception e: %s' % e)
-        pass
-
-    return True
+# Needed for the taskqueue among other things.
+app_instance_static = webapp2.WSGIApplication()
 
 
 def send_twilio_msg(to, body):
@@ -310,9 +299,6 @@ class ApiDeviceDeleteHandler(ApiRequestHandler):
         return self.output_json_success()
 
 
-app_for_taskqueue = webapp2.WSGIApplication()
-
-
 def _send_notification_templater(user_id, device_id, notifying_id, tpl_name):
     logging.info('_send_notification_templater %s, %s, %s' %
                  (user_id, device_id, tpl_name))
@@ -353,7 +339,7 @@ def _send_notification_templater(user_id, device_id, notifying_id, tpl_name):
     }
 
     rendered = jinja2.get_jinja2(
-        app=app_for_taskqueue).render_template(tpl_name, **tpl_data)
+        app=app_instance_static).render_template(tpl_name, **tpl_data)
     return notifying, rendered
 
 
@@ -372,7 +358,7 @@ def send_battery_notification_email(user_id, device_id, notifying_id,
     to = '%s <%s>' % (notifying.name, notifying.means)
     subject = ('[Levels Alert] %s - my phone battery is at 10%%' %
                notifying.name)
-    send_email(to, subject, body)
+    utils.send_email(to, subject, body)
 
     sent = models.NotificationSent(
         parent=notifying.key,
@@ -667,7 +653,7 @@ def send_notifying_message(user_id, to_type, to_name, to_means, send=True):
         if to_type == 'email':
             to = '%s <%s>' % (to_name, to_means)
             subject = '%s cares about you' % user.name
-            send_email(to, subject, body)
+            utils.send_email(to, subject, body)
 
         elif to_type == 'phone':
             send_twilio_msg(to_means, body)

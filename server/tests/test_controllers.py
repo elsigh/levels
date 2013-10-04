@@ -32,6 +32,7 @@ from lib import api
 from lib import controllers
 from lib import models
 
+import utils
 import settings
 
 
@@ -936,7 +937,6 @@ class HandlerTest(unittest.TestCase):
         })
         self.assertEquals(2, mock_notify_device.call_count)
 
-
         calls = [
             call(mock_gcm_message('test_gcm_push_token1', {
                 'message': 'hi',
@@ -948,7 +948,6 @@ class HandlerTest(unittest.TestCase):
             }))]
         mock_notify_device.assert_has_calls(calls)
 
-
     @patch.object(mail, 'send_mail')
     def test_user_send_message_mail(self, mock_send_mail):
         elsigh_user = models.FMBUser(
@@ -957,11 +956,13 @@ class HandlerTest(unittest.TestCase):
         )
         elsigh_user.send_message('hi')
 
+        body = 'End of message. =)'
         args = {
             'sender': settings.MAIL_FROM,
             'to': '%s <%s>' % (elsigh_user.name, elsigh_user.email),
             'subject': 'hi',
-            'body': 'End of message. =)'
+            'body': body,
+            'html': utils.render_template('email_base.html', {'body': body})
         }
         mock_send_mail.assert_called_once_with(**args)
 

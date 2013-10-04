@@ -15,10 +15,8 @@
 # limitations under the License.
 
 import datetime
-from datetime import tzinfo
 import logging
 import sys
-import time
 import uuid
 
 try:
@@ -26,7 +24,6 @@ try:
 except:
     import simplejson
 
-from google.appengine.api import mail
 from google.appengine.api import memcache
 from google.appengine.ext import ndb
 sys.modules['ndb'] = ndb
@@ -37,6 +34,7 @@ from webapp2_extras.appengine.auth.models import UserToken
 from lib.external import general_counter
 from lib.external.gae_python_gcm import gcm
 
+import utils
 import settings
 
 
@@ -234,8 +232,7 @@ class FMBUser(User, FMBModel):
                      (self.name, message, extra))
 
         if hasattr(self, 'email'):
-            mail.send_mail(
-                sender=settings.MAIL_FROM,
+            utils.send_email(
                 to='%s <%s>' % (self.name, self.email),
                 subject=message,
                 body='End of message. =)')
