@@ -117,8 +117,8 @@ fmb.App.prototype.initialize = function(options) {
       this.onPhoneResume_();
       this.initHistory_();
       this.checkIntent_();
-      //window.navigator.splashscreen &&
-      //    _.delay(window.navigator.splashscreen.hide, 2000);
+      window.navigator.splashscreen &&
+          _.delay(window.navigator.splashscreen.hide, 100);
     }, this));
   }, this));
 
@@ -189,23 +189,11 @@ fmb.App.prototype.checkIntent_ = function(url) {
     return;
   }
 
-  // When invoked via a notification in the systra, we put the
-  // URL into WebIntent.EXTRA_TEXT.
-  window.plugins.webintent.getExtra(WebIntent.EXTRA_TEXT,
-      _.bind(function(url) {
-        fmb.log('fmb.App checkIntent YES WebIntent.EXTRA_TEXT', url);
-        this.checkIntentUrlForUser_(url);
-      }, this),
-      function() {
-        fmb.log('fmb.App checkIntent NO WebIntent.EXTRA_TEXT');
-        // Something really bad happened.
-      });
-
   if (url) {
-    this.checkIntentUrlForUser_(url);
+    this.checkIntentUrlForUser(url);
   } else {
     window.plugins.webintent.getUri(
-        _.bind(this.checkIntentUrlForUser_, this),
+        _.bind(this.checkIntentUrlForUser, this),
         function() {
           fmb.log('fmb.App webintent getUri NADA');
         });
@@ -214,33 +202,37 @@ fmb.App.prototype.checkIntent_ = function(url) {
 
 
 /**
- * @type {Boolean}
+ * @type {boolean}
  */
 fmb.App.launchedWithAddUserBit = false;
 
 
 /**
  * @param {string} url
- * @private
  */
-fmb.App.prototype.checkIntentUrlForUser_ = function(url) {
-  fmb.log('fmb.App checkIntentUrlForUser_', url);
+fmb.App.prototype.checkIntentUrlForUser = function(url) {
+  fmb.log('fmb.App checkIntentUrlForUser', url);
   if (!url) {
     fmb.log('.. bail, no URL');
     return;
   }
   var match = fmb.App.FOLLOWING_BY_UNIQUE_STR_URL_RE.exec(url);
   if (match && match.length) {
-    fmb.log('fmb.App checkIntentUrlForUser_', url, match);
-    fmb.App.launchedWithAddUserBit = true;
+    fmb.log('fmb.App checkIntentUrlForUser', url, match);
     var userUniqueProfileStr = match[1];
+    if (userUniqueProfileStr == this.model.user.get('unique_profile_str')) {
+      fmb.log('Not navigating to URL where user would follow themselves');
+      return;
+    }
+    fmb.App.launchedWithAddUserBit = true;
     _.delay(_.bind(function() {
       this.navigate(
           fmb.App.Routes.FOLLOW.url.
               replace(':userUniqueProfileStr', userUniqueProfileStr),
           {trigger: true});
     }, this), 300);
-
+  } else {
+    fmb.log('.. bail, url is not a "following by unique string" url.');
   }
 };
 

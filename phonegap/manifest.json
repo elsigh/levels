@@ -1,0 +1,13 @@
+{
+  "name": "Levels",
+  "version": "0.0.1",
+  "manifest_version": 2,
+  "minimum_chrome_version": "29",
+  "oauth2": {
+    "client_id": "652605517304.apps.googleusercontent.com",
+    "scopes": [
+      "server:client_id:652605517304.apps.googleusercontent.com:api_scope:https://www.googleapis.com/auth/userinfo.profile",
+      "https://www.googleapis.com/auth/userinfo.email"
+    ]
+  }
+}

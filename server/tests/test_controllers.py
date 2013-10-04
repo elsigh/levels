@@ -232,10 +232,12 @@ class HandlerTest(unittest.TestCase):
                                                       update_frequency='20',
                                                       name='Samsung',
                                                       platform='Android',
-                                                      version='S3'))
+                                                      version='S3',
+                                                      app_version='29'))
         body = response.normal_body
         obj = json.loads(body)
         self.assertEquals(1, obj['update_enabled'])
+        self.assertEquals(29, obj['app_version'])
 
         # Test an ancestor query to ensure all our relationships are setup.
         q = models.Device.query(ancestor=elsigh_user.key)

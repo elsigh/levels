@@ -2,7 +2,6 @@
 #
 
 
-import datetime
 import json
 import logging
 import os
@@ -18,14 +17,10 @@ from google.appengine.ext import ndb
 sys.modules['ndb'] = ndb
 from google.appengine.datastore.datastore_query import Cursor
 
-import webapp2
 from webapp2_extras.appengine.users import admin_required
 
 from lib import models
 from lib.auth import login_required
-
-# last import.
-import settings
 
 
 class AdminTinkerHandler(WebRequestHandler, SimpleAuthHandler):
@@ -54,10 +49,10 @@ class AdminUsersHandler(WebRequestHandler):
     @admin_required
     def get(self):
         curs = Cursor(urlsafe=self.request.get('cursor'))
-        users, next_curs, more = models.FMBUser.query().order(
+        users_list, next_curs, more = models.FMBUser.query().order(
             -models.FMBUser.created).fetch_page(10, start_cursor=curs)
         users_output = []
-        for user in users:
+        for user in users_list:
             users_output.append(user.to_dict())
         tpl_data = {
             'title': 'Levels Admin: Users',
@@ -82,6 +77,8 @@ class AdminUserMessageTestHandler(WebRequestHandler):
 
         user_id = self.request.get('user_id')
         extras = self.request.get('extras')
+        logging.info('user_id: %s', user_id)
+        logging.info('extras: %s', extras)
         if extras is not None:
             extras = json.loads(extras)
         else:

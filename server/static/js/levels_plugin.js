@@ -89,10 +89,10 @@ exports.getVersionCode = function(win, fail) {
 exports.shareApp = function(subject, text, win, fail) {
   if (fmb.ua.IS_ANDROID) {
     var extras = {};
-    extras[WebIntent.EXTRA_SUBJECT] = subject;
-    extras[WebIntent.EXTRA_TEXT] = text;
+    extras[window.plugins.webintent.EXTRA_SUBJECT] = subject;
+    extras[window.plugins.webintent.EXTRA_TEXT] = text;
     window.plugins.webintent.startActivity({
-      action: WebIntent.ACTION_SEND,
+      action: window.plugins.webintent.ACTION_SEND,
       type: 'text/plain',
       extras: extras
     },

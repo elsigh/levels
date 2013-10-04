@@ -74,8 +74,10 @@ class ApiRequestHandler(WebRequestHandler):
         #             (request.method, request.path))
         super(ApiRequestHandler, self).initialize(request, response)
         self._set_json_request_data()
-        self._assert_user_key()
-        self._assert_api_token()
+
+        if self.request.method != 'OPTIONS':
+            self._assert_user_key()
+            self._assert_api_token()
 
     def _set_json_request_data(self):
         self._json_request_data = {}
@@ -94,7 +96,7 @@ class ApiRequestHandler(WebRequestHandler):
         # THIS IS GHETTO dumping this data into the _json_request_data
         # Did this b/c the syntax to check _json_request_data for key
         # existence is also pretty ugly and these two fields are pretty key.
-        elif self.request.method == 'GET' or self.request.method == 'OPTIONS':
+        elif self.request.method == 'GET':
             if self.request.get('api_token'):
                 self._json_request_data['api_token'] = \
                     self.request.get('api_token')
@@ -184,22 +186,6 @@ class ApiRequestHandler(WebRequestHandler):
 
     def options(self, *args):
         self.output_json_success()
-
-    def output_json(self, obj):
-        self.apply_cors_headers()
-        self.response.headers['Content-Type'] = 'application/json'
-        json_out = models.FMBModel.json_dump(obj)
-        logging.info('output_json: %s' % json_out)
-        self.response.out.write(json_out)
-
-    def output_json_success(self, obj={}):
-        obj['status'] = 0
-        self.output_json(obj)
-
-    def output_json_error(self, obj={}, error_code=404):
-        obj['status'] = 1
-        self.response.set_status(error_code)
-        self.output_json(obj)
 
 
 class ApiUserHandler(ApiRequestHandler):
@@ -297,7 +283,7 @@ class ApiDeviceHandler(ApiRequestHandler):
                  key in self._json_request_data)):
                 val = self._json_request_data[key]
                 if key in ['update_enabled', 'update_frequency',
-                           'notify_level']:
+                           'notify_level', 'app_version']:
                     val = int(val)
                 setattr(device, key, val)
 

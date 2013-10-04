@@ -133,7 +133,8 @@ class AuthHandler(WebRequestHandler, SimpleAuthHandler):
         return user_data
 
     def _google_code_exchange(self):
-        code = self.request.get('code', None)
+        self.set_json_request_data()
+        code = self.request.get('code', self._json_request_data['code'])
         logging.info('_google_code_exchange CODE: %s' % code)
         assert code
 
@@ -217,20 +218,20 @@ class AuthHandler(WebRequestHandler, SimpleAuthHandler):
                 self.auth.store.user_to_dict(user))
 
         else:
-          # check whether there's a user currently logged in
-          # then, create a new user if nobody's signed in,
-          # otherwise add this auth_id to currently logged in user.
+            # check whether there's a user currently logged in
+            # then, create a new user if nobody's signed in,
+            # otherwise add this auth_id to currently logged in user.
 
             if self.current_user:
                 logging.info('Updating a currently logged in user!')
 
-                u = self.current_user
-                u.populate(**_attrs)
-                # The following will also do u.put(). Though, in a real app
+                user = self.current_user
+                user.populate(**_attrs)
+                # The following will also do put(). Though, in a real app
                 # you might want to check the result, which is
                 # (boolean, info) tuple where boolean == True indicates success
                 # See webapp2_extras.appengine.auth.models.User for details.
-                u.add_auth_id(auth_id)
+                user.add_auth_id(auth_id)
 
             else:
                 logging.info('Creating a brand new user!')
@@ -239,6 +240,14 @@ class AuthHandler(WebRequestHandler, SimpleAuthHandler):
                                                                   **_attrs)
                 if ok:
                     self.auth.set_session(self.auth.store.user_to_dict(user))
+
+        # For the native app auth flow we don't want to redirect, just return.
+        if redirect is False:
+            logging.info('OK, no redirect needed, returning the user model')
+            user_dict = user.to_dict(include_api_token=True,
+                                     include_device_notifying=True)
+            logging.info('got user_dict, now outputting...')
+            return self.output_json_success(user_dict)
 
         # Ok, time to move on.
         # If login was invoked via our login_required decorator we will have
@@ -259,11 +268,6 @@ class AuthHandler(WebRequestHandler, SimpleAuthHandler):
             memcache.add('user_token-%s' % user_token, user.key.id(), 60)
             logging.info('Added user_token<->user.key.id match - %s, %s' %
                          (user_token, user.key.id()))
-
-        # For the native app auth flow we don't want to redirect, just return.
-        if not redirect:
-            logging.info('OK, no redirect needed, just return 200')
-            return self.response.write('')
 
         if redirect_url is None:
             redirect_url = '/p/%s' % user.unique_profile_str

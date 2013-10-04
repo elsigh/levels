@@ -52,6 +52,8 @@ class FMBModel(ndb.Model):
     def iso_str_to_datetime(cls, str):
         return datetime.datetime.strptime(str, '%Y-%m-%dT%H:%M:%S.%fZ')
 
+    # This is a weird and crappy way to deal with datetime - surely someone
+    # knows a better one. Also it's duplicated in web_request_handler.py.
     @classmethod
     def json_dump(cls, obj):
         date_handler = (lambda obj: obj.isoformat()
