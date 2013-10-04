@@ -3,12 +3,14 @@
 #
 #
 
+import datetime
 import httplib
 import json
 import logging
 import os
 import sys
 import time
+import urllib2
 from urlparse import urlparse
 import webapp2
 from webapp2_extras import auth, sessions, jinja2
@@ -82,6 +84,21 @@ class WebRequestHandler(webapp2.RequestHandler):
         pr = urlparse(self.request.url)
         return '%s://%s%s' % (pr.scheme, pr.netloc, path)
 
+    def set_json_request_data(self):
+        self._json_request_data = {}
+        content_type = self.request.headers.get('content-type')
+        if content_type and 'application/json' in content_type:
+            json_request = self.request.body
+            json_request = urllib2.unquote(json_request).decode('utf-8')
+            json_request = json_request.strip('=')
+            try:
+                self._json_request_data = json.loads(json_request)
+            except Exception, e:
+                logging.info('Exception in _set_json_request_data - %s - %s',
+                             str(e),
+                             json_request)
+        logging.info('JSON REQ DATA: %s' % self._json_request_data)
+
     def initialize(self, request, response):
         #logging.info('WebRequestHandler initialize.')
         super(WebRequestHandler, self).initialize(request, response)
@@ -90,16 +107,6 @@ class WebRequestHandler(webapp2.RequestHandler):
 
     def head(self, *args):
         """Head is used by Twitter. If not there the tweet button shows 0"""
-        pass
-
-    def apply_cors_headers(self):
-        self.response.headers['Access-Control-Allow-Origin'] = \
-            self.request.headers.get('Origin', '*')
-        self.response.headers['Access-Control-Allow-Methods'] = \
-            'GET, POST, OPTIONS, PUT, DELETE'
-        self.response.headers['Access-Control-Allow-Credentials'] = 'true'
-        self.response.headers['Access-Control-Allow-Headers'] = \
-            'Content-Type,X-Requested-With'
 
     def browser_detect(self):
         """Tests the UA string for compatibility."""
@@ -152,6 +159,40 @@ class WebRequestHandler(webapp2.RequestHandler):
             logging.info('output_response: done')
         except TemplateNotFound:
             self.abort(404)
+        pass
+
+    def apply_cors_headers(self):
+        self.response.headers['Access-Control-Allow-Origin'] = \
+            self.request.headers.get('Origin', '*')
+        self.response.headers['Access-Control-Allow-Methods'] = \
+            'GET, POST, OPTIONS, PUT, DELETE'
+        self.response.headers['Access-Control-Allow-Credentials'] = 'true'
+        self.response.headers['Access-Control-Allow-Headers'] = \
+            'Content-Type,X-Requested-With'
+
+    # This is a weird and crappy way to deal with datetime - surely someone
+    # knows a better one. Also it's duplicated in models.py.
+    @classmethod
+    def json_dump(cls, obj):
+        date_handler = (lambda obj: obj.isoformat()
+                        if isinstance(obj, datetime.datetime) else None)
+        return json.dumps(obj, default=date_handler)
+
+    def output_json(self, obj):
+        self.apply_cors_headers()
+        self.response.headers['Content-Type'] = 'application/json'
+        json_out = WebRequestHandler.json_dump(obj)
+        logging.info('output_json: %s' % json_out)
+        self.response.out.write(json_out)
+
+    def output_json_success(self, obj={}):
+        obj['status'] = 0
+        self.output_json(obj)
+
+    def output_json_error(self, obj={}, error_code=404):
+        obj['status'] = 1
+        self.response.set_status(error_code)
+        self.output_json(obj)
 
 
 class TemplatesRequestHandler(webapp2.RequestHandler):

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
+    id="com.elsigh.levels"
+    version="0.1">
+    <name>LevelsPlugin</name>
+    <description>Levels Plugin</description>
+    <license>Apache 2.0</license>
+    <keywords>levels</keywords>
+
+    <js-module src="www/levels_plugin.js" name="LevelsPlugin"></js-module>
+
+    <!-- android -->
+    <platform name="android">
+        <config-file target="res/xml/config.xml" parent="/*">
+            <feature name="LevelsPlugin" >
+                <param name="android-package"
+                    value="com.elsigh.levels.LevelsPlugin" />
+            </feature>
+        </config-file>
+
+        <source-file src="src/android/LevelsPlugin.java"
+            target-dir="src/com/elsigh/levels" />
+    </platform>
+
+    <!-- ios -->
+
+
+</plugin>

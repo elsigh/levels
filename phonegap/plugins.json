@@ -1,0 +1,42 @@
+{ "plugins":
+[
+  {
+    "src": "https://git-wip-us.apache.org/repos/asf/cordova-plugin-network-information.git",
+    "id": "org.apache.cordova.core.network-information"
+  },
+  {
+    "src": "https://git-wip-us.apache.org/repos/asf/cordova-plugin-device.git",
+    "id": "org.apache.cordova.core.device"
+  },
+  {
+    "src": "https://git-wip-us.apache.org/repos/asf/cordova-plugin-battery-status.git",
+    "id": "org.apache.cordova.core.battery-status"
+  },
+  {
+    "src": "https://git-wip-us.apache.org/repos/asf/cordova-plugin-splashscreen.git",
+    "id": "org.apache.cordova.core.splashscreen"
+  },
+  /*
+  {
+    "src": "https://github.com/phonegap-build/PushPlugin.git",
+    "id": "com.phonegap.plugins.PushPlugin"
+  },
+  */
+  {
+    "src": "push-plugin",
+    "id": "com.phonegap.plugins.PushPlugin"
+  },
+  {
+    "src": "https://github.com/Initsogar/cordova-webintent.git",
+    "id": "com.borismus.webintent"
+  },
+  {
+    "src": "levels-plugin",
+    "id": "com.elsigh.levels"
+  }
+  {
+    "src": "contacts-plugin",
+    "id": "com.elsigh.contacts"
+  }
+]
+}

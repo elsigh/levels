@@ -56,6 +56,8 @@ routes = [
     # AUTH
     Route('/login', handler='lib.auth.LoginHandler'),
     Route('/logout', handler='lib.auth.AuthHandler:logout', name='logout'),
+    Route('/auth/google/code_exchange',
+          handler='lib.auth.AuthHandler:_google_code_exchange'),
     Route('/auth/<provider>', handler='lib.auth.AuthHandler:_simple_auth',
           name='auth_login'),
     Route('/auth/<provider>/callback',

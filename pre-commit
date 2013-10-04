@@ -13,6 +13,7 @@ IGNORE_FILES = [
     'test_controllers.py',
     'auth.py',
     'lib/external',
+    'phonegap',
 ]
 
 def call(cmd):

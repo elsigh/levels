@@ -141,10 +141,10 @@ button:active {
   position: absolute;
   display: inline-block;
   font: inherit;
-  font-size: 1em;
+  font-size: 0.8em;
   border: 0;
-  right: 10px;
-  padding: 5px 10px;
+  right: 0;
+  padding: 3px 7px;
   color: #ccc;
   text-shadow: none;
   background: #aaa;
@@ -199,8 +199,8 @@ input[type="range"] {
   width: 85%;
 }
 
-html,
-body,
+html.fmb-app-container,
+body.fmb-app-container,
 .fmb-app {
   overflow: hidden;
 }
@@ -241,8 +241,8 @@ body,
 
   display: inline-block;
 
-  overflow: scroll;
-  overflow-y: scroll;
+  overflow: auto;
+  overflow-y: auto;
   overflow-x: hidden;
 }
 

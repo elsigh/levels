@@ -304,6 +304,11 @@ fmb.Model.prototype.getTemplateData = function() {
 
   _.each(this.toJSON(), function(val, key) {
     if (!_.isUndefined(val)) {
+      /*
+      if (_.isString(val)) {
+        val = fmb.views.wbr(val, 10);
+      }
+      */
       templateData[key] = val;
     }
   });

@@ -78,15 +78,16 @@
 
 /* Device */
 .fmb-device {
-  margin-bottom: 1.5em;
-  padding: 0 10px;
   border: 1px solid #999;
   -webkit-border-radius: 2px;
   border-radius: 2px;
+  margin-bottom: 1.5em;
+  padding: 0 10px;
+  position: relative;  /* For the remove button. */
 }
 
 .fmb-device .device > .fmb-remove {
-  margin: 5px 10px 0 0;
+  margin: 10px 10px 0 0;
 }
 
 /* Notifying table */
