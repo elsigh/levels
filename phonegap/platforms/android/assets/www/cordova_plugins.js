@@ -44,16 +44,16 @@ module.exports = [
         ]
     },
     {
-        "file": "plugins/com.phonegap.plugins.PushPlugin/www/PushNotification.js",
-        "id": "com.phonegap.plugins.PushPlugin.PushNotification"
-    },
-    {
         "file": "plugins/com.elsigh.contacts/www/contacts_plugin.js",
         "id": "com.elsigh.contacts.ContactsPlugin"
     },
     {
         "file": "plugins/com.elsigh.levels/www/levels_plugin.js",
         "id": "com.elsigh.levels.LevelsPlugin"
+    },
+    {
+        "file": "plugins/com.phonegap.plugins.PushPlugin/www/PushNotification.js",
+        "id": "com.phonegap.plugins.PushPlugin.PushNotification"
     },
     {
         "file": "plugins/org.chromium.common/events.js",
