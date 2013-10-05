@@ -232,7 +232,7 @@ class FMBUser(User, FMBModel):
         logging.info('FMBUser %s send_message %s, extra: %s' %
                      (self.name, message, extra))
 
-        if hasattr(self, 'email'):
+        if hasattr(self, 'email') and send_mail:
             utils.send_email(
                 to='%s <%s>' % (self.name, self.email),
                 subject=message,
