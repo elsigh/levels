@@ -23,7 +23,7 @@
   },
   */
   {
-    "src": "push-plugin",
+    "src": "https://github.com/elsigh/PushPlugin.git",
     "id": "com.phonegap.plugins.PushPlugin"
   },
   {

@@ -76,6 +76,12 @@ class AdminUserMessageTestHandler(WebRequestHandler):
             self.abort(403)
 
         user_id = self.request.get('user_id')
+
+        send_mail = self.request.get('send_mail', None)
+        should_send_mail = False
+        if send_mail is not None:
+            should_send_mail = True
+
         extras = self.request.get('extras')
         logging.info('user_id: %s', user_id)
         logging.info('extras: %s', extras)
@@ -90,7 +96,8 @@ class AdminUserMessageTestHandler(WebRequestHandler):
         if user_id:
             user = models.FMBUser.get_by_id(int(user_id))
             if user:
-                result = user.send_message(message, extra=extras)
+                result = user.send_message(message, extra=extras,
+                                           send_mail=should_send_mail)
 
         self.output_response({'result': result},
                              'admin_user_message_test.html')
