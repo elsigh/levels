@@ -32,11 +32,14 @@
     <feature name="ChromeIdentity">
         <param name="android-package" value="org.chromium.ChromeIdentity" />
     </feature>
-    <feature name="PushPlugin">
-        <param name="android-package" value="com.plugin.gcm.PushPlugin" />
-    </feature>
     <feature name="ContactsPlugin">
         <param name="android-package" value="com.elsigh.contacts.ContactsPlugin" />
+    </feature>
+    <feature name="LevelsPlugin">
+        <param name="android-package" value="com.elsigh.levels.LevelsPlugin" />
+    </feature>
+    <feature name="PushPlugin">
+        <param name="android-package" value="com.plugin.gcm.PushPlugin" />
     </feature>
     <access origin="http://127.0.0.1*" />
     <access origin="http://clipport.net*" />
@@ -60,7 +63,4 @@
     <preference name="android-minSdkVersion" value="13" />
     <preference name="android-installLocation" value="auto" />
     <preference name="disallowOverscroll" value="true" />
-    <feature name="LevelsPlugin">
-        <param name="android-package" value="com.elsigh.levels.LevelsPlugin" />
-    </feature>
 </widget>

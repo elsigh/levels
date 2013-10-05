@@ -956,7 +956,7 @@ class HandlerTest(unittest.TestCase):
         )
         elsigh_user.send_message('hi')
 
-        body = 'End of message. =)'
+        body = models.USER_EMAIL_MSG
         args = {
             'sender': settings.MAIL_FROM,
             'to': '%s <%s>' % (elsigh_user.name, elsigh_user.email),

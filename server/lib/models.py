@@ -42,6 +42,7 @@ NUM_SETTINGS_TO_FETCH = 10
 NUM_SETTINGS_MULTIPLIER = 10
 DEFAULT_AVATAR_URL = ('http://lh3.googleusercontent.com/-XdUIqdMkCWA/'
                       'AAAAAAAAAAI/AAAAAAAAAAA/4252rscbv5M/photo.jpg')
+USER_EMAIL_MSG = 'End of message. It\'s all good. =)'
 
 
 class FMBModel(ndb.Model):
@@ -226,7 +227,7 @@ class FMBUser(User, FMBModel):
     def get_profile_url(self):
         return 'www.levelsapp.com/p/%s' % self.unique_profile_str
 
-    def send_message(self, message, extra={}):
+    def send_message(self, message, extra={}, send_mail=True):
         """Tries a few different means/methods to send a message to a user."""
         logging.info('FMBUser %s send_message %s, extra: %s' %
                      (self.name, message, extra))
@@ -235,7 +236,7 @@ class FMBUser(User, FMBModel):
             utils.send_email(
                 to='%s <%s>' % (self.name, self.email),
                 subject=message,
-                body='End of message. =)')
+                body=USER_EMAIL_MSG)
             logging.info('Sending email to user.')
 
         for device in self.iter_devices:
