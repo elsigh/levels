@@ -231,12 +231,13 @@ class HandlerTest(unittest.TestCase):
                                                       user_agent_string='ua',
                                                       update_enabled='1',
                                                       update_frequency='20',
-                                                      name='Samsung',
+                                                      name='XT1056',
                                                       platform='Android',
                                                       version='S3',
                                                       app_version='29'))
         body = response.normal_body
         obj = json.loads(body)
+        self.assertEquals('Moto X', obj['name'])
         self.assertEquals(1, obj['update_enabled'])
         self.assertEquals(29, obj['app_version'])
 

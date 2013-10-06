@@ -271,6 +271,10 @@ class ApiDeviceHandler(ApiRequestHandler):
             if ((key not in device.immutable_update_properties and
                  key in self._json_request_data)):
                 val = self._json_request_data[key]
+
+                if key == 'name' and val in models.ANDROID_NAMES:
+                    val = models.ANDROID_NAMES[val]
+
                 if key in ['update_enabled', 'update_frequency',
                            'notify_level', 'app_version']:
                     val = int(val)

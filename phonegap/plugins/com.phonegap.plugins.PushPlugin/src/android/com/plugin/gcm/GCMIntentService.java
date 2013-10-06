@@ -100,12 +100,13 @@ public class GCMIntentService extends GCMBaseIntentService {
 				*/
 
 		// Status bar notification.
+		String message = extras.getString("message");
     Notification.Builder mBuilder = new Notification.Builder(this)
     		.setDefaults(Notification.DEFAULT_ALL)
     		.setSmallIcon(context.getApplicationInfo().icon)
-				//.setWhen(System.currentTimeMillis())
         .setContentTitle(appName)
-        .setContentText(extras.getString("message"))
+        .setContentText(message)
+        .setTicker(message)
         .setContentIntent(contentIntent)
         .setAutoCancel(true);
 
