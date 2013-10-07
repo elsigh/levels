@@ -78,9 +78,11 @@ class AdminUserMessageTestHandler(WebRequestHandler):
         user_id = self.request.get('user_id')
 
         send_mail = self.request.get('send_mail', None)
+        logging.info('send_mail %s' % send_mail)
         should_send_mail = False
         if send_mail is not None:
             should_send_mail = True
+        logging.info('should_send_mail %s', should_send_mail)
 
         extras = self.request.get('extras')
         logging.info('user_id: %s', user_id)

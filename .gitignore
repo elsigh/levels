@@ -2,6 +2,12 @@
 # Compiled source #
 ###################
 *.pyc
+
+phonegap/platforms/android/bin
+phonegap/platforms/android/gen
+phonegap/platforms/android/local.properties
+phonegap/.cordova
+
 client/android/bin
 client/android/gen
 client/android/local.properties

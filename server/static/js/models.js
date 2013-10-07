@@ -592,22 +592,25 @@ fmb.models.User.onPushNotificationGCM = function(e) {
       // you might want to play a sound to get the user's attention,
       // throw up a dialog, etc.
       if (e.foreground) {
-        fmb.log('FOREGROUND NOTIFICATION');
+        fmb.log('FOREGROUND NOTIFICATION', e.payload);
         // if the notification contains a soundname, play it.
         //var my_media = new Media("/android_asset/www/"+e.soundname);
         //my_media.play();
 
       // otherwise we were launched because the user touched a
       // notification in the notification tray.
-      } else if (e.coldstart) {
-        fmb.log('COLDSTART NOTIFICATION');
       } else {
-        fmb.log('BACKGROUND NOTIFICATION');
-      }
+        if (e.coldstart) {
+          fmb.log('COLDSTART NOTIFICATION');
+        } else {
+          fmb.log('BACKGROUND NOTIFICATION');
+        }
 
-      fmb.log('PAYLOAD', e.payload);
-      if (e.payload.url) {
-        window['app'].checkIntentUrlForUser(e.payload.url);
+        fmb.log('PAYLOAD', e.payload);
+
+        if (e.payload.url) {
+          window['app'].checkIntentUrlForUser(e.payload.url);
+        }
       }
 
       break;

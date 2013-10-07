@@ -16,12 +16,6 @@
     "src": "https://git-wip-us.apache.org/repos/asf/cordova-plugin-splashscreen.git",
     "id": "org.apache.cordova.core.splashscreen"
   },
-  /*
-  {
-    "src": "https://github.com/phonegap-build/PushPlugin.git",
-    "id": "com.phonegap.plugins.PushPlugin"
-  },
-  */
   {
     "src": "https://github.com/elsigh/PushPlugin.git",
     "id": "com.phonegap.plugins.PushPlugin"
