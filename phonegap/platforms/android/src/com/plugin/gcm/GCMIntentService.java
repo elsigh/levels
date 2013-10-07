@@ -14,6 +14,8 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -100,12 +102,17 @@ public class GCMIntentService extends GCMBaseIntentService {
 				*/
 
 		// Status bar notification.
+		Resources res = context.getResources();
+		String message = extras.getString("message");
     Notification.Builder mBuilder = new Notification.Builder(this)
     		.setDefaults(Notification.DEFAULT_ALL)
-    		.setSmallIcon(context.getApplicationInfo().icon)
-				//.setWhen(System.currentTimeMillis())
+    		.setSmallIcon(res.getIdentifier("icon_notification", "drawable",
+    				context.getPackageName()))
+    		.setLargeIcon(BitmapFactory.decodeResource(res,
+    				context.getApplicationInfo().icon))
         .setContentTitle(appName)
-        .setContentText(extras.getString("message"))
+        .setContentText(message)
+        .setTicker(message)
         .setContentIntent(contentIntent)
         .setAutoCancel(true);
 
