@@ -232,7 +232,9 @@ fmb.views.App = Backbone.View.extend({
   events: {
     'tap .tabs a': 'onClickTab_',
     'tap .share': 'onClickShare_',
-    'tap .fmb-app-link': 'onClickAppLink_'
+    'tap .fmb-app-link': 'onClickAppLink_',
+    'swipeLeft .fmb-tab-frame-c section > div': 'onSwipeLeft_',
+    'swipeRight .fmb-tab-frame-c section > div': 'onSwipeRight_'
     //'tap .tabs a': 'onClickTab_'
   }
 });
@@ -330,6 +332,34 @@ fmb.views.App.prototype.onClickTab_ = function(e) {
   }
   window['app'].navigate($(e.currentTarget).attr('href'),
                          {trigger: true});
+};
+
+
+/**
+ * @param {Event} e A swipe event.
+ * @private
+ */
+fmb.views.App.prototype.onSwipeLeft_ = function(e) {
+  var tabIndex = this.getTabIndex_(this.curentView);
+  fmb.log('fmb.views.App onSwipeLeft_ tabIndex', tabIndex);
+  if (tabIndex === 1) {
+    window['app'].navigate(fmb.App.Routes.ACCOUNT.url,
+                           {trigger: true});
+  }
+};
+
+
+/**
+ * @param {Event} e A swipe event.
+ * @private
+ */
+fmb.views.App.prototype.onSwipeRight_ = function(e) {
+  var tabIndex = this.getTabIndex_(this.curentView);
+  fmb.log('fmb.views.App onSwipeRight_ tabIndex', tabIndex);
+  if (tabIndex === 0) {
+    window['app'].navigate(fmb.App.Routes.FOLLOWING.url,
+                           {trigger: true});
+  }
 };
 
 
