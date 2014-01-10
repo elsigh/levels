@@ -50,6 +50,6 @@
 /Users/elsigh/src/followmybatterry/phonegap/platforms/android/bin/classes/org/chromium/ChromeStorage$4.class \
 /Users/elsigh/src/followmybatterry/phonegap/platforms/android/bin/classes/org/chromium/ChromeStorage$5.class \
 /Users/elsigh/src/followmybatterry/phonegap/platforms/android/bin/classes/org/chromium/ChromeStorage.class \
-/Users/elsigh/src/followmybatterry/phonegap/platforms/android/bin/dexedLibs/cordova-3.0.0-962a4546bc0f9cf010f33a7c78c13a37.jar \
+/Users/elsigh/src/followmybatterry/phonegap/platforms/android/bin/dexedLibs/classes-618c25d1ccf1c35582ff38572d38cee9.jar \
 /Users/elsigh/src/followmybatterry/phonegap/platforms/android/bin/dexedLibs/gcm-8fa44184c044db26fdad28d895fe542f.jar \
 /Users/elsigh/src/followmybatterry/phonegap/platforms/android/bin/dexedLibs/google-play-services-744b69a53dfa87b9b4405812e9528a63.jar \

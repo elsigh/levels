@@ -110,5 +110,22 @@ module.exports = [
             "chrome.identity"
         ]
     }
-]
+];
+module.exports.metadata = 
+// TOP OF METADATA
+{
+    "org.apache.cordova.core.network-information": "0.2.1",
+    "org.apache.cordova.core.device": "0.2.1",
+    "org.apache.cordova.core.battery-status": "0.2.1",
+    "org.apache.cordova.core.splashscreen": "0.2.0",
+    "com.borismus.webintent": "1.0.0",
+    "com.elsigh.contacts": "0.1",
+    "com.elsigh.levels": "0.1",
+    "com.phonegap.plugins.PushPlugin": "2.0.3",
+    "org.chromium.common": "1.0.1",
+    "org.chromium.storage": "1.0.1",
+    "org.chromium.runtime": "1.0.1",
+    "org.chromium.identity": "1.0.1"
+}
+// BOTTOM OF METADATA
 });
