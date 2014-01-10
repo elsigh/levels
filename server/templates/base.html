@@ -23,6 +23,13 @@
     <link rel="shortcut icon" href="/static/img/favicon.png">
     <link rel="stylesheet" href="/static/css/base.css">
 
+    {% if current_user %}
+      <script>
+        var _user_id = '{{current_user.email}}';
+        var _sift = _sift || []; _sift.push(['_setAccount', '7f6dac226d']); _sift.push(['_setUserId', _user_id]); _sift.push(['_trackPageview']); (function() { function ls() { var e = document.createElement('script'); e.type = 'text/javascript'; e.async = true; e.src = ('https:' == document.location.protocol ? 'https://' : 'http://') + 'cdn.siftscience.com/s.js'; var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(e, s); } if (window.attachEvent) { window.attachEvent('onload', ls); } else { window.addEventListener('load', ls, false); }})();
+      </script>
+    {% endif %}
+
     {% block head %}{% endblock %}
 
   </head>
