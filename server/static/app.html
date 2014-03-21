@@ -331,6 +331,19 @@
             <strong>{{send_battery_notifications_count}}</strong>
             notification{{#send_battery_notifications_count_is_plural}}s{{/send_battery_notifications_count_is_plural}}
           </li>
+          <li class="bluetooth
+                    {{#settings.0.bluetooth_on}}
+                      bluetooth-on
+                    {{/settings.0.bluetooth_on}}">
+          </li>
+          <li class="wifi
+                    {{#settings.0.wifi_on}}
+                      wifi-on
+                    {{/settings.0.wifi_on}}">
+          </li>
+          <li class="ringer-mode">
+            {{settings.0.ringer_mode}}
+          <li>
           <!--
           <li>
             <strong>{{settings_received_count}}</strong>
