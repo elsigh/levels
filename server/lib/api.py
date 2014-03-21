@@ -41,7 +41,8 @@ def send_twilio_msg(to, body):
                                   settings.TWILIO_AUTH_TOKEN)
         twilio_message = client.sms.messages.create(
             to=to, from_=settings.TWILIO_NUMBER, body=body)
-    except TwilioRestException, e:
+        logging.info('twilio_message: %s' % twilio_message)
+    except TwilioRestException as e:
         logging.info('TwilioRestException e: %s' % e)
         pass
 
@@ -660,7 +661,10 @@ def send_notifying_message(user_id, to_type, to_name, to_means, send=True):
             utils.send_email(to, subject, body)
 
         elif to_type == 'phone':
-            send_twilio_msg(to_means, body)
+            try:
+                send_twilio_msg(to_means, body)
+            except TwilioRestException as e:
+                logging.info('TwilioRestException %s' % e)
 
     sent = models.NotificationSent(
         parent=user.key,
