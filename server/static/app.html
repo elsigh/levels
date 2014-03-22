@@ -15,7 +15,6 @@
     <link rel="stylesheet" href="css/following.css">
     <link rel="stylesheet" href="css/xcharts.css">
 
-    <!--<script src="http://clipport.net/target/target-script-min.js#R6b6Cp06"></script>-->
     <title>Levels</title>
 
   </head>
@@ -48,33 +47,6 @@
       <div class="fmb-msg-c" style="display:none;"><div class="fmb-msg"></div></div>
     </div>
 
-    <script>
-      var cordovaSrc_;
-      if (window.location.protocol === 'file:') {
-
-        if (window.navigator.userAgent.match(/Android/i)) {
-          cordovaSrc_ = 'js/cordova-android.js';
-        } else if (window.navigator.userAgent.match(/iPad/i) ||
-                   window.navigator.userAgent.match(/iPhone/i)) {
-          cordovaSrc_ = 'js/cordova-ios.js';
-        }
-
-        cordovaSrc_ = 'cordova.js';
-      }
-
-      if (cordovaSrc_) {
-        document.write('<scr'+'ipt src="' + cordovaSrc_ + '"></sc'+'ript>');
-
-      } else {
-        // Stubs cordova so we can run this page on the web not as a
-        // cordova app.
-        cordova = {
-          addConstructor: function() {},
-          require: function() {},
-          define: function() {}
-        };
-      }
-    </script>
     <!--<script src="js/levels_plugin.js"></script>
     <script src="js/webintent.js"></script>
     <script src="js/ContactView.js"></script>-->
@@ -384,7 +356,7 @@
         });
 
       // Load the app as a cordova app.
-      } else if (cordovaSrc_) {
+      } else if (typeof cordova != 'undefined') {
         document.addEventListener('deviceready', function() {
           window['app'] = new fmb.App();
         }, false);

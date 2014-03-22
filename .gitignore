@@ -6,12 +6,17 @@
 phonegap/platforms/android/bin
 phonegap/platforms/android/gen
 phonegap/platforms/android/local.properties
-
+phonegap/platforms/android/cordova
+phonegap/platforms/android/assets
+phonegap/plugins
+phonegap/www/css
+phonegap/www/img
+phonegap/www/js
+phonegap/www/index.html
 
 client/android/bin
 client/android/gen
 client/android/local.properties
-phonegap/platforms/android
 
 client/ios/CordovaLib/CordovaLib.xcodeproj/xcuserdata
 client/ios/Levels.xcodeproj/project.xcworkspace

@@ -2,19 +2,19 @@
 [
   {
     "src": "https://git-wip-us.apache.org/repos/asf/cordova-plugin-network-information.git",
-    "id": "org.apache.cordova.core.network-information"
+    "id": "org.apache.cordova.network-information"
   },
   {
     "src": "https://git-wip-us.apache.org/repos/asf/cordova-plugin-device.git",
-    "id": "org.apache.cordova.core.device"
+    "id": "org.apache.cordova.device"
   },
   {
     "src": "https://git-wip-us.apache.org/repos/asf/cordova-plugin-battery-status.git",
-    "id": "org.apache.cordova.core.battery-status"
+    "id": "org.apache.cordova.battery-status"
   },
   {
     "src": "https://git-wip-us.apache.org/repos/asf/cordova-plugin-splashscreen.git",
-    "id": "org.apache.cordova.core.splashscreen"
+    "id": "org.apache.cordova.splashscreen"
   },
   {
     "src": "https://github.com/elsigh/PushPlugin.git",
@@ -27,7 +27,7 @@
   {
     "src": "levels-plugin",
     "id": "com.elsigh.levels"
-  }
+  },
   {
     "src": "contacts-plugin",
     "id": "com.elsigh.contacts"

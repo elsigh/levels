@@ -11,5 +11,5 @@ for plugin in data_map['plugins']:
 
 print '\n\n'
 
-for plugin in data_map['plugins']:
-    print 'cordova plugin add %s' % plugin['src']
+#for plugin in data_map['plugins']:
+#    print 'cordova plugin add %s' % plugin['src']
