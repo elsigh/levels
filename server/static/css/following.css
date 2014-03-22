@@ -146,8 +146,8 @@
   padding: 0;
 }
 
-.fmb-following-device .counters li {
-  margin-bottom: 0.3em;
+.fmb-following-device .counters li.notifications-count {
+  margin-bottom: 0.7em;
 }
 
 .fmb-following-device .counters strong {
@@ -160,6 +160,13 @@
   border-radius: 5px;
 }
 
+.fmb-following-device .counters .wifi,
+.fmb-following-device .counters .bluetooth,
+.fmb-following-device .counters .ringer-mode {
+  display: inline-block;
+  margin-right: 0.2em;
+  vertical-align: middle
+}
 
 .fmb-following-device .counters .wifi,
 .fmb-following-device .counters .bluetooth {
@@ -168,7 +175,6 @@
   display: inline-block;
   height: 16px;
   width: 20px;
-  margin-right: 0.2em;
 }
 
 .fmb-following-device .counters .bluetooth {
@@ -181,14 +187,8 @@
   background-image: url(../img/bluetooth_on.png);
 }
 
-
 .fmb-following-device .counters .wifi-on {
   background-image: url(../img/wifi_on.png);
-}
-
-
-.fmb-following-device .counters .ringer-mode {
-  display: inline-block;
 }
 
 .fmb-following-device .battery-graph-td {
