@@ -1,0 +1,24 @@
+{
+  "name": "levels",
+  "version": "0.0.1",
+  "authors": [
+    "Lindsey Simon <elsigh@gmail.com>"
+  ],
+  "description": "Levels",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "backbone": "",
+    "d3": "",
+    "hogan": "",
+    "ng-xCharts": "",
+    "offline": "",
+    "underscore": "",
+    "zeptojs": ""
+  }
+}

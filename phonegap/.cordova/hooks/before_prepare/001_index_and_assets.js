@@ -81,11 +81,13 @@ var copyAndFixAppTemplate = function() {
 
 
     // Make absolute static paths relative, minus the "static" bit.
+    /*
     assetDirs.forEach(function(dir) {
       var re = new RegExp('"/' + dir + '/', 'g');
       str = str.replace(re, '"' + dir + '/');
     });
     fs.writeFileSync(pathToCordovaIndex, str, 'utf8');
+    */
   }
 };
 

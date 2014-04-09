@@ -1,19 +1,19 @@
 { "plugins":
 [
   {
-    "src": "https://git-wip-us.apache.org/repos/asf/cordova-plugin-network-information.git",
+    "src": "org.apache.cordova.network-information",
     "id": "org.apache.cordova.network-information"
   },
   {
-    "src": "https://git-wip-us.apache.org/repos/asf/cordova-plugin-device.git",
+    "src": "org.apache.cordova.device",
     "id": "org.apache.cordova.device"
   },
   {
-    "src": "https://git-wip-us.apache.org/repos/asf/cordova-plugin-battery-status.git",
+    "src": "org.apache.cordova.battery-status",
     "id": "org.apache.cordova.battery-status"
   },
   {
-    "src": "https://git-wip-us.apache.org/repos/asf/cordova-plugin-splashscreen.git",
+    "src": "org.apache.cordova.splashscreen",
     "id": "org.apache.cordova.splashscreen"
   },
   {
@@ -24,6 +24,10 @@
     "src": "https://github.com/Initsogar/cordova-webintent.git",
     "id": "com.borismus.webintent"
   },
+  {
+    "src": "org.chromium.identity",
+    "org.chromium.identity"
+  }
   {
     "src": "levels-plugin",
     "id": "com.elsigh.levels"

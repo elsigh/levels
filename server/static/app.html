@@ -47,11 +47,9 @@
       <div class="fmb-msg-c" style="display:none;"><div class="fmb-msg"></div></div>
     </div>
 
-    <!--<script src="js/levels_plugin.js"></script>
-    <script src="js/webintent.js"></script>
-    <script src="js/ContactView.js"></script>-->
-    <script src="js/zepto.js"></script>
-    <script src="js/touch.js"></script>
+
+    <script src="bower_components/zeptojs/src/zepto.js"></script>
+    <script src="bower_components/zeptojs/src/touch.js"></script>
     <script src="js/underscore.js"></script>
     <script src="js/backbone.js"></script>
     <script src="js/backbone.localStorage.js"></script>
@@ -59,7 +57,6 @@
     <script src="js/hogan.js"></script>
     <script src="js/d3.v2.js"></script>
     <script src="js/xcharts.js"></script>
-    <script src="js/GCMPlugin.js"></script>
 
     <script src="js/fmb.js"></script>
     <script src="js/app.js"></script>
@@ -246,7 +243,7 @@
       <p class="info-other-users">
         <span class="info">i</span>
         When someone sends you their Levels link,
-        open it with the app to see it here.
+        open it with the app to add them here.
       </p>
       <table>
         <thead>
@@ -363,6 +360,13 @@
 
       // Load the app ala webapp style.
       } else {
+        // Mock requires.
+        cordova = {
+          addConstructor: function() {},
+          require: function() {},
+          define: function() {}
+        };
+
         $(document).ready(function() {
           window['app'] = new fmb.App();
         });

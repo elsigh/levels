@@ -1,1 +1,0 @@
-cordova-2.8.1.ios.js

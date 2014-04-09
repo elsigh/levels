@@ -1,7 +1,43 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="com.elsigh.levels" version="1.0.0"
-    xmlns="http://www.w3.org/ns/widgets"
-    xmlns:gap="http://phonegap.com/ns/1.0">
+<widget id="com.elsigh.levels" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:gap="http://phonegap.com/ns/1.0">
+    <preference name="loglevel" value="DEBUG" />
+    <feature name="App">
+        <param name="android-package" value="org.apache.cordova.App" />
+    </feature>
+    <feature name="WebIntent">
+        <param name="android-package" value="com.borismus.webintent.WebIntent" />
+    </feature>
+    <feature name="ContactsPlugin">
+        <param name="android-package" value="com.elsigh.contacts.ContactsPlugin" />
+    </feature>
+    <feature name="LevelsPlugin">
+        <param name="android-package" value="com.elsigh.levels.LevelsPlugin" />
+    </feature>
+    <feature name="PushPlugin">
+        <param name="android-package" value="com.plugin.gcm.PushPlugin" />
+    </feature>
+    <feature name="Battery">
+        <param name="android-package" value="org.apache.cordova.batterystatus.BatteryListener" />
+    </feature>
+    <feature name="Device">
+        <param name="android-package" value="org.apache.cordova.device.Device" />
+    </feature>
+    <feature name="InAppBrowser">
+        <param name="android-package" value="org.apache.cordova.inappbrowser.InAppBrowser" />
+    </feature>
+    <feature name="NetworkStatus">
+        <param name="android-package" value="org.apache.cordova.networkinformation.NetworkManager" />
+    </feature>
+    <feature name="SplashScreen">
+        <param name="android-package" value="org.apache.cordova.splashscreen.SplashScreen" />
+    </feature>
+    <feature name="ChromeIdentity">
+        <param name="android-package" value="org.chromium.ChromeIdentity" />
+    </feature>
+    <access origin="https://accounts.google.com/*" />
+    <feature name="ChromeStorage">
+        <param name="android-package" value="org.chromium.ChromeStorage" />
+    </feature>
     <name>Levels</name>
     <description>
         Levels
@@ -50,13 +86,6 @@
     <gap:splash gap:platform="ios" height="1024" src="res/screen/ios/screen-ipad-portrait.png" width="768" />
     <gap:splash gap:platform="ios" height="768" src="res/screen/ios/screen-ipad-landscape.png" width="1024" />
     <gap:splash gap:platform="winphone" src="res/screen/windows-phone/screen-portrait.jpg" />
-    <!--
-    <access origin="http://127.0.0.1*" />
-    <access origin="http://clipport.net*" />
-    <access origin="https://*.googleusercontent.com*" />
-    <access origin="https://followmybattery.appspot.com*" />
-    <access origin="https://levelsapp.com*" />
-    -->
     <access origin="*" />
     <content src="index.html" />
 </widget>

@@ -6,6 +6,13 @@
 // the identifier, the filesystem location
 // or the URL
 var pluginlist = [
+  'org.apache.cordova.battery-status',
+  'org.apache.cordova.device',
+  'org.apache.cordova.splashscreen',
+  'https://github.com/elsigh/PushPlugin.git',
+  'https://github.com/Initsogar/cordova-webintent.git',
+  'levels-plugin',
+  'contacts-plugin'
 ];
 
 // no need to configure below
