@@ -10,10 +10,6 @@ phonegap/www/img
 phonegap/www/js
 phonegap/www/index.html
 
-client/android/bin
-client/android/gen
-client/android/local.properties
-
 client/ios/CordovaLib/CordovaLib.xcodeproj/xcuserdata
 client/ios/Levels.xcodeproj/project.xcworkspace
 client/ios/Levels.xcodeproj/xcuserdata

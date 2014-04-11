@@ -16,9 +16,15 @@
     "backbone": "",
     "d3": "",
     "hogan": "",
-    "ng-xCharts": "",
+    "bower-xcharts": "",
     "offline": "",
     "underscore": "",
-    "zeptojs": ""
+    "zepto-full": "",
+
+    "paper-scaffold": "Polymer/paper-scaffold#master",
+    "polymer": "Polymer/polymer#master",
+    "paper-toolbar-panel": "Polymer/paper-toolbar-panel#master",
+    "paper-appbar": "Polymer/paper-appbar#master",
+    "paper-drawer-panels": "Polymer/paper-drawer-panels#master"
   }
 }

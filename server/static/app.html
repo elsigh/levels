@@ -7,13 +7,16 @@
     <meta name="viewport"
       content="user-scalable=no,initial-scale=1,maximum-scale=1,minimum-scale=1,width=device-width">
 
-    <!-- target-densitydpi=device-dpi -->
-    <link rel="stylesheet" href="css/base.css">
-    <link rel="stylesheet" href="css/loading.css">
-    <link rel="stylesheet" href="css/app.css">
-    <link rel="stylesheet" href="css/account.css">
-    <link rel="stylesheet" href="css/following.css">
-    <link rel="stylesheet" href="css/xcharts.css">
+    <link rel="stylesheet"
+      href="/bower_components/bower-xcharts/xcharts.css">
+    <link rel="stylesheet"
+      href="/bower_components/offline/themes/offline-theme-chrome.css">
+
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/loading.css">
+    <link rel="stylesheet" href="/css/app.css">
+    <link rel="stylesheet" href="/css/account.css">
+    <link rel="stylesheet" href="/css/following.css">
 
     <title>Levels</title>
 
@@ -47,22 +50,22 @@
       <div class="fmb-msg-c" style="display:none;"><div class="fmb-msg"></div></div>
     </div>
 
+    <script src="/js/zepto.min.js"></script>
+    <script src="/bower_components/underscore/underscore.js"></script>
+    <script src="/bower_components/backbone/backbone.js"></script>
+    <script src="/bower_components/hogan/web/builds/2.0.0/hogan-2.0.0.min.js"></script>
+    <script src="/bower_components/d3/d3.min.js"></script>
+    <script src="/bower_components/bower-xcharts/xcharts.min.js"></script>
+    <scrtup src="/bower_components/offline/offline.min.js"></script>
 
-    <script src="bower_components/zeptojs/src/zepto.js"></script>
-    <script src="bower_components/zeptojs/src/touch.js"></script>
-    <script src="js/underscore.js"></script>
-    <script src="js/backbone.js"></script>
-    <script src="js/backbone.localStorage.js"></script>
-    <script src="js/backbone-identity-map.js"></script>
-    <script src="js/hogan.js"></script>
-    <script src="js/d3.v2.js"></script>
-    <script src="js/xcharts.js"></script>
+    <script src="/js/backbone.localStorage.js"></script>
+    <script src="/js/backbone-identity-map.js"></script>
 
-    <script src="js/fmb.js"></script>
-    <script src="js/app.js"></script>
-    <script src="js/models_fmb.js"></script>
-    <script src="js/models.js"></script>
-    <script src="js/views.js"></script>
+    <script src="/js/fmb.js"></script>
+    <script src="/js/app.js"></script>
+    <script src="/js/models_fmb.js"></script>
+    <script src="/js/models.js"></script>
+    <script src="/js/views.js"></script>
 
     <script id="tpl_how_it_works" type="text/html">
       <h2>How Levels Works</h2>
@@ -349,7 +352,7 @@
           'app_test.js'
         ];
         $.each(testFiles, function(i, src) {
-          document.write('<scr'+'ipt src="' + src + '"></sc'+'ript>');
+          document.write('<scr'+'ipt src="/' + src + '"></sc'+'ript>');
         });
 
       // Load the app as a cordova app.

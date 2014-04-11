@@ -16,7 +16,7 @@ var child = require('child_process');
 var pathToCordovaAssets = path.join('.', 'www');
 var pathToCordovaIndex = path.join(pathToCordovaAssets, 'index.html');
 
-var assetDirs = ['css', 'js', 'img'];
+var assetDirs = ['css', 'js', 'img', 'bower_components'];
 
 
 /**
@@ -80,14 +80,12 @@ var copyAndFixAppTemplate = function() {
                       '  <script src="cordova.js"></script>\n  </head>');
 
 
-    // Make absolute static paths relative, minus the "static" bit.
-    /*
-    assetDirs.forEach(function(dir) {
-      var re = new RegExp('"/' + dir + '/', 'g');
-      str = str.replace(re, '"' + dir + '/');
+    // Makes absolute static asset paths relative.
+    assetDirs.forEach(function(assetDir) {
+      var re = new RegExp('"/' + assetDir + '/', 'g');
+      str = str.replace(re, '"' + assetDir + '/');
     });
     fs.writeFileSync(pathToCordovaIndex, str, 'utf8');
-    */
   }
 };
 
