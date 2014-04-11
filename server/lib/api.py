@@ -383,10 +383,14 @@ def send_battery_notification_phone(user_id, device_id, notifying_id,
         logging.info('BAIL CITY BABY, DONE PHONE NOTIFIED ENUFF')
         return
 
-    logging.info('body: %s' % body)
+    logging.info('send_battery_notification_phone body: %s' % body)
     twilio_message = None
     if send:
-        send_twilio_msg(notifying.means, body)
+        try:
+            send_twilio_msg(notifying.means, body)
+        except TwilioRestException as e:
+            logging.info('TwilioRestException caught  %s' % e)
+            pass
 
     sent = models.NotificationSent(
         parent=notifying.key,
