@@ -83,25 +83,13 @@ handlers:
   expiration: "3650d"
 
 # Serve static contents from root paths
+- url: /bower_components
+  static_dir: static/bower_components
 - url: /css
   static_dir: static/css
 - url: /js
   static_dir: static/js
 - url: /img
-  static_dir: static/img
-
-- url: /app/css
-  static_dir: static/css
-- url: /app/js
-  static_dir: static/js
-- url: /app/img
-  static_dir: static/img
-
-- url: /app/.*/css
-  static_dir: static/css
-- url: /app/.*/js
-  static_dir: static/js
-- url: /app/.*/img
   static_dir: static/img
 
 # Serve the tests for automation.

@@ -1239,7 +1239,7 @@ fmb.views.FollowingDevice.prototype.renderGraph_ = function() {
     });
   });
 
-  fmb.log('fmb.views.FollowingDevice dataSeries', dataSeries);
+  //fmb.log('fmb.views.FollowingDevice dataSeries', dataSeries);
 
   var data = {
     'xScale': 'time',

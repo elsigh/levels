@@ -41,8 +41,13 @@ def send_twilio_msg(to, body):
                                   settings.TWILIO_AUTH_TOKEN)
         twilio_message = client.sms.messages.create(
             to=to, from_=settings.TWILIO_NUMBER, body=body)
-    except TwilioRestException, e:
+        logging.info('twilio_message: %s' % twilio_message)
+    except TwilioRestException as e:
         logging.info('TwilioRestException e: %s' % e)
+        pass
+    # Bummer that this is what works.
+    except:
+        logging.info('Uncaught exception')
         pass
 
     return True
@@ -382,7 +387,7 @@ def send_battery_notification_phone(user_id, device_id, notifying_id,
         logging.info('BAIL CITY BABY, DONE PHONE NOTIFIED ENUFF')
         return
 
-    logging.info('body: %s' % body)
+    logging.info('send_battery_notification_phone body: %s' % body)
     twilio_message = None
     if send:
         send_twilio_msg(notifying.means, body)
@@ -660,7 +665,10 @@ def send_notifying_message(user_id, to_type, to_name, to_means, send=True):
             utils.send_email(to, subject, body)
 
         elif to_type == 'phone':
-            send_twilio_msg(to_means, body)
+            try:
+                send_twilio_msg(to_means, body)
+            except TwilioRestException as e:
+                logging.info('TwilioRestException %s' % e)
 
     sent = models.NotificationSent(
         parent=user.key,

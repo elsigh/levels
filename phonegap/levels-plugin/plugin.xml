@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
+    xmlns:android="http://schemas.android.com/apk/res/android"
     id="com.elsigh.levels"
     version="0.1">
     <name>LevelsPlugin</name>
@@ -19,8 +20,30 @@
             </feature>
         </config-file>
 
+        <config-file target="AndroidManifest.xml" parent="/manifest">
+           <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+        </config-file>
+
+
         <source-file src="src/android/LevelsPlugin.java"
             target-dir="src/com/elsigh/levels" />
+
+        <source-file src="src/android/Levels.java"
+            target-dir="src/com/elsigh/levels" />
+        <source-file src="src/android/LevelsAlarm.java"
+            target-dir="src/com/elsigh/levels" />
+        <source-file src="src/android/LevelsAutoStart.java"
+            target-dir="src/com/elsigh/levels" />
+        <source-file src="src/android/LevelsService.java"
+            target-dir="src/com/elsigh/levels" />
+
+        <source-file src="src/android/ant.properties"
+            target-dir="" />
+        <source-file src="src/android/levels-release-key.keystore"
+            target-dir="" />
+        <source-file src="src/android/local.properties"
+            target-dir="" />
+
     </platform>
 
     <!-- ios -->

@@ -19,7 +19,7 @@ fmb.models.SERVER_PROD = 'https://followmybattery.appspot.com';
 
 // Useful for testing from the filesystem locally.
 //fmb.models.SERVER_PROD = fmb.models.SERVER_LOCAL;
-//fmb.models.SERVER_LOCAL = fmb.models.SERVER_PROD;
+fmb.models.SERVER_LOCAL = fmb.models.SERVER_PROD;
 
 
 /**

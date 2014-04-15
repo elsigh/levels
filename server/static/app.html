@@ -7,15 +7,17 @@
     <meta name="viewport"
       content="user-scalable=no,initial-scale=1,maximum-scale=1,minimum-scale=1,width=device-width">
 
-    <!-- target-densitydpi=device-dpi -->
-    <link rel="stylesheet" href="css/base.css">
-    <link rel="stylesheet" href="css/loading.css">
-    <link rel="stylesheet" href="css/app.css">
-    <link rel="stylesheet" href="css/account.css">
-    <link rel="stylesheet" href="css/following.css">
-    <link rel="stylesheet" href="css/xcharts.css">
+    <link rel="stylesheet"
+      href="/bower_components/bower-xcharts/xcharts.css">
+    <link rel="stylesheet"
+      href="/bower_components/offline/themes/offline-theme-chrome.css">
 
-    <!--<script src="http://clipport.net/target/target-script-min.js#R6b6Cp06"></script>-->
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/loading.css">
+    <link rel="stylesheet" href="/css/app.css">
+    <link rel="stylesheet" href="/css/account.css">
+    <link rel="stylesheet" href="/css/following.css">
+
     <title>Levels</title>
 
   </head>
@@ -48,52 +50,22 @@
       <div class="fmb-msg-c" style="display:none;"><div class="fmb-msg"></div></div>
     </div>
 
-    <script>
-      var cordovaSrc_;
-      if (window.location.protocol === 'file:') {
+    <script src="/js/zepto.min.js"></script>
+    <script src="/bower_components/underscore/underscore.js"></script>
+    <script src="/bower_components/backbone/backbone.js"></script>
+    <script src="/bower_components/hogan/web/builds/2.0.0/hogan-2.0.0.min.js"></script>
+    <script src="/bower_components/d3/d3.min.js"></script>
+    <script src="/bower_components/bower-xcharts/xcharts.min.js"></script>
+    <scrtup src="/bower_components/offline/offline.min.js"></script>
 
-        if (window.navigator.userAgent.match(/Android/i)) {
-          cordovaSrc_ = 'js/cordova-android.js';
-        } else if (window.navigator.userAgent.match(/iPad/i) ||
-                   window.navigator.userAgent.match(/iPhone/i)) {
-          cordovaSrc_ = 'js/cordova-ios.js';
-        }
+    <script src="/js/backbone.localStorage.js"></script>
+    <script src="/js/backbone-identity-map.js"></script>
 
-        cordovaSrc_ = 'cordova.js';
-      }
-
-      if (cordovaSrc_) {
-        document.write('<scr'+'ipt src="' + cordovaSrc_ + '"></sc'+'ript>');
-
-      } else {
-        // Stubs cordova so we can run this page on the web not as a
-        // cordova app.
-        cordova = {
-          addConstructor: function() {},
-          require: function() {},
-          define: function() {}
-        };
-      }
-    </script>
-    <!--<script src="js/levels_plugin.js"></script>
-    <script src="js/webintent.js"></script>
-    <script src="js/ContactView.js"></script>-->
-    <script src="js/zepto.js"></script>
-    <script src="js/touch.js"></script>
-    <script src="js/underscore.js"></script>
-    <script src="js/backbone.js"></script>
-    <script src="js/backbone.localStorage.js"></script>
-    <script src="js/backbone-identity-map.js"></script>
-    <script src="js/hogan.js"></script>
-    <script src="js/d3.v2.js"></script>
-    <script src="js/xcharts.js"></script>
-    <script src="js/GCMPlugin.js"></script>
-
-    <script src="js/fmb.js"></script>
-    <script src="js/app.js"></script>
-    <script src="js/models_fmb.js"></script>
-    <script src="js/models.js"></script>
-    <script src="js/views.js"></script>
+    <script src="/js/fmb.js"></script>
+    <script src="/js/app.js"></script>
+    <script src="/js/models_fmb.js"></script>
+    <script src="/js/models.js"></script>
+    <script src="/js/views.js"></script>
 
     <script id="tpl_how_it_works" type="text/html">
       <h2>How Levels Works</h2>
@@ -274,7 +246,7 @@
       <p class="info-other-users">
         <span class="info">i</span>
         When someone sends you their Levels link,
-        open it with the app to see it here.
+        open it with the app to add them here.
       </p>
       <table>
         <thead>
@@ -327,10 +299,23 @@
         </div>
 
         <ul class="counters">
-          <li>
+          <li class="notifications-count">
             <strong>{{send_battery_notifications_count}}</strong>
             notification{{#send_battery_notifications_count_is_plural}}s{{/send_battery_notifications_count_is_plural}}
           </li>
+          <li class="bluetooth
+                    {{#settings.0.bluetooth_on}}
+                      bluetooth-on
+                    {{/settings.0.bluetooth_on}}">
+          </li>
+          <li class="wifi
+                    {{#settings.0.wifi_on}}
+                      wifi-on
+                    {{/settings.0.wifi_on}}">
+          </li>
+          <li class="ringer-mode">
+            {{settings.0.ringer_mode}}
+          <li>
           <!--
           <li>
             <strong>{{settings_received_count}}</strong>
@@ -367,17 +352,24 @@
           'app_test.js'
         ];
         $.each(testFiles, function(i, src) {
-          document.write('<scr'+'ipt src="' + src + '"></sc'+'ript>');
+          document.write('<scr'+'ipt src="/' + src + '"></sc'+'ript>');
         });
 
       // Load the app as a cordova app.
-      } else if (cordovaSrc_) {
+      } else if (typeof cordova != 'undefined') {
         document.addEventListener('deviceready', function() {
           window['app'] = new fmb.App();
         }, false);
 
       // Load the app ala webapp style.
       } else {
+        // Mock requires.
+        cordova = {
+          addConstructor: function() {},
+          require: function() {},
+          define: function() {}
+        };
+
         $(document).ready(function() {
           window['app'] = new fmb.App();
         });

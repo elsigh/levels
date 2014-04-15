@@ -3,14 +3,11 @@
 ###################
 *.pyc
 
-phonegap/platforms/android/bin
-phonegap/platforms/android/gen
-phonegap/platforms/android/local.properties
-phonegap/.cordova
-
-client/android/bin
-client/android/gen
-client/android/local.properties
+phonegap/plugins
+phonegap/www/css
+phonegap/www/img
+phonegap/www/js
+phonegap/www/index.html
 
 client/ios/CordovaLib/CordovaLib.xcodeproj/xcuserdata
 client/ios/Levels.xcodeproj/project.xcworkspace
@@ -18,6 +15,7 @@ client/ios/Levels.xcodeproj/xcuserdata
 
 server/data.sqlite3
 server/update.sh
+server/static/js/bower_components
 
 
 # OS generated files #
