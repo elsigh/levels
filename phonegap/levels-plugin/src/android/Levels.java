@@ -15,7 +15,7 @@ import org.apache.cordova.*;
 //import com.elsigh.levels.LevelsService;
 
 
-public class Levels extends DroidGap {
+public class Levels extends CordovaActivity {
 
     private static final String TAG = Levels.class.getSimpleName();
 
@@ -33,7 +33,6 @@ public class Levels extends DroidGap {
               android.os.Build.DISPLAY + ", " +
               "Build.VERSION.SDK_INT: " + android.os.Build.VERSION.SDK_INT
               );
-        super.setIntegerProperty("splashscreen", R.drawable.splash);
         super.loadUrl(Config.getStartUrl(), 10000);
     }
 }

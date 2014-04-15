@@ -3,7 +3,6 @@
 ###################
 *.pyc
 
-phonegap/platforms
 phonegap/plugins
 phonegap/www/css
 phonegap/www/img

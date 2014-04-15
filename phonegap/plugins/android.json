@@ -97,6 +97,10 @@
                         {
                             "xml": "<uses-permission android:name=\"com.elsigh.levels.permission.C2D_MESSAGE\" />",
                             "count": 1
+                        },
+                        {
+                            "xml": "<uses-permission android:name=\"android.permission.READ_PHONE_STATE\" />",
+                            "count": 1
                         }
                     ],
                     "/manifest/application": [
@@ -143,7 +147,7 @@
             "PACKAGE_NAME": "com.elsigh.levels"
         },
         "com.elsigh.levels": {
-            "PACKAGE_NAME": "com.elsigh.levels"
+            "PACKAGE_NAME": "com.elsigh.Levels"
         }
     },
     "dependent_plugins": {
