@@ -33,15 +33,15 @@
                             "count": 1
                         },
                         {
-                            "xml": "<feature name=\"InAppBrowser\"><param name=\"android-package\" value=\"org.apache.cordova.inappbrowser.InAppBrowser\" /></feature>",
-                            "count": 1
-                        },
-                        {
                             "xml": "<feature name=\"ContactsPlugin\"><param name=\"android-package\" value=\"com.elsigh.contacts.ContactsPlugin\" /></feature>",
                             "count": 1
                         },
                         {
                             "xml": "<feature name=\"LevelsPlugin\"><param name=\"android-package\" value=\"com.elsigh.levels.LevelsPlugin\" /></feature>",
+                            "count": 1
+                        },
+                        {
+                            "xml": "<feature name=\"InAppBrowser\"><param name=\"android-package\" value=\"org.apache.cordova.inappbrowser.InAppBrowser\" /></feature>",
                             "count": 1
                         }
                     ],
@@ -99,7 +99,15 @@
                             "count": 1
                         },
                         {
+                            "xml": "<uses-permission android:name=\"android.permission.READ_CONTACTS\" />",
+                            "count": 1
+                        },
+                        {
                             "xml": "<uses-permission android:name=\"android.permission.READ_PHONE_STATE\" />",
+                            "count": 1
+                        },
+                        {
+                            "xml": "<uses-permission android:name=\"android.permission.RECEIVE_BOOT_COMPLETED\" />",
                             "count": 1
                         }
                     ],
@@ -114,6 +122,28 @@
                         },
                         {
                             "xml": "<service android:name=\"com.plugin.gcm.GCMIntentService\" />",
+                            "count": 1
+                        },
+                        {
+                            "xml": "<service android:name=\"com.elsigh.levels.LevelsService\" android:process=\":levels_service\" />",
+                            "count": 1
+                        },
+                        {
+                            "xml": "<receiver android:name=\".LevelsAutoStart\"><intent-filter><action android:name=\"android.intent.action.BOOT_COMPLETED\" /></intent-filter><intent-filter><action android:name=\"android.intent.action.PACKAGE_REPLACED\" /><data android:path=\"com.elsigh.levels\" android:scheme=\"package\" /></intent-filter></receiver>",
+                            "count": 1
+                        },
+                        {
+                            "xml": "<receiver android:name=\"com.elsigh.levels.LevelsAlarm\" android:process=\":remote\" />",
+                            "count": 1
+                        },
+                        {
+                            "xml": "<meta-data android:name=\"com.google.android.gms.version\" android:value=\"@integer/google_play_services_version\" />",
+                            "count": 1
+                        }
+                    ],
+                    "/manifest/application/activity": [
+                        {
+                            "xml": "<intent-filter><action android:name=\"android.intent.action.VIEW\" /><category android:name=\"android.intent.category.DEFAULT\" /><category android:name=\"android.intent.category.ALTERNATIVE\" /><category android:name=\"android.intent.category.BROWSABLE\" /><data android:scheme=\"http\" /><data android:host=\"www.levelsapp.com\" /></intent-filter>",
                             "count": 1
                         }
                     ]
@@ -140,14 +170,14 @@
         "com.borismus.webintent": {
             "PACKAGE_NAME": "com.elsigh.levels"
         },
-        "org.chromium.identity": {
-            "PACKAGE_NAME": "com.elsigh.levels"
-        },
         "com.elsigh.contacts": {
-            "PACKAGE_NAME": "com.elsigh.levels"
+            "PACKAGE_NAME": "com.elsigh.Levels"
         },
         "com.elsigh.levels": {
             "PACKAGE_NAME": "com.elsigh.Levels"
+        },
+        "org.chromium.identity": {
+            "PACKAGE_NAME": "com.elsigh.levels"
         }
     },
     "dependent_plugins": {
