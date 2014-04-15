@@ -19,12 +19,14 @@
     "bower-xcharts": "",
     "offline": "",
     "underscore": "",
-    "zepto-full": "",
+    "zeptojs": "",
 
-    "paper-scaffold": "Polymer/paper-scaffold#master",
+    "font-roboto2": "",
     "polymer": "Polymer/polymer#master",
+    "paper-scaffold": "Polymer/paper-scaffold#master",
     "paper-toolbar-panel": "Polymer/paper-toolbar-panel#master",
     "paper-appbar": "Polymer/paper-appbar#master",
-    "paper-drawer-panels": "Polymer/paper-drawer-panels#master"
+    "paper-drawer-panels": "Polymer/paper-drawer-panels#master",
+    "paper-icon-button": ""
   }
 }

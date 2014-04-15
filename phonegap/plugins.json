@@ -26,8 +26,8 @@
   },
   {
     "src": "org.chromium.identity",
-    "org.chromium.identity"
-  }
+    "id": "org.chromium.identity"
+  },
   {
     "src": "levels-plugin",
     "id": "com.elsigh.levels"

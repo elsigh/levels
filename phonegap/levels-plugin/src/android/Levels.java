@@ -15,9 +15,9 @@ import org.apache.cordova.*;
 //import com.elsigh.levels.LevelsService;
 
 
-public class LevelsActivity extends DroidGap {
+public class Levels extends DroidGap {
 
-    private static final String TAG = LevelsActivity.class.getSimpleName();
+    private static final String TAG = Levels.class.getSimpleName();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {

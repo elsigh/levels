@@ -45,6 +45,10 @@ def send_twilio_msg(to, body):
     except TwilioRestException as e:
         logging.info('TwilioRestException e: %s' % e)
         pass
+    # Bummer that this is what works.
+    except:
+        logging.info('Uncaught exception')
+        pass
 
     return True
 
@@ -386,11 +390,7 @@ def send_battery_notification_phone(user_id, device_id, notifying_id,
     logging.info('send_battery_notification_phone body: %s' % body)
     twilio_message = None
     if send:
-        try:
-            send_twilio_msg(notifying.means, body)
-        except TwilioRestException as e:
-            logging.info('TwilioRestException caught  %s' % e)
-            pass
+        send_twilio_msg(notifying.means, body)
 
     sent = models.NotificationSent(
         parent=notifying.key,

@@ -18,8 +18,16 @@
                     value="com.elsigh.levels.LevelsPlugin" />
             </feature>
         </config-file>
-
         <source-file src="src/android/LevelsPlugin.java"
+            target-dir="src/com/elsigh/levels" />
+
+        <source-file src="src/android/Levels.java"
+            target-dir="src/com/elsigh/levels" />
+        <source-file src="src/android/LevelsAlarm.java"
+            target-dir="src/com/elsigh/levels" />
+        <source-file src="src/android/LevelsAutoStart.java"
+            target-dir="src/com/elsigh/levels" />
+        <source-file src="src/android/LevelsService.java"
             target-dir="src/com/elsigh/levels" />
     </platform>
 
