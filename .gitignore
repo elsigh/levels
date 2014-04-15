@@ -3,7 +3,9 @@
 ###################
 *.pyc
 
+phonegap/platforms
 phonegap/plugins
+phonegap/www/bower_components
 phonegap/www/css
 phonegap/www/img
 phonegap/www/js
@@ -15,7 +17,7 @@ client/ios/Levels.xcodeproj/xcuserdata
 
 server/data.sqlite3
 server/update.sh
-server/static/js/bower_components
+server/static/bower_components
 
 
 # OS generated files #

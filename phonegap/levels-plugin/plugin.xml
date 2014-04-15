@@ -21,10 +21,38 @@
         </config-file>
 
         <config-file target="AndroidManifest.xml" parent="/manifest">
-           <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+            <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+            <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+        </config-file>
+
+        <config-file target="AndroidManifest.xml" parent="/manifest/application">
+            <service android:name="com.elsigh.levels.LevelsService"
+                android:process=":levels_service" />
+            <receiver android:name=".LevelsAutoStart">
+                <intent-filter>
+                    <action android:name="android.intent.action.BOOT_COMPLETED" />
+                </intent-filter>
+                <intent-filter>
+                    <action android:name="android.intent.action.PACKAGE_REPLACED" />
+                    <data android:path="com.elsigh.levels" android:scheme="package" />
+                </intent-filter>
+            </receiver>
+            <receiver android:name="com.elsigh.levels.LevelsAlarm" android:process=":remote" />
+        </config-file>
+
+        <config-file target="AndroidManifest.xml" parent="/manifest/application/activity">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.ALTERNATIVE" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="http" />
+                <data android:host="www.levelsapp.com" />
+            </intent-filter>
         </config-file>
 
 
+        <!-- SOURCE FILES -->
         <source-file src="src/android/LevelsPlugin.java"
             target-dir="src/com/elsigh/levels" />
 
