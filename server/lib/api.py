@@ -509,16 +509,22 @@ class ApiSettingsHandler(ApiRequestHandler):
 
 class ApiFollowingHandler(ApiRequestHandler):
     def get(self):
-        q = models.Following.query(ancestor=self.current_user.key)
-        logging.info('ApiFollowingHandler following len: %s' % q.count())
-        obj = {'following': []}
-        for followed in q:
-            followed_user = followed.following.get()
-            logging.info('followed_user: %s %s' %
-                         (followed_user.key.urlsafe(), followed_user.name))
-            followed_user_dict = followed_user.to_dict(
-                include_device_notifying=False)
-            obj['following'].append(followed_user_dict)
+        memcache_following_key = ('api-following-%s' %
+                                  self.current_user.key.urlsafe())
+        obj = memcache.get(memcache_following_key)
+        if not obj:
+            q = models.Following.query(ancestor=self.current_user.key)
+            logging.info('ApiFollowingHandler following len: %s' % q.count())
+            obj = {'following': []}
+            for followed in q:
+                followed_user = followed.following.get()
+                logging.info('followed_user: %s %s' %
+                             (followed_user.key.urlsafe(), followed_user.name))
+                followed_user_dict = followed_user.to_dict(
+                    include_device_notifying=False)
+                obj['following'].append(followed_user_dict)
+            # 180s = 3 min
+            memcache.set(memcache_following_key, obj, time=180)
 
         return self.output_json_success(obj)
 

@@ -151,6 +151,10 @@ class FMBUser(User, FMBModel):
         #logging.info('POST _pre_put_hook %s' % self)
 
     @property
+    def memcache_following_key(self):
+        return 'user-following-%s' % self.key.urlsafe()
+
+    @property
     def google_auth_ids(self):
         """OAuth2 user ids."""
         google_auth_ids = []
@@ -207,6 +211,7 @@ class FMBUser(User, FMBModel):
         return q.fetch()
 
     def to_dict(self, include_api_token=False, include_device_notifying=False):
+        logging.info('-- FMBUser.to_dict start --')
         obj = super(FMBUser, self).to_dict(include_api_token=include_api_token)
 
         # Default avatar url
@@ -219,6 +224,7 @@ class FMBUser(User, FMBModel):
 
         obj['devices'] = []
         for device in self.iter_devices:
+            logging.info('-- FMBUser.to_dict device.to_dict --')
             obj['devices'].append(
                 device.to_dict(include_notifying=include_device_notifying))
 
@@ -286,9 +292,9 @@ class Device(FMBModel):
     @property
     def settings(self):
         """Returns an array of settings models."""
-        settings = memcache.get(self.memcache_device_settings_key)
-        if not settings:
-            settings = []
+        device_settings = memcache.get(self.memcache_device_settings_key)
+        if not device_settings:
+            device_settings = []
             q_settings = Settings.query(
                 ancestor=self.key).order(-Settings.created)
 
@@ -303,26 +309,25 @@ class Device(FMBModel):
                     if i % NUM_SETTINGS_MULTIPLIER == 0:
                         list_of_keys.append(results[i])
                 for setting in ndb.get_multi(list_of_keys):
-                    settings.append(setting)
+                    device_settings.append(setting)
             else:
                 for setting in q_settings.fetch():
-                    settings.append(setting)
-            memcache.set(self.memcache_device_settings_key, settings)
-        return settings
+                    device_settings.append(setting)
+            memcache.set(self.memcache_device_settings_key, device_settings)
+        return device_settings
 
     def clear_device_settings_memcache(self):
         memcache.delete(self.memcache_device_settings_key)
 
     def to_dict(self, include_notifying=True):
+        logging.info('Device %s to dict include_notifying: %s' %
+                     (self.key.id(), include_notifying))
+
         obj = super(Device, self).to_dict()
 
         obj['settings'] = []
         for setting in self.settings:
             obj['settings'].append(setting.to_dict())
-
-        # notifying
-        logging.info('Device %s to dict include_notifying: %s' %
-                     (self.key.id(), include_notifying))
 
         if include_notifying:
             q_notifying = Notifying.query(
