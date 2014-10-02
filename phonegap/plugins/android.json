@@ -33,15 +33,11 @@
                             "count": 1
                         },
                         {
-                            "xml": "<feature name=\"ContactsPlugin\"><param name=\"android-package\" value=\"com.elsigh.contacts.ContactsPlugin\" /></feature>",
+                            "xml": "<feature name=\"InAppBrowser\"><param name=\"android-package\" value=\"org.apache.cordova.inappbrowser.InAppBrowser\" /></feature>",
                             "count": 1
                         },
                         {
                             "xml": "<feature name=\"LevelsPlugin\"><param name=\"android-package\" value=\"com.elsigh.levels.LevelsPlugin\" /></feature>",
-                            "count": 1
-                        },
-                        {
-                            "xml": "<feature name=\"InAppBrowser\"><param name=\"android-package\" value=\"org.apache.cordova.inappbrowser.InAppBrowser\" /></feature>",
                             "count": 1
                         }
                     ],
@@ -99,10 +95,6 @@
                             "count": 1
                         },
                         {
-                            "xml": "<uses-permission android:name=\"android.permission.READ_CONTACTS\" />",
-                            "count": 1
-                        },
-                        {
                             "xml": "<uses-permission android:name=\"android.permission.READ_PHONE_STATE\" />",
                             "count": 1
                         },
@@ -125,6 +117,10 @@
                             "count": 1
                         },
                         {
+                            "xml": "<meta-data android:name=\"com.google.android.gms.version\" android:value=\"@integer/google_play_services_version\" />",
+                            "count": 1
+                        },
+                        {
                             "xml": "<service android:name=\"com.elsigh.levels.LevelsService\" android:process=\":levels_service\" />",
                             "count": 1
                         },
@@ -134,10 +130,6 @@
                         },
                         {
                             "xml": "<receiver android:name=\"com.elsigh.levels.LevelsAlarm\" android:process=\":remote\" />",
-                            "count": 1
-                        },
-                        {
-                            "xml": "<meta-data android:name=\"com.google.android.gms.version\" android:value=\"@integer/google_play_services_version\" />",
                             "count": 1
                         }
                     ],
@@ -170,13 +162,10 @@
         "com.borismus.webintent": {
             "PACKAGE_NAME": "com.elsigh.levels"
         },
-        "com.elsigh.contacts": {
-            "PACKAGE_NAME": "com.elsigh.Levels"
+        "org.chromium.identity": {
+            "PACKAGE_NAME": "com.elsigh.levels"
         },
         "com.elsigh.levels": {
-            "PACKAGE_NAME": "com.elsigh.Levels"
-        },
-        "org.chromium.identity": {
             "PACKAGE_NAME": "com.elsigh.levels"
         }
     },
