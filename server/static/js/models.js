@@ -219,7 +219,7 @@ fmb.models.DeviceUnMapped = fmb.Model.extend({
   defaults: {
     'user_agent_string': window.navigator.userAgent,
     'update_enabled': 1,
-    'update_frequency': 10,
+    'update_frequency': 10,  // Note, overridden in levels_plugin.js now.
     'notify_level': 10
   },
   submodels: {

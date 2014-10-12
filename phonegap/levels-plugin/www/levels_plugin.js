@@ -34,7 +34,8 @@ exports.startService = _.debounce(function(win, fail) {
       [app.model.user.get('api_token'),
        app.model.user.id,
        app.model.user.device.id,
-       app.model.user.device.get('update_frequency'),
+       //app.model.user.device.get('update_frequency'),
+       15,  // AKA 15 minutes
        fmb.models.getApiUrl('/settings')
       ]);
 }, 10 * 1000, true);
