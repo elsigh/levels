@@ -12,6 +12,8 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 //import android.hardware.Sensor;
 //import android.hardware.SensorManager;
+import android.location.Location;
+import android.location.LocationManager;
 import android.media.AudioManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -37,6 +39,7 @@ import org.json.JSONObject;
 import org.json.JSONException;
 
 import java.io.IOException;
+import java.lang.Double;
 
 import com.elsigh.levels.LevelsService;
 
@@ -183,6 +186,15 @@ public class LevelsAlarm extends BroadcastReceiver {
             net_traffic_tx = 0;
         }
 
+        // Get last known location, if battery percent <= 15.
+        if (batteryPercent <= 15) {
+            LocationManager locationManager = (LocationManager) context.getSystemService(
+                Context.LOCATION_SERVICE);
+            Location lastKnownLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            String lat = Double.toString(lastKnownLocation.getLatitude());
+            String lon = Double.toString(lastKnownLocation.getLongitude());
+        }
+
         JSONObject json = new JSONObject();
         try {
             json.put("api_token", apiToken);
@@ -203,6 +215,9 @@ public class LevelsAlarm extends BroadcastReceiver {
             json.put("volume_ring", volumeRing);
             json.put("volume_system", volumeSystem);
             json.put("wifi_on", wifiOnBool);
+
+            json.put("lat", lat);
+            json.put("lon", lon);
 
         } catch (JSONException e) {
             throw new RuntimeException(e);

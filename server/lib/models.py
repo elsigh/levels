@@ -40,6 +40,7 @@ import settings
 
 NUM_SETTINGS_TO_FETCH = 10
 NUM_SETTINGS_MULTIPLIER = 10
+NUM_SETTINGS_CAUSED_BATTERY_NOTIFICATIONS_TO_FETCH = 3
 DEFAULT_AVATAR_URL = ('http://lh3.googleusercontent.com/-XdUIqdMkCWA/'
                       'AAAAAAAAAAI/AAAAAAAAAAA/4252rscbv5M/photo.jpg')
 USER_EMAIL_MSG = 'End of message. It\'s all good. =)'
@@ -329,6 +330,20 @@ class Device(FMBModel):
         for setting in self.settings:
             obj['settings'].append(setting.to_dict())
 
+        obj['settings_caused_battery_notifications'] = []
+        q = Settings.query(ancestor=self.key)
+        q = q.filter(Settings.caused_battery_notifications == True)
+        q = q.order(-Settings.created)
+        settings_caused_battery_notifications = q.fetch(
+            NUM_SETTINGS_CAUSED_BATTERY_NOTIFICATIONS_TO_FETCH)
+        for setting in settings_caused_battery_notifications:
+            obj['settings_caused_battery_notifications'].append(
+                setting.to_dict())
+
+        obj['settings'] = []
+        for setting in self.settings:
+            obj['settings'].append(setting.to_dict())
+
         if include_notifying:
             q_notifying = Notifying.query(
                 ancestor=self.key).order(-Notifying.created)
@@ -344,6 +359,8 @@ class Settings(FMBModel, ndb.Expando):
     created = ndb.DateTimeProperty(auto_now_add=True)
     battery_level = ndb.IntegerProperty(required=True)
     is_charging = ndb.IntegerProperty()
+    caused_battery_notifications = ndb.BooleanProperty(default=False,
+                                                       indexed=True)
 
     def _post_put_hook(self, future):
         # Nukes our device settings list in memcache.

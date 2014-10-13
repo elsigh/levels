@@ -425,8 +425,7 @@ def send_battery_notification_self(user_id, device_id):
 
     sent = models.NotificationSent(
         parent=user.key,
-        means=means
-    )
+        means=means)
     sent.put()
 
     message = ('Your %s %s battery is running low at 10%%.' %
@@ -471,6 +470,12 @@ class ApiSettingsHandler(ApiRequestHandler):
         is_this_update_over_notify_level = \
             int(battery_level) > int(device.notify_level)
 
+        settings = models.Settings(
+            parent=device.key
+        )
+        settings_data = self.pruned_json_request_data
+        settings.populate(**settings_data)
+
         logging.info('device.is_last_update_over_notify_level %s, '
                      'is_this_update_over_notify_level %s' %
                      (device.is_last_update_over_notify_level,
@@ -481,12 +486,10 @@ class ApiSettingsHandler(ApiRequestHandler):
             deferred.defer(send_battery_notifications,
                            self.current_user.key.id(),
                            device.key.id())
+            # Sets a bit on this settings record because it broke the
+            # threshold.
+            settings.caused_battery_notifications = True
 
-        settings = models.Settings(
-            parent=device.key
-        )
-        settings_data = self.pruned_json_request_data
-        settings.populate(**settings_data)
         settings.put()
 
         if ((is_this_update_over_notify_level !=
@@ -641,6 +644,20 @@ class ApiNotifyingDeleteHandler(ApiRequestHandler):
 
         notifying.key.delete()
         return self.output_json_success(notifying.to_dict())
+
+
+class ApiSettingsCausedBatteryNotificationsHandler(ApiRequestHandler):
+    def get(self):
+        device = self._get_device_by_device_key()
+        q = models.Settings.query(ancestor=device.key)
+        q = q.filter(models.Settings.caused_battery_notifications == True)
+        q = q.order(-models.NotificationSent.created)
+        notifications = q.fetch(5)
+
+        obj = {'settings': []}
+        for notification in notifications:
+            obj['settings'].append(notification.to_dict())
+        return self.output_json_success(obj)
 
 
 def send_notifying_message(user_id, to_type, to_name, to_means, send=True):

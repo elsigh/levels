@@ -211,6 +211,28 @@ fmb.models.SettingsCollection.prototype.comparator = function(model) {
 
 
 /**
+ * @extends {Backbone.Collection}
+ * @constructor
+ */
+fmb.models.SettingsCausedBatteryNotificationsCollection =
+    fmb.Collection.extend({
+  model: fmb.Model
+});
+
+
+/** @inheritDoc */
+fmb.models.SettingsCausedBatteryNotificationsCollection.prototype.comparator =
+    function(model) {
+  var d = new Date(model.get('created'));
+  return -d.getTime();
+};
+
+
+/******************************************************************************/
+
+
+
+/**
  * @extends {fmb.Model}
  * @constructor
  */
@@ -224,7 +246,9 @@ fmb.models.DeviceUnMapped = fmb.Model.extend({
   },
   submodels: {
     'notifying': fmb.models.NotifyingCollection,
-    'settings': fmb.models.SettingsCollection
+    'settings': fmb.models.SettingsCollection,
+    'settings_caused_battery_notifications':
+        fmb.models.SettingsCausedBatteryNotificationsCollection
   }
 });
 

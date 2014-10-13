@@ -26,10 +26,11 @@ builtins:
 - remote_api: on
 #- appstats: on
 
-
 inbound_services:
 #- warmup
 
+#includes:
+#  - lib/external/mapreduce/include.yaml
 
 # Magic skip configuration, do not edit.
 skip_files: |
@@ -54,6 +55,10 @@ handlers:
 # google app engine only stuff
 - url: /_ah/warmup
   script: warmup.app
+  login: admin
+
+- url: /mapreduce(/.*)?
+  script: lib.external.mapreduce.main.APP
   login: admin
 
 # Static files

@@ -21,6 +21,7 @@
         </config-file>
 
         <config-file target="AndroidManifest.xml" parent="/manifest">
+            <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
             <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
         </config-file>
 
