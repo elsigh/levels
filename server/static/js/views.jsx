@@ -113,7 +113,7 @@ fmb.views.DeviceInfo = React.createClass({
       <div>
         {this.props.model.get('is_user_device') &&
          this.props.model.has('key') &&
-          <button type="button"
+          <paper-button raised
             onClick={this.props.onClickRemove}
             className="fmb-remove device-remove"
             data-key={this.props.model.get('key')}>X</button>

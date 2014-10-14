@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-  <html>
+<html>
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="format-detection"
@@ -11,44 +11,64 @@
       href="/bower_components/bower-xcharts/xcharts.css">
     <link rel="stylesheet"
       href="/bower_components/offline/themes/offline-theme-chrome.css">
+    <link rel="stylesheet"
+      href="/bower_components/offline/themes/offline-language-english.css">
 
     <link rel="stylesheet" href="/css/base.css">
-    <link rel="stylesheet" href="/css/loading.css">
-    <link rel="stylesheet" href="/css/app.css">
     <link rel="stylesheet" href="/css/account.css">
     <link rel="stylesheet" href="/css/following.css">
+
+
+    <!-- [START imports] -->
+    <script
+      src="/bower_components/platform/platform.js">
+    </script>
+    <link rel="import"
+      href="/bower_components/core-header-panel/core-header-panel.html">
+    <link rel="import"
+      href="/bower_components/core-toolbar/core-toolbar.html">
+    <link rel="import"
+      href="/bower_components/core-animated-pages/core-animated-pages.html">
+    <link rel="import"
+      href="/bower_components/core-animated-pages/transitions/slide-from-right.html">
+    <link rel="import"
+      href="/bower_components/paper-button/paper-button.html">
+    <link rel="import"
+      href="/bower_components/paper-checkbox/paper-checkbox.html">
+    <link rel="import"
+      href="/bower_components/paper-tabs/paper-tabs.html">
+    <link rel="import"
+      href="/bower_components/paper-progress/paper-progress.html">
+
+    <!-- [END imports] -->
+
 
     <title>Levels</title>
 
   </head>
-  <body>
-    <div class="fmb-app">
-      <div class="nav">
-        <h1><span>Levels</span></h1>
-      </div>
-      <section class="tabs-c">
-        <div class="tabs">
-          <a href="account" class="account">Account</a><a href="following" class="following">Stats</a>
-        </div>
-      </section>
+  <body fullbleed layout vertical unresolved>
 
-      <div class="fmb-tab-frame-c">
-        <div class="fmb-tab-frame">
-          <section class="fmb-tab fmb-tab-how-it-works">
-            <div class="fmb-how-it-works"></div>
-          </section
-          ><section class="fmb-tab fmb-tab-account">
-            <div class="fmb-account"></div>
-          </section
-          ><section class="fmb-tab fmb-tab-following">
-            <div class="fmb-following"></div>
-          </section>
-        </div>
+    <core-header-panel flex class="fmb-app">
+      <paper-progress></paper-progress>
+
+      <core-toolbar>
+        <div class="logo"></div>
+        <paper-tabs class="bottom fit" selected="0">
+          <paper-tab href="account">Account</paper-tab>
+          <paper-tab href="following">Stats</paper-tab>
+        </paper-tabs>
+      </core-toolbar>
+
+      <div class="content" fit>
+        <core-animated-pages selected="1" transitions="slide-from-right">
+          <section class="fmb-how-it-works" data-tab-index="-1"></section>
+          <section class="fmb-account" data-tab-index="0"></section>
+          <section class="fmb-following" data-tab-index="1"></section>
+        </core-animated-pages>
       </div>
 
-      <div class="fmb-loading" style="display:none;"></div>
       <div class="fmb-msg-c" style="display:none;"><div class="fmb-msg"></div></div>
-    </div>
+    </core-header-panel>
 
     <script src="/js/zepto.min.js"></script>
     <script src="/bower_components/underscore/underscore.js"></script>
@@ -56,7 +76,7 @@
     <script src="/bower_components/hogan/web/builds/2.0.0/hogan-2.0.0.min.js"></script>
     <script src="/bower_components/d3/d3.min.js"></script>
     <script src="/bower_components/bower-xcharts/xcharts.min.js"></script>
-    <scrtup src="/bower_components/offline/offline.min.js"></script>
+    <script src="/bower_components/offline/offline.min.js"></script>
 
     <script src="/js/backbone.localStorage.js"></script>
     <script src="/js/backbone-identity-map.js"></script>
@@ -134,14 +154,12 @@
             </div>
 
             {{#user.is_gmail_account}}
-              <div class="label-c">
-                <label>
-                  <input
-                    type="checkbox"
-                    name="allow_gmail_lookup"
-                    {{#user.allow_gmail_lookup}}checked{{/user.allow_gmail_lookup}}>
-                  Use gmail name for my profile url.
-                </label>
+              <div layout horizontal class="gmail-acct-checkbox-c">
+                <paper-checkbox
+                  name="allow_gmail_lookup"
+                  {{#user.allow_gmail_lookup}}checked{{/user.allow_gmail_lookup}}>
+                </paper-checkbox>
+                <div flex>Use my gmail name as profile url.</div>
               </div>
             {{/user.is_gmail_account}}
 
@@ -167,8 +185,8 @@
     <script id="tpl_device" type="text/html">
       {{^is_user_device}}
         {{#key}}
-          <button type="button" class="fmb-remove device-remove"
-            data-key="{{key}}">X</button>
+          <paper-button class="fmb-remove device-remove"
+            data-key="{{key}}">X</paper-button>
         {{/key}}
       {{/is_user_device}}
 
@@ -185,12 +203,12 @@
 
       <div class="fmb-button-c">
         {{#is_ios}}
-          <button class="notifying-add-phone"
-            >add notification contact</button>
+          <paper-button raised class="notifying-add-phone colored"
+            >add notification contact</paper-button>
         {{/is_ios}}
         {{^is_ios}}
-          <button class="notifying-add-phone">by text</button>
-          <button class="notifying-add-email">by email</button>
+          <paper-button raised class="notifying-add-phone colored">by text</paper-button>
+          <paper-button raised class="notifying-add-email colored">by email</paper-button>
         {{/is_ios}}
       </div>
 
@@ -215,9 +233,9 @@
                 <td>
                   {{^is_user_email}}
                     {{#key}}
-                      <button type="button" class="fmb-remove notifying-remove"
+                      <paper-button class="fmb-remove notifying-remove"
                         data-key="{{key}}"
-                        data-means="{{means}}">X</button>
+                        data-means="{{means}}">X</paper-button>
                     {{/key}}
                     {{^key}}
                       <div class="fmb-loading"></div>
@@ -238,11 +256,6 @@
 
 
     <script id="tpl_following" type="text/html">
-      <!--
-      <div class="fmb-tab-header">
-        <button class="share">get more stats</button>
-      </div>
-      -->
       <p class="info-other-users">
         <span class="info">i</span>
         When someone sends you their Levels link,
@@ -273,8 +286,8 @@
 
           {{^is_current_user}}
             {{#key}}
-              <button type="button" class="fmb-remove following-user-remove"
-                data-key="{{key}}">X</button>
+              <paper-button class="fmb-remove following-user-remove"
+                data-key="{{key}}">X</paper-button>
             {{/key}}
             {{^key}}
               <div class="fmb-loading"></div>
@@ -385,4 +398,4 @@
       }
     </script>
   </body>
-  </html>
+</html>

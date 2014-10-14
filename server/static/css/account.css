@@ -71,9 +71,8 @@
   vertical-align: middle;
 }
 
-.fmb-account .label-c {
-  margin: 0.7em 0;
-  font-size: 85%;
+.fmb-account .user-info .gmail-acct-checkbox-c {
+  margin-top: 0.7em;
 }
 
 /* Device */

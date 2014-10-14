@@ -89,11 +89,16 @@ fmb.App.prototype.initialize = function(options) {
 
   //fmb.injectScript('http://192.168.1.9:9090/target/target-script-min.js#anonymous');
 
+  // Offline.js needs config for the app.
+  if (fmb.ua.IS_APP) {
+    Offline.options = {checks: {image: {
+      url: fmb.models.SERVER_PROD + '/img/favicon.png'
+    }, active: 'image'}};
+  }
+
   _.each(fmb.App.Routes, _.bind(function(route) {
     this.route(route.url, route.handler);
   }, this));
-
-  //this.tryWorkers();
 
   // Bound cordova events.
   document.addEventListener('pause',
@@ -122,29 +127,6 @@ fmb.App.prototype.initialize = function(options) {
     }, this));
   }, this));
 
-};
-
-
-/**
- * Yeah, it's worth a try.
- */
-fmb.App.prototype.tryWorkers = function() {
-
-  // Test for webWorkers
-  if (_.isUndefined(Worker)) {
-    fmb.log('######### No WebWorkers here, move along now.');
-    return;
-  }
-
-  fmb.log('######## We got WebWorkers!');
-
-  var worker = new Worker('js/worker.js');
-
-  worker.addEventListener('message', function(e) {
-    console.log('######## Worker said: ', e.data);
-  }, false);
-
-  worker.postMessage({'cmd': 'start'});
 };
 
 

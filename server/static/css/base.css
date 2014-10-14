@@ -30,36 +30,84 @@ footer {
   text-align: center;
 }
 
-h1 {
-  position: fixed;
-  box-sizing: border-box;
-  top: 0;
-  z-index: 2;
-  width: 100%;
-  font-size: 1.6em;
-  margin: 0;
-  padding: 10px;
+/** START Polymer stuffs. */
+
+core-toolbar {
   background-color: #ccc;
+  height: 60px;
+}
+
+core-toolbar .logo {
   background-image: url(../img/logo.png);
-  background-position: 10px 10px;
   background-repeat: no-repeat;
+  background-position: 0 10px;
   background-size: 100px auto;
-  font-weight: 400;
-  border-bottom: 2px solid #3b97d1;
-
-  /* otherwise it disappears . */
-  -webkit-transform: translateZ(0);
+  margin: 0;
+  min-height: 64px;
+  padding: 0;
+  width: 100%;
 }
 
-h1 > a {
-  display: inline-block;
-  width: 150px;
+paper-tabs {
+  border-top: 1px solid #ddd;
+  display: none;
+  -webkit-box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  -moz-box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
 }
 
-h1 > a > span,
-h1 > span {
-  visibility: hidden;
+.fmb-signed-in core-toolbar {
+  height: 100px;
 }
+
+.fmb-signed-in paper-tabs {
+  display: block;
+}
+
+paper-button {
+  background: #3b97d1;
+  color: #fff;
+  min-width: 0;
+  text-shadow: none;
+}
+
+core-header-panel .content {
+  padding: 20px 10px 0;
+}
+
+div[horizontal] paper-checkbox ~ div {
+  font-size: 85%;
+  margin-left: 1em;
+}
+
+paper-progress {
+  position: fixed;
+  height: 3px;
+  left: 0;
+  right: 0;
+  top: 0;
+  width: 100%;
+  z-index: 2;
+}
+
+paper-progress::shadow #activeProgress {
+  background: -webkit-repeating-linear-gradient(
+      -45deg,
+      #3b97d1,
+      #3b97d1 10px,
+      #465298 30px);
+  background: repeating-linear-gradient(
+      -45deg,
+      #3b97d1,
+      #3b97d1 10px,
+      #465298 30px);
+
+  transition: all 0.25s ease-out;
+  -webkit-transition: all 0.25s ease-out;
+}
+
+/** END Polymer stuffs. */
+
 
 h2 {
   font-size: 1.2em;
@@ -145,9 +193,6 @@ button:active {
   border: 0;
   right: 0;
   padding: 3px 7px;
-  color: #ccc;
-  text-shadow: none;
-  background: #aaa;
   border-radius: 2px;
 }
 
@@ -212,93 +257,6 @@ body.fmb-app-container,
   left: 0;
   bottom: 0;
   overflow: hidden;
-}
-
-.fmb-signed-in .fmb-tab-frame-c {
-  top: 110px;
-}
-
-.fmb-tab-frame {
-  white-space: nowrap;
-  height: 100%;
-
-  /* errybody gets their own layer or shit goes crazy */
-  -webkit-transform: translateZ(0);
-}
-
-.fmb-tab-frame.fmb-active {
-  -webkit-transition: all 0.5s ease-in-out;
-  transition: all 0.5s ease-in-out;
-}
-
-.fmb-tab {
-  box-sizing: border-box;
-  padding: 20px 10px 0;
-  height: 100%;
-  width: 100%;
-  vertical-align: top;
-  white-space: normal;  /* counteracts nowrap on tab-c */
-
-  display: inline-block;
-
-  overflow: auto;
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-
-.fmb-tab-header h2 {
-  display: inline-block;
-  margin: 0 1em 0 0;
-  padding: 0;
-  vertical-align: bottom;
-}
-
-.tabs-c {
-  display: none;
-}
-
-.fmb-signed-in .tabs-c {
-  display: block;
-}
-
-.tabs {
-  background: #ccc;
-  width: 100%;
-  -webkit-box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
-  -moz-box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
-}
-
-.tabs a,
-.tabs span {
-  display: inline-block;
-  color: #111;
-  text-align: center;
-  text-shadow: 0 1px 1px #fff;
-  padding-top: 1em;
-  padding-bottom: 1em;
-  -webkit-box-sizing: border-box;
-  width: 49.9%;
-  text-decoration: none;
-  border-right: 1px solid #eee;
-  border-bottom: 1px solid #eee;
-}
-.tabs a:last-child,
-.tabs span:last-child {
-  border-right: 0;
-}
-
-.Xtabs a:active,
-.Xtabs span:active,
-.tabs a.selected,
-.tabs span.selected {
-  -moz-box-shadow: inset 0 0 1em rgba(0, 0, 0, 0.2);
-  -webkit-box-shadow: inset 0 0 1em rgba(0, 0, 0, 0.2);
-  box-shadow: inset 0 0 1em rgba(0, 0, 0, 0.2);
-}
-
-.content {
-  padding: 10px;
 }
 
 .fmb-button-c {
