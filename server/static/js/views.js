@@ -326,25 +326,53 @@ fmb.views.App.prototype.setCurrentView = function(view) {
 };
 
 
+/** @private */
+fmb.views.App.prototype.startProgressAnimation_ = function() {
+  if (this.progress_.value !== 0) {
+    return;  // already going.
+  }
+  this.progress_.value = 20;
+  this.progressInterval_ = window.setInterval(_.bind(function() {
+    var delta = this.progress_.value + ((100 - this.progress_.value) / 15);
+    this.progress_.value = delta;
+  }, this), 250);
+
+};
+
+
+/** @private */
+fmb.views.App.prototype.endProgressAnimation_ = function() {
+  window.clearInterval(this.progressInterval_);
+  this.progressInterval_ = null;
+
+  var progress = this.progress_;
+  progress.value = 100;
+
+  var transitionEnd = 'onwebkittransitionend' in window ?
+      'webkitTransitionEnd' :
+      'transitionend';
+
+  // Done going to 100.
+  $(progress).on(transitionEnd, function() {
+    progress.style.opacity = 0;
+    progress.value = 0;
+    // Done going to 0.
+    $(progress).on(transitionEnd, function() {
+        progress.style.opacity = 1;
+    });
+  });
+};
+
+
 /** @override */
 fmb.views.App.prototype.render = function() {
   this.progress_ = this.$('paper-progress').get(0);
 
-  $(document).on('xhrLoading', _.bind(function(e) {
-    this.progress_.value = 40;
-  }, this));
-  $(document).on('xhrLoadingDone', _.bind(function(e) {
-    this.progress_.value = 100;
-    _.delay(_.bind(function() {
-      if (this.progress_.value == 100) {
-        this.progress_.value = 0;
-      }
-    }, this), 300);
-  }, this));
+  $(document).on('xhrLoading', _.bind(this.startProgressAnimation_, this));
+  $(document).on('xhrLoadingDone', _.bind(this.endProgressAnimation_, this));
 
   this.tabs_ = this.$('paper-tabs').get(0);
   this.pages_ = this.$('core-animated-pages').get(0);
-
 
   this.viewAccount = new fmb.views.Account({
     model: this.model.user
@@ -931,6 +959,7 @@ fmb.views.Following.prototype.setIsActive = function(isActive) {
   this.model.stopFetchPoll();
   this.user.stopFetchPoll();
   if (isActive) {
+    this.render();
     _.delay(_.bind(function() {
       this.model.startFetchPoll(60 * 1000);
       this.user.startFetchPoll(60 * 1000);
@@ -961,13 +990,15 @@ fmb.views.Following.prototype.render = function() {
     this.$el.html(fmb.views.getTemplateHtml('following', {}));
     this.$table = this.$('table');
 
-    // Add yo-self into the view.
-    this.addSubview_(this.user);
   }
+
+  // Add yo-self into the view.
+  this.addSubview_(this.user);
 
   this.model.each(_.bind(function(model) {
     this.addSubview_(model);
   }, this));
+
   return this;
 };
 
@@ -986,6 +1017,9 @@ fmb.views.Following.prototype.addSubview_ = function(model) {
     });
     this.subViews_[model.cid].render();
     this.$table.append(this.subViews_[model.cid].$el);
+  } else {
+    // re-render
+    this.subViews_[model.cid].render();
   }
 };
 
@@ -1065,6 +1099,9 @@ fmb.views.FollowingUser.prototype.render = function() {
       });
       this.subViews_[model.cid].render();
       this.$el.append(this.subViews_[model.cid].$el);
+    } else {
+      // re-render
+      this.subViews_[model.cid].render();
     }
   }, this));
 
@@ -1139,6 +1176,11 @@ fmb.views.FollowingDevice.prototype.renderGraph_ = function() {
   fmb.log('fmb.views.FollowingDevice renderGraph_', this.model.id);
   if (!this.model.get('settings').length) {
     fmb.log('No setting data to render chart with.');
+    return;
+  }
+
+  if (this.$('.battery-graph').parent().width() === 0) {
+    fmb.log('Not in the render tree yet, this will fail - bail.');
     return;
   }
 

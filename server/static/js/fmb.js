@@ -134,7 +134,6 @@ fmb.injectScript = function(src) {
 fmb.log = fmb.ua.IS_APP ?
     fmb.getWebViewLogger_() : fmb.getConsoleLogger_();
 
-
 /**
  * @param {Object} obj An object to clone.
  * @return {Object} A deep clone of the passed in object.
