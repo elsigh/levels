@@ -130,6 +130,10 @@ fmb.App.prototype.initialize = function(options) {
 };
 
 
+/** @type {string} */
+fmb.App.ROOT = '/app/';
+
+
 /**
  * Initializes Backbone.history in our app.
  * @private
@@ -138,7 +142,7 @@ fmb.App.prototype.initHistory_ = function() {
   fmb.log('fmb.App.initHistory_' + window.location.hash);
 
   var usePushState = true;
-  var root = '/app/';
+  var root = fmb.App.ROOT;
   var silent = false;
 
   fmb.log('Backbone.history.start', usePushState, silent);

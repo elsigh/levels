@@ -331,14 +331,14 @@ class Device(FMBModel):
             obj['settings'].append(setting.to_dict())
 
         obj['settings_caused_battery_notifications'] = []
-        # q = Settings.query(ancestor=self.key)
-        # q = q.filter(Settings.caused_battery_notifications == True)
-        # q = q.order(-Settings.created)
-        # settings_caused_battery_notifications = q.fetch(
-        #     NUM_SETTINGS_CAUSED_BATTERY_NOTIFICATIONS_TO_FETCH)
-        # for setting in settings_caused_battery_notifications:
-        #     obj['settings_caused_battery_notifications'].append(
-        #         setting.to_dict())
+        q = Settings.query(ancestor=self.key)
+        q = q.filter(Settings.caused_battery_notifications == True)
+        q = q.order(-Settings.created)
+        settings_caused_battery_notifications = q.fetch(
+            NUM_SETTINGS_CAUSED_BATTERY_NOTIFICATIONS_TO_FETCH)
+        for setting in settings_caused_battery_notifications:
+            obj['settings_caused_battery_notifications'].append(
+                setting.to_dict())
 
         obj['settings'] = []
         for setting in self.settings:

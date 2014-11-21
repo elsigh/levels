@@ -16,7 +16,7 @@ var child = require('child_process');
 var pathToCordovaAssets = path.join('.', 'www');
 var pathToCordovaIndex = path.join(pathToCordovaAssets, 'index.html');
 
-var assetDirs = ['css', 'js', 'img', 'bower_components'];
+var assetDirs = ['css', 'js', 'img', 'bower_components', 'components'];
 
 
 /**

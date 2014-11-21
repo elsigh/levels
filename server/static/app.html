@@ -37,6 +37,8 @@
       href="/bower_components/core-animated-pages/core-animated-pages.html">
     <link rel="import"
       href="/bower_components/core-animated-pages/transitions/slide-from-right.html">
+
+
     <link rel="import"
       href="/bower_components/paper-button/paper-button.html">
     <link rel="import"
@@ -45,6 +47,10 @@
       href="/bower_components/paper-tabs/paper-tabs.html">
     <link rel="import"
       href="/bower_components/paper-progress/paper-progress.html">
+
+    <link rel="import" href="/components/core-style.html">
+    <link rel="import" href="/components/how-it-works.html">
+    <link rel="import" href="/components/device-battery-notifications.html">
 
     <!-- [END imports] -->
 
@@ -59,7 +65,7 @@
 
       <core-toolbar>
         <div class="logo"></div>
-        <paper-tabs class="bottom fit" selected="0">
+        <paper-tabs noink class="bottom fit" selected="0">
           <paper-tab href="account">Account</paper-tab>
           <paper-tab href="following">Stats</paper-tab>
         </paper-tabs>
@@ -67,7 +73,9 @@
 
       <div class="content" fit>
         <core-animated-pages selected="1" transitions="slide-from-right">
-          <section class="fmb-how-it-works" data-tab-index="-1"></section>
+          <section class="fmb-how-it-works" data-tab-index="-1">
+            <how-it-works appRoot="/app/"></how-it-works>
+          </section>
           <section class="fmb-account" data-tab-index="0"></section>
           <section class="fmb-following" data-tab-index="1"></section>
         </core-animated-pages>
@@ -93,30 +101,8 @@
     <script src="/js/models.js"></script>
     <script src="/js/views.js"></script>
 
-    <script id="tpl_how_it_works" type="text/html">
-      <h2>How Levels Works</h2>
-      <p>
-        Levels sends your battery status to our server every
-        10 minutes.
-      </p>
-      <p>
-        When your battery goes down below 10%
-        we'll send you, and anyone you'd like, a notification.
-        Levels sends, at most, one message every 12 hours.
-      </p>
-      <p>
-        You can install Levels on your phones, tablets, remote controls,
-        etc ... and then manage all your notification settings in the App.
-      </p>
-      <p>
-        <a href="account" class="fmb-app-link fmb-btn"
-          >Get this party started!</a>
-      </p>
-    </script>
-
     <script id="tpl_account" type="text/html">
       {{^user.api_token}}
-        <!--<h2>Thanks for trying the App!</h2>-->
 
         <p>
           Levels will send you, and anyone you configure, a
@@ -169,19 +155,6 @@
               </div>
             {{/user.is_gmail_account}}
 
-            <!--
-            <div>
-              www.levelsapp.com/n/{{user.unique_profile_str}}
-            </div>
-            <label>
-              <input
-                type="checkbox"
-                name="allow_phone_lookup"
-                {{#user.allow_phone_lookup}}checked{{/user.allow_phone_lookup}}>
-              Others can use my phone number for reverse lookups.
-            </label>
-            -->
-
           </div>
         </div>
 
@@ -200,6 +173,7 @@
         {{platform}}
         {{name}}
       </h3>
+
     </script>
 
     <script id="tpl_notifying" type="text/html">
@@ -209,12 +183,12 @@
 
       <div class="fmb-button-c">
         {{#is_ios}}
-          <paper-button raised class="notifying-add-phone colored"
+          <paper-button class="notifying-add-phone colored"
             >add notification contact</paper-button>
         {{/is_ios}}
         {{^is_ios}}
-          <paper-button raised class="notifying-add-phone colored">by text</paper-button>
-          <paper-button raised class="notifying-add-email colored">by email</paper-button>
+          <paper-button class="notifying-add-phone colored">by text</paper-button>
+          <paper-button class="notifying-add-email colored">by email</paper-button>
         {{/is_ios}}
       </div>
 
@@ -350,10 +324,12 @@
 
     <script>
       // Catch-all.
+      /*
       window.onerror = function(message, url, lineNumber) {
         window.console.log('window.onerror GLOBAL FAIL: ' + message + ', ' +
             url + ', ' + lineNumber);
       };
+      */
 
       // Hogan.
       window.templates = {};

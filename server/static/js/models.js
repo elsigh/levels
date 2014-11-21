@@ -789,9 +789,11 @@ fmb.models.User.prototype.launchSync_ = function() {
     });
 
     // Our user API doesn't return following data.
+    /*
     this.get('following').fetch({
       remove: fmb.App.launchedWithAddUserBit ? false : true
     });
+    */
 
   }, this));
 };

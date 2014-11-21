@@ -187,12 +187,20 @@ public class LevelsAlarm extends BroadcastReceiver {
         }
 
         // Get last known location, if battery percent <= 15.
+        String lat = "";
+        String lon = "";
+        Location lastKnownLocation = null;
         if (batteryPercent <= 15) {
             LocationManager locationManager = (LocationManager) context.getSystemService(
                 Context.LOCATION_SERVICE);
-            Location lastKnownLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-            String lat = Double.toString(lastKnownLocation.getLatitude());
-            String lon = Double.toString(lastKnownLocation.getLongitude());
+            lastKnownLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            if (lastKnownLocation == null) {
+                lastKnownLocation = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+            }
+            if (lastKnownLocation != null) {
+                lat = Double.toString(lastKnownLocation.getLatitude());
+                lon = Double.toString(lastKnownLocation.getLongitude());
+            }
         }
 
         JSONObject json = new JSONObject();

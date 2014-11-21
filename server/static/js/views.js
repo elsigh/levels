@@ -197,7 +197,7 @@ fmb.views.App = Backbone.View.extend({
 
 /** @inheritDoc */
 fmb.views.App.prototype.initialize = function(options) {
-  fmb.log('fmb.views.App.initialize', this.model);
+  fmb.log('fmb.views.App initialize', this.model);
 
   // For some special scroll/overflow control.
   $('html,body').addClass('fmb-app-container');
@@ -221,10 +221,23 @@ fmb.views.App.prototype.initialize = function(options) {
  * @private
  */
 fmb.views.App.prototype.onClickAppLink_ = function(e) {
-  fmb.log('fmb.views.App.onClickAppLink_', e);
+  fmb.log('fmb.views.App onClickAppLink_', e);
   e.preventDefault();
-  window['app'].navigate($(e.currentTarget).attr('href'),
-                         {trigger: true});
+  var href = $(e.currentTarget).attr('href');
+  window['app'].navigate(href, {trigger: true});
+};
+
+
+/**
+ * For clicks in a polymer page.
+ * @param {Event} e A click event.
+ * @private
+ */
+fmb.views.App.prototype.onClickPageNavigate_ = function(e) {
+  e.preventDefault();
+  var href = e.detail.href.replace(fmb.App.ROOT, '');
+  fmb.log('fmb.views.App onClickPageNavigate_', href);
+  window['app'].navigate(href, {trigger: true});
 };
 
 
@@ -241,7 +254,7 @@ fmb.views.App.prototype.setUserSignedInClass_ = function() {
  * @private
  */
 fmb.views.App.prototype.onClickShare_ = function(e) {
-  fmb.log('fmb.views.App.onClickShare_', e);
+  fmb.log('fmb.views.App onClickShare_', e);
 
   e.preventDefault();
 
@@ -280,7 +293,7 @@ fmb.views.App.prototype.onClickShare_ = function(e) {
  * @private
  */
 fmb.views.App.prototype.onClickTab_ = function(e) {
-  fmb.log('fmb.views.App.onClickTab_', e);
+  fmb.log('fmb.views.App onClickTab_', e);
   e.preventDefault();
   if (!this.model.user.get('api_token')) {
     fmb.log('Gotta get a api_token before navigating.');
@@ -310,7 +323,11 @@ fmb.views.App.prototype.setCurrentView = function(view) {
         this.currentView.setIsActive(false);
   }
 
-  var tabIndex = Number(view.$el.data('tab-index'));
+  // TODO(elsigh): Nuke when all polymer.
+  var tabIndex = view.getAttribute ?
+      Number(view.getAttribute('data-tab-index')) :  // polymer
+      Number(view.$el.data('tab-index'));            // backbone
+
   if (this.tabs_.selected != tabIndex) {
     this.tabs_.selected = tabIndex;
   }
@@ -386,11 +403,11 @@ fmb.views.App.prototype.render = function() {
   });
   this.viewFollowing.render();
 
+  this.viewHowItWorks = $('.fmb-how-it-works').get(0);
 
-  this.viewHowItWorks = new fmb.views.HowItWorks({
-    model: this.model.user
-  });
-  this.viewHowItWorks.render();
+  this.$('how-it-works').get(0).addEventListener('fmb-page-navigate',
+      _.bind(this.onClickPageNavigate_, this));
+
 
   this.rendered_ = true;
 };
@@ -411,13 +428,9 @@ fmb.views.App.prototype.transitionPage = function(route) {
     newView = this.viewAccount;
 
   } else if (_.isEqual(fmb.App.Routes.FOLLOWING, route)) {
-    if (!this.viewFollowing) {
-    }
     newView = this.viewFollowing;
 
   } else if (_.isEqual(fmb.App.Routes.HOW_IT_WORKS, route)) {
-    if (!this.viewHowItWorks) {
-    }
     newView = this.viewHowItWorks;
   }
 
@@ -735,9 +748,16 @@ fmb.views.Device.prototype.render = function() {
 
     this.viewNotifying.render();
     this.$el.append(this.viewNotifying.$el);
+
+    this.$deviceBatteryNotifications = $('<device-battery-notifications>');
+    this.$el.append(this.$deviceBatteryNotifications);
   }
+
   var templateData = this.model.getTemplateData();
   this.$device.html(fmb.views.getTemplateHtml('device', templateData));
+  this.$deviceBatteryNotifications.get(0).notifications =
+      templateData['settings_caused_battery_notifications'];
+
   return this;
 };
 

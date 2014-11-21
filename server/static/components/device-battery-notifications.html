@@ -1,0 +1,46 @@
+
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="core-style.html">
+
+<polymer-element name="device-battery-notifications" attributes="notifications">
+  <style>
+    ::host {
+      display: block;
+      padding: 10px;
+    }
+  </style>
+  <template>
+    <core-style ref="fmb"></core-style>
+    <style>
+      table {
+        font-size: 85%;
+        margin-top: 0;
+        width: auto;
+      }
+      td {
+        border: 0;
+        white-space: nowrap;
+      }
+    </style>
+    <section>
+      <h4>Recent Notifications</h4>
+      <table>
+        <tbody>
+          <template repeat="{{notifications}}">
+            <tr>
+              <td data-datetime="{{created}}">{{created_pretty}}</td>
+              <td>
+                <a href="http://google.com/maps/search/{{lat}},{{lon}}"
+                   target="_blank">{{lat}}, {{lon}}</a>
+              </td>
+            </tr>
+          </template>
+        </tbody>
+      </table>
+    </section>
+  </template>
+  <script>
+    Polymer();
+  </script>
+
+</polymer-element>

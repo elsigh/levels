@@ -90,6 +90,8 @@ handlers:
 # Serve static contents from root paths
 - url: /bower_components
   static_dir: static/bower_components
+- url: /components
+  static_dir: static/components
 - url: /css
   static_dir: static/css
 - url: /js

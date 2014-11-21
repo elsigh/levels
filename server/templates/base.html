@@ -23,6 +23,22 @@
     <link rel="shortcut icon" href="/static/img/favicon.png">
     <link rel="stylesheet" href="/static/css/base.css">
 
+    <style>
+      .nav {
+        height: 55px;
+        /* otherwise it disappears . */
+        -webkit-transform: translateZ(0);
+      }
+
+      .nav .sign-in-out {
+        position: fixed;
+        display: inline-block;
+        right: 10px;
+        z-index: 3;
+        margin-top: 0.8em;
+      }
+    </style>
+
     {% if current_user %}
       <script>
         var _user_id = '{{current_user.email}}';
