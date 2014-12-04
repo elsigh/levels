@@ -375,7 +375,8 @@ fmb.views.App.prototype.endProgressAnimation_ = function() {
     progress.value = 0;
     // Done going to 0.
     $(progress).on(transitionEnd, function() {
-        progress.style.opacity = 1;
+      progress.style.opacity = 1;
+      $(progress).off();
     });
   });
 };

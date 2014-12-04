@@ -61,14 +61,12 @@
     <preference name="disable-cursor" value="false" />
     <preference name="android-minSdkVersion" value="13" />
     <preference name="android-installLocation" value="auto" />
-    <preference name="AndroidLaunchMode" value="singleTask" />
+    <preference name="AndroidLaunchMode" value="singleTop" />
     <preference name="disallowOverscroll" value="true" />
 
-    <gap:splash src="config/android/res/drawable-ldpi/splash.9.png" gap:platform="android" gap:qualifier="ldpi" />
-    <gap:splash src="config/android/res/drawable-mdpi/splash.9.png" gap:platform="android" gap:qualifier="mdpi" />
-    <gap:splash src="config/android/res/drawable-hdpi/splash.9.png" gap:platform="android" gap:qualifier="hdpi" />
-    <gap:splash src="config/android/res/drawable-xhdpi/splash.9.png" gap:platform="android" gap:qualifier="xhdpi" />
-    <gap:splash src="config/android/res/drawable-xxhdpi/splash.9.png" gap:platform="android" gap:qualifier="xxhdpi" />
+    <preference name="SplashScreen" value="splash" />
+    <preference name="SplashScreenDelay" value="10000" />
+
     <!--
     <icon src="icon.png" />
     <icon gap:density="ldpi" gap:platform="android" src="res/icon/android/icon-36-ldpi.png" />

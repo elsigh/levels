@@ -1,0 +1,36 @@
+
+<link rel="import"
+      href="../bower_components/webcomponentsjs/webcomponents.js">
+<link rel="import" href="../bower_components/google-apis/google-maps-api.html">
+
+<polymer-element name="reverse-geocode" attributes="latitude longitude">
+  <template>
+    <google-maps-api
+      apiKey="AIzaSyBjx5QCWYL0gunJaPbytztWgkhChLX5X8c"
+      version="3.exp"
+      on-api-load="{{mapApiLoaded}}"></google-maps-api>
+    <span id="output"></span>
+  </template>
+  <script>
+    Polymer({
+      domReady: function() {
+        // It's kinda like graceful degradation.
+        this.$.output.textContent = this.latitude + ', ' + this.longitude;
+      },
+      mapApiLoaded: function() {
+        var geocoder = new google.maps.Geocoder();
+        var latlng = new google.maps.LatLng(this.latitude, this.longitude);
+        geocoder.geocode({'latLng': latlng}, function(results, status) {
+          if (status == google.maps.GeocoderStatus.OK) {
+            if (results[1] && results[1].formatted_address) {
+              this.$.output.textContent = results[1].formatted_address;
+            }
+          } else {
+            //alert('Geocoder failed due to: ' + status);
+          }
+        }.bind(this));
+      }
+    });
+  </script>
+
+</polymer-element>

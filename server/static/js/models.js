@@ -721,8 +721,6 @@ fmb.models.User.prototype.setUserKey_ = function() {
  * Get us all set up.
  */
 fmb.models.User.prototype.createUserDevice = function() {
-  fmb.log('** CREATE USER DEVICE the first time');
-
   // We only create a user device if running in an "app" context. Otherwise
   // we might just want to show/run the UI as though we're a client
   // in a browser with no background services (aka the web).
@@ -730,6 +728,8 @@ fmb.models.User.prototype.createUserDevice = function() {
     fmb.log('**** NOT createUserDevice - is not app or sim.');
     return;
   }
+
+  fmb.log('** CREATE USER DEVICE the first time');
 
   var device = new fmb.models.Device(null, {
     isUserDevice: true
@@ -789,11 +789,9 @@ fmb.models.User.prototype.launchSync_ = function() {
     });
 
     // Our user API doesn't return following data.
-    /*
     this.get('following').fetch({
       remove: fmb.App.launchedWithAddUserBit ? false : true
     });
-    */
 
   }, this));
 };

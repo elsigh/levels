@@ -27,7 +27,7 @@
 
     <!-- [START imports] -->
     <script
-      src="/bower_components/platform/platform.js">
+      src="/bower_components/webcomponentsjs/webcomponents.js">
     </script>
     <link rel="import"
       href="/bower_components/core-header-panel/core-header-panel.html">
@@ -49,6 +49,7 @@
       href="/bower_components/paper-progress/paper-progress.html">
 
     <link rel="import" href="/components/core-style.html">
+    <link rel="import" href="/components/datetime-pretty.html">
     <link rel="import" href="/components/how-it-works.html">
     <link rel="import" href="/components/device-battery-notifications.html">
 
@@ -62,10 +63,9 @@
 
     <core-header-panel flex class="fmb-app">
       <paper-progress></paper-progress>
-
       <core-toolbar>
         <div class="logo"></div>
-        <paper-tabs noink class="bottom fit" selected="0">
+        <paper-tabs class="bottom fit" selected="0">
           <paper-tab href="account">Account</paper-tab>
           <paper-tab href="following">Stats</paper-tab>
         </paper-tabs>
@@ -286,9 +286,9 @@
             style="background-image:-webkit-gradient(linear, left top, right top, color-stop({{settings.0.battery_level}}%, #3b97d1), color-stop({{settings.0.battery_level}}%, #666666))">
             {{settings.0.battery_level}}%
           </div>
-          <div class="battery-created">
-            {{settings.0.created_pretty}}
-          </div>
+          <datetime-pretty
+            class="battery-created"
+            datetime="{{settings.0.created}}"></datetime-pretty>
         </div>
 
         <ul class="counters">
@@ -339,6 +339,28 @@
         window.templates[name] = Hogan.compile(html);
       });
 
+
+      window.isPolymerReady = false;
+      window.polymerStartTime = (new Date).getTime();
+      window.addEventListener('polymer-ready', function(e) {
+        window.polymerReadyTime = (new Date).getTime();
+        var time = window.polymerReadyTime - window.polymerStartTime;
+        fmb.log('POLYMER READY took', time, 'ms.')
+        window.isPolymerReady = true;
+      });
+
+      // We really need to wait until polymer is ready before starting.
+      var createAppInstance = function() {
+        if (!window.isPolymerReady) {
+          window.addEventListener('polymer-ready', function(e) {
+            window.isPolymerReady = true;
+            createAppInstance();
+          });
+          return;
+        }
+        window['app'] = new fmb.App();
+      }
+
       // Super-wild-west-runtime-unit-testing.
       if (window.location.search.indexOf('?test=1') !== -1) {
         var testFiles = [
@@ -353,7 +375,7 @@
       // Load the app as a cordova app.
       } else if (typeof cordova != 'undefined') {
         document.addEventListener('deviceready', function() {
-          window['app'] = new fmb.App();
+          createAppInstance();
         }, false);
 
       // Load the app ala webapp style.
@@ -366,10 +388,11 @@
         };
 
         $(document).ready(function() {
-          window['app'] = new fmb.App();
+          createAppInstance();
         });
       }
 
+      // Be cool to use the google-apis polymer element for this.
       if (window.location.href.match(/levelsapp.com/i)) {
         (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
         (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),

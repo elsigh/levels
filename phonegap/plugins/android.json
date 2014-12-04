@@ -37,11 +37,11 @@
                             "count": 1
                         },
                         {
-                            "xml": "<feature name=\"ContactsPlugin\"><param name=\"android-package\" value=\"com.elsigh.contacts.ContactsPlugin\" /></feature>",
+                            "xml": "<feature name=\"LevelsPlugin\"><param name=\"android-package\" value=\"com.elsigh.levels.LevelsPlugin\" /></feature>",
                             "count": 1
                         },
                         {
-                            "xml": "<feature name=\"LevelsPlugin\"><param name=\"android-package\" value=\"com.elsigh.levels.LevelsPlugin\" /></feature>",
+                            "xml": "<feature name=\"ContactsPlugin\"><param name=\"android-package\" value=\"com.elsigh.contacts.ContactsPlugin\" /></feature>",
                             "count": 1
                         }
                     ],
@@ -99,15 +99,15 @@
                             "count": 1
                         },
                         {
-                            "xml": "<uses-permission android:name=\"android.permission.READ_CONTACTS\" />",
-                            "count": 1
-                        },
-                        {
                             "xml": "<uses-permission android:name=\"android.permission.ACCESS_FINE_LOCATION\" />",
                             "count": 1
                         },
                         {
                             "xml": "<uses-permission android:name=\"android.permission.RECEIVE_BOOT_COMPLETED\" />",
+                            "count": 1
+                        },
+                        {
+                            "xml": "<uses-permission android:name=\"android.permission.READ_CONTACTS\" />",
                             "count": 1
                         }
                     ],
@@ -173,10 +173,10 @@
         "org.chromium.identity": {
             "PACKAGE_NAME": "com.elsigh.levels"
         },
-        "com.elsigh.contacts": {
+        "com.elsigh.levels": {
             "PACKAGE_NAME": "com.elsigh.levels"
         },
-        "com.elsigh.levels": {
+        "com.elsigh.contacts": {
             "PACKAGE_NAME": "com.elsigh.levels"
         }
     },

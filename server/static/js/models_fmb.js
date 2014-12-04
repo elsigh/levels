@@ -283,6 +283,7 @@ fmb.Model.prototype.set = function(key, value, options) {
         // Allow "null" to pass through.
         if (!_.isNull(data[submodelName])) {
           var submodel = this.get(submodelName);
+          //fmb.log('SETTING SUBMODEL', submodelName, data[submodelName])
           submodel.set(data[submodelName], options);
           delete data[submodelName];
         }

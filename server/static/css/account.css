@@ -90,6 +90,13 @@
   margin: 10px 10px 0 0;
 }
 
+.fmb-device device-battery-notifications {
+  display: block;
+  border-top: 1px solid #eee;
+  margin-top: 1em;
+  padding-top: 0.5em;
+}
+
 /* Notifying table */
 .fmb-notifying .info-headline {
   font-size: 80%;

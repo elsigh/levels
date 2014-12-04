@@ -16,12 +16,10 @@
   -webkit-border-radius: 25px;
   border-radius: 25px;
   color: #fff;
-  text-shadow: none;
   padding: 5px 10px;
   float: left;
   margin-right: 0.5em;
   font-weight: bold;
-  text-shadow: none;
 }
 
 .fmb-following > table {
@@ -102,7 +100,6 @@
 .fmb-following-device .battery-level {
   font-size: 1.5em;
   color: #fff;
-  text-shadow: 0 1px 1px #111;
   display: inline-block;
   border: 2px solid #666;
   border-radius: 5px;
@@ -131,6 +128,7 @@
 }
 
 .fmb-following-device .battery-created {
+  display: block;
   margin-top: 4px;
   font-size: 85%;
   font-weight: 500;

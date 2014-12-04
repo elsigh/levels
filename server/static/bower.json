@@ -16,11 +16,11 @@
     "backbone": "",
     "d3": "",
     "hogan": "",
+    "google-apis": "",
     "bower-xcharts": "",
     "offline": "",
     "underscore": "",
     "zeptojs": "",
-    "font-roboto": "",
     "paper-elements": "Polymer/paper-elements#master",
     "core-elements": "Polymer/core-elements#master"
   }
