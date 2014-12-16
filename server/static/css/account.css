@@ -53,14 +53,15 @@
 }
 
 .fmb-account .user-info .share {
-  border: 1px solid #ddd;
+  border: 1px solid #bbb;
+  background: #ddd;
   border-radius: 4px;
   display: inline-block;
   padding: 7px 5px 5px;
   vertical-align: middle;
 }
 
-.fmb-account .user-info .share::after {
+.fmb-account .user-info .share::before {
   background: url(../img/share_this.png);
   content: "";
   display: inline-block;
@@ -71,9 +72,8 @@
   vertical-align: middle;
 }
 
-.fmb-account .label-c {
-  margin: 0.7em 0;
-  font-size: 85%;
+.fmb-account .user-info .gmail-acct-checkbox-c {
+  margin-top: 0.7em;
 }
 
 /* Device */
@@ -88,6 +88,13 @@
 
 .fmb-device .device > .fmb-remove {
   margin: 10px 10px 0 0;
+}
+
+.fmb-device device-battery-notifications {
+  display: block;
+  border-top: 1px solid #eee;
+  margin-top: 1em;
+  padding-top: 0.5em;
 }
 
 /* Notifying table */

@@ -16,17 +16,12 @@
     "backbone": "",
     "d3": "",
     "hogan": "",
+    "google-apis": "",
     "bower-xcharts": "",
     "offline": "",
     "underscore": "",
     "zeptojs": "",
-
-    "font-roboto2": "",
-    "polymer": "Polymer/polymer#master",
-    "paper-scaffold": "Polymer/paper-scaffold#master",
-    "paper-toolbar-panel": "Polymer/paper-toolbar-panel#master",
-    "paper-appbar": "Polymer/paper-appbar#master",
-    "paper-drawer-panels": "Polymer/paper-drawer-panels#master",
-    "paper-icon-button": ""
+    "paper-elements": "Polymer/paper-elements",
+    "core-elements": "Polymer/core-elements"
   }
 }

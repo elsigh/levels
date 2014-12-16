@@ -1,0 +1,80 @@
+
+<link rel="import" href="core-style.html">
+<link rel="import" href="datetime-pretty.html">
+<link rel="import" href="reverse-geocode.html">
+
+<polymer-element name="device-battery-notifications" attributes="notifications">
+  <template>
+    <core-style ref="fmb"></core-style>
+    <style>
+      table.outer {
+        font-size: 85%;
+        margin-top: 0;
+        width: 100%;
+      }
+      table tbody td {
+        border: 0 !important;  /* Oh polymer. */
+        white-space: nowrap;
+      }
+
+      .fixed-table {
+          /* magic */
+          width: 100%;
+          table-layout: fixed;
+
+          /*not really necessary, removes extra white space */
+          border-collapse: collapse;
+          border-spacing: 0;
+          border: 0;
+          margin: 0;
+      }
+      .fixed-table td {
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+      }
+
+    </style>
+    <section>
+      <h4>Recent Notifications</h4>
+      <table class="outer">
+        <tbody>
+          <template repeat="{{notifications}}">
+            <tr>
+              <td>
+                <datetime-pretty datetime="{{created}}"></datetime-pretty>
+              </td>
+              <td>
+                <table class="fixed-table"><tr><td>
+                  <a href="http://google.com/maps/search/{{lat}},{{lon}}"
+                     data-intent="geo:{{lat}},{{lon}}"
+                     target="_blank"
+                     on-click="{{onClickGeo}}"><reverse-geocode
+                     latitude="{{lat}}" longitude="{{lon}}">{{lat}}, {{lon}}</reverse-geocode></a>
+                </td></tr></table>
+              </td>
+            </tr>
+          </template>
+        </tbody>
+      </table>
+    </section>
+  </template>
+  <script>
+    Polymer({
+      onClickGeo: function(e) {
+        if (fmb.ua.IS_APP) {
+          e.preventDefault();
+          var intentAddress = e.currentTarget.getAttribute('data-intent');
+          window.plugins.webintent.startActivity({
+              action: window.plugins.webintent.ACTION_VIEW,
+              url: intentAddress
+            },
+            function() {},
+            function() {}
+          );
+        }
+      }
+    });
+  </script>
+
+</polymer-element>

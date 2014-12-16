@@ -1,0 +1,246 @@
+
+<link rel="import" href="../bower_components/core-style/core-style.html">
+
+<core-style id="fmb">
+
+
+* {
+  -webkit-tap-highlight-color: rgba(0,0,0,0); /* make transparent link selection, adjust last value opacity 0 to 1.0 */
+}
+
+html, body {
+  background-color: #ccc;
+  color: #111;
+  font-family: RobotoDraft, 'HelveticaNeue-Light', 'HelveticaNeue', Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.3;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+
+  -webkit-font-smoothing: antialiased;
+  -webkit-text-size-adjust: 100%;
+
+  -webkit-touch-callout: none;                /* prevent callout to copy image, etc when tap to hold */
+  -webkit-text-size-adjust: none;             /* prevent webkit from resizing text to fit */
+}
+
+body.ios,
+body.android {
+  -webkit-user-select: none;                  /* prevent copy paste, to allow, change 'none' to 'text' */
+}
+
+footer {
+  margin-top: 2em;
+  font-size: 90%;
+  padding: 10px;
+  text-align: center;
+}
+
+/** START Polymer stuffs. */
+
+core-toolbar {
+  background-color: #ccc;
+  height: 60px;
+}
+
+core-toolbar .logo {
+  background-image: url(../img/logo.png);
+  background-repeat: no-repeat;
+  background-position: 0 10px;
+  background-size: 100px auto;
+  margin: 0;
+  min-height: 64px;
+  padding: 0;
+  width: 100%;
+}
+
+paper-tabs {
+  border-top: 1px solid #ddd;
+  display: none;
+  -webkit-box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  -moz-box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+paper-tab {
+  font-size: 16px;
+}
+
+.fmb-signed-in core-toolbar {
+  height: 100px;
+}
+
+.fmb-signed-in paper-tabs {
+  display: block;
+}
+
+paper-button {
+  background: #3b97d1;
+  color: #fff;
+  min-width: 0;
+}
+
+core-header-panel .content {
+  padding: 20px 10px 0;
+}
+
+div[horizontal] paper-checkbox ~ div {
+  font-size: 85%;
+  margin-left: 1em;
+}
+
+paper-progress {
+  position: fixed;
+  height: 5px;
+  left: 0;
+  right: 0;
+  top: 0;
+  width: 100%;
+  z-index: 2;
+}
+
+
+@-webkit-keyframes stripes {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 60px 0;
+  }
+}
+
+@keyframes stripes {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 60px 0;
+  }
+}
+
+paper-progress::shadow #activeProgress {
+  border-radius: 0 3px 3px 0;
+  background-size: 30px 30px;
+  background-color: #34c2e3;
+  background-image: -webkit-linear-gradient(135deg, rgba(255, 255, 255, .15) 25%, transparent 25%,
+                      transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%,
+                      transparent 75%, transparent);
+  background-image: linear-gradient(135deg, rgba(255, 255, 255, .15) 25%, transparent 25%,
+                      transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%,
+                      transparent 75%, transparent);
+
+  -webkit-animation: stripes 2s infinite;
+  animation: stripes 2s infinite;
+  transition: width .4s ease-in-out;
+}
+
+/** END Polymer stuffs. */
+
+
+h2 {
+  font-size: 1.2em;
+  margin: 0;
+  padding-bottom: 10px;
+  font-weight: 300;
+}
+
+h3,
+h4 {
+  padding: 10px 0 10px;
+  margin: 0;
+  font-weight: 300;
+}
+
+a {
+  color: #3b97d1;
+}
+
+figure {
+  margin: 0;
+  padding: 0;
+}
+
+table {
+  margin: 1em 0;
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th {
+  text-align: left;
+  font-weight: 400;
+}
+
+th,
+td {
+  padding: 0.5em;
+  border-top: 1px solid #666;
+}
+
+form > div {
+  margin-bottom: 1.5em;
+}
+
+
+input[type="text"] {
+  font-size: 2em;
+  width: 60%;
+}
+
+
+.fmb-remove {
+  position: absolute;
+  display: inline-block;
+  font: inherit;
+  font-size: 0.8em;
+  border: 0;
+  right: 0;
+  padding: 3px 7px;
+  border-radius: 2px;
+}
+
+.fmb-remove:active {
+  -webkit-box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3);
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3);
+}
+
+.fmb-msg-c {
+  display: none;
+  position: fixed;
+  z-index: 2;
+  bottom: 2em;
+  width: 100%;
+  text-align: center;
+}
+
+.fmb-msg {
+  display: inline-block;
+  margin: 0 auto;
+  padding: 0.5em 1.5em;
+  color: #fff;
+  border: 1px solid #000;
+  background: #444;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+}
+
+
+.range {
+  text-align: center;
+}
+input[type="range"] {
+  width: 85%;
+}
+
+html.fmb-app-container,
+body.fmb-app-container,
+.fmb-app {
+  overflow: hidden;
+}
+
+.fmb-button-c {
+  padding: 10px;
+}
+
+</core-style>

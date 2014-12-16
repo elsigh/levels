@@ -80,14 +80,20 @@ class HandlerTest(unittest.TestCase):
 
         for i in range(models.NUM_SETTINGS_TO_FETCH * models.NUM_SETTINGS_MULTIPLIER):
             battery_level = 50 + i
+            caused_battery_notifications = i % 5 == 0
             settings_model = models.Settings(
                 parent=device.key,
-                battery_level=battery_level
+                battery_level=battery_level,
+                caused_battery_notifications=caused_battery_notifications
             )
             settings_model.put()
         data = device.to_dict()
         assert 'settings' in data
         assert len(data['settings']) == models.NUM_SETTINGS_TO_FETCH
+
+        # We should have a full house on these.
+        self.assertEquals(len(data['settings_caused_battery_notifications']),
+            models.NUM_SETTINGS_CAUSED_BATTERY_NOTIFICATIONS_TO_FETCH)
 
     def test_ApiUserHandler_get(self):
         self.testapp.get('/api/user', status=500)
@@ -362,6 +368,7 @@ class HandlerTest(unittest.TestCase):
         obj = json.loads(body)
         self.assertEquals(82, obj['battery_level'])
         self.assertEquals(1, obj['expando_test'])
+        self.assertFalse(obj['caused_battery_notifications'])
         assert not 'api_token' in obj
         self.assertTrue(obj['is_last_update_over_notify_level'])
 
@@ -381,10 +388,13 @@ class HandlerTest(unittest.TestCase):
                                                       user_key=elsigh_user.key.urlsafe(),
                                                       device_key=elsigh_device.key.urlsafe(),
                                                       battery_level=9,
-                                                      is_charging=0))
+                                                      is_charging=0,
+                                                      lat=37.76468098,
+                                                      lon=-122.44952477))
         body = response.normal_body
         obj = json.loads(body)
         self.assertEquals(9, obj['battery_level'])
+        self.assertTrue(obj['caused_battery_notifications'])
         self.assertFalse(obj['is_last_update_over_notify_level'])
 
         # tests that our counter updated
@@ -403,6 +413,7 @@ class HandlerTest(unittest.TestCase):
         body = response.normal_body
         obj = json.loads(body)
         self.assertEquals(11, obj['battery_level'])
+        self.assertFalse(obj['caused_battery_notifications'])
         self.assertTrue(obj['is_last_update_over_notify_level'])
 
         # tests that our counter updated
@@ -991,88 +1002,3 @@ class HandlerTest(unittest.TestCase):
         self.assertEquals(['bar', 'bat'],
                           user.google_auth_ids)
 
-
-class GlasswareHandlerTest(unittest.TestCase):
-    def setUp(self):
-        self.testbed = testbed.Testbed()
-        self.testbed.setup_env(app_id='followmybattery')
-        self.testbed.activate()
-        self.testbed.init_datastore_v3_stub()
-        self.testbed.init_taskqueue_stub()
-        self.taskqueue_stub = self.testbed.get_stub(testbed.TASKQUEUE_SERVICE_NAME)
-        self.testapp = webtest.TestApp(controllers.app)
-
-    def tearDown(self):
-        self.testbed.deactivate()
-
-    def test_glassware(self):
-        response = self.testapp.get('/glassware', status=302)
-        assert response
-
-    @patch.object(discovery, 'build')
-    def test_notify(self, mock_build=None):
-        user = models.FMBUser(
-            name='elsigh moo',
-            auth_ids=['google:abc'],
-            oauth2_access_token='test_oauth2_access_token',
-            oauth2_refresh_token='test_oauth2_refresh_token',
-            oauth2_expires_datetime='test_oauth2_expires_datetime'
-        )
-        user.put()
-
-        item_id = 'item_id'
-
-        # Sets up our mock to return a timeline item
-        execute_mock = mock_build().timeline().get(id=item_id).execute
-        datetime_not_now = '2013-07-08T15:54:12.865Z'
-        timeline_item = {
-            'created': datetime_not_now,
-            'text': '{"capacity": 57, "is_charging": true}'
-        }
-        execute_mock.return_value = timeline_item
-
-        payload = {
-            'collection': 'timeline',
-            'itemId': item_id,
-            'operation': 'INSERT',
-            'userToken': 'abc',
-            'userActions': [{'type': 'SHARE'}]
-        }
-        response = self.testapp.post('/glassware/notify', json.dumps(payload))
-
-        # Created a glass device for this user with one setting value.
-        glass_device_query = models.Device.query(
-            ancestor=user.key).filter(
-                models.Device.uuid == 'glass')
-        self.assertEquals(1, glass_device_query.count())
-        glass_device = glass_device_query.get()
-        self.assertEquals(1, len(glass_device.settings))
-        stored_setting = glass_device.settings[0]
-        self.assertEquals(models.FMBModel.iso_str_to_datetime(datetime_not_now),
-                          stored_setting.created)
-        self.assertEquals(57, stored_setting.battery_level)
-        self.assertEquals(True, stored_setting.is_charging)
-
-        ########
-        # A second call should tack-on a setting to the existing-made
-        # glass device.
-        item_id = 'item_id_2'
-        execute_mock = mock_build().timeline().get(id=item_id).execute
-        datetime_not_now = '2013-07-08T16:04:12.865Z'
-        timeline_item = {
-            'created': datetime_not_now,
-            'text': '{"capacity": 47, "is_charging": false}'
-        }
-        execute_mock.return_value = timeline_item
-
-        payload = {
-            'collection': 'timeline',
-            'itemId': item_id,
-            'operation': 'INSERT',
-            'userToken': 'abc',
-            'userActions': [{'type': 'SHARE'}]
-        }
-        response = self.testapp.post('/glassware/notify', json.dumps(payload))
-        assert response
-        self.assertEquals(2, models.Settings.query().count())
-        self.assertEquals(2, len(glass_device.settings))

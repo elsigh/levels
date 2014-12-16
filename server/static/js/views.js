@@ -1,62 +1,20 @@
 
+
 $.ajaxSettings['xhrCount'] = 0;
 
 // Yep, we need zepto to work with CORS and cookies.
 $.ajaxSettings['beforeSend'] = function(xhr, settings) {
   xhr.withCredentials = true;
   $.ajaxSettings['xhrCount']++;
-  $('.fmb-app > .fmb-loading').show();
+  $(document).trigger('xhrLoading', $.ajaxSettings['xhrCount']);
 };
 
 $.ajaxSettings['complete'] = function(xhr, status) {
   $.ajaxSettings['xhrCount']--;
   if ($.ajaxSettings['xhrCount'] === 0) {
-    $('.fmb-app > .fmb-loading').hide();
+    $(document).trigger('xhrLoadingDone');
   }
 };
-
-/*
-$.ajaxSettings['success'] = function(xhr, status) {
-  // noop
-};
-$.ajaxSettings['error'] = function(xhr, status) {
-  // noop
-};
-*/
-
-// Proxy click as zepto tap so we can bind to "tap"
-$(document).ready(function(e) {
-  var shouldPreventDefault = function(el) {
-    var tagName = el.tagName.toLowerCase();
-    switch (tagName) {
-      case 'input':
-      case 'select':
-      case 'textarea':
-      case 'label':
-        return false;
-        break;
-      default:
-        return true;
-    }
-  };
-  // only do this if not on a touch device
-  if (!('ontouchend' in window)) {
-    $(document.body).on('click', function(e) {
-      if (shouldPreventDefault(e.target)) {
-        e.preventDefault();
-        $(e.target).trigger('tap', e);
-      }
-    });
-
-  // Nuke ghost clicks on touch devices.
-  } else {
-    $(document.body).on('click', function(e) {
-      if (shouldPreventDefault(e.target)) {
-        e.preventDefault();
-      }
-    });
-  }
-});
 
 
 /**
@@ -176,9 +134,11 @@ fmb.views.hideSpinner = function() {
 fmb.views.showMessage = function(msg) {
   fmb.views.clearHideMessageTimeout_();
   $('.fmb-msg').text(msg);
+  /*
   $('.fmb-msg-c').css('opacity', '0').show().animate({
     opacity: 1
   }, 250, 'linear', fmb.views.hideMessage_);
+  */
 };
 
 
@@ -204,6 +164,7 @@ fmb.views.clearHideMessageTimeout_ = function() {
  */
 fmb.views.hideMessage_ = function() {
   fmb.views.clearHideMessageTimeout_();
+  /*
   fmb.views.hideMessageTimeout_ = _.delay(
       function() {
         $('.fmb-msg-c').animate(
@@ -216,6 +177,7 @@ fmb.views.hideMessage_ = function() {
               $('.fmb-msg-c').hide();
             });
       }, 2000);
+*/
 };
 
 
@@ -230,19 +192,16 @@ fmb.views.hideMessage_ = function() {
 fmb.views.App = Backbone.View.extend({
   el: '.fmb-app',
   events: {
-    'tap .tabs a': 'onClickTab_',
-    'tap .share': 'onClickShare_',
-    'tap .fmb-app-link': 'onClickAppLink_',
-    'swipeLeft .fmb-tab-frame-c section > div': 'onSwipeLeft_',
-    'swipeRight .fmb-tab-frame-c section > div': 'onSwipeRight_'
-    //'tap .tabs a': 'onClickTab_'
+    'click paper-tab': 'onClickTab_',
+    'click .share': 'onClickShare_',
+    'click .fmb-app-link': 'onClickAppLink_'
   }
 });
 
 
 /** @inheritDoc */
 fmb.views.App.prototype.initialize = function(options) {
-  fmb.log('fmb.views.App.initialize', this.model);
+  fmb.log('fmb.views.App initialize', this.model);
 
   // For some special scroll/overflow control.
   $('html,body').addClass('fmb-app-container');
@@ -257,6 +216,7 @@ fmb.views.App.prototype.initialize = function(options) {
       _.debounce(_.bind(this.handleResizeOrientationChange_, this), 500), true);
   $(window).on('resize',
       _.debounce(_.bind(this.handleResizeOrientationChange_, this), 500), true);
+
 };
 
 
@@ -265,10 +225,23 @@ fmb.views.App.prototype.initialize = function(options) {
  * @private
  */
 fmb.views.App.prototype.onClickAppLink_ = function(e) {
-  fmb.log('fmb.views.App.onClickAppLink_', e);
+  fmb.log('fmb.views.App onClickAppLink_', e);
   e.preventDefault();
-  window['app'].navigate($(e.currentTarget).attr('href'),
-                         {trigger: true});
+  var href = $(e.currentTarget).attr('href');
+  window['app'].navigate(href, {trigger: true});
+};
+
+
+/**
+ * For clicks in a polymer page.
+ * @param {Event} e A click event.
+ * @private
+ */
+fmb.views.App.prototype.onClickPageNavigate_ = function(e) {
+  e.preventDefault();
+  var href = e.detail.href.replace(fmb.App.ROOT, '');
+  fmb.log('fmb.views.App onClickPageNavigate_', href);
+  window['app'].navigate(href, {trigger: true});
 };
 
 
@@ -285,7 +258,7 @@ fmb.views.App.prototype.setUserSignedInClass_ = function() {
  * @private
  */
 fmb.views.App.prototype.onClickShare_ = function(e) {
-  fmb.log('fmb.views.App.onClickShare_', e);
+  fmb.log('fmb.views.App onClickShare_', e);
 
   e.preventDefault();
 
@@ -324,42 +297,15 @@ fmb.views.App.prototype.onClickShare_ = function(e) {
  * @private
  */
 fmb.views.App.prototype.onClickTab_ = function(e) {
-  fmb.log('fmb.views.App.onClickTab_', e);
+  fmb.log('fmb.views.App onClickTab_', e);
   e.preventDefault();
   if (!this.model.user.get('api_token')) {
     fmb.log('Gotta get a api_token before navigating.');
     return;
   }
+  this.pages_.selected = this.tabs_.selected + 1;
   window['app'].navigate($(e.currentTarget).attr('href'),
                          {trigger: true});
-};
-
-
-/**
- * @param {Event} e A swipe event.
- * @private
- */
-fmb.views.App.prototype.onSwipeLeft_ = function(e) {
-  var tabIndex = this.getTabIndex_(this.curentView);
-  fmb.log('fmb.views.App onSwipeLeft_ tabIndex', tabIndex);
-  if (tabIndex === 1) {
-    window['app'].navigate(fmb.App.Routes.ACCOUNT.url,
-                           {trigger: true});
-  }
-};
-
-
-/**
- * @param {Event} e A swipe event.
- * @private
- */
-fmb.views.App.prototype.onSwipeRight_ = function(e) {
-  var tabIndex = this.getTabIndex_(this.curentView);
-  fmb.log('fmb.views.App onSwipeRight_ tabIndex', tabIndex);
-  if (tabIndex === 0) {
-    window['app'].navigate(fmb.App.Routes.FOLLOWING.url,
-                           {trigger: true});
-  }
 };
 
 
@@ -373,16 +319,6 @@ fmb.views.App.prototype.handleResizeOrientationChange_ = function() {
 
 /**
  * @param {Backbone.View} view A view instance.
- * @return {number} The index of this node in it's parent list.
- * @private
- */
-fmb.views.App.prototype.getTabIndex_ = function(view) {
-  return view.$el.parent('.fmb-tab').index();
-};
-
-
-/**
- * @param {Backbone.View} view A view instance.
  */
 fmb.views.App.prototype.setCurrentView = function(view) {
   // Calls a "setIsActive" function if defined on this view.
@@ -391,35 +327,99 @@ fmb.views.App.prototype.setCurrentView = function(view) {
         this.currentView.setIsActive(false);
   }
 
+  // TODO(elsigh): Nuke when all polymer.
+  var tabIndex = view.getAttribute ?
+      Number(view.getAttribute('data-tab-index')) :  // polymer
+      Number(view.$el.data('tab-index'));            // backbone
+
+  if (this.tabs_.selected != tabIndex) {
+    this.tabs_.selected = tabIndex;
+  }
+
+  // Why did I have to cast this to a Number? Otherwise got 01.
+  this.pages_.selected = Number(this.tabs_.selected) + 1;
+
   this.currentView = view;
 
   // Calls a "setIsActive" function if defined on this view.
-  this.currentView.setIsActive &&
-      this.currentView.setIsActive(true);
+  $(this.pages_).on('core-animated-pages-transition-end', _.bind(function() {
+    fmb.log('CORE PAGES TRANSITION END');
+    this.currentView.setIsActive &&
+        this.currentView.setIsActive(true);
+    $(this.pages_).off();
+  }, this));
+};
 
-  // Sets up tab / container widths so we can have nice scrolling and
-  // tab animations.
-  var screenW = document.documentElement.clientWidth;
 
-  var $fmbTabs = $('.fmb-tab');
-  //$('.fmb-tab-frame').css('width', $fmbTabs.length * screenW + 'px');
+/** @private */
+fmb.views.App.prototype.startProgressAnimation_ = function() {
+  if (this.progress_.value !== 0) {
+    return;  // already going.
+  }
+  this.progress_.value = 20;
+  this.progressInterval_ = window.setInterval(_.bind(function() {
+    var delta = this.progress_.value + ((100 - this.progress_.value) / 15);
+    this.progress_.value = delta;
+  }, this), 250);
 
-  //$fmbTabs.each(function(i, el) {
-  //  $(el).css('left', i * screenW + 'px').css('width', screenW + 'px');
-  //});
+};
 
-  var tabIndex = this.getTabIndex_(view);
-  var transform = 'translateX(-' + (tabIndex * screenW) + 'px)';
-  $('.fmb-tab-frame').
-      css('-webkit-transform', transform).
-      css('transform', transform);
 
-  _.defer(function() {
-    // Enables transitions on all but the first change.
-    if (!$('.fmb-tab-frame').hasClass('fmb-active')) {
-      $('.fmb-tab-frame').addClass('fmb-active');
-    }
+/** @private */
+fmb.views.App.prototype.endProgressAnimation_ = function() {
+  window.clearInterval(this.progressInterval_);
+  this.progressInterval_ = null;
+
+  var progress = this.progress_;
+  progress.value = 100;
+
+  var transitionEnd = 'onwebkittransitionend' in window ?
+      'webkitTransitionEnd' :
+      'transitionend';
+
+  // Done going to 100.
+  $(progress).on(transitionEnd, function() {
+    progress.style.opacity = 0;
+    progress.value = 0;
+    // Done going to 0.
+    $(progress).on(transitionEnd, function() {
+      progress.style.opacity = 1;
+      $(progress).off();
+    });
   });
+};
+
+
+/** @override */
+fmb.views.App.prototype.render = function() {
+  this.progress_ = this.$('paper-progress').get(0);
+  this.pages_ = this.$('core-animated-pages').get(0);
+
+  $(document).on('xhrLoading', _.bind(this.startProgressAnimation_, this));
+  $(document).on('xhrLoadingDone', _.bind(this.endProgressAnimation_, this));
+
+  this.tabs_ = this.$('paper-tabs').get(0);
+  this.pages_ = this.$('core-animated-pages').get(0);
+
+  this.viewAccount = new fmb.views.Account({
+    model: this.model.user
+  });
+  this.viewAccount.render();
+
+
+  this.viewFollowing = new fmb.views.Following({
+    model: this.model.user.get('following'),
+    user: this.model.user
+  });
+  this.viewFollowing.render();
+
+  this.viewHowItWorks = $('.fmb-how-it-works').get(0);
+
+  this.$('how-it-works').get(0).addEventListener('fmb-page-navigate',
+      _.bind(this.onClickPageNavigate_, this));
+
+
+  this.rendered_ = true;
 };
 
 
@@ -429,52 +429,21 @@ fmb.views.App.prototype.setCurrentView = function(view) {
 fmb.views.App.prototype.transitionPage = function(route) {
   fmb.log('fmb.views.App --> transitionPage', route);
 
-  var newTab;
-  var newView;
-
-  this.$('.tabs .selected').removeClass('selected');
-  var $priorActiveTab = this.$('.fmb-tab.fmb-active');
-  if ($priorActiveTab.length) {
-    $priorActiveTab.removeClass('fmb-active');
-    _.defer(function() {
-      $priorActiveTab.get(0).scrollTop = 0;
-    });
+  if (!this.rendered_) {
+    this.render();
   }
 
+  var newView;
   if (_.isEqual(fmb.App.Routes.ACCOUNT, route)) {
-    if (!this.viewAccount) {
-      this.viewAccount = new fmb.views.Account({
-        model: this.model.user
-      });
-      this.viewAccount.render();
-    }
-    newTab = 'account';
     newView = this.viewAccount;
 
   } else if (_.isEqual(fmb.App.Routes.FOLLOWING, route)) {
-    if (!this.viewFollowing) {
-      this.viewFollowing = new fmb.views.Following({
-        model: this.model.user.get('following'),
-        user: this.model.user
-      });
-      this.viewFollowing.render();
-    }
-    newTab = 'following';
     newView = this.viewFollowing;
 
   } else if (_.isEqual(fmb.App.Routes.HOW_IT_WORKS, route)) {
-    if (!this.viewHowItWorks) {
-      this.viewHowItWorks = new fmb.views.HowItWorks({
-        model: this.model.user
-      });
-      this.viewHowItWorks.render();
-    }
-    newTab = 'how-it-works';
     newView = this.viewHowItWorks;
   }
 
-  this.$('.tabs .' + newTab).addClass('selected');
-  this.$('.fmb-tab.fmb-tab-' + newTab).addClass('fmb-active');
   this.setCurrentView(newView);
 };
 
@@ -490,7 +459,7 @@ fmb.views.App.prototype.transitionPage = function(route) {
 fmb.views.Account = Backbone.View.extend({
   el: '.fmb-account',
   events: {
-    'tap .login-google': 'onClickLogin_',
+    'click .login-google': 'onClickLogin_',
     'change [name="allow_gmail_lookup"]': 'onChangeAllowGmailLookup_'
   }
 });
@@ -762,8 +731,8 @@ fmb.views.Device = Backbone.View.extend({
   className: 'fmb-device',
   events: {
     'submit form.device-update': 'onSubmitUpdateDevice_',
-    'tap input[type="radio"]': 'onChangeUpdateEnabled_',
-    'tap .device-remove': 'onClickRemove_',
+    'click input[type="radio"]': 'onChangeUpdateEnabled_',
+    'click .device-remove': 'onClickRemove_',
     'change [name="update_frequency"]': 'onChangeUpdateFrequency_'
   }
 });
@@ -789,9 +758,16 @@ fmb.views.Device.prototype.render = function() {
 
     this.viewNotifying.render();
     this.$el.append(this.viewNotifying.$el);
+
+    this.$deviceBatteryNotifications = $('<device-battery-notifications>');
+    this.$el.append(this.$deviceBatteryNotifications);
   }
+
   var templateData = this.model.getTemplateData();
   this.$device.html(fmb.views.getTemplateHtml('device', templateData));
+  this.$deviceBatteryNotifications.get(0).notifications =
+      templateData['settings_caused_battery_notifications'];
+
   return this;
 };
 
@@ -874,9 +850,9 @@ fmb.views.Device.prototype.debouncedUpdateDevice_ = _.debounce(function() {
 fmb.views.Notifying = Backbone.View.extend({
   className: 'fmb-notifying',
   events: {
-    'tap .notifying-add-phone': 'onClickNotifyingAdd_',
-    'tap .notifying-add-email': 'onClickNotifyingAdd_',
-    'tap .notifying-remove': 'onClickRemove_'
+    'click .notifying-add-phone': 'onClickNotifyingAdd_',
+    'click .notifying-add-email': 'onClickNotifyingAdd_',
+    'click .notifying-remove': 'onClickRemove_'
   }
 });
 
@@ -1013,6 +989,7 @@ fmb.views.Following.prototype.setIsActive = function(isActive) {
   this.model.stopFetchPoll();
   this.user.stopFetchPoll();
   if (isActive) {
+    this.render();
     _.delay(_.bind(function() {
       this.model.startFetchPoll(60 * 1000);
       this.user.startFetchPoll(60 * 1000);
@@ -1043,13 +1020,15 @@ fmb.views.Following.prototype.render = function() {
     this.$el.html(fmb.views.getTemplateHtml('following', {}));
     this.$table = this.$('table');
 
-    // Add yo-self into the view.
-    this.addSubview_(this.user);
   }
+
+  // Add yo-self into the view.
+  this.addSubview_(this.user);
 
   this.model.each(_.bind(function(model) {
     this.addSubview_(model);
   }, this));
+
   return this;
 };
 
@@ -1068,6 +1047,9 @@ fmb.views.Following.prototype.addSubview_ = function(model) {
     });
     this.subViews_[model.cid].render();
     this.$table.append(this.subViews_[model.cid].$el);
+  } else {
+    // re-render
+    this.subViews_[model.cid].render();
   }
 };
 
@@ -1084,7 +1066,7 @@ fmb.views.FollowingUser = Backbone.View.extend({
   className: 'fmb-following-user',
   tagName: 'tbody',
   events: {
-    'tap .following-user-remove': 'onClickRemove_'
+    'click .following-user-remove': 'onClickRemove_'
   }
 });
 
@@ -1147,6 +1129,9 @@ fmb.views.FollowingUser.prototype.render = function() {
       });
       this.subViews_[model.cid].render();
       this.$el.append(this.subViews_[model.cid].$el);
+    } else {
+      // re-render
+      this.subViews_[model.cid].render();
     }
   }, this));
 
@@ -1221,6 +1206,11 @@ fmb.views.FollowingDevice.prototype.renderGraph_ = function() {
   fmb.log('fmb.views.FollowingDevice renderGraph_', this.model.id);
   if (!this.model.get('settings').length) {
     fmb.log('No setting data to render chart with.');
+    return;
+  }
+
+  if (this.$('.battery-graph').parent().width() === 0) {
+    fmb.log('Not in the render tree yet, this will fail - bail.');
     return;
   }
 

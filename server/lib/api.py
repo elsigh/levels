@@ -425,11 +425,10 @@ def send_battery_notification_self(user_id, device_id):
 
     sent = models.NotificationSent(
         parent=user.key,
-        means=means
-    )
+        means=means)
     sent.put()
 
-    message = ('Your %s %s battery is running low at 10%%.' %
+    message = ('Your %s %s battery is at 10%%.' %
                (device.platform, device.name))
     user.send_message(message)
 
@@ -471,6 +470,12 @@ class ApiSettingsHandler(ApiRequestHandler):
         is_this_update_over_notify_level = \
             int(battery_level) > int(device.notify_level)
 
+        settings = models.Settings(
+            parent=device.key
+        )
+        settings_data = self.pruned_json_request_data
+        settings.populate(**settings_data)
+
         logging.info('device.is_last_update_over_notify_level %s, '
                      'is_this_update_over_notify_level %s' %
                      (device.is_last_update_over_notify_level,
@@ -481,12 +486,10 @@ class ApiSettingsHandler(ApiRequestHandler):
             deferred.defer(send_battery_notifications,
                            self.current_user.key.id(),
                            device.key.id())
+            # Sets a bit on this settings record because it broke the
+            # threshold.
+            settings.caused_battery_notifications = True
 
-        settings = models.Settings(
-            parent=device.key
-        )
-        settings_data = self.pruned_json_request_data
-        settings.populate(**settings_data)
         settings.put()
 
         if ((is_this_update_over_notify_level !=
@@ -509,16 +512,22 @@ class ApiSettingsHandler(ApiRequestHandler):
 
 class ApiFollowingHandler(ApiRequestHandler):
     def get(self):
-        q = models.Following.query(ancestor=self.current_user.key)
-        logging.info('ApiFollowingHandler following len: %s' % q.count())
-        obj = {'following': []}
-        for followed in q:
-            followed_user = followed.following.get()
-            logging.info('followed_user: %s %s' %
-                         (followed_user.key.urlsafe(), followed_user.name))
-            followed_user_dict = followed_user.to_dict(
-                include_device_notifying=False)
-            obj['following'].append(followed_user_dict)
+        memcache_following_key = ('api-following-%s' %
+                                  self.current_user.key.urlsafe())
+        obj = memcache.get(memcache_following_key)
+        if not obj:
+            q = models.Following.query(ancestor=self.current_user.key)
+            logging.info('ApiFollowingHandler following len: %s' % q.count())
+            obj = {'following': []}
+            for followed in q:
+                followed_user = followed.following.get()
+                logging.info('followed_user: %s %s' %
+                             (followed_user.key.urlsafe(), followed_user.name))
+                followed_user_dict = followed_user.to_dict(
+                    include_device_notifying=False)
+                obj['following'].append(followed_user_dict)
+            # 180s = 3 min
+            memcache.set(memcache_following_key, obj, time=180)
 
         return self.output_json_success(obj)
 
@@ -635,6 +644,20 @@ class ApiNotifyingDeleteHandler(ApiRequestHandler):
 
         notifying.key.delete()
         return self.output_json_success(notifying.to_dict())
+
+
+class ApiSettingsCausedBatteryNotificationsHandler(ApiRequestHandler):
+    def get(self):
+        device = self._get_device_by_device_key()
+        q = models.Settings.query(ancestor=device.key)
+        q = q.filter(models.Settings.caused_battery_notifications == True)
+        q = q.order(-models.NotificationSent.created)
+        notifications = q.fetch(5)
+
+        obj = {'settings': []}
+        for notification in notifications:
+            obj['settings'].append(notification.to_dict())
+        return self.output_json_success(obj)
 
 
 def send_notifying_message(user_id, to_type, to_name, to_means, send=True):

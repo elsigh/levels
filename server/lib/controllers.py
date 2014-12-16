@@ -52,6 +52,8 @@ routes = [
           handler='lib.api.ApiUserGCMPushTokenHandler'),
     Route('/api/user/token', handler='lib.api.ApiUserTokenHandler'),
     Route('/api/user', handler='lib.api.ApiUserHandler'),
+    Route('/api/settings_caused_battery_notifications',
+          handler='lib.api.ApiSettingsCausedBatteryNotificationsHandler'),
 
     # AUTH
     Route('/login', handler='lib.auth.LoginHandler'),

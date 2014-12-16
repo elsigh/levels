@@ -283,6 +283,7 @@ fmb.Model.prototype.set = function(key, value, options) {
         // Allow "null" to pass through.
         if (!_.isNull(data[submodelName])) {
           var submodel = this.get(submodelName);
+          //fmb.log('SETTING SUBMODEL', submodelName, data[submodelName])
           submodel.set(data[submodelName], options);
           delete data[submodelName];
         }
@@ -419,10 +420,15 @@ fmb.Model.prototype.fetchFromStorage = function(opt_options) {
 
 
 /**
- * @type {number}
- * @private
+ * @private {number}
  */
 fmb.Model.prototype.fetchTimeout_ = null;
+
+
+/**
+ * @private {number}
+ */
+fmb.Model.prototype.lastFetchPollStartTime_ = null;
 
 
 /**
@@ -431,7 +437,15 @@ fmb.Model.prototype.fetchTimeout_ = null;
  */
 fmb.Model.prototype.startFetchPoll = function(timeout) {
   this.stopFetchPoll();
-  this.fetch();
+
+  // Ghetto caching.
+  var now = new Date().getTime();
+  if (this.lastFetchPollStartTime_ == null ||
+      now - this.lastFetchPollStartTime_ > timeout) {
+    this.fetch();
+  }
+  this.lastFetchPollStartTime_ = new Date().getTime();
+
   this.fetchTimeout_ = window.setInterval(
       _.bind(this.fetch, this),
       timeout);

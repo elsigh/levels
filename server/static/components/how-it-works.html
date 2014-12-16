@@ -1,0 +1,37 @@
+
+<link rel="import" href="fmb-page.html">
+<link rel="import"
+      href="../bower_components/paper-button/paper-button.html">
+
+<polymer-element name="how-it-works" extends="fmb-page">
+
+  <template>
+    <core-style ref="fmb"></core-style>
+    <h2>How Levels Works</h2>
+    <p>
+      Levels sends your battery status to our server every
+      15 minutes.
+    </p>
+    <p>
+      When your battery goes below 10%
+      we'll send you, and anyone you'd like, a notification.
+      Levels sends, at most, one message every 12 hours.
+    </p>
+    <p>
+      You can install Levels on phones, tablets, remote controls,
+      etc ... and then manage all your notification settings in the App.
+    </p>
+
+    <p>
+      <paper-button
+        on-click="{{onClickPageNavigate}}"
+        href="{{appRoot}}account">Get this party started!</paper-button>
+    </p>
+  </template>
+
+  <script>
+    Polymer();
+  </script>
+
+
+</polymer-element>

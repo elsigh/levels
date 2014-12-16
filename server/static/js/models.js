@@ -211,6 +211,28 @@ fmb.models.SettingsCollection.prototype.comparator = function(model) {
 
 
 /**
+ * @extends {Backbone.Collection}
+ * @constructor
+ */
+fmb.models.SettingsCausedBatteryNotificationsCollection =
+    fmb.Collection.extend({
+  model: fmb.Model
+});
+
+
+/** @inheritDoc */
+fmb.models.SettingsCausedBatteryNotificationsCollection.prototype.comparator =
+    function(model) {
+  var d = new Date(model.get('created'));
+  return -d.getTime();
+};
+
+
+/******************************************************************************/
+
+
+
+/**
  * @extends {fmb.Model}
  * @constructor
  */
@@ -219,12 +241,14 @@ fmb.models.DeviceUnMapped = fmb.Model.extend({
   defaults: {
     'user_agent_string': window.navigator.userAgent,
     'update_enabled': 1,
-    'update_frequency': 10,
+    'update_frequency': 10,  // Note, overridden in levels_plugin.js now.
     'notify_level': 10
   },
   submodels: {
     'notifying': fmb.models.NotifyingCollection,
-    'settings': fmb.models.SettingsCollection
+    'settings': fmb.models.SettingsCollection,
+    'settings_caused_battery_notifications':
+        fmb.models.SettingsCausedBatteryNotificationsCollection
   }
 });
 
@@ -593,9 +617,11 @@ fmb.models.User.onPushNotificationGCM = function(e) {
       // throw up a dialog, etc.
       if (e.foreground) {
         fmb.log('FOREGROUND NOTIFICATION', e.payload);
-        // if the notification contains a soundname, play it.
-        //var my_media = new Media("/android_asset/www/"+e.soundname);
-        //my_media.play();
+        window.navigator.notification.alert(
+            e.payload.message,
+            function() {},
+            'Alert',
+            'OK');
 
       // otherwise we were launched because the user touched a
       // notification in the notification tray.
@@ -697,8 +723,6 @@ fmb.models.User.prototype.setUserKey_ = function() {
  * Get us all set up.
  */
 fmb.models.User.prototype.createUserDevice = function() {
-  fmb.log('** CREATE USER DEVICE the first time');
-
   // We only create a user device if running in an "app" context. Otherwise
   // we might just want to show/run the UI as though we're a client
   // in a browser with no background services (aka the web).
@@ -706,6 +730,8 @@ fmb.models.User.prototype.createUserDevice = function() {
     fmb.log('**** NOT createUserDevice - is not app or sim.');
     return;
   }
+
+  fmb.log('** CREATE USER DEVICE the first time');
 
   var device = new fmb.models.Device(null, {
     isUserDevice: true
@@ -784,8 +810,7 @@ fmb.models.User.GCM_SENDER_ID = '652605517304';
  * @private
  */
 fmb.models.User.prototype.registerWithGCM_ = function() {
-  var pushPlugin = cordova.require(
-      'com.phonegap.plugins.PushPlugin.PushNotification');
+  var pushPlugin = window.plugins.pushNotification;
   if (!pushPlugin || !window.device.platform) {
     fmb.log('No push plugin available.');
     return;

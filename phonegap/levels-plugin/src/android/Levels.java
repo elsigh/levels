@@ -9,11 +9,6 @@ import android.view.View;
 
 import org.apache.cordova.*;
 
-//import com.google.android.gms.auth.GoogleAuthUtil;
-//import com.google.android.gms.common.GooglePlayServicesUtil;
-
-//import com.elsigh.levels.LevelsService;
-
 
 public class Levels extends CordovaActivity {
 

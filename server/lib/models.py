@@ -40,6 +40,7 @@ import settings
 
 NUM_SETTINGS_TO_FETCH = 10
 NUM_SETTINGS_MULTIPLIER = 10
+NUM_SETTINGS_CAUSED_BATTERY_NOTIFICATIONS_TO_FETCH = 3
 DEFAULT_AVATAR_URL = ('http://lh3.googleusercontent.com/-XdUIqdMkCWA/'
                       'AAAAAAAAAAI/AAAAAAAAAAA/4252rscbv5M/photo.jpg')
 USER_EMAIL_MSG = 'End of message. It\'s all good. =)'
@@ -151,6 +152,10 @@ class FMBUser(User, FMBModel):
         #logging.info('POST _pre_put_hook %s' % self)
 
     @property
+    def memcache_following_key(self):
+        return 'user-following-%s' % self.key.urlsafe()
+
+    @property
     def google_auth_ids(self):
         """OAuth2 user ids."""
         google_auth_ids = []
@@ -207,6 +212,7 @@ class FMBUser(User, FMBModel):
         return q.fetch()
 
     def to_dict(self, include_api_token=False, include_device_notifying=False):
+        logging.info('-- FMBUser.to_dict start --')
         obj = super(FMBUser, self).to_dict(include_api_token=include_api_token)
 
         # Default avatar url
@@ -219,6 +225,7 @@ class FMBUser(User, FMBModel):
 
         obj['devices'] = []
         for device in self.iter_devices:
+            logging.info('-- FMBUser.to_dict device.to_dict --')
             obj['devices'].append(
                 device.to_dict(include_notifying=include_device_notifying))
 
@@ -244,6 +251,7 @@ class FMBUser(User, FMBModel):
                  device.gcm_push_token is not None)):
                 push_token = device.gcm_push_token
                 android_payload = {
+                    'title': 'Levels Alert',
                     'message': message
                 }
                 android_payload.update(extra)
@@ -286,9 +294,9 @@ class Device(FMBModel):
     @property
     def settings(self):
         """Returns an array of settings models."""
-        settings = memcache.get(self.memcache_device_settings_key)
-        if not settings:
-            settings = []
+        device_settings = memcache.get(self.memcache_device_settings_key)
+        if not device_settings:
+            device_settings = []
             q_settings = Settings.query(
                 ancestor=self.key).order(-Settings.created)
 
@@ -303,26 +311,39 @@ class Device(FMBModel):
                     if i % NUM_SETTINGS_MULTIPLIER == 0:
                         list_of_keys.append(results[i])
                 for setting in ndb.get_multi(list_of_keys):
-                    settings.append(setting)
+                    device_settings.append(setting)
             else:
                 for setting in q_settings.fetch():
-                    settings.append(setting)
-            memcache.set(self.memcache_device_settings_key, settings)
-        return settings
+                    device_settings.append(setting)
+            memcache.set(self.memcache_device_settings_key, device_settings)
+        return device_settings
 
     def clear_device_settings_memcache(self):
         memcache.delete(self.memcache_device_settings_key)
 
     def to_dict(self, include_notifying=True):
+        logging.info('Device %s to dict include_notifying: %s' %
+                     (self.key.id(), include_notifying))
+
         obj = super(Device, self).to_dict()
 
         obj['settings'] = []
         for setting in self.settings:
             obj['settings'].append(setting.to_dict())
 
-        # notifying
-        logging.info('Device %s to dict include_notifying: %s' %
-                     (self.key.id(), include_notifying))
+        obj['settings_caused_battery_notifications'] = []
+        q = Settings.query(ancestor=self.key)
+        q = q.filter(Settings.caused_battery_notifications == True)
+        q = q.order(-Settings.created)
+        settings_caused_battery_notifications = q.fetch(
+            NUM_SETTINGS_CAUSED_BATTERY_NOTIFICATIONS_TO_FETCH)
+        for setting in settings_caused_battery_notifications:
+            obj['settings_caused_battery_notifications'].append(
+                setting.to_dict())
+
+        obj['settings'] = []
+        for setting in self.settings:
+            obj['settings'].append(setting.to_dict())
 
         if include_notifying:
             q_notifying = Notifying.query(
@@ -339,6 +360,8 @@ class Settings(FMBModel, ndb.Expando):
     created = ndb.DateTimeProperty(auto_now_add=True)
     battery_level = ndb.IntegerProperty(required=True)
     is_charging = ndb.IntegerProperty()
+    caused_battery_notifications = ndb.BooleanProperty(default=False,
+                                                       indexed=True)
 
     def _post_put_hook(self, future):
         # Nukes our device settings list in memcache.

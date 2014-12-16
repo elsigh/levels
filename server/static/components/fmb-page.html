@@ -1,0 +1,17 @@
+
+<link rel="import" href="core-style.html">
+
+<polymer-element name="fmb-page" attributes="appRoot">
+  <script>
+    Polymer({
+      onClickPageNavigate: function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        this.fire('fmb-page-navigate', {
+          event: e,
+          href: e.currentTarget.getAttribute('href')
+        });
+      }
+    });
+  </script>
+</polymer-element>

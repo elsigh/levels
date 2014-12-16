@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <widget
     id="com.elsigh.levels"
-    version="0.0.1"
+    version="1.0.1"
     xmlns="http://www.w3.org/ns/widgets"
     xmlns:cdv="http://cordova.apache.org/ns/1.0">
     <name>Levels</name>
@@ -13,6 +13,16 @@
     </author>
     <preference name="SplashScreen" value="splash" />
     <preference name="BackgroundColor" value="0x00000000" />
+    <preference name="orientation" value="default" />
+    <preference name="target-device" value="universal" />
+    <preference name="fullscreen" value="false" />
+    <preference name="webviewbounce" value="false" />
+    <preference name="prerendered-icon" value="true" />
+    <preference name="stay-in-webview" value="false" />
+    <preference name="ios-statusbarstyle" value="black-opaque" />
+    <preference name="detect-data-types" value="true" />
+    <preference name="exit-on-suspend" value="false" />
+
     <content src="index.html" />
     <access origin="*" />
 </widget>

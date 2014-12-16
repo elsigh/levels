@@ -87,13 +87,9 @@ fmb.App.onBatteryStatus_ = function(batteryInfo) {
 fmb.App.prototype.initialize = function(options) {
   fmb.log('fmb.App initialize');
 
-  //fmb.injectScript('http://192.168.1.9:9090/target/target-script-min.js#anonymous');
-
   _.each(fmb.App.Routes, _.bind(function(route) {
     this.route(route.url, route.handler);
   }, this));
-
-  //this.tryWorkers();
 
   // Bound cordova events.
   document.addEventListener('pause',
@@ -125,27 +121,8 @@ fmb.App.prototype.initialize = function(options) {
 };
 
 
-/**
- * Yeah, it's worth a try.
- */
-fmb.App.prototype.tryWorkers = function() {
-
-  // Test for webWorkers
-  if (_.isUndefined(Worker)) {
-    fmb.log('######### No WebWorkers here, move along now.');
-    return;
-  }
-
-  fmb.log('######## We got WebWorkers!');
-
-  var worker = new Worker('js/worker.js');
-
-  worker.addEventListener('message', function(e) {
-    console.log('######## Worker said: ', e.data);
-  }, false);
-
-  worker.postMessage({'cmd': 'start'});
-};
+/** @type {string} */
+fmb.App.ROOT = '/app/';
 
 
 /**
@@ -156,7 +133,7 @@ fmb.App.prototype.initHistory_ = function() {
   fmb.log('fmb.App.initHistory_' + window.location.hash);
 
   var usePushState = true;
-  var root = '/app/';
+  var root = fmb.App.ROOT;
   var silent = false;
 
   fmb.log('Backbone.history.start', usePushState, silent);

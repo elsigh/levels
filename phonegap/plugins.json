@@ -17,7 +17,11 @@
     "id": "org.apache.cordova.splashscreen"
   },
   {
-    "src": "https://github.com/elsigh/PushPlugin.git",
+    "src": "org.apache.cordova.dialogs",
+    "id": "org.apache.cordova.dialogs"
+  },
+  {
+    "src": "https://github.com/phonegap-build/PushPlugin.git",
     "id": "com.phonegap.plugins.PushPlugin"
   },
   {

@@ -1,0 +1,10 @@
+mapreduce:
+- name: Notification Settings Fixer
+  mapper:
+    input_reader: mapreduce.input_readers.DatastoreInputReader
+    handler: lib.mapreducer.NotificationSettingsFixer
+    params:
+    - name: entity_kind
+      default: lib.models.NotificationSent
+    - name: filters
+      default: ""
