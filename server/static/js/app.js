@@ -87,15 +87,6 @@ fmb.App.onBatteryStatus_ = function(batteryInfo) {
 fmb.App.prototype.initialize = function(options) {
   fmb.log('fmb.App initialize');
 
-  //fmb.injectScript('http://192.168.1.9:9090/target/target-script-min.js#anonymous');
-
-  // Offline.js needs config for the app.
-  if (fmb.ua.IS_APP) {
-    Offline.options = {checks: {image: {
-      url: fmb.models.SERVER_PROD + '/img/favicon.png'
-    }, active: 'image'}};
-  }
-
   _.each(fmb.App.Routes, _.bind(function(route) {
     this.route(route.url, route.handler);
   }, this));

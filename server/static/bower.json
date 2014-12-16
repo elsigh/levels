@@ -21,7 +21,7 @@
     "offline": "",
     "underscore": "",
     "zeptojs": "",
-    "paper-elements": "Polymer/paper-elements#master",
-    "core-elements": "Polymer/core-elements#master"
+    "paper-elements": "Polymer/paper-elements",
+    "core-elements": "Polymer/core-elements"
   }
 }

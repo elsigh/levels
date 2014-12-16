@@ -134,9 +134,11 @@ fmb.views.hideSpinner = function() {
 fmb.views.showMessage = function(msg) {
   fmb.views.clearHideMessageTimeout_();
   $('.fmb-msg').text(msg);
+  /*
   $('.fmb-msg-c').css('opacity', '0').show().animate({
     opacity: 1
   }, 250, 'linear', fmb.views.hideMessage_);
+  */
 };
 
 
@@ -162,6 +164,7 @@ fmb.views.clearHideMessageTimeout_ = function() {
  */
 fmb.views.hideMessage_ = function() {
   fmb.views.clearHideMessageTimeout_();
+  /*
   fmb.views.hideMessageTimeout_ = _.delay(
       function() {
         $('.fmb-msg-c').animate(
@@ -174,6 +177,7 @@ fmb.views.hideMessage_ = function() {
               $('.fmb-msg-c').hide();
             });
       }, 2000);
+*/
 };
 
 
@@ -338,8 +342,12 @@ fmb.views.App.prototype.setCurrentView = function(view) {
   this.currentView = view;
 
   // Calls a "setIsActive" function if defined on this view.
-  this.currentView.setIsActive &&
-      this.currentView.setIsActive(true);
+  $(this.pages_).on('core-animated-pages-transition-end', _.bind(function() {
+    fmb.log('CORE PAGES TRANSITION END');
+    this.currentView.setIsActive &&
+        this.currentView.setIsActive(true);
+    $(this.pages_).off();
+  }, this));
 };
 
 
@@ -385,6 +393,7 @@ fmb.views.App.prototype.endProgressAnimation_ = function() {
 /** @override */
 fmb.views.App.prototype.render = function() {
   this.progress_ = this.$('paper-progress').get(0);
+  this.pages_ = this.$('core-animated-pages').get(0);
 
   $(document).on('xhrLoading', _.bind(this.startProgressAnimation_, this));
   $(document).on('xhrLoadingDone', _.bind(this.endProgressAnimation_, this));

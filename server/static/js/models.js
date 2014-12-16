@@ -617,9 +617,11 @@ fmb.models.User.onPushNotificationGCM = function(e) {
       // throw up a dialog, etc.
       if (e.foreground) {
         fmb.log('FOREGROUND NOTIFICATION', e.payload);
-        // if the notification contains a soundname, play it.
-        //var my_media = new Media("/android_asset/www/"+e.soundname);
-        //my_media.play();
+        window.navigator.notification.alert(
+            e.payload.message,
+            function() {},
+            'Alert',
+            'OK');
 
       // otherwise we were launched because the user touched a
       // notification in the notification tray.
@@ -808,8 +810,7 @@ fmb.models.User.GCM_SENDER_ID = '652605517304';
  * @private
  */
 fmb.models.User.prototype.registerWithGCM_ = function() {
-  var pushPlugin = cordova.require(
-      'com.phonegap.plugins.PushPlugin.PushNotification');
+  var pushPlugin = window.plugins.pushNotification;
   if (!pushPlugin || !window.device.platform) {
     fmb.log('No push plugin available.');
     return;

@@ -69,6 +69,47 @@ var copyRecursiveSync = function(src, dest) {
 /**
  * Copies app.html from the server and fixes paths, renames to index.html
  */
+var copyAndVulcanizeAppTemplate = function() {
+  var pathServerTemplates = path.join('../server/static');
+
+  fs.unlinkSync(path.join(pathServerTemplates, 'vulcanized.html'));
+  fs.unlinkSync(path.join(pathServerTemplates, 'vulcanized.js'));
+
+  fs.unlinkSync(path.join(pathToCordovaAssets, 'index.html'));
+  fs.unlinkSync(path.join(pathToCordovaAssets, 'vulcanized.js'));
+
+  child.exec(
+      'vulcanize --csp --inline -p ../server/static ../server/static/app.html',
+      function(error, stdout, stderr) {
+        var serverAppIndex = path.join(pathServerTemplates, 'vulcanized.html');
+
+        if (fs.existsSync(serverAppIndex)) {
+          var str = fs.readFileSync(serverAppIndex, 'utf8');
+
+          // Add cordova.js
+          str = str.replace('</head>',
+                            '  <script src="cordova.js"></script>\n  </head>');
+
+          // Makes absolute static asset paths relative.
+          assetDirs.forEach(function(assetDir) {
+            var re = new RegExp('"/' + assetDir + '/', 'g');
+            str = str.replace(re, '"' + assetDir + '/');
+          });
+          fs.writeFileSync(pathToCordovaIndex, str, 'utf8');
+
+          fs.linkSync(path.join(pathServerTemplates, 'vulcanized.js'),
+                      path.join(pathToCordovaAssets, 'vulcanized.js'));
+        } else {
+          console.log('WHOAH, no serverAppIndex', serverAppIndex);
+        }
+
+      });
+};
+
+
+/**
+ * Copies app.html from the server and fixes paths, renames to index.html
+ */
 var copyAndFixAppTemplate = function() {
   var pathServerTemplates = path.join('../server/templates');
   var serverAppIndex = path.join(pathServerTemplates, 'app.html');
@@ -114,4 +155,5 @@ var syncAssetDirectories = function() {
  * Main routine ;0
  */
 copyAndFixAppTemplate();
+//copyAndVulcanizeAppTemplate();
 syncAssetDirectories();

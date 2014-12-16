@@ -428,7 +428,7 @@ def send_battery_notification_self(user_id, device_id):
         means=means)
     sent.put()
 
-    message = ('Your %s %s battery is running low at 10%%.' %
+    message = ('Your %s %s battery is at 10%%.' %
                (device.platform, device.name))
     user.send_message(message)
 

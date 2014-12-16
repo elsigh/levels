@@ -10,9 +10,10 @@ var pluginlist = [
   'org.apache.cordova.device',
   'org.apache.cordova.battery-status',
   'org.apache.cordova.splashscreen',
-  'org.chromium.identity',
-  'https://github.com/elsigh/PushPlugin.git',
+  'org.apache.cordova.dialogs',
+  'https://github.com/phonegap-build/PushPlugin.git',
   'https://github.com/Initsogar/cordova-webintent.git',
+  'org.chromium.identity',
   'levels-plugin',
   'contacts-plugin'
 ];

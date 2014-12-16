@@ -87,62 +87,24 @@ div[horizontal] paper-checkbox ~ div {
 
 paper-progress {
   position: fixed;
-  height: 5px;
+  height: 2px;
   left: 0;
   right: 0;
-  top: 0;
+  top: 50px;
   width: 100%;
   z-index: 2;
 }
 
 
-@-webkit-keyframes stripes {
-  0% {
-    background-position: 0 0;
-  }
-  100% {
-    background-position: 60px 0;
-  }
-}
-
-@keyframes stripes {
-  0% {
-    background-position: 0 0;
-  }
-  100% {
-    background-position: 60px 0;
-  }
-}
-
 paper-progress #activeProgress {
   border-radius: 0 3px 3px 0;
-  background-size: 30px 30px;
   background-color: #34c2e3;
-  background-image: -webkit-linear-gradient(135deg, rgba(255, 255, 255, .15) 25%, transparent 25%,
-                      transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%,
-                      transparent 75%, transparent);
-  background-image: linear-gradient(135deg, rgba(255, 255, 255, .15) 25%, transparent 25%,
-                      transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%,
-                      transparent 75%, transparent);
-
-  -webkit-animation: stripes 2s infinite;
-  animation: stripes 2s infinite;
-  transition: transform .4s ease-in-out;
+  transition: all .4s ease-in-out;
 }
 paper-progress::shadow #activeProgress {
   border-radius: 0 3px 3px 0;
-  background-size: 30px 30px;
   background-color: #34c2e3;
-  background-image: -webkit-linear-gradient(135deg, rgba(255, 255, 255, .15) 25%, transparent 25%,
-                      transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%,
-                      transparent 75%, transparent);
-  background-image: linear-gradient(135deg, rgba(255, 255, 255, .15) 25%, transparent 25%,
-                      transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%,
-                      transparent 75%, transparent);
-
-  -webkit-animation: stripes 2s infinite;
-  animation: stripes 2s infinite;
-  transition: transform .4s ease-in-out;
+  transition: all .4s ease-in-out;
 }
 
 /** END Polymer stuffs. */

@@ -251,6 +251,7 @@ class FMBUser(User, FMBModel):
                  device.gcm_push_token is not None)):
                 push_token = device.gcm_push_token
                 android_payload = {
+                    'title': 'Levels Alert',
                     'message': message
                 }
                 android_payload.update(extra)

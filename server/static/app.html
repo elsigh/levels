@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <script>window.appStartTime = (new Date).getTime();</script>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="format-detection"
       content="telephone=no,email=no,address=no">
@@ -16,19 +17,18 @@
 
     <!--<link rel="stylesheet"
       href="/bower_components/font-roboto/roboto.html">-->
+    <!-- NEED HTTP So this works on android. -->
     <link
-      href="//fonts.googleapis.com/css?family=RobotoDraft:regular,bold,italic,thin,light,bolditalic,black,medium&amp;lang=en"
+      href="http://fonts.googleapis.com/css?family=RobotoDraft:regular,bold,italic,thin,light,bolditalic,black,medium&amp;lang=en"
       rel="stylesheet" type="text/css">
 
     <link rel="stylesheet" href="/css/base.css">
     <link rel="stylesheet" href="/css/account.css">
     <link rel="stylesheet" href="/css/following.css">
 
-
     <!-- [START imports] -->
     <script
-      src="/bower_components/webcomponentsjs/webcomponents.js">
-    </script>
+      src="/bower_components/webcomponentsjs/webcomponents.js"></script>
     <link rel="import"
       href="/bower_components/core-header-panel/core-header-panel.html">
     <link rel="import"
@@ -40,13 +40,13 @@
 
 
     <link rel="import"
-      href="/bower_components/paper-button/paper-button.html">
+          href="/bower_components/paper-button/paper-button.html">
     <link rel="import"
-      href="/bower_components/paper-checkbox/paper-checkbox.html">
+          href="/bower_components/paper-checkbox/paper-checkbox.html">
     <link rel="import"
-      href="/bower_components/paper-tabs/paper-tabs.html">
+          href="/bower_components/paper-tabs/paper-tabs.html">
     <link rel="import"
-      href="/bower_components/paper-progress/paper-progress.html">
+          href="/bower_components/paper-progress/paper-progress.html">
 
     <link rel="import" href="/components/core-style.html">
     <link rel="import" href="/components/datetime-pretty.html">
@@ -65,7 +65,7 @@
       <paper-progress></paper-progress>
       <core-toolbar>
         <div class="logo"></div>
-        <paper-tabs class="bottom fit" selected="0">
+        <paper-tabs noink class="bottom fit" selected="0">
           <paper-tab href="account">Account</paper-tab>
           <paper-tab href="following">Stats</paper-tab>
         </paper-tabs>
@@ -100,6 +100,15 @@
     <script src="/js/models_fmb.js"></script>
     <script src="/js/models.js"></script>
     <script src="/js/views.js"></script>
+
+    <script>
+      // Offline.js needs config for the app or else it looks on the filesystem.
+      if (fmb.ua.IS_APP) {
+        Offline.options = {checks: {image: {
+          url: fmb.models.SERVER_PROD + '/img/favicon.png'
+        }, active: 'image'}};
+      }
+    </script>
 
     <script id="tpl_account" type="text/html">
       {{^user.api_token}}
@@ -345,7 +354,7 @@
       window.addEventListener('polymer-ready', function(e) {
         window.polymerReadyTime = (new Date).getTime();
         var time = window.polymerReadyTime - window.polymerStartTime;
-        fmb.log('POLYMER READY took', time, 'ms.')
+        fmb.log('POLYMER READY took', time, 'ms.');
         window.isPolymerReady = true;
       });
 
@@ -358,6 +367,8 @@
           });
           return;
         }
+        var time = (new Date).getTime() - window.appStartTime;
+        fmb.log('APP READY took', time, 'ms.');
         window['app'] = new fmb.App();
       }
 

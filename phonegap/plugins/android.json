@@ -9,31 +9,11 @@
                 "parents": {
                     "/*": [
                         {
-                            "xml": "<feature name=\"NetworkStatus\"><param name=\"android-package\" value=\"org.apache.cordova.networkinformation.NetworkManager\" /></feature>",
-                            "count": 1
-                        },
-                        {
-                            "xml": "<feature name=\"Device\"><param name=\"android-package\" value=\"org.apache.cordova.device.Device\" /></feature>",
-                            "count": 1
-                        },
-                        {
-                            "xml": "<feature name=\"Battery\"><param name=\"android-package\" value=\"org.apache.cordova.batterystatus.BatteryListener\" /></feature>",
-                            "count": 1
-                        },
-                        {
-                            "xml": "<feature name=\"SplashScreen\"><param name=\"android-package\" value=\"org.apache.cordova.splashscreen.SplashScreen\" /></feature>",
-                            "count": 1
-                        },
-                        {
-                            "xml": "<feature name=\"PushPlugin\"><param name=\"android-package\" value=\"com.plugin.gcm.PushPlugin\" /></feature>",
-                            "count": 1
-                        },
-                        {
                             "xml": "<feature name=\"WebIntent\"><param name=\"android-package\" value=\"com.borismus.webintent.WebIntent\" /></feature>",
                             "count": 1
                         },
                         {
-                            "xml": "<feature name=\"InAppBrowser\"><param name=\"android-package\" value=\"org.apache.cordova.inappbrowser.InAppBrowser\" /></feature>",
+                            "xml": "<feature name=\"ContactsPlugin\"><param name=\"android-package\" value=\"com.elsigh.contacts.ContactsPlugin\" /></feature>",
                             "count": 1
                         },
                         {
@@ -41,7 +21,31 @@
                             "count": 1
                         },
                         {
-                            "xml": "<feature name=\"ContactsPlugin\"><param name=\"android-package\" value=\"com.elsigh.contacts.ContactsPlugin\" /></feature>",
+                            "xml": "<feature name=\"PushPlugin\"><param name=\"android-package\" value=\"com.plugin.gcm.PushPlugin\" /></feature>",
+                            "count": 1
+                        },
+                        {
+                            "xml": "<feature name=\"Battery\"><param name=\"android-package\" value=\"org.apache.cordova.batterystatus.BatteryListener\" /></feature>",
+                            "count": 1
+                        },
+                        {
+                            "xml": "<feature name=\"Device\"><param name=\"android-package\" value=\"org.apache.cordova.device.Device\" /></feature>",
+                            "count": 1
+                        },
+                        {
+                            "xml": "<feature name=\"Notification\"><param name=\"android-package\" value=\"org.apache.cordova.dialogs.Notification\" /></feature>",
+                            "count": 1
+                        },
+                        {
+                            "xml": "<feature name=\"InAppBrowser\"><param name=\"android-package\" value=\"org.apache.cordova.inappbrowser.InAppBrowser\" /></feature>",
+                            "count": 1
+                        },
+                        {
+                            "xml": "<feature name=\"NetworkStatus\"><param name=\"android-package\" value=\"org.apache.cordova.networkinformation.NetworkManager\" /></feature>",
+                            "count": 1
+                        },
+                        {
+                            "xml": "<feature name=\"SplashScreen\"><param name=\"android-package\" value=\"org.apache.cordova.splashscreen.SplashScreen\" /></feature>",
                             "count": 1
                         }
                     ],
@@ -63,17 +67,23 @@
             },
             "AndroidManifest.xml": {
                 "parents": {
-                    "/*": [
+                    "/manifest": [
                         {
-                            "xml": "<uses-permission android:name=\"android.permission.ACCESS_NETWORK_STATE\" />",
+                            "xml": "<uses-permission android:name=\"android.permission.READ_CONTACTS\" />",
                             "count": 1
                         },
                         {
-                            "xml": "<uses-permission android:name=\"android.permission.USE_CREDENTIALS\" />",
+                            "xml": "<uses-permission android:name=\"android.permission.ACCESS_FINE_LOCATION\" />",
                             "count": 1
-                        }
-                    ],
-                    "/manifest": [
+                        },
+                        {
+                            "xml": "<uses-permission android:name=\"android.permission.RECEIVE_BOOT_COMPLETED\" />",
+                            "count": 1
+                        },
+                        {
+                            "xml": "<uses-permission android:name=\"android.permission.ACCESS_WIFI_STATE\" />",
+                            "count": 1
+                        },
                         {
                             "xml": "<uses-permission android:name=\"android.permission.ACCESS_NETWORK_STATE\" />",
                             "count": 1
@@ -87,6 +97,10 @@
                             "count": 1
                         },
                         {
+                            "xml": "<uses-permission android:name=\"android.permission.VIBRATE\" />",
+                            "count": 1
+                        },
+                        {
                             "xml": "<uses-permission android:name=\"com.google.android.c2dm.permission.RECEIVE\" />",
                             "count": 1
                         },
@@ -97,37 +111,9 @@
                         {
                             "xml": "<uses-permission android:name=\"com.elsigh.levels.permission.C2D_MESSAGE\" />",
                             "count": 1
-                        },
-                        {
-                            "xml": "<uses-permission android:name=\"android.permission.ACCESS_FINE_LOCATION\" />",
-                            "count": 1
-                        },
-                        {
-                            "xml": "<uses-permission android:name=\"android.permission.RECEIVE_BOOT_COMPLETED\" />",
-                            "count": 1
-                        },
-                        {
-                            "xml": "<uses-permission android:name=\"android.permission.READ_CONTACTS\" />",
-                            "count": 1
                         }
                     ],
                     "/manifest/application": [
-                        {
-                            "xml": "<activity android:name=\"com.plugin.gcm.PushHandlerActivity\" />",
-                            "count": 1
-                        },
-                        {
-                            "xml": "<receiver android:name=\"com.plugin.gcm.CordovaGCMBroadcastReceiver\" android:permission=\"com.google.android.c2dm.permission.SEND\"><intent-filter><action android:name=\"com.google.android.c2dm.intent.RECEIVE\" /><action android:name=\"com.google.android.c2dm.intent.REGISTRATION\" /><category android:name=\"com.elsigh.levels\" /></intent-filter></receiver>",
-                            "count": 1
-                        },
-                        {
-                            "xml": "<service android:name=\"com.plugin.gcm.GCMIntentService\" />",
-                            "count": 1
-                        },
-                        {
-                            "xml": "<meta-data android:name=\"com.google.android.gms.version\" android:value=\"@integer/google_play_services_version\" />",
-                            "count": 1
-                        },
                         {
                             "xml": "<service android:name=\"com.elsigh.levels.LevelsService\" android:process=\":levels_service\" />",
                             "count": 1
@@ -139,11 +125,37 @@
                         {
                             "xml": "<receiver android:name=\"com.elsigh.levels.LevelsAlarm\" android:process=\":remote\" />",
                             "count": 1
+                        },
+                        {
+                            "xml": "<meta-data android:name=\"com.google.android.gms.version\" android:value=\"@integer/google_play_services_version\" />",
+                            "count": 1
+                        },
+                        {
+                            "xml": "<activity android:exported=\"true\" android:name=\"com.plugin.gcm.PushHandlerActivity\" />",
+                            "count": 1
+                        },
+                        {
+                            "xml": "<receiver android:name=\"com.plugin.gcm.CordovaGCMBroadcastReceiver\" android:permission=\"com.google.android.c2dm.permission.SEND\"><intent-filter><action android:name=\"com.google.android.c2dm.intent.RECEIVE\" /><action android:name=\"com.google.android.c2dm.intent.REGISTRATION\" /><category android:name=\"com.elsigh.levels\" /></intent-filter></receiver>",
+                            "count": 1
+                        },
+                        {
+                            "xml": "<service android:name=\"com.plugin.gcm.GCMIntentService\" />",
+                            "count": 1
                         }
                     ],
                     "/manifest/application/activity": [
                         {
                             "xml": "<intent-filter><action android:name=\"android.intent.action.VIEW\" /><category android:name=\"android.intent.category.DEFAULT\" /><category android:name=\"android.intent.category.ALTERNATIVE\" /><category android:name=\"android.intent.category.BROWSABLE\" /><data android:scheme=\"http\" /><data android:host=\"www.levelsapp.com\" /></intent-filter>",
+                            "count": 1
+                        }
+                    ],
+                    "/*": [
+                        {
+                            "xml": "<uses-permission android:name=\"android.permission.ACCESS_NETWORK_STATE\" />",
+                            "count": 1
+                        },
+                        {
+                            "xml": "<uses-permission android:name=\"android.permission.USE_CREDENTIALS\" />",
                             "count": 1
                         }
                     ]
@@ -152,54 +164,57 @@
         }
     },
     "installed_plugins": {
-        "org.apache.cordova.network-information": {
-            "PACKAGE_NAME": "com.elsigh.levels"
-        },
-        "org.apache.cordova.device": {
-            "PACKAGE_NAME": "com.elsigh.levels"
-        },
-        "org.apache.cordova.battery-status": {
-            "PACKAGE_NAME": "com.elsigh.levels"
-        },
-        "org.apache.cordova.splashscreen": {
-            "PACKAGE_NAME": "com.elsigh.levels"
-        },
-        "com.phonegap.plugins.PushPlugin": {
-            "PACKAGE_NAME": "com.elsigh.levels"
-        },
         "com.borismus.webintent": {
             "PACKAGE_NAME": "com.elsigh.levels"
         },
-        "org.chromium.identity": {
+        "com.elsigh.contacts": {
             "PACKAGE_NAME": "com.elsigh.levels"
         },
         "com.elsigh.levels": {
             "PACKAGE_NAME": "com.elsigh.levels"
         },
-        "com.elsigh.contacts": {
-            "PACKAGE_NAME": "com.elsigh.levels"
-        }
-    },
-    "dependent_plugins": {
-        "org.chromium.common": {
+        "com.google.playservices": {
             "PACKAGE_NAME": "com.elsigh.levels"
         },
-        "org.chromium.storage": {
+        "com.phonegap.plugins.PushPlugin": {
             "PACKAGE_NAME": "com.elsigh.levels"
         },
-        "org.chromium.runtime": {
+        "org.apache.cordova.battery-status": {
+            "PACKAGE_NAME": "com.elsigh.levels"
+        },
+        "org.apache.cordova.device": {
+            "PACKAGE_NAME": "com.elsigh.levels"
+        },
+        "org.apache.cordova.dialogs": {
             "PACKAGE_NAME": "com.elsigh.levels"
         },
         "org.apache.cordova.inappbrowser": {
             "PACKAGE_NAME": "com.elsigh.levels"
         },
-        "com.google.playservices": {
+        "org.apache.cordova.network-information": {
+            "PACKAGE_NAME": "com.elsigh.levels"
+        },
+        "org.apache.cordova.splashscreen": {
+            "PACKAGE_NAME": "com.elsigh.levels"
+        },
+        "org.chromium.common": {
             "PACKAGE_NAME": "com.elsigh.levels"
         },
         "org.chromium.frameworks.googleopensource": {
             "PACKAGE_NAME": "com.elsigh.levels"
         },
         "org.chromium.frameworks.googleplus": {
+            "PACKAGE_NAME": "com.elsigh.levels"
+        },
+        "org.chromium.identity": {
+            "PACKAGE_NAME": "com.elsigh.levels"
+        }
+    },
+    "dependent_plugins": {
+        "org.chromium.storage": {
+            "PACKAGE_NAME": "com.elsigh.levels"
+        },
+        "org.chromium.runtime": {
             "PACKAGE_NAME": "com.elsigh.levels"
         }
     }

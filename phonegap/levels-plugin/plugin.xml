@@ -23,6 +23,8 @@
         <config-file target="AndroidManifest.xml" parent="/manifest">
             <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
             <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+            <!-- for crosswalk -->
+            <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
         </config-file>
 
         <config-file target="AndroidManifest.xml" parent="/manifest/application">

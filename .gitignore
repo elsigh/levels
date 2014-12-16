@@ -10,6 +10,8 @@ phonegap/www/css
 phonegap/www/img
 phonegap/www/js
 phonegap/www/index.html
+phonegap/www/components
+phonegap/www/vulcanized.js
 
 client/ios/CordovaLib/CordovaLib.xcodeproj/xcuserdata
 client/ios/Levels.xcodeproj/project.xcworkspace
@@ -18,6 +20,8 @@ client/ios/Levels.xcodeproj/xcuserdata
 server/data.sqlite3
 server/update.sh
 server/static/bower_components
+server/static/vulcanized.html
+server/static/vulcanized.js
 
 
 # OS generated files #
