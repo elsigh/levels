@@ -337,7 +337,7 @@ fmb.views.App.prototype.setCurrentView = function(view) {
   }
 
   // Why did I have to cast this to a Number? Otherwise got 01.
-  this.pages_.selected = Number(this.tabs_.selected) + 1;
+  this.pages_.selected = Number(this.tabs_.selected);
 
   this.currentView = view;
 
@@ -418,6 +418,7 @@ fmb.views.App.prototype.render = function() {
   this.$('how-it-works').get(0).addEventListener('fmb-page-navigate',
       _.bind(this.onClickPageNavigate_, this));
 
+  this.viewPush = $('.fmb-push').get(0);
 
   this.rendered_ = true;
 };
@@ -442,6 +443,9 @@ fmb.views.App.prototype.transitionPage = function(route) {
 
   } else if (_.isEqual(fmb.App.Routes.HOW_IT_WORKS, route)) {
     newView = this.viewHowItWorks;
+
+  } else if (_.isEqual(fmb.App.Routes.PUSH, route)) {
+    newView = this.viewPush;
   }
 
   this.setCurrentView(newView);
@@ -695,27 +699,6 @@ fmb.views.Account.prototype.onInAppBrowserExit_ = function(e) {
   this.inAppBrowser_ = null;
 
   this.model.syncByLoginToken();
-};
-
-
-/******************************************************************************/
-
-
-
-/**
- * @extends {Backbone.View}
- * @constructor
- */
-fmb.views.HowItWorks = Backbone.View.extend({
-  el: '.fmb-how-it-works'
-});
-
-
-/** @inheritDoc */
-fmb.views.HowItWorks.prototype.render = function() {
-  fmb.log('fmb.views.HowItWorks render');
-  this.$el.html(fmb.views.getTemplateHtml('how_it_works', {}));
-  return this;
 };
 
 

@@ -8,6 +8,15 @@
     <meta name="viewport"
       content="user-scalable=no,initial-scale=1,maximum-scale=1,minimum-scale=1,width=device-width">
 
+
+    <!-- Add to homescreen -->
+    <link rel="manifest" href="/js/manifest.json">
+
+    <!-- Add to homescreen for Chrome on Android -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="Levels">
+    <link rel="icon" sizes="192x192" href="img/icon-192x192.png">
+
     <link rel="stylesheet"
       href="/bower_components/bower-xcharts/xcharts.css">
     <link rel="stylesheet"
@@ -27,8 +36,7 @@
     <link rel="stylesheet" href="/css/following.css">
 
     <!-- [START imports] -->
-    <script
-      src="/bower_components/webcomponentsjs/webcomponents.js"></script>
+    <script src="/bower_components/webcomponentsjs/webcomponents.js"></script>
     <link rel="import"
       href="/bower_components/core-header-panel/core-header-panel.html">
     <link rel="import"
@@ -51,6 +59,7 @@
     <link rel="import" href="/components/core-style.html">
     <link rel="import" href="/components/datetime-pretty.html">
     <link rel="import" href="/components/how-it-works.html">
+    <link rel="import" href="/components/push-page.html">
     <link rel="import" href="/components/device-battery-notifications.html">
 
     <!-- [END imports] -->
@@ -66,6 +75,8 @@
       <core-toolbar>
         <div class="logo"></div>
         <paper-tabs noink class="bottom fit" selected="0">
+          <paper-tab href="push">Push</paper-tab>
+          <paper-tab href="about">About</paper-tab>
           <paper-tab href="account">Account</paper-tab>
           <paper-tab href="following">Stats</paper-tab>
         </paper-tabs>
@@ -73,6 +84,9 @@
 
       <div class="content" fit>
         <core-animated-pages selected="1" transitions="slide-from-right">
+          <section class="fmb-push" data-tab-index="-2">
+            <push-page></push-page>
+          </section>
           <section class="fmb-how-it-works" data-tab-index="-1">
             <how-it-works appRoot="/app/"></how-it-works>
           </section>

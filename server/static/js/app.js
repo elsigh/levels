@@ -27,6 +27,10 @@ fmb.App.Routes = {
   HOW_IT_WORKS: {
     url: 'how_it_works',
     handler: 'routeHowItWorks_'
+  },
+  PUSH: {
+    url: 'push',
+    handler: 'routePush_'
   }
 };
 
@@ -264,6 +268,15 @@ fmb.App.prototype.routeFollowing_ = function() {
 fmb.App.prototype.routeHowItWorks_ = function() {
   fmb.log('fmb.App routeHowItWorks_');
   this.view.transitionPage(fmb.App.Routes.HOW_IT_WORKS);
+};
+
+
+/**
+ * @private
+ */
+fmb.App.prototype.routePush_ = function() {
+  fmb.log('fmb.App routePush_');
+  this.view.transitionPage(fmb.App.Routes.PUSH);
 };
 
 
