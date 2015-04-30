@@ -1,0 +1,204 @@
+
+<link rel="import" href="fmb-page.html">
+<link rel="import"
+      href="../bower_components/paper-button/paper-button.html">
+
+<polymer-element name="push-page" extends="fmb-page">
+
+  <template>
+    <core-style ref="fmb"></core-style>
+    <h2>Push Notifications</h2>
+    `
+    <p>
+      Enabled: {{isPushEnabled}}
+      <br>
+      <paper-button
+        id="pushButton"
+        on-click="{{onClick}}">Do it</paper-button>
+    </p>
+  </template>
+
+  <script>
+
+
+
+
+
+    Polymer({
+
+      isPushEnabled: false,
+
+      onClick: function(e) {
+        if (this.isPushEnabled) {
+          this.unsubscribe();
+        } else {
+          this.subscribe();
+        }
+
+
+        // Check that service workers are supported, if so, progressively
+        // enhance and add push messaging support, otherwise continue without it.
+        if ('serviceWorker' in navigator) {
+          console.log('Registering service worker.');
+          navigator.serviceWorker.register('/js/service-worker.js')
+          .then(this.initialiseState);
+        } else {
+          console.warn('Service workers aren\'t supported in this browser.');
+        }
+      },
+
+
+
+      // Once the service worker is registered set the initial state
+      initialiseState: function() {
+        console.log('initialiseState');
+
+        // Are Notifications supported in the service worker?
+        if (!('showNotification' in ServiceWorkerRegistration.prototype)) {
+          console.warn('Notifications aren\'t supported.');
+          return;
+        }
+
+        // Check the current Notification permission.
+        // If its denied, it's a permanent block until the
+        // user changes the permission
+        if (Notification.permission === 'denied') {
+          console.warn('The user has blocked notifications.');
+          return;
+        }
+
+        // Check if push messaging is supported
+        if (!('PushManager' in window)) {
+          console.warn('Push messaging isn\'t supported.');
+          return;
+        }
+
+        var _this = this;
+
+        // We need the service worker registration to check for a subscription
+        navigator.serviceWorker.ready.then(function(serviceWorkerRegistration) {
+          console.log('got serviceWorkerRegistration');
+          // Do we already have a push message subscription?
+          serviceWorkerRegistration.pushManager.getSubscription()
+            .then(function(subscription) {
+              console.log('getSubscription returned', subscription);
+
+              // Enable any UI which subscribes / unsubscribes from
+              // push messages.
+              var pushButton = _this.$.pushButton;
+              pushButton.disabled = false;
+
+              if (!subscription) {
+                // We aren't subscribed to push, so set UI
+                // to allow the user to enable push
+                return;
+              }
+
+              // Keep your server in sync with the latest subscriptionId
+              sendSubscriptionToServer(subscription);
+
+              // Set your UI to show they have subscribed for
+              // push messages
+              pushButton.textContent = 'Disable Push Messages';
+              _this.isPushEnabled = true;
+            })
+            .catch(function(err) {
+              console.warn('Error during getSubscription()', err);
+            });
+        });
+      },
+
+      subscribe: function() {
+        console.log('subscribe');
+
+        // Disable the button so it can't be changed while
+        // we process the permission request
+        var _this = this;
+        var pushButton = _this.$.pushButton;
+        pushButton.disabled = true;
+
+        navigator.serviceWorker.ready.then(function(serviceWorkerRegistration) {
+          serviceWorkerRegistration.pushManager.subscribe()
+            .then(function(subscription) {
+              console.log('subscribe returned', subscription);
+              // The subscription was successful
+              _this.isPushEnabled = true;
+              pushButton.textContent = 'Disable Push Messages';
+              pushButton.disabled = false;
+
+              // TODO: Send the subscription.subscriptionId and
+              // subscription.endpoint to your server
+              // and save it to send a push message at a later date
+              return sendSubscriptionToServer(subscription);
+            })
+            .catch(function(e) {
+              if (Notification.permission === 'denied') {
+                // The user denied the notification permission which
+                // means we failed to subscribe and the user will need
+                // to manually change the notification permission to
+                // subscribe to push messages
+                console.warn('Permission for Notifications was denied');
+                pushButton.disabled = true;
+              } else {
+                // A problem occurred with the subscription; common reasons
+                // include network errors, and lacking gcm_sender_id and/or
+                // gcm_user_visible_only in the manifest.
+                console.error('Unable to subscribe to push.', e);
+                pushButton.disabled = false;
+                pushButton.textContent = 'Enable Push Messages';
+              }
+            });
+        });
+      },
+
+      unsubscribe: function() {
+        var _this = this;
+        var pushButton = _this.$.pushButton;
+        pushButton.disabled = true;
+
+        navigator.serviceWorker.ready.then(function(serviceWorkerRegistration) {
+          // To unsubscribe from push messaging, you need get the
+          // subscription object, which you can call unsubscribe() on.
+          serviceWorkerRegistration.pushManager.getSubscription().then(
+            function(pushSubscription) {
+              // Check we have a subscription to unsubscribe
+              if (!pushSubscription) {
+                // No subscription object, so set the state
+                // to allow the user to subscribe to push
+                _this.isPushEnabled = false;
+                pushButton.disabled = false;
+                pushButton.textContent = 'Enable Push Messages';
+                return;
+              }
+
+              var subscriptionId = pushSubscription.subscriptionId;
+              // TODO: Make a request to your server to remove
+              // the subscriptionId from your data store so you
+              // don't attempt to send them push messages anymore
+
+              // We have a subscription, so call unsubscribe on it
+              pushSubscription.unsubscribe().then(function(successful) {
+                pushButton.disabled = false;
+                pushButton.textContent = 'Enable Push Messages';
+                _this.isPushEnabled = false;
+              }).catch(function(e) {
+                // We failed to unsubscribe, this can lead to
+                // an unusual state, so may be best to remove
+                // the users data from your data store and
+                // inform the user that you have done so
+
+                console.log('Unsubscription error: ', e);
+                pushButton.disabled = false;
+                pushButton.textContent = 'Enable Push Messages';
+              });
+            }).catch(function(e) {
+              console.error('Error thrown while unsubscribing from push messaging.', e);
+            });
+        });
+      }
+
+    });
+  </script>
+
+
+</polymer-element>
